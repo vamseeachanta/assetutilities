@@ -39,7 +39,7 @@ dictitems:
       filter: []
       transform: []
       label: FST1
-      file_name: src/assetutilities/tests/test_data/visualization/csv/test_1.csv
+      file_name: tests/modules/visualization/csv/test_1.csv
     - columns:
         x:
         - Heading
@@ -55,7 +55,7 @@ dictitems:
       filter: []
       transform: []
       label: FST2
-      file_name: src/assetutilities/tests/test_data/visualization/csv/test_2.csv
+      file_name: tests/modules/visualization/csv/test_2.csv
     color:
     - blue
     - green
@@ -100,7 +100,9 @@ dictitems:
     set_rlabel_position: -22.5
     legend:
       flag: true
-      label: []
+      label:
+      - FST1, Cx
+      - FST2, Cx
       loc: best
       prop:
         family: Arial
@@ -123,7 +125,7 @@ dictitems:
     alpha:
     - 1.0
     - 0.95
-    traces: 0
+    traces: 2
   master_settings:
     groups:
       columns:
@@ -141,16 +143,16 @@ dictitems:
       filter: []
       transform: []
       label: FST2
-      file_name: src/assetutilities/tests/test_data/visualization/csv/test_2.csv
+      file_name: tests/modules/visualization/csv/test_2.csv
   Analysis:
     basename: visualization
-    analysis_root_folder: k:\github\assetutilities\tests\modules\visualization
+    analysis_root_folder: K:\github\assetutilities\tests\modules\visualization
     file_name: template_xy_line_csv
     file_name_for_overwrite: template_xy_line_csv
-    result_folder: k:\github\assetutilities\tests\modules\visualization\results
-    log_folder: k:\github\assetutilities\tests\modules\visualization\logs
-    start_time: 2025-01-17 14:51:02.534563
+    result_folder: K:\github\assetutilities\tests\modules\visualization\results
+    log_folder: K:\github\assetutilities\tests\modules\visualization\logs
+    start_time: 2025-01-17 14:59:13.023857
     cfg_array_file_names: ~
     DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\visualization\template_xy_line_csv.yml
-    fe_folder: k:\github\assetutilities\tests\modules\visualization\results
+    CustomInputFile: K:\github\assetutilities\tests\modules\visualization\template_xy_line_csv.yml
+    fe_folder: K:\github\assetutilities\tests\modules\visualization\results

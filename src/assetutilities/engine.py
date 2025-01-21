@@ -87,7 +87,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     elif cfg["basename"] == "web_scraping":
         ws = WebScraping()
         cfg_base = ws.router(cfg_base)
-        
+
     elif cfg["basename"] == "download_data":
         ddfu = DownloadDataFromURL()
         cfg_base = ddfu.router(cfg_base)

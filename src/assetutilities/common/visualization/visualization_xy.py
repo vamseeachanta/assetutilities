@@ -135,7 +135,6 @@ class VisualizationXY:
         return data_dict, cfg
 
     def get_xy_plot_matplotlib(self, df, plt_settings, cfg, plt_properties):
-        # Third party imports
         if plt_properties != None:
             plt = plt_properties["plt"]
             fig = plt_properties["fig"]

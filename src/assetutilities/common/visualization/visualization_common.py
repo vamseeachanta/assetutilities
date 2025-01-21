@@ -285,7 +285,6 @@ class VisualizationCommon:
     def add_image_to_xy_plot(self, cfg, plt_settings):
         plt_properties = None
         if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get("flag", False):
-
             img_path = plt_settings['add_image']['image_path']
             transparency = plt_settings['add_image']['transperancy']
             x = plt_settings['add_image']['x']
@@ -305,7 +304,6 @@ class VisualizationCommon:
             plt_properties = {"fig": fig, "ax": ax, "plt": plt}
         else:
             print("add_image data is not available")    
-
 
         return plt_properties
 
