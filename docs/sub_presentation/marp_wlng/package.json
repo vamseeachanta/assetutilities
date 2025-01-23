@@ -1,0 +1,22 @@
+{
+  "name": "marp-presentation",
+  "version": "1.0.0",
+  "description": "A Marp presentation project with plots and conclusions.",
+  "main": "src/presentation.md",
+  "scripts": {
+    "start": "marp src/presentation.md --watch",
+    "build": "marp src/presentation.md -o presentation.html"
+  },
+  "dependencies": {
+    "@marp-team/marp-cli": "^2.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "marp",
+    "presentation",
+    "plots",
+    "analysis"
+  ],
+  "author": "",
+  "license": "MIT"
+}
