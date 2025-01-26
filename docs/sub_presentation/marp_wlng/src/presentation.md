@@ -3,7 +3,16 @@
 <!-- Title Slide -->
 ## WLNG FST Extreme Weather Analysis
 ## Vamsee Achanta
-## 2025-22-01
+
+<!-- Today's Date -->
+<!-- _class: date -->
+<script>
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0];
+  document.write(formattedDate);
+</script>
+
+
 ---
 
 <!-- Slide for Introduction -->
@@ -11,38 +20,107 @@
 - FST analysis for WLNG
 
 ---
+<!-- _class: transition -->
 
-<!-- Slide for Data Overview -->
+# 
+
+## Design Data
+
+## Analysis Methodology
+
+---
+
+# Design Data - Environment
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+  <img src="./plots/au_input_current.png" alt="Current" style="width: 32%;">
+  <img src="./plots/au_input_wave.png" alt="Wave" style="width: 32%;">
+  <img src="./plots/au_input_wind.png" alt="Wind" style="width: 32%;">
+</div>
+
+---
+# FSTs Only, General Arrangement
+
+  <img src="./plots/fsts.png" alt="axes" style="width: 100%;">
+
+```markdown
+- strut, jacket and FST numbering shown
+- FST local axes shown
+```
+
+---
 # Methodology
 - TBA
 
 ---
+<!-- _class: transition -->
 
-<!-- Slide for Plots -->
-# FSTs, 100yr, LWL - Force Timetrace
+# 
+
+## 100 year Analysis Results
+
+
+---
+# FSTs 95% LNG, 100yr, LWL - Max Jacket Loads, Directional Response
+
+- LWL, Jacket Global forces in X and Y direction are shown
+- Two (2) struts contribute to each jacket global force
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/au_lwl_100yr_Gx.png" alt="Gx" style="width: 48%;">
+    <img src="./plots/au_lwl_100yr_Gy.png" alt="Gy" style="width: 48%;">
+</div>
+
+```markdown
+- Y loads are significantly higher than X loads
+```
+
+---
+
+# FSTs 15% LNG, 100yr, HWL - Max Jacket Loads, Directional Response
+
+- HWL, Jacket Global forces in X and Y direction are shown
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/au_hwl_100yr_Gx.png" alt="Gx" style="width: 48%;">
+    <img src="./plots/au_hwl_100yr_Gy.png" alt="Gy" style="width: 48%;">
+</div>
+
+```markdown
+- The HWL static & dynamic forces are significantly higher that those of LWL.
+- The 15% LNG & LWL needs to be investigated further.
+```
+
+---
+
+# FSTs 95% LNG, 100yr, LWL - Force Timetrace
 
 <div style="display: flex; justify-content: space-between;">
     <img src="./plots/au_fst1_LWL_100yr_D075_struts_max_f.png" alt="FST1" style="width: 48%;">
     <img src="./plots/au_fst2_LWL_100yr_D075_struts_max_f.png" alt="FST2" style="width: 48%;">
 </div>
 
+```markdown
 - The struts are in sync
 - Results in lower strut forces when compared to HWL results
+```
 
 ---
-<!-- Slide for Plots -->
-# FSTs, 100yr, HWL - Force Timetrace
+
+# FSTs 15% LNG, 100yr, HWL - Force Timetrace
 
 <div style="display: flex; justify-content: space-between;">
     <img src="./plots/au_fst1_HWL_100yr_D345_struts_max_f.png" alt="FST1" style="width: 48%;">
     <img src="./plots/au_fst2_HWL_100yr_D030_struts_max_f.png" alt="FST2" style="width: 48%;">
 </div>
 
+```markdown
 - The 2 struts are locked FST in yaw position
   - Results in high forces
   - Low roll compared to LWL response
   - Comparable heave motions with LWL response
 - This yaw-locking result trend is similar to what was obtained in AQWA
+```
 
 ---
 <!-- Slide for Plots -->

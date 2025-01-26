@@ -1,10 +1,11 @@
 
-# Third party imports
+# Standard library imports
 import logging
-import matplotlib.pyplot as plt #noqa
-from matplotlib import gridspec
-import numpy as np
+
+# Third party imports
+import matplotlib.pyplot as plt  #noqa  # noqa
 import pandas as pd
+import numpy as np
 from colorama import Fore, Style
 from colorama import init as colorama_init
 
@@ -24,7 +25,7 @@ class VisualizationPolar:
         pass
 
     def polar_plot_set_up_and_save(self, cfg, plt_settings):
-        data_df = self.get_polar_data(cfg)
+        data_df, cfg = self.get_data_df_and_plot_properties(cfg)
         plt_settings["traces"] = int(len(data_df.columns) / 2)
         if cfg["settings"]["plt_engine"] == "plotly":
             plt_properties = self.get_polar_plot_plotly(data_df, plt_settings)
@@ -35,18 +36,25 @@ class VisualizationPolar:
             visualization_common.add_image_to_polar_plot(cfg, plt_settings,plt_properties)
             self.save_polar_plot_and_close_matplotlib(plt_properties, cfg)
 
-    def get_polar_data(self, cfg):
-        data_dict = self.get_polar_mapped_data_dict(cfg)
+    def get_data_df_and_plot_properties(self, cfg):
+        data_dict, cfg = self.get_polar_mapped_data_dict(cfg)
         data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
-        return data_df
+
+        cfg = visualization_common.get_plot_properties_for_df(cfg, data_df)
+
+        return data_df, cfg
 
     def get_polar_mapped_data_dict(self, cfg):
         if cfg['data']['type'] == 'input':
-            data_dict = self.get_polar_mapped_data_dict_from_input(cfg)
-        elif cfg['data']['type'] == 'csv':
-            data_dict = self.get_polar_mapped_data_dict_from_csv(cfg)
+            data_dict, legend = self.get_polar_mapped_data_dict_from_input(cfg)
+            if len(cfg["settings"]["legend"]["label"]) == 0:
+                cfg["settings"]["legend"]["label"] = legend
 
-        return data_dict
+        elif cfg['data']['type'] == 'csv':
+            data_dict, cfg = self.get_polar_mapped_data_dict_from_csv(cfg)
+
+
+        return data_dict, cfg
 
     def get_polar_mapped_data_dict_from_csv(self, cfg):
         mapped_data_cfg = {}
@@ -78,14 +86,20 @@ class VisualizationPolar:
                     theta_data = theta_data_dict[theta_column]
                     theta_data_array = theta_data_array + [theta_data]
 
-                    legend_label = group_cfg["label"] + ", " + theta_column
+                    if group_cfg["label"] is not None:
+                        legend_label = group_cfg["label"] + ", " + theta_column
+                    else:
+                        legend_label = theta_column
                     theta_legend_array.append(legend_label)
 
                 for r_column in group_cfg["columns"]["r"]:
                     r_data = r_data_dict[r_column]
                     r_data_array = r_data_array + [r_data]
 
-                    legend_label = group_cfg["label"] + ", " + r_column
+                    if group_cfg["label"] is not None:
+                        legend_label = group_cfg["label"] + ", " + r_column
+                    else:
+                        legend_label = r_column
                     r_legend_array.append(legend_label)
 
             # Consolidate theta and r data
@@ -105,7 +119,7 @@ class VisualizationPolar:
 
         mapped_data_cfg = {"data": {"groups": [{"theta": theta_data_array, "r": r_data_array}]}}
         cfg["settings"]["legend"]["label"] = legend_data
-        data_dict = self.get_polar_mapped_data_dict_from_input(mapped_data_cfg)
+        data_dict, legend_unused = self.get_polar_mapped_data_dict_from_input(mapped_data_cfg)
 
         return data_dict, cfg
     
@@ -115,6 +129,10 @@ class VisualizationPolar:
         trace_count = 0
         for group_cfg in mapped_data_cfg["data"]['groups']:
             theta_data = group_cfg["theta"] 
+            for theta_index in range(0, len(theta_data)):
+                new_data = [theta * np.pi / 180 for theta in theta_data[theta_index]]
+                theta_data[theta_index] = new_data
+
             r_data = group_cfg["r"]
             legend_item = group_cfg.get("label", None)
             legend.append(legend_item)
@@ -122,43 +140,17 @@ class VisualizationPolar:
             no_of_trends = max(len(theta_data), len(r_data))
 
             if len(theta_data) < len(r_data):
-            theta_data = [theta_data[0]] * len(r_data)
+                theta_data = [theta_data[0]] * len(r_data)
             if len(theta_data) > len(r_data):
-            r_data = [r_data[0]] * len(theta_data)
+                r_data = [r_data[0]] * len(theta_data)
 
             for i in range(0, no_of_trends):
-            data_dict.update({"theta_" + str(i+trace_count): theta_data[i]})
-            data_dict.update({"r_" + str(i+trace_count): r_data[i]})
+                data_dict.update({"theta_" + str(i+trace_count): theta_data[i]})
+                data_dict.update({"r_" + str(i+trace_count): r_data[i]})
             trace_count += no_of_trends
+
         return data_dict, legend
 
-        # theta_data = cfg["data"]['groups']["theta"]
-        # r_data = cfg["data"]['groups']["r"]
-
-        #     # Get legend data
-        # if "legend" in cfg["data"]:
-        #     legend_data = cfg["data"]["legend"]
-        # else:
-        #     legend_data = []
-
-        # no_of_trends = max(len(theta_data), len(r_data))
-        # if not len(legend_data) == no_of_trends:
-        #     legend_data = ["legend_" + str(i) for i in range(0, no_of_trends)]
-
-        # if len(theta_data) < len(r_data):
-        #     theta_data = [theta_data[0]] * len(r_data)
-        # if len(theta_data) > len(r_data):
-        #     r_data = [r_data[0]] * len(theta_data)
-
-        # for theta_index in range(0, len(theta_data)):
-        #     new_data = [theta * np.pi / 180 for theta in theta_data[theta_index]]
-        #     theta_data[theta_index] = new_data
-
-        # data_dict = {}
-        # for i in range(0, len(legend_data)):
-        #     data_dict.update({"r_" + str(i): r_data[i]})
-        #     data_dict.update({"theta_" + str(i): theta_data[i]})
-        # return data_dict
 
     def get_axis_for_polar(self, rect):
         rect_polar = rect.copy()
@@ -185,7 +177,8 @@ class VisualizationPolar:
 
     def get_polar_plot_matplotlib(self, df, plt_settings, cfg):
 
-        import matplotlib.pyplot as plt #noqa
+        # Third party imports
+        import matplotlib.pyplot as plt  # noqa
 
 
         if (
@@ -200,13 +193,13 @@ class VisualizationPolar:
         facecolor = plt_settings.get("facecolor", None)
         if ("add_axes" not in plt_settings) or (not plt_settings["add_axes"]):
             fig, ax = plt.subplots(
-                subplot_kw={"projection": "polar"}, facecolor=facecolor, alpha=alpha
+                subplot_kw={"projection": "polar"}, facecolor=facecolor, alpha=alpha[0]
             )
 
         else:
             fig = plt_settings["plt_properties"]["fig"]
             rect = plt_settings["rect"]
-            ax = fig.add_axes(rect, polar=True, facecolor=facecolor, alpha=alpha)
+            ax = fig.add_axes(rect, polar=True, facecolor=facecolor, alpha=alpha[0])
 
             axis = plt_settings["axis"]
             if axis != "off":
@@ -225,18 +218,18 @@ class VisualizationPolar:
                     df["theta_" + str(index)],
                     df["r_" + str(index)],
                     label=label,
-                    color=cfg["data"]["color"][index],
-                    linestyle=cfg["data"]["linestyle"][index],
-                    alpha=cfg["data"]["alpha"][index],
+                    color=plt_settings["color"][index],
+                    linestyle=plt_settings["linestyle"][index],
+                    alpha=plt_settings["alpha"][index],
                 )
             elif plt_settings["type"] == "polar_scatter":
                 ax.scatter(
                     df["theta_" + str(index)],
                     df["r_" + str(index)],
                     label=label,
-                    color=cfg["data"]["color"][index],
-                    linestyle=cfg["data"]["linestyle"][index],
-                    alpha=cfg["data"]["alpha"][index],
+                    color=plt_settings["color"][index],
+                    linestyle=plt_settings["linestyle"][index],
+                    alpha=plt_settings["alpha"][index],
                 )
 
         legend_flag = True
