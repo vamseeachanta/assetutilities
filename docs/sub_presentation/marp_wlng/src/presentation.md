@@ -59,6 +59,33 @@
 
 ## 100 year Analysis Results
 
+---
+# Methodology - Analysis
+
+- TBA
+
+```markdown
+- TBA
+- TBA
+```
+
+---
+# Methodology - Result Interpretation
+
+- Timetrace plots ? actual values (no data manipulation)
+  - Strut positive tension is tension and negative is compression i.e. axes independent values 
+  - Jacket forces are in global X and Y direction
+  - FST forces are in FST local axes
+- Radial/rose  plots - ONLY positive values used
+  - Objective: 
+    - For understanding directional trend. 
+    - The increase/decrease/reversals help determine the max forces.
+  - Static values: absolute values
+  - Dynamic values: absolute maximum i.e. max (abs(max), abs(min))
+
+```markdown
+- Applicable details will be added to each slide
+```
 
 ---
 # FSTs 95% LNG, 100yr, LWL - Max Jacket Loads, Directional Response
@@ -80,6 +107,7 @@
 # FSTs 15% LNG, 100yr, HWL - Max Jacket Loads, Directional Response
 
 - HWL, Jacket Global forces in X and Y direction are shown
+- Max loads are absolute maximum i.e. max (abs(max), abs(min))
 
 <div style="display: flex; justify-content: space-between;">
     <img src="./plots/au_hwl_100yr_Gx.png" alt="Gx" style="width: 48%;">
@@ -119,20 +147,30 @@
   - Results in high forces
   - Low roll compared to LWL response
   - Comparable heave motions with LWL response
-- This yaw-locking result trend is similar to what was obtained in AQWA
+- This roll-locking result trend is similar to what was obtained in AQWA
 ```
 
 ---
-<!-- Slide for Plots -->
 # FSTs, 100yr Discussion
 
-- 100yr, HWL has yaw-locking effect potentially due to force coefficients used
-- Perform sensitivity analysis on force coefficients with yaw = 0
-- Determine whether yaw-locking effect is realistic due to prevailing external non-dynamic forces (e.g. wind, current, wave etc.)
+- 100yr, HWL has roll-locking effect 
+  - potentially due to force coefficients used
+- Perform sensitivity analysis on force coefficients with yaw-coeffs = 0
+- Determine whether roll-locking effect is realistic due to prevailing external non-dynamic forces (e.g. wind, current, wave etc.)
 
 ---
 
-<!-- Slide for Conclusions -->
+# Conclusions
+
+### Way Forward
+
+- FST roll-locking effect
+  - Theorically, this effect may be possible. 
+  - Recommend permanemnt moring system designer, WSP to verify that this phenomenon does not occur from their design.
+  - FST strut interface foundation is currently designed for all loads presented in this document.
+
+---
+
 # Way Forward
 - 100 yr FSTs only
   - Perform sensitivity
@@ -140,8 +178,3 @@
 - 5 yr FSTs with LNGC
   - Will get this running after few more insights in 100 yr analysis
 
----
-
-<!-- Slide for Conclusions -->
-# Conclusions
-- TBA

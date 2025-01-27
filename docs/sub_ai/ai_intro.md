@@ -72,3 +72,6 @@ https://www.linkedin.com/posts/johnrushx_ive-replaced-100-of-my-marketing-sales-
 https://github.com/microsoft/generative-ai-for-beginners
 
 https://blogs.microsoft.com/on-the-issues/2025/01/03/the-golden-opportunity-for-american-ai/
+
+
+https://youtubetranscriptoptimizer.com/blog/05_the_short_case_for_nvda
