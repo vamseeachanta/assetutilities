@@ -46,7 +46,14 @@ for branch in "${branches[@]}"; do
                     git checkout "$MAIN_BRANCH"
                     # Delete the stale branch locally
                     git branch -D "$branch"
-                    echo "Cleaned stale branch: $branch"
+                    echo "Cleaned stale local branch: $branch"
+
+                    # Delete the branch on the remote
+                    if git push origin --delete "$branch"; then
+                        echo "Cleaned stale remote branch: $branch"
+                    else
+                        echo "Failed to delete remote branch: $branch"
+                    fi
                 else
                     echo "Failed to push $branch to origin"
                 fi
