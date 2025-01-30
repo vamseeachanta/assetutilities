@@ -43,4 +43,4 @@ https://askubuntu.com/questions/892604/what-is-the-meaning-of-exit-0-exit-1-and-
 while running bash script in the git bash encountered below error:
 ![alt text](bash_v_editor.png) 
 
-to quit from editor : press !q and enter
+To quit from editor : type :q + enter
