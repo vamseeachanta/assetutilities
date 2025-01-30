@@ -31,17 +31,19 @@
 ---
 
 # Design Data - Environment
-
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
   <img src="./plots/au_input_current.png" alt="Current" style="width: 32%;">
   <img src="./plots/au_input_wave.png" alt="Wave" style="width: 32%;">
   <img src="./plots/au_input_wind.png" alt="Wind" style="width: 32%;">
 </div>
 
----
 # FSTs Only, General Arrangement
 
-  <img src="./plots/fsts.png" alt="axes" style="width: 100%;">
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+
+![axes](./plots/fsts.png)
+</div>
 
 ```markdown
 - strut, jacket and FST numbering shown
@@ -51,13 +53,6 @@
 ---
 # Methodology
 - TBA
-
----
-<!-- _class: transition -->
-
-# 
-
-## 100 year Analysis Results
 
 ---
 # Methodology - Analysis
@@ -78,8 +73,8 @@
   - FST forces are in FST local axes
 - Radial/rose  plots - ONLY positive values used
   - Objective: 
-    - For understanding directional trend. 
-    - The increase/decrease/reversals help determine the max forces.
+    - For understanding value change with direction. 
+    - The increase/decrease help determine the max force directions.
   - Static values: absolute values
   - Dynamic values: absolute maximum i.e. max (abs(max), abs(min))
 
@@ -88,7 +83,172 @@
 ```
 
 ---
-# FSTs 95% LNG, 100yr, LWL - Max Jacket Loads, Directional Response
+<!-- _class: transition -->
+
+# 
+
+## 100 year Analysis Results
+
+---
+<!-- _class: transition -->
+
+# 
+
+### FST Motion Response
+
+---
+# FSTs 95% LNG, 100yr, LWL - FST Surge and Sway, Directional Response
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+
+  <img src="./plots/fsts/au_lwl_100yr_fst2_dof_translation.png" alt="FST2 DOF Translation Plot at 100yr LWL" style="width: 48%;">
+  <img src="./plots/fsts/au_lwl_100yr_fst1_dof_translation.png" alt="FST1 DOF Translation Plot at 100yr LWL" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 95% LNG, 100yr, HWL - FST Surge and Sway, Directional Response
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_hwl_100yr_fst2_dof_translation.png" alt="FST2" style="width: 48%;">
+    <img src="./plots/fsts/au_hwl_100yr_fst1_dof_translation.png" alt="FST1" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 95% LNG, 100yr, LWL - FST Rotations, Directional Response
+
+- TBA
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_lwl_100yr_fst2_dof_rotation.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_lwl_100yr_fst1_dof_rotation.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 95% LNG, 100yr, HWL - FST Rotations, Directional Response
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_hwl_100yr_fst2_dof_rotation.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_hwl_100yr_fst1_dof_rotation.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+<!-- _class: transition -->
+
+# 
+
+### FST Load Response
+
+---
+# FSTs 95% LNG, 100yr, HWL - FST Loads, X Direction
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Lx.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Lx.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 95% LNG, 100yr, HWL - FST Loads, Y Direction
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Ly.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Ly.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 15% LNG, 100yr, LWL - FST Loads, X Direction
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Lx.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Lx.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+# FSTs 15% LNG, 100yr, LWL - FST Loads, Y Direction
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Ly.png" alt="FST1" style="width: 48%;">
+    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Ly.png" alt="FST2" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+---
+<!-- _class: transition -->
+
+# 
+
+### Jacket Loads
+
+---
+# Max Jacket Loads, FSTs 95% LNG, 100yr, LWL
 
 - LWL, Jacket Global forces in X and Y direction are shown
 - Two (2) struts contribute to each jacket global force
@@ -104,7 +264,7 @@
 
 ---
 
-# FSTs 15% LNG, 100yr, HWL - Max Jacket Loads, Directional Response
+# Max Jacket Loads, FSTs 15% LNG, 100yr, HWL
 
 - HWL, Jacket Global forces in X and Y direction are shown
 - Max loads are absolute maximum i.e. max (abs(max), abs(min))
@@ -118,6 +278,13 @@
 - The HWL static & dynamic forces are significantly higher that those of LWL.
 - The 15% LNG & LWL needs to be investigated further.
 ```
+
+---
+<!-- _class: transition -->
+
+# 
+
+### Strut Loads
 
 ---
 
