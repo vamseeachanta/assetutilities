@@ -27,8 +27,10 @@ Gmail filters are rules that automatically organize emails based on search crite
 3. Click **Create filter**.
 4. Check the box for **Never send it to Spam**.
 5. Check the box for **Never delete it**.
+   
    - if there is no option create a label for it.
-   - 
+   - check the box **Apply the label** , create new label "RetainForever" , click create
+  
 6. Click **Create filter**.
 
 ---
