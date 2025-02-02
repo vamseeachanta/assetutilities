@@ -651,12 +651,12 @@ FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&em
 ```
 
 ---
-# Max Strut Loads, FSTs 95% LNG, 100yr, HWL vs. LWL, Tension, Dynamic
+# Max Strut Loads, 100yr, HWL vs. LWL, Tension, Dynamic
 
 - TBA
 
 <div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+15% LNG HWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; 95% LNG LWL
 </div>
 <div style="display: flex; justify-content: space-between;">
     <img src="./plots/fsts/au_hwl_100yr_fst2_strut_et.png" alt="hwl" style="width: 48%;">
