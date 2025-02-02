@@ -651,6 +651,24 @@ FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&em
 ```
 
 ---
+# Max Strut Loads, FSTs 95% LNG, 100yr, HWL vs. LWL, Tension, Dynamic
+
+- TBA
+
+<div style="text-align: center;">
+FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="./plots/fsts/au_hwl_100yr_fst2_strut_et.png" alt="hwl" style="width: 48%;">
+    <img src="./plots/fsts/au_lwl_100yr_fst2_strut_et.png" alt="lwl" style="width: 48%;">
+</div>
+
+```markdown
+- TBA
+```
+
+
+---
 
 # FSTs 95% LNG, 100yr, LWL - Force Timetrace
 
@@ -665,6 +683,18 @@ Min -ve &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 ```markdown
 - The struts are in sync
 - Results in lower strut forces when compared to HWL results
+```
+
+---
+
+# FSTs 95% LNG, 100yr, LWL - Force Timetrace, 240 deg
+
+<div style="text-align: center;">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/QA3RmtbFTfE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+```markdown
+- Time trace with extreme loading at 1359 s for FST2
 ```
 
 ---
@@ -684,6 +714,19 @@ Min -ve &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
   - Results in high strut forces for FSTs 15% LNG, LWL condition
 - This tension-compression lock position is similar to what was obtained in AQWA
 ```
+
+---
+
+# FSTs 15% LNG, 100yr, HWL - Force Timetrace, FST1, 345 deg
+
+<div style="text-align: center;">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/breV6vJoA30" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+```markdown
+- Time trace with extreme loading at 6918 s for FST1
+```
+
 
 ---
 # FSTs, 100yr Discussion
