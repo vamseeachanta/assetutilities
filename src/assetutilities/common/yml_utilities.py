@@ -220,6 +220,21 @@ class WorkingWithYAML:
 
         return filename_with_lib_path
 
+    def get_library_filepath(self, cfg, src_relative_location_flag=False):
+            
+            filepath_with_lib_path = cfg["filepath"]
+            library_name = cfg["library_name"]
+            if not os.path.isabs(filepath_with_lib_path) or not os.path.isdir(filepath_with_lib_path):
+                lib_spec = importlib.util.find_spec(library_name)
+                lib_path = Path(lib_spec.origin).parent
+                if not src_relative_location_flag:
+                    lib_path = lib_path.parents[1]
+                filepath_with_lib_path = os.path.join(lib_path, cfg["filepath"])
+                if not os.path.isdir(filepath_with_lib_path):
+                    raise FileNotFoundError()
+
+            return filepath_with_lib_path
+
     def divide_yaml_files(self, cfg) -> None:
         '''
         Iterate through yml files
