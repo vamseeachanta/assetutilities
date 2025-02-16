@@ -7,17 +7,19 @@ if [ ! -f "${au_git_sync_home}/common.sh" ]; then
     source ${au_git_sync_home}/common.sh
 fi
 
-# Check if current directory is a git repository
+
+
+
+
+# Check if current directory is in a git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     cd ../../
     github_dir=$(dirname "$(pwd)")
     log_message "yellow" "$(pwd) is not a git repository. Define a valid directory to run this script."
-    exit 1
 else
     # get to repo root
     repo_root=$(git rev-parse --show-toplevel)
     cd "$repo_root"
-    repo_name=$(basename $(git rev-parse --show-toplevel))
     # Directory containing GitHub repositories
     github_dir=$(dirname "$(pwd)")
 fi
