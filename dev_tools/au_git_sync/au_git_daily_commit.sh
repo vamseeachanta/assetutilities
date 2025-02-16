@@ -32,6 +32,8 @@ if [ -n "$(git status --porcelain)" ]; then
     git add --all
     git commit -m "$daily_commit_message"
     git push
+else
+    log_message "green" "No changes detected in $(basename "$dir") ..."
 
 fi
 

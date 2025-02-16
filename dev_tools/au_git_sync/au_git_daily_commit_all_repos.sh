@@ -29,25 +29,16 @@ log_message "normal" "Starting repository check-in routine process in $(pwd)..."
 for dir in "$github_dir"/*/ ; do
     if [ -d "$dir" ]; then
 
-        log_message "normal" "Processing repo: $(basename "$dir")"
         cd "$dir"
 
-        # Check if there are any changes
-        if [ -n "$(git status --porcelain)" ]; then
-            log_message "yellow" "Changes detected in repo: $(basename "$dir")"
-
-            # commit changes
-            daily_commit_script="${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
-            log_message "green" "Daily routine ... START"
-            if [ ! -f "$daily_commit_script" ]; then
-                daily_commit_script="${au_daily_commit_script}"
-            fi
-            bash "$daily_commit_script"
-            log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
-
-        else
-            log_message "green" "No changes detected in $(basename "$dir") ..."
+        # commit changes
+        daily_commit_script="${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
+        log_message "green" "Daily routine ... START"
+        if [ ! -f "$daily_commit_script" ]; then
+            daily_commit_script="${au_daily_commit_script}"
         fi
+        bash "$daily_commit_script"
+        log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
 
     fi
 done
