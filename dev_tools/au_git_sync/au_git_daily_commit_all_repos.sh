@@ -31,14 +31,10 @@ for dir in "$github_dir"/*/ ; do
 
         cd "$dir"
 
-        # commit changes
-        daily_commit_script="${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
-        log_message "green" "Daily routine ... START"
         if [ ! -f "$daily_commit_script" ]; then
             daily_commit_script="${au_daily_commit_script}"
         fi
         bash "$daily_commit_script"
-        log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
 
     fi
 done
