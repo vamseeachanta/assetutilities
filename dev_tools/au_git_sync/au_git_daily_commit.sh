@@ -6,6 +6,7 @@ if [ -f "${repo_git_sync_home}/common.sh" ]; then
     source ${repo_git_sync_home}/common.sh
 else
     local au_git_sync_home=$1
+    echo "au_git_sync_home: $au_git_sync_home"
     source ${au_git_sync_home}/common.sh
 fi
 
