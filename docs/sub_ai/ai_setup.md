@@ -3,3 +3,6 @@
   - Create guidelines
   
 
+## Cline
+
+https://github.com/cline/cline

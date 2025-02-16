@@ -1,5 +1,7 @@
 # Standard library imports
 import os
+import logging
+
 
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
@@ -7,7 +9,11 @@ import numpy as np
 import pandas as pd  # noqa
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from PIL import Image
+from colorama import Fore, Style
+from colorama import init as colorama_init
 
+from assetutilities.common.utilities import is_file_valid_func
+colorama_init()
 
 class VisualizationCommon:
 
@@ -255,11 +261,20 @@ class VisualizationCommon:
         if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get("flag", False):
 
             img_path = plt_settings['add_image']['image_path']
+            analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
+            file_is_valid, valid_file = is_file_valid_func(
+                img_path, analysis_root_folder
+            )
+            if not file_is_valid:
+                logging.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
+                logging.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
+                logging.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
+            
             transparency = plt_settings['add_image']['transperancy']
             r = plt_settings['add_image']['r']
             theta = plt_settings['add_image']['theta_center']
             
-            img = Image.open(img_path)
+            img = Image.open(valid_file)
 
             im_array = np.array(img.convert("RGBA"))
             im_array[:, :, 3] = (im_array[:, :, 3].astype(float) * transparency).astype(np.uint8)
@@ -277,20 +292,24 @@ class VisualizationCommon:
             ab = AnnotationBbox(image_box, (theta_center, r_center), frameon=False, xycoords='polar')
             
             ax.add_artist(ab)   
-            #ax.set_ylim(0, 14)
-    
-            # plt.show() 
-            #plt.savefig('docs/leg_pycodes/polar_plot_delete.png')
 
     def add_image_to_xy_plot(self, cfg, plt_settings):
         plt_properties = None
         if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get("flag", False):
-
             img_path = plt_settings['add_image']['image_path']
+            analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
+            file_is_valid, valid_file = is_file_valid_func(
+                img_path, analysis_root_folder
+            )
+            if not file_is_valid:
+                logging.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
+                logging.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
+                logging.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
+
             transparency = plt_settings['add_image']['transperancy']
             x = plt_settings['add_image']['x']
             y = plt_settings['add_image']['y']
-            img = Image.open(img_path)
+            img = Image.open(valid_file)
 
             fig, ax = plt.subplots()
             # ax = plt_properties['ax']
@@ -306,7 +325,6 @@ class VisualizationCommon:
         else:
             print("add_image data is not available")    
 
-
         return plt_properties
 
     def get_plot_properties_for_df(self, cfg, df):
@@ -321,36 +339,58 @@ class VisualizationCommon:
 
     def get_plot_count_array_for_df(self, cfg):
 
-        x_count_array = []
-        y_count_array = []
-        plot_count_array = []
-        for group_cfg in cfg["data"]["groups"]:
+        if 'xy' in cfg['settings']['type']:
+            x_count_array = []
+            y_count_array = []
+            plot_count_array = []
+            for group_cfg in cfg["data"]["groups"]:
 
-            if "columns" in group_cfg:
-                x_count = len(group_cfg["columns"]["x"])
-                y_count = len(group_cfg["columns"]["y"])
-            else:
-                x_count = len(group_cfg["x"])
-                y_count = len(group_cfg["y"])
+                if "columns" in group_cfg:
+                    x_count = len(group_cfg["columns"]["x"])
+                    y_count = len(group_cfg["columns"]["y"])
+                else:
+                    x_count = len(group_cfg["x"])
+                    y_count = len(group_cfg["y"])
 
-            x_count_array.append(x_count)
-            y_count_array.append(y_count)
+                x_count_array.append(x_count)
+                y_count_array.append(y_count)
 
-            plot_count_array.append(x_count * y_count)
+                plot_count_array.append(x_count * y_count)
 
-        plot_count_dict = {
-            "x_count_array": x_count_array,
-            "y_count_array": y_count_array,
-            "plot_count_array": plot_count_array,
-        }
+            plot_count_dict = {
+                "x_count_array": x_count_array,
+                "y_count_array": y_count_array,
+                "plot_count_array": plot_count_array,
+            }
+
+        elif 'polar' in cfg['settings']['type']:
+            theta_count_array = []
+            r_count_array = []
+            plot_count_array = []
+            for group_cfg in cfg["data"]["groups"]:
+                if "columns" in group_cfg:
+                    theta_count = len(group_cfg["columns"]["theta"])
+                    r_count = len(group_cfg["columns"]["r"])
+                else:
+                    theta_count = len(group_cfg["theta"])
+                    r_count = len(group_cfg["r"])
+
+                theta_count_array.append(theta_count)
+                r_count_array.append(r_count)
+
+                plot_count_array.append(theta_count * r_count)
+
+            plot_count_dict = {
+                "theta_count_array": theta_count_array,
+                "r_count_array": r_count_array,
+                "plot_count_array": plot_count_array
+                }
+
         return plot_count_dict
 
     def get_plot_colors_for_df(self, plot_count_dict, cfg, key="color"):
 
-        x_count_array = plot_count_dict["x_count_array"]
-        y_count_array = plot_count_dict["y_count_array"]
         plot_count_array = plot_count_dict["plot_count_array"]
-
 
         repeat_flag = True
         if 'pairs' in cfg['settings'] and not cfg['settings']['pairs']:
@@ -369,8 +409,6 @@ class VisualizationCommon:
     def get_plot_linestyle_for_df(self, cfg, plot_count_dict, key="linestyle"):
 
         default_linestyle_list = ["-", "--", "-.", ":"]
-        x_count_array = plot_count_dict["x_count_array"]
-        y_count_array = plot_count_dict["y_count_array"]
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True
@@ -446,8 +484,6 @@ class VisualizationCommon:
     def get_plot_alpha_for_df(self, cfg, plot_count_dict, key="alpha"):
 
         default_alpha_list = [round(1 - n * 0.05, 2) for n in range(0, 20)]
-        x_count_array = plot_count_dict["x_count_array"]
-        y_count_array = plot_count_dict["y_count_array"]
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True

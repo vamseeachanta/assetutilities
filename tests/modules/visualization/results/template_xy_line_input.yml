@@ -1,0 +1,146 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  basename: visualization
+  default:
+    log_level: INFO
+    config:
+      overwrite:
+        output: true
+  data:
+    r:
+    - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+    theta:
+    - 35
+    - 70
+    - 120
+    - 155
+    - 205
+    - 240
+    type: input
+    groups:
+    - x:
+      - - 35
+        - 70
+        - 120
+        - 155
+        - 205
+        - 240
+      y:
+      - - 0.5
+        - 1
+        - 2
+        - 2.5
+        - 3
+        - 4
+      - - 1
+        - 2
+        - 2.5
+        - 2.5
+        - 3
+        - 5
+    color:
+    - blue
+    - green
+    alpha:
+    - 1
+    - 0.75
+    linestyle:
+    - --
+    - '-'
+    - '-'
+    - ':'
+  settings:
+    type: xy
+    mode: line
+    pairs: false
+    multiple: false
+    plt_engine: matplotlib
+    label: Allowable Wave Height
+    file_name: x_y_line
+    plt_save_extensions:
+    - .png
+    title: Allowable Significant Wave Height (Hs)
+    xlabel: Direction (deg)
+    ylabel: Allowable Wave Height (m)
+    set_rmax: 10
+    set_rticks:
+    - 1
+    - 2
+    - 3
+    set_thetagrids:
+    - 0
+    - 30
+    - 60
+    - 90
+    - 120
+    - 150
+    - 180
+    - 210
+    - 240
+    - 270
+    - 300
+    - 330
+    set_rlabel_position: -22.5
+    legend:
+      flag: true
+      label:
+      - ~
+      loc: best
+      prop:
+        family: Arial
+        size: 5
+    color:
+    - '#17becf'
+    - '#bcbd22'
+    linestyle:
+    - '-'
+    - '-'
+    markerprops:
+    - marker: ~
+      markersize: ~
+    - marker: ~
+      markersize: ~
+    alpha:
+    - 1.0
+    - 1.0
+    traces: 2
+  master_settings:
+    groups:
+      x:
+      - - 35
+        - 70
+        - 120
+        - 155
+        - 205
+        - 240
+      y:
+      - - 0.5
+        - 1
+        - 2
+        - 2.5
+        - 3
+        - 4
+      - - 1
+        - 2
+        - 2.5
+        - 2.5
+        - 3
+        - 5
+  Analysis:
+    basename: visualization
+    analysis_root_folder: k:\github\assetutilities\tests\modules\visualization
+    file_name: template_xy_line_input
+    file_name_for_overwrite: template_xy_line_input
+    result_folder: k:\github\assetutilities\tests\modules\visualization\results
+    log_folder: k:\github\assetutilities\tests\modules\visualization\logs
+    start_time: 2025-01-17 14:44:52.214392
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: k:\github\assetutilities\tests\modules\visualization\template_xy_line_input.yml
+    fe_folder: k:\github\assetutilities\tests\modules\visualization\results

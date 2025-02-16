@@ -64,9 +64,14 @@ https://www.youtube.com/watch?v=Go1aQslQvrs
 Mathew versaggi 
 - [https://youtu.be/BaXxWMkl5g4](https://youtu.be/BaXxWMkl5g4)
 - [https://youtu.be/LD2rZe1T-EM](https://youtu.be/LD2rZe1T-EM)
-- [https://youtu.be/4hW0THcheaQ](https://youtu.be/4hW0THcheaQ)
+- [https://youtu.be/4hW0THcheaQ](https://yo utu.be/4hW0THcheaQ)
 - [https://youtu.be/tVcopEpWDlw](https://youtu.be/tVcopEpWDlw) 
 
 https://www.linkedin.com/posts/johnrushx_ive-replaced-100-of-my-marketing-sales-activity-7274649527326756864-b7UM?utm_source=share&utm_medium=member_desktop
 
 https://github.com/microsoft/generative-ai-for-beginners
+
+https://blogs.microsoft.com/on-the-issues/2025/01/03/the-golden-opportunity-for-american-ai/
+
+
+https://youtubetranscriptoptimizer.com/blog/05_the_short_case_for_nvda

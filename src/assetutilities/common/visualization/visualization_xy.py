@@ -40,11 +40,11 @@ class VisualizationXY:
             data_dict, legend = self.get_xy_mapped_data_dict_from_input(cfg)
             if len(cfg["settings"]["legend"]["label"]) == 0:
                 cfg["settings"]["legend"]["label"] = legend
-            data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
 
         elif cfg["data"]["type"] == "csv":
             data_dict, cfg = self.get_xy_mapped_data_dict_from_csv(cfg)
-            data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
+
+        data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
 
         cfg = visualization_common.get_plot_properties_for_df(cfg, data_df)
 
@@ -130,12 +130,11 @@ class VisualizationXY:
 
         mapped_data_cfg = {"data": {"groups": [{"x": x_data_array, "y": y_data_array}]}}
         cfg["settings"]["legend"]["label"] = legend_data
-        data_dict, ledgend_unused = self.get_xy_mapped_data_dict_from_input(mapped_data_cfg)
+        data_dict, legend_unused = self.get_xy_mapped_data_dict_from_input(mapped_data_cfg)
 
         return data_dict, cfg
 
     def get_xy_plot_matplotlib(self, df, plt_settings, cfg, plt_properties):
-        # Third party imports
         if plt_properties != None:
             plt = plt_properties["plt"]
             fig = plt_properties["fig"]
