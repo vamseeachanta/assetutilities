@@ -1,6 +1,7 @@
 # shell script to perform daily git operations - all repos
 au_git_sync_home=$(pwd)
-au_script="${au_git_sync_home}/au_git_daily_commit.sh"
+script_name="au_git_daily_commit.sh"
+au_script="${au_git_sync_home}/${script_name}"
 
 # source common utilities
 if [ -f "${au_git_sync_home}/common.sh" ]; then
@@ -21,7 +22,7 @@ else
 fi
 
 cd ${github_dir}
-log_message "green" "Commit Routine for Repositories in $(pwd)... START"
+log_message "green" "Commit Routine for Repositories in "$github_dir"... START"
 
 # Iterate through all directories in the GitHub folder
 for dir in "$github_dir"/*/ ; do
@@ -29,7 +30,7 @@ for dir in "$github_dir"/*/ ; do
 
         cd "$dir"
 
-        repo_script = "${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
+        repo_script = "${dir}/dev_tools/au_git_sync/${script_name}"
         if [ ! -f "$repo_script" ]; then
             repo_script="${au_script}"
         fi
