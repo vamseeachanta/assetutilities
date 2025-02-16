@@ -7,10 +7,6 @@ if [ ! -f "${au_git_sync_home}/common.sh" ]; then
     source ${au_git_sync_home}/common.sh
 fi
 
-
-
-
-
 # Check if current directory is in a git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     cd ../../
