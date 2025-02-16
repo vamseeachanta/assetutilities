@@ -21,7 +21,7 @@ else
 fi
 
 cd ${github_dir}
-log_message "normal" "Starting repository check-in routine process in $(pwd)..."
+log_message "green" "Commit Routine for Repositories in $(pwd)... START"
 
 # Iterate through all directories in the GitHub folder
 for dir in "$github_dir"/*/ ; do
@@ -32,11 +32,11 @@ for dir in "$github_dir"/*/ ; do
         if [ ! -f "$daily_commit_script" ]; then
             daily_commit_script="${au_daily_commit_script}"
         fi
-        bash "$daily_commit_script"
+        bash "$daily_commit_script" $au_git_sync_home
 
     fi
 done
 
 # Return to original directory
 cd "$au_git_sync_home"
-log_message "green" "Completed daily_routine for all repositories"
+log_message "green" "Commit Routine for Repositories in $(pwd)... FINISH"
