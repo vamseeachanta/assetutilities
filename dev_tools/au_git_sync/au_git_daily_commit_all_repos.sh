@@ -1,6 +1,6 @@
 # shell script to perform daily git operations - all repos
 au_git_sync_home=$(pwd)
-au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
+au_script="${au_git_sync_home}/au_git_daily_commit.sh"
 
 # source common utilities
 if [ -f "${au_git_sync_home}/common.sh" ]; then
@@ -29,10 +29,11 @@ for dir in "$github_dir"/*/ ; do
 
         cd "$dir"
 
-        if [ ! -f "$daily_commit_script" ]; then
-            daily_commit_script="${au_daily_commit_script}"
+        repo_script = "${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
+        if [ ! -f "$repo_script" ]; then
+            repo_script="${au_script}"
         fi
-        bash "$daily_commit_script" $au_git_sync_home
+        bash "$repo_script" $au_git_sync_home
 
     fi
 done
