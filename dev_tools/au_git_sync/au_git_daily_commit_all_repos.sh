@@ -40,4 +40,4 @@ done
 
 # Return to original directory
 cd "$au_git_sync_home"
-log_message "green" "Commit Routine for Repositories in $(pwd)... FINISH"
+log_message "green" "Commit Routine for Repositories in $(github_dir)... FINISH"
