@@ -5,9 +5,6 @@ repo_git_sync_home=$(pwd)
 if [ -f "${repo_git_sync_home}/common.sh" ]; then
     source ${repo_git_sync_home}/common.sh
 else
-    echo $0
-    echo $1
-    echo $2
     source $1/common.sh
 fi
 
