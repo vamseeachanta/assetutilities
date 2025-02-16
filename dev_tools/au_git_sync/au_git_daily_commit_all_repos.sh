@@ -3,7 +3,7 @@ au_git_sync_home=$(pwd)
 au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
 
 # source common utilities
-if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+if [ -f "${au_git_sync_home}/common.sh" ]; then
     source ${au_git_sync_home}/common.sh
 fi
 
