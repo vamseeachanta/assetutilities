@@ -1,10 +1,12 @@
 # shell script to perform daily git operations
-repo_root=$(git rev-parse --show-toplevel)
-# get to repo root
-cd "$repo_root"
+# Define git sync home
+assetutilities_dir=$(pwd)
+au_git_sync_home=${assetutilities_dir}/"dev_tools/au_git_sync"
 
+# get to repo root
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
 repo_name=$(basename $(git rev-parse --show-toplevel))
-au_git_sync_home="dev_tools/au_git_sync"
 
 # source common utilities
 source ${au_git_sync_home}/common.sh
@@ -33,4 +35,5 @@ if [ -n "$(git status --porcelain)" ]; then
 
 fi
 
+cd "$au_git_sync_home"
 log_message "green" "Repo : ${repo_name} : Daily git operations completed"
