@@ -1,8 +1,11 @@
 # shell script to perform daily git commit in a repository
-au_git_sync_home=$(pwd)
+repo_git_sync_home=$(pwd)
 
 # source common utilities
-if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+if [ ! -f "${repo_git_sync_home}/common.sh" ]; then
+    source ${repo_git_sync_home}/common.sh
+else
+    local au_git_sync_home=$1
     source ${au_git_sync_home}/common.sh
 fi
 
@@ -38,5 +41,5 @@ else
     log_message "green" "No changes detected in $(basename "$dir") ..."
 fi
 
-cd "$au_git_sync_home"
+cd "$repo_git_sync_home"
 log_message "green" "Repo : ${repo_name} : Daily git operations completed"
