@@ -1,21 +1,19 @@
-# shell script to perform daily git operations
-repo_root=$(git rev-parse --show-toplevel)
-# get to repo root
-cd "$repo_root"
-
-repo_name=$(basename $(git rev-parse --show-toplevel))
-au_git_sync_home="dev_tools/au_git_sync"
+# shell script to perform daily git operations - all repos
+# Define git sync home
+au_git_sync_home=$(pwd)
+au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
 
 # source common utilities
 source ${au_git_sync_home}/common.sh
 
+# get to repo root
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+repo_name=$(basename $(git rev-parse --show-toplevel))
+
 # Directory containing GitHub repositories
 current_dir=$(pwd)
 github_dir=$(dirname "$current_dir")
-assetutilities_dir="${github_dir}/assetutilities"
-
-# rel path top bash_tools dir, daily_commit_script
-daily_commit_script_rel_path="${au_git_sync_home}/au_git_daily_commit.sh"
 
 cd ${github_dir}
 log_message "normal" "Starting repository check-in routine process in $(pwd)..."
@@ -32,14 +30,13 @@ for dir in "$github_dir"/*/ ; do
             log_message "yellow" "Changes detected in repo: $(basename "$dir")"
 
             # commit changes
-            daily_commit_script="${dir}/${daily_commit_script_rel_path}"
+            daily_commit_script="${dir}/dev_tools/au_git_sync/au_git_daily_commit.sh"
             log_message "green" "Daily routine ... START"
             if [ ! -f "$daily_commit_script" ]; then
-                daily_commit_script="${assetutilities_dir}/${daily_commit_script_rel_path}"
+                daily_commit_script="${au_daily_commit_script}"
             fi
             bash "$daily_commit_script"
             log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
-
 
         else
             log_message "green" "No changes detected in $(basename "$dir") ..."
@@ -49,5 +46,5 @@ for dir in "$github_dir"/*/ ; do
 done
 
 # Return to original directory
-cd "$assetutilities_dir/$au_git_sync_home"
+cd "$au_git_sync_home"
 log_message "green" "Completed daily_routine for all repositories"

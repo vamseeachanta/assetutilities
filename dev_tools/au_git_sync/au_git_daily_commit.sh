@@ -2,13 +2,13 @@
 # Define git sync home
 au_git_sync_home=$(pwd)
 
+# source common utilities
+source ${au_git_sync_home}/common.sh
+
 # get to repo root
 repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 repo_name=$(basename $(git rev-parse --show-toplevel))
-
-# source common utilities
-source ${au_git_sync_home}/common.sh
 
 daily_commit_message=$(date '+%Y%m%d')
 
