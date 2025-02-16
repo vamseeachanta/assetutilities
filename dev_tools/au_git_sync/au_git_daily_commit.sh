@@ -4,11 +4,11 @@ repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
 repo_name=$(basename $(git rev-parse --show-toplevel))
-bash_tools_home="dev_tools/bash_tools"
+au_git_sync_home="dev_tools/au_git_sync"
 
 # source common utilities
-source ${bash_tools_home}/common.sh
-# source ${bash_tools_home}/git_select_year_month_branch.sh
+source ${au_git_sync_home}/common.sh
+# source ${au_git_sync_home}/git_select_year_month_branch.sh
 
 daily_commit_message=$(date '+%Y%m%d')
 

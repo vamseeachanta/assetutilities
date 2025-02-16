@@ -4,34 +4,50 @@ repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
 repo_name=$(basename $(git rev-parse --show-toplevel))
-bash_tools_home="dev_tools/bash_tools"
+au_git_sync_home="dev_tools/au_git_sync"
 
 # source common utilities
-source ${bash_tools_home}/common.sh
-# source ${bash_tools_home}/git_select_year_month_branch.sh
+source ${au_git_sync_home}/common.sh
 
-daily_commit_message=$(date '+%Y%m%d')
+# Directory containing GitHub repositories
+current_dir=$(pwd)
+github_dir=$(dirname "$current_dir")
+assetutilities_dir="${github_dir}/assetutilities"
 
-cat << COM
-Starting daily git routine. key details 
-  - Repository name: $repo_name
-  - Repository root: $repo_root
-  - Daily Commit message: $daily_commit_message
-Executing git operations now 
-COM
+# rel path top bash_tools dir, daily_commit_script
+daily_commit_script_rel_path="${au_git_sync_home}/au_git_daily_commit.sh"
 
-if [ -n "$(git status --porcelain)" ]; then
-    log_message "yellow" "Changes detected in repo: $(basename "$dir")"
+cd ${github_dir}
+log_message "normal" "Starting repository check-in routine process in $(pwd)..."
 
-    # get to repo root
-    cd "$repo_root"
+# Iterate through all directories in the GitHub folder
+for dir in "$github_dir"/*/ ; do
+    if [ -d "$dir" ]; then
 
-    # perform git operations
-    git pull
-    git add --all
-    git commit -m "$daily_commit_message"
-    git push
+        log_message "normal" "Processing repo: $(basename "$dir")"
+        cd "$dir"
 
-fi
+        # Check if there are any changes
+        if [ -n "$(git status --porcelain)" ]; then
+            log_message "yellow" "Changes detected in repo: $(basename "$dir")"
 
-log_message "green" "Repo : ${repo_name} : Daily git operations completed"
+            # commit changes
+            daily_commit_script="${dir}/${daily_commit_script_rel_path}"
+            log_message "green" "Daily routine ... START"
+            if [ ! -f "$daily_commit_script" ]; then
+                daily_commit_script="${assetutilities_dir}/${daily_commit_script_rel_path}"
+            fi
+            bash "$daily_commit_script"
+            log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
+
+
+        else
+            log_message "green" "No changes detected in $(basename "$dir") ..."
+        fi
+
+    fi
+done
+
+# Return to original directory
+cd "$assetutilities_dir/$au_git_sync_home"
+log_message "green" "Completed daily_routine for all repositories"

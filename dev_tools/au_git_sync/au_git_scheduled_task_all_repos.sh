@@ -4,10 +4,10 @@ repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
 repo_name=$(basename $(git rev-parse --show-toplevel))
-bash_tools_home="dev_tools/bash_tools"
+au_git_sync_home="dev_tools/au_git_sync"
 
 # source common utilities
-source ${bash_tools_home}/common.sh
+source ${au_git_sync_home}/common.sh
 
 # Directory containing GitHub repositories
 current_dir=$(pwd)
@@ -15,10 +15,9 @@ github_dir=$(dirname "$current_dir")
 assetutilities_dir="${github_dir}/assetutilities"
 
 # rel path top bash_tools dir, daily_commit_script
-bash_tools_home="dev_tools/bash_tools"
-daily_commit_script_rel_path="${bash_tools_home}/git_daily_commit.sh"
-clean_stale_branches_rel_path="${bash_tools_home}/git_clean_stale_local_branches.sh"
-select_year_month_branch_rel_path="${bash_tools_home}/git_select_year_month_branch.sh"
+daily_commit_script_rel_path="${au_git_sync_home}/git_daily_commit.sh"
+clean_stale_branches_rel_path="${au_git_sync_home}/git_clean_stale_local_branches.sh"
+select_year_month_branch_rel_path="${au_git_sync_home}/git_select_year_month_branch.sh"
 
 cd ${github_dir}
 log_message "normal" "Starting repository check-in routine process in $(pwd)..."
