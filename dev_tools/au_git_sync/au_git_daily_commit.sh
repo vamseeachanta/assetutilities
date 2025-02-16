@@ -37,7 +37,7 @@ if [ -n "$(git status --porcelain)" ]; then
     git push
     log_message "green" "Daily commit routine in $(basename "$dir") ... FINISH"
 else
-    log_message "green" "No changes detected in $(basename "$dir") ..."
+    log_message "yellow" "No changes detected in $(basename "$dir") ..."
 fi
 
 cd "$repo_git_sync_home"
