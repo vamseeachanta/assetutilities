@@ -24,8 +24,8 @@ Executing git operations now
 COM
 
 if [ -n "$(git status --porcelain)" ]; then
-    log_message "green" "Daily commit routine in $(basename "$dir") ... START"
-    log_message "yellow" "Changes detected in repo: $(basename "$dir")"
+    log_message "yellow" "Daily commit routine in $(basename "$dir") ... START"
+    log_message "green" "Changes detected in repo: $(basename "$dir")"
 
     # get to repo root
     cd "$repo_root"
