@@ -36,7 +36,6 @@ if [ -n "$(git status --porcelain)" ]; then
     log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
 else
     log_message "green" "No changes detected in $(basename "$dir") ..."
-
 fi
 
 cd "$au_git_sync_home"
