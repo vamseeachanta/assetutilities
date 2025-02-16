@@ -2,11 +2,11 @@
 repo_git_sync_home=$(pwd)
 
 # source common utilities
-if [ ! -f "${repo_git_sync_home}/common.sh" ]; then
+if [ -f "${repo_git_sync_home}/common.sh" ]; then
     source ${repo_git_sync_home}/common.sh
-# else
-#     au_git_sync_home=$1
-#     source ${au_git_sync_home}/common.sh
+else
+    au_git_sync_home=$1
+    source ${au_git_sync_home}/common.sh
 fi
 
 # get to repo root
