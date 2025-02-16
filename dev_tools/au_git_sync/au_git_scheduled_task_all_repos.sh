@@ -6,5 +6,5 @@ select_year_month_branch="${au_git_sync_home}/au_git_select_YYYYMM_branch_all_re
 clean_stale_branches="${au_git_sync_home}/au_git_clean_stale_local_branches_all_repos.sh"
 
 bash "${daily_commit_script}"
-bash "${select_year_month_branch}"
-bash "${clean_stale_branches}"
+# bash "${select_year_month_branch}"
+# bash "${clean_stale_branches}"
