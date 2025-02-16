@@ -1,6 +1,6 @@
 # shell script to perform daily git operations - all repos
 au_git_sync_home=$(pwd)
-script_name="au_git_daily_commit.sh"
+script_name="au_git_select_YYYYMM_branch.sh"
 au_script="${au_git_sync_home}/${script_name}"
 
 # source common utilities

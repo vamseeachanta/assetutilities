@@ -24,7 +24,7 @@ Executing git operations now
 COM
 
 if [ -n "$(git status --porcelain)" ]; then
-    log_message "green" "Daily routine in $(basename "$dir") ... START"
+    log_message "green" "Daily commit routine in $(basename "$dir") ... START"
     log_message "yellow" "Changes detected in repo: $(basename "$dir")"
 
     # get to repo root
@@ -35,10 +35,9 @@ if [ -n "$(git status --porcelain)" ]; then
     git add --all
     git commit -m "$daily_commit_message"
     git push
-    log_message "green" "Daily routine in $(basename "$dir") ... FINISH"
+    log_message "green" "Daily commit routine in $(basename "$dir") ... FINISH"
 else
     log_message "green" "No changes detected in $(basename "$dir") ..."
 fi
 
 cd "$repo_git_sync_home"
-log_message "green" "Repo : ${repo_name} : Daily git operations completed"

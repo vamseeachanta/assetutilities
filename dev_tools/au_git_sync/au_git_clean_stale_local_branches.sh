@@ -1,9 +1,11 @@
-# shell script to clean stale local branches in a repository
-au_git_sync_home=$(pwd)
+# shell script to perform daily git commit in a repository
+repo_git_sync_home=$(pwd)
 
 # source common utilities
-if [ ! -f "${au_git_sync_home}/common.sh" ]; then
-    source ${au_git_sync_home}/common.sh
+if [ -f "${repo_git_sync_home}/common.sh" ]; then
+    source ${repo_git_sync_home}/common.sh
+else
+    source $1/common.sh
 fi
 
 # Function to determine if using 'main' or 'master' as the default branch
