@@ -8,7 +8,6 @@ au_git_sync_home="dev_tools/au_git_sync"
 
 # source common utilities
 source ${au_git_sync_home}/common.sh
-# source ${au_git_sync_home}/git_select_year_month_branch.sh
 
 daily_commit_message=$(date '+%Y%m%d')
 
