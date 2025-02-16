@@ -1,7 +1,6 @@
 # shell script to perform daily git operations
 # Define git sync home
-assetutilities_dir=$(pwd)
-au_git_sync_home=${assetutilities_dir}/"dev_tools/au_git_sync"
+au_git_sync_home=$(pwd)
 
 # get to repo root
 repo_root=$(git rev-parse --show-toplevel)
