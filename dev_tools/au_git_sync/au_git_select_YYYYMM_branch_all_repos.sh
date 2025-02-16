@@ -30,8 +30,7 @@ for dir in "$github_dir"/*/ ; do
 
         cd "$dir"
 
-        repo_script = "${dir}/dev_tools/au_git_sync/${script_name}"
-        if [ ! -f "$repo_script" ]; then
+        if [ ! -f "${dir}/dev_tools/au_git_sync/${script_name}" ]; then
             repo_script="${au_script}"
         fi
         bash "$repo_script" $au_git_sync_home
