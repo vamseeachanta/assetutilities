@@ -1,10 +1,11 @@
 # shell script to perform daily git operations - all repos
 # Define git sync home
 au_git_sync_home=$(pwd)
-au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
 
 # source common utilities
 source ${au_git_sync_home}/common.sh
+
+au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
 
 # get to repo root
 repo_root=$(git rev-parse --show-toplevel)
