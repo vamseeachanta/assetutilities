@@ -14,8 +14,7 @@ cd "$repo_root"
 repo_name=$(basename $(git rev-parse --show-toplevel))
 
 # Directory containing GitHub repositories
-current_dir=$(pwd)
-github_dir=$(dirname "$current_dir")
+github_dir=$(dirname "$(pwd)")
 
 cd ${github_dir}
 log_message "normal" "Starting repository check-in routine process in $(pwd)..."
