@@ -3,7 +3,9 @@
 au_git_sync_home=$(pwd)
 
 # source common utilities
-source ${au_git_sync_home}/common.sh
+if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+    source ${au_git_sync_home}/common.sh
+fi
 
 # get to repo root
 repo_root=$(git rev-parse --show-toplevel)
