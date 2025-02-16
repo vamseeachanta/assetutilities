@@ -1,9 +1,10 @@
 # shell script to perform daily git operations - all repos
-# Define git sync home
 au_git_sync_home=$(pwd)
 
 # source common utilities
-source ${au_git_sync_home}/common.sh
+if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+    source ${au_git_sync_home}/common.sh
+fi
 
 au_daily_commit_script="${au_git_sync_home}/au_git_daily_commit.sh"
 

@@ -1,5 +1,4 @@
-# shell script to perform daily git operations
-# Define git sync home
+# shell script to perform daily git commit in a repository
 au_git_sync_home=$(pwd)
 
 # source common utilities

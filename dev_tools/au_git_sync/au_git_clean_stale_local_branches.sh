@@ -1,6 +1,12 @@
-#!/bin/bash
+# shell script to clean stale local branches in a repository
+au_git_sync_home=$(pwd)
 
-# Function to determine if we're using 'main' or 'master' as the default branch
+# source common utilities
+if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+    source ${au_git_sync_home}/common.sh
+fi
+
+# Function to determine if using 'main' or 'master' as the default branch
 get_main_branch() {
     if git rev-parse --verify origin/main >/dev/null 2>&1; then
         echo "main"
@@ -30,7 +36,7 @@ for branch in "${branches[@]}"; do
     if [[ "$branch" != "$MAIN_BRANCH" && "$branch" != "$CURRENT_BRANCH" ]]; then
         # Checkout the branch
         if git checkout "$branch"; then
-            echo "Processing branch: $branch"
+            log_message "yellow" "Processing branch: $branch"
             # Merge default branch into current branch
             if git merge "$MAIN_BRANCH"; then
                 # Push to origin
@@ -39,31 +45,31 @@ for branch in "${branches[@]}"; do
                     if command -v gh &> /dev/null; then
                         gh pr create --base "$MAIN_BRANCH" --head "$branch" --title "Merge $branch into $MAIN_BRANCH" --body "Automated PR created by maintenance script"
                     else
-                        echo "GitHub CLI not installed. Skipping PR creation for $branch"
+                        log_message "yellow" "GitHub CLI not installed. Skipping PR creation for $branch"
                     fi
 
                     # Switch to the default branch before deleting
                     git checkout "$MAIN_BRANCH"
                     # Delete the stale branch locally
                     git branch -D "$branch"
-                    echo "Cleaned stale local branch: $branch"
+                    log_message "green" "Cleaned stale local branch: $branch"
                 else
-                    echo "Failed to push $branch to origin"
+                    log_message "yellow" "Failed to push $branch to origin"
                 fi
             else
-                echo "Failed to merge $MAIN_BRANCH into $branch"
+                log_message "yellow" "Failed to merge $MAIN_BRANCH into $branch"
             fi
         else
-            echo "Failed to checkout $branch"
+            log_message "yellow" "Failed to checkout $branch"
         fi
     else
         # Improved message for non-stale branches
         if [[ "$branch" == "$MAIN_BRANCH" ]]; then
-            echo "Branch '$branch' is the default branch. It is not considered stale."
+            log_message "green" "Branch '$branch' is the default branch. It is not considered stale."
         elif [[ "$branch" == "$CURRENT_BRANCH" ]]; then
-            echo "Branch '$branch' is the currently active branch. It is not considered stale."
+            log_message "yellow" "Branch '$branch' is the currently active branch. It is not considered stale."
         else
-            echo "Branch '$branch' is not stale. No cleanup required."
+            log_message "yellow" "Branch '$branch' is not stale. No cleanup required."
         fi
     fi
 done
@@ -71,4 +77,5 @@ done
 # Return to the original branch
 git checkout "$CURRENT_BRANCH"
 
-echo "Branch maintenance complete!"
+cd "$au_git_sync_home"
+log_message "green" "Branch maintenance complete!"

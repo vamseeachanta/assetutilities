@@ -1,4 +1,11 @@
-# shell script to perform daily git operations
+# shell script to perform daily git operations - all repos
+au_git_sync_home=$(pwd)
+
+# source common utilities
+if [ ! -f "${au_git_sync_home}/common.sh" ]; then
+    source ${au_git_sync_home}/common.sh
+fi
+
 repo_root=$(git rev-parse --show-toplevel)
 # get to repo root
 cd "$repo_root"
@@ -16,8 +23,8 @@ assetutilities_dir="${github_dir}/assetutilities"
 
 # rel path top bash_tools dir, daily_commit_script
 daily_commit_script_rel_path="${au_git_sync_home}/git_daily_commit.sh"
-clean_stale_branches_rel_path="${au_git_sync_home}/git_clean_stale_local_branches.sh"
 select_year_month_branch_rel_path="${au_git_sync_home}/git_select_year_month_branch.sh"
+clean_stale_branches_rel_path="${au_git_sync_home}/git_clean_stale_local_branches.sh"
 
 cd ${github_dir}
 log_message "normal" "Starting repository check-in routine process in $(pwd)..."
