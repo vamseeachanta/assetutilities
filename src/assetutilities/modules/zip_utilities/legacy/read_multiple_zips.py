@@ -11,10 +11,10 @@ class ReadMultipleZips:
     def router(self,cfg):
 
         if cfg['zip']['mode'] == 'multiple':
-            dfs = self.extract_multiple_zips_to_dataframes(cfg['zip_folderpath'], cfg['column_names'])
+            dfs = self.multiple_zips_to_dataframes(cfg['zip_folderpath'], cfg['column_names'])
         return cfg
 
-    def extract_multiple_zips_to_dataframes(folder_path: str, column_names: Optional[List[str]] = None) -> Dict[str, Dict[str, pd.DataFrame]]:
+    def multiple_zips_to_dataframes(folder_path: str, column_names: Optional[List[str]] = None) -> Dict[str, Dict[str, pd.DataFrame]]:
         """
         Extracts CSV or TXT files from multiple ZIP archives in a folder and loads them into separate Pandas DataFrames.
         
