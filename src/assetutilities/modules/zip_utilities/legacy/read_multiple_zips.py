@@ -10,7 +10,7 @@ class ReadMultipleZips:
 
     def router(self,cfg):
 
-        if cfg['zip']['mode'] == 'multiple':
+        if cfg['zip']['files'] == 'multiple':
             dfs = self.multiple_zips_to_dataframes(cfg['zip_folderpath'], cfg['column_names'])
         return cfg
 
