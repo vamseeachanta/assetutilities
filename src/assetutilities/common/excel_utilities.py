@@ -1,5 +1,9 @@
 import os
 import excel2img
+import pandas as pd
+from openpyxl import load_workbook
+
+import win32api
 
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.utility import xl_rowcol_to_cell
@@ -32,6 +36,8 @@ class ExcelUtilities:
             data = self.get_data(cfg)
         if cfg["task"] == "excel_to_image":
             data = self.excel_to_image(cfg)
+        if cfg['task'] == 'csv_copy_to_excel':
+            data = self.csv_copy_to_excel(cfg)
 
         return cfg
 
@@ -91,3 +97,23 @@ class ExcelUtilities:
                                 cfg["Analysis"]["result_folder"], output_filename
                             )
                         excel2img.export_img(io, output_filename, "", sheet_range)
+
+    def csv_copy_to_excel(self, cfg):
+
+        inputs_csv = cfg['data']['groups']['input']['inputs_file']
+        results_csv = cfg['data']['groups']['input']['results_file']
+        target_file = cfg['data']['groups']['target']['file']
+
+        # Load the target Excel file
+        wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
+        sheet = wb["transform"] if "transform" in wb.sheetnames else wb.active
+        
+        # Read the CSV files into pandas DataFrames
+        df_inputs = pd.read_csv(inputs_csv)
+        df_results = pd.read_csv(results_csv)
+        
+        pass 
+        # Save the modified Excel file
+        output_file = cfg['data']['groups']['target']['output_filename']
+       
+

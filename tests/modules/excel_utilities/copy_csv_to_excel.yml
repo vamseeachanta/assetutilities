@@ -1,0 +1,22 @@
+basename: excel_utilities
+
+task: csv_copy_to_excel
+
+data:
+    groups:
+          input: 
+            inputs_file: docs\modules\excel_utilities\another_folder\inputs.csv
+            sheetname: inputs
+            results_file: docs\modules\excel_utilities\another_folder\results.csv
+            sheet_name: results
+            make_a_copy: True
+          target: 
+            file: docs\modules\excel_utilities\another_folder\target.xlsx
+            sheetname: transform
+            output_filename: target_updated.xlsx
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
