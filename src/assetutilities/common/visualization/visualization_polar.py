@@ -257,6 +257,10 @@ class VisualizationPolar:
         if set_rlabel_position is not None:
             ax.set_rlabel_position(set_rlabel_position)
 
+        set_theta_zero_location = plt_settings.get("set_theta_zero_location", None)
+        if set_theta_zero_location is not None:
+            ax.set_theta_zero_location(set_theta_zero_location)
+
         set_thetagrids = plt_settings.get("set_thetagrids", None)
         if set_thetagrids is not None:
             ax.set_thetagrids(set_thetagrids)
@@ -264,6 +268,18 @@ class VisualizationPolar:
         set_theta_zero_location = plt_settings.get("set_theta_zero_location", None)
         if set_theta_zero_location is not None:
             ax.set_theta_zero_location(set_theta_zero_location)
+
+        set_theta_direction = plt_settings.get("set_theta_direction", None)
+        if set_theta_direction is not None:
+            ax.set_theta_direction(set_theta_direction)
+
+        set_thetamin = plt_settings.get("set_thetamin", None)
+        if set_thetamin is not None:
+            ax.set_thetamin(set_thetamin)
+
+        set_thetamax = plt_settings.get("set_thetamax", None)
+        if set_thetamax is not None:
+            ax.set_thetamax(set_thetamax)
 
         grid = plt_settings.get("grid", True)
         ax.grid(grid)

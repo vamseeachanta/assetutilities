@@ -1,0 +1,41 @@
+basename: visualization
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: polar_scatter
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: False
+  file_name: allowable_wave_height_matplotlib
+  plt_save_extensions: [".png"]
+  title: Allowable Significant Wave Height (Hs)
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  set_theta_zero_location: W
+  set_theta_direction: 1
+  set_thetamin: 45
+  set_thetamax: 225
+  legend:
+    flag: True
+    label:
+      [vessel inline with product route, vessel rotation wrt. product route]
+    loc: best
+    prop: { family: Arial, size: 5 }
+
+data:
+  type: input
+  r:
+    - [0.5, 1, 2, 2.5, 3, 4]
+    - [0.5, 1, 2, 2.5, 3, 4]
+  theta:
+    - [35, 70, 120, 155, 205, 240]
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]

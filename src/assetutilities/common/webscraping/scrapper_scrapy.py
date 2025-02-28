@@ -2,7 +2,7 @@
 import pandas as pd  # noqa
 import scrapy
 from scrapy import FormRequest
-from scrapy.crawler import CrawlerProcess
+#from scrapy.crawler import CrawlerProcess
 from scrapy.utils.response import (  # noqa useful while program is running
     open_in_browser,
 )
@@ -33,14 +33,14 @@ class SpiderScrapy(scrapy.Spider):
             'REQUEST_FINGERPRINTER_IMPLEMENTATION': '2.7'
         }
 
-        process = CrawlerProcess(settings=settings)
+        #process = CrawlerProcess(settings=settings)
  
         input_settings = cfg['input_settings']
         for input_item in cfg['input']:
             input_item = {**input_settings, **input_item}
-            process.crawl(SpiderScrapy, input_item=input_item, cfg=cfg)
+            #process.crawl(SpiderScrapy, input_item=input_item, cfg=cfg)
 
-        process.start()
+        #process.start()
 
     def parse(self, response):
         
