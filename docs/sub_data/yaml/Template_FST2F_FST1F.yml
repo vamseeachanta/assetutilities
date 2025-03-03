@@ -1,0 +1,61 @@
+﻿%YAML 1.1
+# Type: Model
+# Program: OrcaFlex 11.2d
+# File: 
+# Created: 9:59 AM on 11/30/2022
+# User: Jun.Cheng
+# Machine: CGNP9Z2
+---
+BaseFile: %basefile%
+VesselTypes:
+    Strt1_FST2type:
+        Draughts:
+            Full:
+                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST2F.yml
+                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST2F.yml
+    Strt2_FST1type:
+        Draughts:
+            Full:
+                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST1F.yml
+                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST1F.yml
+includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Mooring_stiffness.yml
+General:
+  StaticsMinDamping: 200
+  StageDuration[1]: 1000
+Environment:
+  WaveTrains:
+    Wave1:
+      WaveDirection: %wavedir%
+      WaveGamma: %wavegamma%
+      WaveHs: %wavehs%
+      WaveTp: %wavetp%
+  RefCurrentSpeed: %currspeed%
+  RefCurrentDirection: %currdir%
+  WindSpeed: %windspeed%
+  WindDirection: %winddir%
+Constraints:
+  Jacket1_X_Springs:
+    TranslationalStiffness: %xs1%
+    TranslationalDamping: %xd1%
+  Jacket1_Y_Springs:
+    TranslationalStiffness: %ys1%
+    TranslationalDamping: %yd1%
+  Jacket2_X_Springs:
+    TranslationalStiffness: %xs2%
+    TranslationalDamping: %xd2%
+  Jacket2_Y_Springs:
+    TranslationalStiffness: %ys2%
+    TranslationalDamping: %yd2%
+  Jacket3_X_Springs:
+    TranslationalStiffness: %xs3%
+    TranslationalDamping: %xd3%
+  Jacket3_Y_Springs:
+    TranslationalStiffness: %ys3%
+    TranslationalDamping: %yd3%
+  Jacket4_X_Springs:
+    TranslationalStiffness: %xs4%
+    TranslationalDamping: %xd4%
+  Jacket4_Y_Springs:
+    TranslationalStiffness: %ys4%
+    TranslationalDamping: %yd4%
+...
