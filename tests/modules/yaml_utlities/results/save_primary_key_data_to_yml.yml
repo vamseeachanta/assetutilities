@@ -1,0 +1,76 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  library: assetutlities
+  basename: yaml_utlities
+  default:
+    log_level: INFO
+    config:
+      overwrite:
+        output: true
+  file_management:
+    flag: true
+    files:
+      files_in_current_directory:
+        flag: false
+        auto_read: true
+        directory: yml
+        file_extensions:
+        - yml
+        filename_pattern: ~
+      output_directory: ~
+    input_files:
+      yml:
+      - !!python/object/apply:pathlib.WindowsPath
+        - c:\
+        - Users
+        - Sk Samdan
+        - Desktop
+        - github
+        - assetutilities
+        - tests
+        - modules
+        - yaml_utlities
+        - yml
+        - SZ_trim_QA.yml
+  analysis:
+    save_primary_key_data:
+      flag: true
+      by: primary_key
+  files:
+    file_name: zip_by_stem.yml
+    file_path: tests\modules\reportgen\reportgen-cfg-20in-docx.yml
+    output_directory: docs\sub_data\yaml\primary_key_data
+  Analysis:
+    basename: yaml_utlities
+    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+    file_name: save_primary_key_data_to_yml
+    file_name_for_overwrite: save_primary_key_data_to_yml
+    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-03-04 19:04:25.384112
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\save_primary_key_data_to_yml.yml
+    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - yaml_utlities
+    - yml
+    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - yaml_utlities

@@ -1,0 +1,17 @@
+basename: yaml_utlities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+analysis:
+  save_primary_key_data:
+    flag: True
+    by: primary_key
+
+files:
+  file_name: zip_by_stem.yml
+  file_path: tests\modules\reportgen\reportgen-cfg-20in-docx.yml
+  output_directory: docs\sub_data\yaml\primary_key_data

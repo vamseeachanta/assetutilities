@@ -1,5 +1,6 @@
 # Standard library imports
 import importlib.util
+import logging
 import os
 import pkgutil
 import types
@@ -9,6 +10,8 @@ from pathlib import Path
 # Third party imports
 import yaml
 from deepdiff import DeepDiff
+
+from loguru import logger
 
 # Reader imports
 from assetutilities.common.data import ReadData
@@ -45,8 +48,10 @@ class WorkingWithYAML:
         pass
 
     def router(self, cfg):
-        if cfg['yml_analysis']['divide']['flag']:
+        if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['flag']:
             self.divide_yaml_files(cfg)
+        elif cfg['analysis']['save_primary_key_data']['flag']:
+            self.primary_keys_data_into_individual_yaml_files(cfg)
 
         return cfg
 
@@ -66,10 +71,10 @@ class WorkingWithYAML:
                 with open(updateYml, "r") as ymlfile:
                     cfgUpdateValues = yaml.safe_load(ymlfile)
                 #  Convert to logs
-                # print(cfgUpdateValues)
+                # logger.info(cfgUpdateValues)
                 cfg = update_deep(cfg, cfgUpdateValues)
             except:
-                print(
+                logger.info(
                     "Update Input file could not be loaded successfully. Running program default values"
                 )
 
@@ -108,7 +113,7 @@ class WorkingWithYAML:
         Analyze Yaml file
         '''
         file_name_content = ymlInput(file_name)
-        print(file_name_content.keys())
+        logger.info(file_name_content.keys())
 
     def compare_yaml_root_keys(self, file_name1, file_name2):
         '''
@@ -120,10 +125,10 @@ class WorkingWithYAML:
         file_name1_keys = file_name1_content.keys()
         file_name2_keys = file_name2_content.keys()
         if file_name1_keys == file_name2_keys:
-            print("Yaml files have the same root keys")
+            logger.info("Yaml files have the same root keys")
         else:
-            print(f"The root keys for {file_name1}: {file_name1_keys}")
-            print(f"The root keys for {file_name2}: {file_name2_keys}")
+            logger.info(f"The root keys for {file_name1}: {file_name1_keys}")
+            logger.info(f"The root keys for {file_name2}: {file_name2_keys}")
 
     def compare_yaml_files_deepdiff(self, cfg):
         '''
@@ -135,7 +140,7 @@ class WorkingWithYAML:
         file_name2_content = ymlInput(file_name2)
         file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
         if file_diff == {}:  # if there is no difference
-            print("Yaml files are the same")
+            logger.info("Yaml files are the same")
         else:
             # get file root directory
             file_directory = os.path.dirname(file_name1)
@@ -163,7 +168,7 @@ class WorkingWithYAML:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
         if file_diff == {}:  # if there is no difference
-            print("Yaml files are the same")
+            logger.info("Yaml files are the same")
         else:
             # get file root directory
             file_directory = os.path.dirname(file_name1)
@@ -191,7 +196,7 @@ class WorkingWithYAML:
                 f"{file_directory}/wwyaml_{uniquebasename}_values_changed",
             )
 
-            print(
+            logger.info(
                 "Yaml files are different. See wwyaml files saved in the current file directory"
             )
 
@@ -270,8 +275,36 @@ class WorkingWithYAML:
 
             with open(output_file_path, "w") as f:
                 yaml.dump(file_name_content[primary_key], f, default_flow_style=False)
-                print(f"{primary_key_clean}.yml has been saved in the current file directory")
+                logger.info(f"{primary_key_clean}.yml has been saved in the current file directory")
 
             output_file_name_array.append({'data': output_file_path})
         
         return output_file_name_array
+    
+    def primary_keys_data_into_individual_yaml_files(self, cfg):
+        '''
+        saves primary key data into individual yaml files with primary_key as the file name
+        '''
+
+        input_yaml_file = cfg["files"]["file_path"]
+        output_dir = cfg['files']['output_directory']
+
+        with open(input_yaml_file, 'r') as file:
+            data = yaml.safe_load(file)
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        for primary_key, value in data.items():
+            # Skip if the primary key has single value
+            if not isinstance(value, (dict , list)):
+                logging.info(f"Skipping primary key {primary_key} (single value)")
+                continue
+
+            # Save nested data to a file
+            file_name = f"{primary_key}.yaml"
+            file_path = os.path.join(output_dir, file_name)
+            with open(file_path, 'w') as file:
+                yaml.dump({primary_key: value}, file, default_flow_style=False)
+            logging.info(f"Saved primary key {primary_key} data to {file_path}")
+

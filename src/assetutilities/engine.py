@@ -1,5 +1,6 @@
 # Standard library imports
 import logging
+from loguru import logger
 import os
 import sys
 
@@ -45,7 +46,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     else:
         cfg_base = cfg
 
-    logging.info(f"{basename}, application ... START")
+    logger.info(f"{basename}, application ... START")
 
     if basename in ["excel_utilities"]:
         # Reader imports
@@ -92,7 +93,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         ddfu = DownloadDataFromURL()
         cfg_base = ddfu.router(cfg_base)
 
-    elif cfg["basename"] == "yaml_utlities":
+    elif cfg["basename"] == "yaml_utlities" or cfg["basename"] == "yml_utilities":
         cfg_base = wwyaml.router(cfg_base)
 
     elif cfg["basename"] == "reportgen":
@@ -109,7 +110,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     if cfg is None:
         save_application_cfg(cfg_base=cfg_base)
 
-    logging.info(f"{basename}, application ... END")
+    logger.info(f"{basename}, application ... END")
     save_cfg(cfg_base=cfg_base)
 
     return cfg_base
