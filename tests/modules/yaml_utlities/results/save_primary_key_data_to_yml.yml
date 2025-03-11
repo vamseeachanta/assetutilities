@@ -22,10 +22,16 @@ dictitems:
     input_files:
       yml:
       - !!python/object/apply:pathlib.WindowsPath
-        - c:\
-        - Users
-        - Sk Samdan
-        - Desktop
+        - k:\
+        - github
+        - assetutilities
+        - tests
+        - modules
+        - yaml_utlities
+        - yml
+        - FST2F_FST1F_universal_LWL_r09.yml
+      - !!python/object/apply:pathlib.WindowsPath
+        - k:\
         - github
         - assetutilities
         - tests
@@ -43,21 +49,18 @@ dictitems:
     output_directory: docs\sub_data\yaml\primary_key_data
   Analysis:
     basename: yaml_utlities
-    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
     file_name: save_primary_key_data_to_yml
     file_name_for_overwrite: save_primary_key_data_to_yml
-    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
-    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-03-06 09:02:03.875449
+    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
+    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-03-11 11:25:00.433813
     cfg_array_file_names: ~
     DefaultInputFile: ~
-    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\save_primary_key_data_to_yml.yml
-    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\save_primary_key_data_to_yml.yml
+    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
     file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - c:\
-    - Users
-    - Sk Samdan
-    - Desktop
+    - k:\
     - github
     - assetutilities
     - tests
@@ -65,10 +68,7 @@ dictitems:
     - yaml_utlities
     - yml
     file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - c:\
-    - Users
-    - Sk Samdan
-    - Desktop
+    - k:\
     - github
     - assetutilities
     - tests
