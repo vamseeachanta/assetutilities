@@ -100,20 +100,22 @@ class ExcelUtilities:
 
     def csv_copy_to_excel(self, cfg):
 
-        inputs_csv = cfg['data']['groups']['input']['inputs_file']
-        results_csv = cfg['data']['groups']['input']['results_file']
-        target_file = cfg['data']['groups']['target']['file']
+        groups = cfg['data']['groups']
+        for group in groups:
+            inputs_csv = group['input']['filename']
+            target_file = group['target']['filename']
+            sheet_name = group['target']['sheet_name']
+            
+            df = pd.read_csv(inputs_csv)
 
-        # Load the target Excel file
-        wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
-        sheet = wb["transform"] if "transform" in wb.sheetnames else wb.active
-        
-        # Read the CSV files into pandas DataFrames
-        df_inputs = pd.read_csv(inputs_csv)
-        df_results = pd.read_csv(results_csv)
-        
-        pass 
-        # Save the modified Excel file
-        output_file = cfg['data']['groups']['target']['output_filename']
-       
+            # Load the target Excel file
+            wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
+            # sheet = wb["transform"] if "transform" in wb.sheetnames else wb.active
+
+            with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
+            # Save the modified Excel file
+            # output_file = cfg['data']['groups']['target']['output_filename']
+            # wb.save(output_file)
+            # wb.close()
 

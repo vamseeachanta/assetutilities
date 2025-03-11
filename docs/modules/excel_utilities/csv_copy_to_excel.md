@@ -9,9 +9,7 @@ data:
             filename: inputs.csv
           target: 
             filename: target.xlsx
-            sheetname: inputs
-            make_a_copy: True
-            output_filename: target_updated.xlsx
+            sheet_name: inputs
 
 <code>
     if 'basename' in cfg:

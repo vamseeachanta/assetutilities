@@ -1,19 +1,26 @@
+meta:
+  basename: excel_utilities
+  library: assetutilities
+
 basename: excel_utilities
 
 task: csv_copy_to_excel
 
 data:
+    input_format: csv
     groups:
-          input: 
-            inputs_file: docs\modules\excel_utilities\another_folder\inputs.csv
-            sheetname: inputs
-            results_file: docs\modules\excel_utilities\another_folder\results.csv
-            sheet_name: results
-            make_a_copy: True
-          target: 
-            file: docs\modules\excel_utilities\another_folder\target.xlsx
-            sheetname: transform
-            output_filename: target_updated.xlsx
+      -
+        input: 
+          filename: docs/modules/excel_utilities/another_folder/inputs.csv
+        target: 
+          filename: docs/modules/excel_utilities/another_folder/target.xlsx
+          sheet_name: inputs
+      -
+        input: 
+          filename: docs/modules/excel_utilities/another_folder/results.csv
+        target: 
+          filename: docs/modules/excel_utilities/another_folder/target.xlsx
+          sheet_name: results
 
 default:
   log_level: DEBUG
