@@ -17,37 +17,43 @@ dictitems:
         directory: yml
         file_extensions:
         - yml
-        filename_pattern: _QA
+        filename_pattern: LWL
       output_directory: ~
     input_files:
       yml:
       - !!python/object/apply:pathlib.WindowsPath
-        - k:\
+        - c:\
+        - Users
+        - Sk Samdan
+        - Desktop
         - github
         - assetutilities
         - tests
         - modules
         - yaml_utlities
         - yml
-        - SZ_trim_QA.yml
+        - FST2F_FST1F_universal_LWL_r09.yml
   yml_analysis:
     divide:
       flag: true
       by: primary_key
   Analysis:
     basename: yaml_utlities
-    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
+    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
     file_name: divide_yaml_file_by_primary_key
     file_name_for_overwrite: divide_yaml_file_by_primary_key
-    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-03-11 11:32:02.225180
+    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-03-12 15:46:37.643956
     cfg_array_file_names: ~
     DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
-    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
+    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
+    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
     file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
     - github
     - assetutilities
     - tests
@@ -55,7 +61,10 @@ dictitems:
     - yaml_utlities
     - yml
     file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
     - github
     - assetutilities
     - tests
@@ -64,6 +73,13 @@ dictitems:
   yaml_utlities:
     divide:
       groups:
-      - - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_BaseFile.yml
-        - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_General.yml
-        - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_Environment.yml
+      - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_General.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_VariableData.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Environment.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_VesselTypes.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_LineTypes.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Vessels.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Lines.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_MultibodyGroups.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Constraints.yml
+        - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Groups.yml

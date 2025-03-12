@@ -1,0 +1,28 @@
+BuoysIncludedInStatics: All
+DynamicsSolutionMethod: Implicit time domain
+FirstStage: 0
+ImplicitConstantMaxNumOfIterations: 150
+ImplicitConstantTimeStep: 0.1
+ImplicitUseVariableTimeStep: false
+JacobianBufferingPolicy: 1
+JacobianPerturbationFactor: 0
+LineStaticsStep1Policy: All lines included
+LineStaticsStep2Policy: Solve coupled systems
+LogPrecision: Single
+LogStartTime: ~
+RampFinishTime: ~
+RampStartTime: ~
+RestartStateRecordingPeriodicCount: 0
+RestartStateRecordingTest: ~
+StageDuration:
+- 20
+- 10.8e3
+StartTime: ~
+StaticsMaxDamping: 2000
+StaticsMaxIterations: 26000
+StaticsMinDamping: 15
+TargetLogSampleInterval: 0.1
+TimeHistoryImportFrom: ~
+TimeHistoryImportTo: ~
+UnitsSystem: SI
+WholeSystemStaticsEnabled: true

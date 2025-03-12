@@ -1,0 +1,60 @@
+- CalculateHydrostaticStiffnessAnglesBy: Subtraction, legacy
+  CalculationMode: Filtering
+  Connection: Free
+  Draught: Full
+  IncludeAddedMassAndDamping: true
+  IncludeAppliedLoads: true
+  IncludeCurrentLoad: true
+  IncludeManoeuvringLoad: false
+  IncludeOtherDamping: true
+  IncludeSumFrequencyLoad: false
+  IncludeWaveDriftDamping: true
+  IncludeWaveDriftLoad2ndOrder: true
+  IncludeWaveLoad1stOrder: true
+  IncludeWindLoad: true
+  IncludedInStatics: 6 DOF
+  InitialPosition:
+  - 208.397
+  - 0.248178593
+  - -11.661
+  Length: ~
+  Name: FST1
+  Orientation:
+  - 0
+  - 0
+  - 180
+  PrimaryMotion: Calculated (6 DOF)
+  PrimaryMotionDividingPeriod: 30
+  PrimaryMotionIsTreatedAs: Both low and wave frequency
+  SuperimposedMotion: None
+  VesselType: Strt2_FST1type
+- CalculateHydrostaticStiffnessAnglesBy: Subtraction, legacy
+  CalculationMode: Filtering
+  Connection: Free
+  Draught: Full
+  IncludeAddedMassAndDamping: true
+  IncludeAppliedLoads: true
+  IncludeCurrentLoad: true
+  IncludeManoeuvringLoad: false
+  IncludeOtherDamping: true
+  IncludeSumFrequencyLoad: false
+  IncludeWaveDriftDamping: true
+  IncludeWaveDriftLoad2ndOrder: true
+  IncludeWaveLoad1stOrder: true
+  IncludeWindLoad: true
+  IncludedInStatics: 6 DOF
+  InitialPosition:
+  - -208.397
+  - 0
+  - -11.8
+  Length: ~
+  Name: FST2
+  Orientation:
+  - 0
+  - 0
+  - 0
+  PrimaryMotion: Calculated (6 DOF)
+  PrimaryMotionDividingPeriod: 30
+  PrimaryMotionIsTreatedAs: Both low and wave frequency
+  SuperimposedMotion: None
+  VesselType: Strt1_FST2type

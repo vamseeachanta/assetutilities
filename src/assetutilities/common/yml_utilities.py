@@ -1,6 +1,6 @@
 # Standard library imports
 import importlib.util
-import logging
+#import logging
 import os
 import pkgutil
 import types
@@ -50,8 +50,6 @@ class WorkingWithYAML:
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['flag']:
             self.divide_yaml_files(cfg)
-        elif cfg['analysis']['save_primary_key_data']['flag']:
-            self.primary_keys_data_into_individual_yaml_files(cfg)
 
         return cfg
 
@@ -63,7 +61,7 @@ class WorkingWithYAML:
             try:
                 cfg = yaml.safe_load(ymlfile)
             except yaml.composer.ComposerError:
-                cfg = yml_read_stream(defaultYml)
+                cfg = self.yml_read_stream(defaultYml)
 
         if updateYml != None:
             #  Update values file
@@ -280,31 +278,4 @@ class WorkingWithYAML:
             output_file_name_array.append({'data': output_file_path})
         
         return output_file_name_array
-    
-    def primary_keys_data_into_individual_yaml_files(self, cfg):
-        '''
-        saves primary key data into individual yaml files with primary_key as the file name
-        '''
-
-        input_yaml_file = cfg["files"]["file_path"]
-        output_dir = cfg['files']['output_directory']
-
-        with open(input_yaml_file, 'r') as file:
-            data = yaml.safe_load(file)
-
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        for primary_key, value in data.items():
-            # Skip if the primary key has single value
-            if not isinstance(value, (dict , list)):
-                logging.info(f"Skipping primary key {primary_key} (single value)")
-                continue
-
-            # Save nested data to a file
-            file_name = f"{primary_key}.yaml"
-            file_path = os.path.join(output_dir, file_name)
-            with open(file_path, 'w') as file:
-                yaml.dump({primary_key: value}, file, default_flow_style=False)
-            logging.info(f"Saved primary key {primary_key} data to {file_path}")
 

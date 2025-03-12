@@ -17,12 +17,15 @@ dictitems:
         directory: yml
         file_extensions:
         - yml
-        filename_pattern: ~
+        filename_pattern: LWL
       output_directory: ~
     input_files:
       yml:
       - !!python/object/apply:pathlib.WindowsPath
-        - k:\
+        - c:\
+        - Users
+        - Sk Samdan
+        - Desktop
         - github
         - assetutilities
         - tests
@@ -30,37 +33,27 @@ dictitems:
         - yaml_utlities
         - yml
         - FST2F_FST1F_universal_LWL_r09.yml
-      - !!python/object/apply:pathlib.WindowsPath
-        - k:\
-        - github
-        - assetutilities
-        - tests
-        - modules
-        - yaml_utlities
-        - yml
-        - SZ_trim_QA.yml
   analysis:
     save_primary_key_data:
       flag: true
       by: primary_key
-  files:
-    file_name: reportgen-cfg-20in-docx.yml
-    file_path: tests\modules\reportgen\reportgen-cfg-20in-docx.yml
-    output_directory: docs\sub_data\yaml\primary_key_data
   Analysis:
     basename: yaml_utlities
-    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
+    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
     file_name: save_primary_key_data_to_yml
     file_name_for_overwrite: save_primary_key_data_to_yml
-    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-03-11 11:25:00.433813
+    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-03-12 15:34:32.210561
     cfg_array_file_names: ~
     DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\save_primary_key_data_to_yml.yml
-    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
+    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\save_primary_key_data_to_yml.yml
+    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
     file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
     - github
     - assetutilities
     - tests
@@ -68,7 +61,10 @@ dictitems:
     - yaml_utlities
     - yml
     file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
     - github
     - assetutilities
     - tests
