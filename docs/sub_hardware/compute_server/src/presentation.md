@@ -44,55 +44,36 @@
 ```
 
 ---
-# FSTs Only, General Arrangement
+# Cloud vs. In-house (Costing)
 
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
+Key Factors in Pricing Comparison:
 
-![axes](./plots/fsts.png)
-</div>
+- Compute Costs: Differences in virtual machine (VM) pricing, instance types, and reserved instances.
 
-```markdown
-- strut, jacket and FST numbering shown
-- FST local axes shown
-```
+- Storage Costs: Variations in block storage, object storage, and file storage pricing.
 
----
-# Methodology
-- TBA
+- Data Transfer Costs: Charges for data ingress and egress, which can vary significantly between providers.
+
+- Support and Licensing: Differences in support plans and licensing models.
 
 ---
-# Methodology - Analysis
+# In-house (Rack vs. Desktop). IT support etc.
 
-- TBA
-
-```markdown
-- TBA
-- TBA
-```
 
 ---
-# Methodology - Result Interpretation
+# Comparison of costs
 
-- Timetrace plots are actual values (not statistical)
-  - Strut positive tension is tension and negative tension is compression i.e. axes independent values
-  - Jacket forces are in global X and Y direction
-  - FST forces are in FST local axes
-- Radial/rose  plots - ONLY positive values used
-  - Objective: 
-    - For understanding value change with direction. 
-    - The increase/decrease help determine the max force directions.
-  - Static values: absolute values
-  - Dynamic values: absolute maximum i.e. max (abs(max), abs(min))
+- TBA
 
-```markdown
-- Applicable details will be added to each slide
-```
+
+---
+# Conclusions and Recommendations
+
+
 
 ---
 <!-- _class: transition -->
 
-# 
 
 ## 100 year Analysis Results
 
