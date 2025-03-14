@@ -7,7 +7,7 @@ basename: excel_utilities
 task: csv_copy_to_excel
 
 data:
-    input_format: csv
+    input_format: csv # clear_existing_data in a sheet
     groups:
       -
         input: 

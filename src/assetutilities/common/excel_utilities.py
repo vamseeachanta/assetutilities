@@ -110,12 +110,12 @@ class ExcelUtilities:
 
             # Load the target Excel file
             wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
-            # sheet = wb["transform"] if "transform" in wb.sheetnames else wb.active
-
+            worksheet = wb[sheet_name]
+            for row in worksheet['A1:BZ1000']:
+                for cell in row:
+                    cell.value = None
+            wb.save(target_file)
+            
             with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
                 df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
-            # Save the modified Excel file
-            # output_file = cfg['data']['groups']['target']['output_filename']
-            # wb.save(output_file)
-            # wb.close()
 
