@@ -2,6 +2,7 @@
 import importlib.util
 #import logging
 import os
+import re
 import pkgutil
 import types
 from collections.abc import Mapping
@@ -82,15 +83,41 @@ class WorkingWithYAML:
         stream_dict = {}
         try:
             with open(yaml_file_name, "r") as ymlfile:
-                docs = yaml.safe_load_all(ymlfile)
+                yaml_content = ymlfile.read()
+            
+                # Clean the YAML content
+                cleaned_yaml = self.clean_yaml_file(yaml_content)
+                docs = yaml.safe_load_all(cleaned_yaml)
                 if type(docs) is types.GeneratorType:
                     for doc in docs:
                         if type(doc) is dict:
                             stream_dict = update_deep(stream_dict, doc)
-        except:
-            raise Exception("Stopping Program")
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error: {e}")                    
+        except Exception as e:
+            raise Exception("Stopping Program due to some inefficient data in the YAML file")
 
         return stream_dict
+    
+    def clean_yaml_line(self,line):
+        """
+        Cleans a single line of YAML by removing invalid tokens or characters.
+        """
+        # Remove lines that are comments or contain invalid tokens
+        if '%' in line:
+            line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
+        return line
+
+    def clean_yaml_file(self,yaml_content):
+        """
+        Cleans the entire YAML content by removing invalid lines and tokens.
+        """
+        cleaned_lines = []
+        for line in yaml_content.splitlines():
+            cleaned_line = self.clean_yaml_line(line)
+            if cleaned_line:
+                cleaned_lines.append(cleaned_line)
+        return '\n'.join(cleaned_lines)
 
     def update_deep(self, d, u):
         for k, v in u.items():
@@ -258,7 +285,6 @@ class WorkingWithYAML:
         '''
         file_name_content = ymlInput(file_name)
     
-
         primary_keys = list(file_name_content.keys())
 
         file_name_stem = Path(file_name).stem
@@ -271,8 +297,11 @@ class WorkingWithYAML:
             output_file_name = f"{file_name_stem}_{primary_key_clean}.yml"
             output_file_path = os.path.join(result_folder, output_file_name)
 
+            # Create a dictionary to add primary key to the output file 
+            data_to_write = {primary_key: file_name_content[primary_key]}
+
             with open(output_file_path, "w") as f:
-                yaml.dump(file_name_content[primary_key], f, default_flow_style=False)
+                yaml.dump(data_to_write, f, default_flow_style=False, Dumper=yaml.Dumper, encoding='utf-8-sig')
                 logger.info(f"{primary_key_clean}.yml has been saved in the current file directory")
 
             output_file_name_array.append({'data': output_file_path})
