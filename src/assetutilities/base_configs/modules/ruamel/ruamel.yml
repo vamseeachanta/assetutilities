@@ -1,15 +1,11 @@
-basename: yaml_utlities
+library: assetutlities
+basename: ruamel
 
 default:
   log_level: INFO
   config:
     overwrite:
       output: True
-
-yml_analysis:
-  divide:
-    flag: True
-    by: primary_key
 
 file_management:
   flag: True
@@ -20,5 +16,5 @@ file_management:
       auto_read: True
       directory: yml
       file_extensions: [yml]
-      filename_pattern: SS
+      filename_pattern: NULL
     output_directory: NULL

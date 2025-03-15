@@ -18,6 +18,7 @@ from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
 from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
+from assetutilities.common.ruamel import RuamelYaml
 
 library_name = "assetutilities"
 
@@ -25,6 +26,7 @@ de = DataExploration()
 fm = FileManagement()
 save_data = SaveData()
 wwyaml = WorkingWithYAML()
+ruamel = RuamelYaml()
 
 
 def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) -> dict:
@@ -95,6 +97,8 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
 
     elif cfg["basename"] == "yaml_utlities" or cfg["basename"] == "yml_utilities":
         cfg_base = wwyaml.router(cfg_base)
+    elif cfg["basename"] == "ruamel":
+        cfg_base = ruamel.router(cfg_base)
 
     elif cfg["basename"] == "reportgen":
         from assetutilities.common.reportgen import reportgen
