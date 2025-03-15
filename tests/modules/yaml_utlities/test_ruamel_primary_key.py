@@ -42,7 +42,7 @@ def run_process(input_file, expected_result):
 
 
 def test_run_process():
-    input_file = "ruamel_test_primary_key.yml"
+    input_file = "ruamel_primary_key_delete.yml"
 
     # pytest_output_file = "results/divide_yaml_file_by_primary_key_pytest.yml"
     # pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)

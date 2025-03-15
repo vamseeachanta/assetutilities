@@ -53,8 +53,7 @@ print(yaml_str)
 ---
 
 
-
-> **Note:** PyYAML is not suitable for well-formatting main YAML file data into new output YAML files; `ruamel.yaml` is best for it's advanced level of handling yml complex files.
+> **Note:** PyYAML is not suitable for well-formatting main YAML file data into new output YAML files; `ruamel.yaml` is best for it's advanced level of handling yml complex files without even explicitly including conditions.
 
 ---
 
@@ -62,21 +61,22 @@ print(yaml_str)
 
 | Feature                     | PyYAML                   | Ruamel.yaml |
 |-----------------------------|:------------------------:|:------------:|
-| Precise Indentation        | ❌                        | ✅            |
-| Maintains Key Order        | ✅ (with `sort_keys=False`) | ✅            |
-| Preserve comments            | ❌                        | ✅            |
-| Controls Quoting Style      | ❌                        | ✅            |
+| Precise Indentation        | ❌                        | ✅          |
+| Maintains Key Order        | ✅ (with `sort_keys=False`) | ✅        |
+| Preserve comments            | ❌                        | ✅        |
+| Controls Quoting Style      | ❌                        | ✅         |
 
 ---
 
-### ruamel
+### ruamel.yml
 
-Since PyYAML does not provide fine-grained control over indentation, you should use ruamel.yaml instead , 
+ruamel is very powerful and advanced parsing library for complex yml files.
+
+Since PyYAML does not provide fine-grained control over indentation ,
 This library allows you to maintain the exact structure and indentation from the original YAML file.
 
 ```python
 pip install ruamel.yaml
-
 ```
 
 ```python
@@ -91,7 +91,10 @@ with open("main.yml", "r") as file:
     data = yaml.load(file)
 
 # Save it back to a new file while preserving formatting
-with open("output.yml", "w") as file:
+result_folder = cfg['Analysis']['result_folder']
+output_file_name = "output.yml"
+output_file_path = os.path.join(result_folder, output_file_name)
+with open(output_file_path, "w") as file:
     yaml.dump(data, file)
 ```
 

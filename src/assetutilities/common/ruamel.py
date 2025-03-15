@@ -2,6 +2,8 @@ import os
 from ruamel.yaml import YAML
 
 yaml = YAML()
+yaml.preserve_quotes = True  # Keeps quotes if present 
+yaml.allow_duplicate_keys = True  # Allows duplicate keys in the YAML file
 yaml.indent(mapping=2, sequence=4, offset=2) 
 
 class RuamelYaml:
@@ -11,6 +13,7 @@ class RuamelYaml:
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['flag']:
             self.divide_yaml_files(cfg)
+        return cfg
     
     def divide_yaml_files(self, cfg):
         yml_files = cfg['file_management']['input_files']['yml']
@@ -29,7 +32,7 @@ class RuamelYaml:
         with open(file_name) as file:
             data = yaml.load(file)
         
-        output_file_name = "primary_key_clean.yml"
+        output_file_name = "primary_key_output.yml"
         output_file_path = os.path.join(result_folder, output_file_name)
         # Save it back to a new file while preserving formatting
         with open(output_file_path, "w") as f:

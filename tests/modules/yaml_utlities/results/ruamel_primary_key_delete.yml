@@ -1,0 +1,72 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  library: assetutlities
+  basename: ruamel
+  default:
+    log_level: INFO
+    config:
+      overwrite:
+        output: true
+  file_management:
+    flag: true
+    files:
+      files_in_current_directory:
+        flag: false
+        auto_read: true
+        directory: yml
+        file_extensions:
+        - yml
+        filename_pattern: SS
+      output_directory: ~
+    input_files:
+      yml:
+      - !!python/object/apply:pathlib.WindowsPath
+        - c:\
+        - Users
+        - Sk Samdan
+        - Desktop
+        - github
+        - assetutilities
+        - tests
+        - modules
+        - yaml_utlities
+        - yml
+        - test_SS_prim_key_delete.yml
+  yml_analysis:
+    divide:
+      flag: true
+      by: primary_key
+  Analysis:
+    basename: ruamel
+    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+    file_name: ruamel_primary_key_delete
+    file_name_for_overwrite: ruamel_primary_key_delete
+    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-03-15 16:13:32.664160
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\ruamel_primary_key_delete.yml
+    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - yaml_utlities
+    - yml
+    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
+    - c:\
+    - Users
+    - Sk Samdan
+    - Desktop
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - yaml_utlities
