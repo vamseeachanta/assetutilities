@@ -11,15 +11,15 @@ data:
     groups:
       -
         input: 
-          filename: docs/modules/excel_utilities/another_folder/inputs.csv
+          filename: tests/modules/excel_utilities/input_data/inputs.csv
         target: 
-          filename: docs/modules/excel_utilities/another_folder/target.xlsx
+          filename: tests/modules/excel_utilities/input_data/target.xlsx
           sheet_name: inputs
       -
         input: 
-          filename: docs/modules/excel_utilities/another_folder/results.csv
+          filename: tests/modules/excel_utilities/input_data/results.csv
         target: 
-          filename: docs/modules/excel_utilities/another_folder/target.xlsx
+          filename: tests/modules/excel_utilities/input_data/target.xlsx
           sheet_name: results
 
 default:

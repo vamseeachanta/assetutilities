@@ -301,7 +301,7 @@ class WorkingWithYAML:
             data_to_write = {primary_key: file_name_content[primary_key]}
 
             with open(output_file_path, "w") as f:
-                yaml.dump(data_to_write, f, default_flow_style=False, Dumper=yaml.Dumper, encoding='utf-8-sig')
+                yaml.dump(data_to_write, f, default_flow_style=False, encoding='utf-8-sig', sort_keys=False, indent=2)
                 logger.info(f"{primary_key_clean}.yml has been saved in the current file directory")
 
             output_file_name_array.append({'data': output_file_path})
