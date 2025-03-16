@@ -1,3 +1,42 @@
+### while loading yml file encountered below error 
+
+
+❗[ERROR] Exception has occurred: ScannerError ✖
+yaml.scanner.ScannerError: while scanning for the next token found character '%' that cannot start any token❗
+
+
+code fix :
+
+```python
+with open(file_name, "r", encoding='utf-8-sig') as file:
+    yaml_content = file.read()
+    
+    # Clean the YAML content
+    cleaned_yaml = self.clean_yaml_file(yaml_content)
+    
+    data = yaml.load(cleaned_yml)
+
+def clean_yaml_file(self,yaml_content):
+    """
+    Cleans the entire YAML content by removing invalid lines and tokens.
+    """
+    cleaned_lines = []
+    for line in yaml_content.splitlines():
+        cleaned_line = self.clean_yaml_line(line)
+        if cleaned_line:
+            cleaned_lines.append(cleaned_line)
+    return '\n'.join(cleaned_lines)
+
+def clean_yaml_line(self,line):
+    """
+    Cleans a single line of YAML by removing invalid tokens or characters.
+    """
+    if '%' in line:
+        line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
+    return line
+```
+
+
 # PyYaml
 
 PyYAML is a Python library that provides a set of tools for parsing YAML files.
@@ -59,7 +98,7 @@ print(yaml_str)
 
 ## PyYAML vs ruamel.yaml 
 
-| Feature                     | PyYAML                   | Ruamel.yaml |
+| Feature                     | PyYAML                   | ruamel.yaml |
 |-----------------------------|:------------------------:|:------------:|
 | Precise Indentation        | ❌                        | ✅          |
 | Maintains Key Order        | ✅ (with `sort_keys=False`) | ✅        |
@@ -101,8 +140,8 @@ with open(output_file_path, "w") as file:
 
 ## References
 
-<https://pyyaml.org/wiki/PyYAMLDocumentation>
-<https://yaml.dev/doc/ruamel.yaml/>
+- <https://pyyaml.org/wiki/PyYAMLDocumentation>
+- <https://yaml.dev/doc/ruamel.yaml/>
 
 
 

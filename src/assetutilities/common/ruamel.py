@@ -1,4 +1,5 @@
 import os
+import re
 from ruamel.yaml import YAML
 
 yaml = YAML()
@@ -28,12 +29,35 @@ class RuamelYaml:
 
         result_folder = cfg['Analysis']['result_folder']
        
-        # Read the original YAML file
-        with open(file_name) as file:
+        with open(file_name, "r", encoding='utf-8-sig') as file:
+            yaml_content = file.read()
+            
+            # Clean the YAML content
+            cleaned_yaml = self.clean_yaml_file(yaml_content)
+            
             data = yaml.load(file)
         
         output_file_name = "primary_key_output.yml"
         output_file_path = os.path.join(result_folder, output_file_name)
-        # Save it back to a new file while preserving formatting
-        with open(output_file_path, "w") as f:
+        
+        with open(output_file_path, "w",encoding='utf-8-sig') as f:
             yaml.dump(data, f)
+    
+    def clean_yaml_line(self,line):
+        """
+        Cleans a single line of YAML by removing invalid tokens or characters.
+        """
+        if '%' in line:
+            line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
+        return line
+
+    def clean_yaml_file(self,yaml_content):
+        """
+        Cleans the entire YAML content by removing invalid lines and tokens.
+        """
+        cleaned_lines = []
+        for line in yaml_content.splitlines():
+            cleaned_line = self.clean_yaml_line(line)
+            if cleaned_line:
+                cleaned_lines.append(cleaned_line)
+        return '\n'.join(cleaned_lines)
