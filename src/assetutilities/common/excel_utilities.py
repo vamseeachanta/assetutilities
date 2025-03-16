@@ -1,4 +1,5 @@
 import os
+import logging
 import excel2img
 import pandas as pd
 from openpyxl import load_workbook
@@ -119,3 +120,4 @@ class ExcelUtilities:
             with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
                 df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
 
+            logging.info(f"CSV data copied to Excel file: {target_file}")
