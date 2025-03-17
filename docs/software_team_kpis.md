@@ -1,3 +1,5 @@
+https://www.hyperact.co.uk/blog/product-development-blueprint
+
 key metrics for engineering director to track performance of software engineering team which owns multiple applications and consists of multiple scrum teams
 
 - **Velocity**: The number of story points completed in a sprint. This is a measure of how much work the team is able to complete in a sprint. It is important to track velocity over time to ensure that the team is not overcommitting or undercommitting in a sprint.
