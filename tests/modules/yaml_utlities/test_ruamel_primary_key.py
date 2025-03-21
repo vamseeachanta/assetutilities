@@ -8,8 +8,6 @@ from assetutilities.common.yml_utilities import ymlInput
 
 # Reader imports
 from assetutilities.engine import engine
-from assetutilities.common.yml_utilities import ymlInput
-from assetutilities.engine import engine
 from assetutilities.modules.test_utilities.test_utilities import TestUtilities
 
 colorama.init(autoreset=True)
