@@ -85,7 +85,8 @@ class FileConcatenate:
         return cfg
 
     def concatenate_files_2d_array(self, cfg):
-        for input_set in cfg["input"]:
+        for input_set_idx in range(0, len(cfg["input"])):
+            input_set = cfg["input"][input_set_idx]
             output_files = {"ext": [], "no_ext": []}
             output_dir = input_set.get("output_dir", None)
             if output_dir is None:
@@ -128,7 +129,7 @@ class FileConcatenate:
 
                 cfg = self.concatenate_one_set(cfg, file_array, output_filename_path)
 
-                batch_filename = self.prepare_custom_batch(cfg, input_set, set_2d_idx, output_files)
+            batch_filename = self.prepare_custom_batch(cfg, input_set, input_set_idx, output_files)
 
         return cfg, batch_filename
 
