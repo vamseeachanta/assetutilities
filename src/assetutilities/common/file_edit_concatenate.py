@@ -128,7 +128,7 @@ class FileConcatenate:
 
                 cfg = self.concatenate_one_set(cfg, file_array, output_filename_path)
 
-            batch_filename = self.prepare_custom_batch(input_set, output_files, cfg)
+                batch_filename = self.prepare_custom_batch(cfg, input_set, set_2d_idx, output_files)
 
         return cfg, batch_filename
 
