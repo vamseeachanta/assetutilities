@@ -37,7 +37,13 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         if cfg is None:
             raise ValueError("cfg is None")
 
-    basename = cfg["basename"]
+    if 'basename' in cfg:
+        basename = cfg["basename"]
+    elif 'meta' in cfg:
+        basename = cfg["meta"]["basename"]
+    else:
+        raise ValueError("basename not found in cfg")
+
     application_manager = ConfigureApplicationInputs(basename)
     application_manager.configure(cfg, library_name)
 

@@ -3,6 +3,8 @@ import logging
 import excel2img
 import pandas as pd
 from openpyxl import load_workbook
+import shutil
+
 
 import win32api
 
@@ -11,6 +13,7 @@ from xlsxwriter.utility import xl_rowcol_to_cell
 
 from assetutilities.common.data import ReadFromExcel
 from assetutilities.calculations.polynomial import Polynomial
+from assetutilities.common.utilities import is_file_valid_func
 
 
 rfe = ReadFromExcel()
@@ -103,10 +106,24 @@ class ExcelUtilities:
 
         groups = cfg['data']['groups']
         for group in groups:
+            analysis_root_folder = cfg['Analysis']['analysis_root_folder']
             inputs_csv = group['input']['filename']
+            is_file_valid, inputs_csv = is_file_valid_func(inputs_csv, analysis_root_folder)
+
+            template_file = group['target']['template']
+            is_file_valid, template_file = is_file_valid_func(template_file, analysis_root_folder)
+
             target_file = group['target']['filename']
+            is_file_valid, target_file = is_file_valid_func(target_file, analysis_root_folder)
+            if not is_file_valid:
+                target_file = os.path.join(analysis_root_folder, target_file)
+
             sheet_name = group['target']['sheet_name']
             
+            # Copy the template file to the target file
+            shutil.copy(template_file, target_file)
+            logging.debug(f"Template file copied to: {target_file}")
+
             df = pd.read_csv(inputs_csv)
 
             # Load the target Excel file
