@@ -98,9 +98,10 @@ I
 
 ### Recommendations
 
-- Understand the existing architecture
+- Understand Existing architecture
   - Rack and its capabilities
   - Flexibility in compute and hardware (Can we combine ANSYS03 and ANSYS04 to get 24 cores or more going?)
+
 
 ```markdown
 - Get dedicated desktop or add to rack? 
@@ -111,4 +112,7 @@ I
 
 # Way Forward
 
-TBA
+- Cloud is not an option due to First. Experience/skills of IT teams plays big role in success.
+- Understand Existing architecture and see if we can easily expand it
+- If shelling out 15K is an easy decision, Based on IT team's expertise and our existing hardware flexibility
+  - get dedicated desktop or add to rack ?
