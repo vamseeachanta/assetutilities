@@ -3,7 +3,6 @@
 <!-- Title Slide -->
 ## Analysis and Costing
 
-## Samdan Shaik
 
 <!-- Today's Date -->
 <!-- _class: date -->
@@ -18,9 +17,12 @@
 
 <!-- Slide for Introduction -->
 # Introduction
-- Computer Server is required for OrcaFlex to increase productivity
-- In-house vs. Cloud is compared
-- IT requirements and Costing is also compared
+- Compute Server is required for OrcaFlex to increase productivity
+- Given the license cost, having a dedicated server is cost-effective for running multiple simulations
+- This presentation will cover the following:
+  - OrcaFlex vs. Other Software
+  - In-house vs. Cloud
+  - IT requirements and Costing is also compared
 
 ---
 <!-- _class: transition -->
@@ -33,14 +35,15 @@
 
 # OrcaFlex 
 
-- Software typically require a dedicated license to run Multiprocessing andn multicore runs. 
-- However, Orcaflex allows to run each simulation using each core
+- Software typically require a dedicated license to run Multiprocessing and multicore runs. 
+- However, Orcaflex allows to run each simulation using each core (logical processor)
 - Ability to run any number of cores as much as the computer can accommodate. Typically 1 core is reserved  tasks other than OrcaFlex simulations
 
 ![alt text](../../12_core_pc_pending_jobs.PNG)
 
 ```markdown
-- More cores = More runs; Quicker turnaround of results
+- More cores = More runs; 
+- Quicker turnaround of results. Effective use of license
 ```
 
 ---
@@ -56,678 +59,52 @@ Key Factors in Pricing Comparison:
 
 - Support and Licensing: Differences in support plans and licensing models.
 
+```markdown
+- Requires good understanding and use of cloud hardware and awith appropriate gaurdrails. 
+- Cloud computing will be <b>NEW</b> area for ACMA
+```
+
 ---
 # In-house (Rack vs. Desktop). IT support etc.
 
+- Rack Server
+  - Higher cost
+
+I
+```markdown
+- Existing ACMA systems are rack based servers
+```
 
 ---
 # Comparison of costs
 
-- TBA
+| Type | Specifications | Cores and Threads | CPU Speed | RAM Support | Hard Disk | Cost | URL |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| AMD Ryzen Threadripper Processors | | 16cores and 32 threads | Not specified | Up to 1 TB DDR5 memory | Not specified | 5389 | [AMD Ryzen](https://bizon-tech.com/amd-threadripper-workstation-pc-servers?utm_term=64-core%20computer&utm_campaign=workstations&utm_source=adwords&utm_medium=ppc&hsa_acc=2602547611&hsa_cam=1556162152&hsa_grp=82018998448&hsa_ad=619219694532&hsa_src=g&hsa_tgt=kwd-872495797641&hsa_kw=64-core%20computer&hsa_mt=b&hsa_net=adwords&hsa_ver=3&gad_source=1&gclid=CjwKCAiAw5W-hardware) |
+| AMD Ryzen Threadripper Processors |  | Up to 64 cores and 128 threads | Not specified | 256 GB DDR5 memory | Not specified | 14,749 | [AMD Ryzen](https://bizon-tech.com/bizon-x4000.html#3215:47270;3217:47278;3218:29012;3219:46902;3220:59362;3222:29063;3223:29116;3224:29148;5024:53050) |
+| Dell Precision 7960 Tower Workstation | Not specified | Not specified | Not specified | Not specified | Not specified | 5389 | [Dell](https://www.dell.com/en-us/shop/cty/pdp/spd/precision-t7960-workstation/xctopt7960us_vp_cc_fy25?tfcid=91049735&&gacd=9684992-1105-5761040-266906002-0&dgc=ST&SA360CID=71700000109798566&gclsrc=aw.ds&gad_source=1&gbraid=0AAAAADllXQeRwmGrtvlV1GI6DxO31PG9P&gclid=CjwKCAiAw5W-BhAhEiwApv4goJXmBIwrLokeVfP10u3FCs4nrHKbEk_aaURx1cegKI7rPPcRrQkl7RoC1OEQAvD_BwE) |
+| BIZON AMD Threadripper Workstations |  | Up to 96 cores with AMD Threadripper 7000 series processors | Not specified | Up to 1 TB DDR5 memory | Not specified |
+| Dell Precision 7960 Tower Workstation  | | Not specified | Not specified | Not specified | Not specified | Not specified | 5389 | [Dell](https://www.dell.com/en-us/shop/cty/pdp/spd/precision-t7960-workstation/xctopt7960us_vp_cc_fy25?tfcid=91049735&&gacd=9684992-1105-5761040-266906002-0&dgc=ST&SA360CID=71700000109798566&gclsrc=aw.ds&gad_source=1&gbraid=0AAAAADllXQeRwmGrtvlV1GI6DxO31PG9P&gclid=CjwKCAiAw5W-BhAhEiwApv4goJXmBIwrLokeVfP10u3FCs4nrHKbEk_aaURx1cegKI7rPPcRrQkl7RoC1OEQAvD_BwE) |
+| BIZON AMD Threadripper Workstations  | | Up to 96 cores with AMD Threadripper 7000 series processors | Not specified | Up to 1 TB DDR5 memory | Not specified |
 
 
 ---
 # Conclusions and Recommendations
 
 
+### Recommendations
 
----
-<!-- _class: transition -->
-
-
-## 100 year Analysis Results
-
----
-<!-- _class: transition -->
-
-# 
-
-### FST Motion Response
-
----
-# FSTs 95% LNG, 100yr, LWL - FST Surge and Sway
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-
-  <img src="./plots/fsts/au_lwl_100yr_fst2_dof_translation.png" alt="FST2 DOF Translation Plot at 100yr LWL" style="width: 48%;">
-  <img src="./plots/fsts/au_lwl_100yr_fst1_dof_translation.png" alt="FST1 DOF Translation Plot at 100yr LWL" style="width: 48%;">
-</div>
+- Understand the existing architecture
+  - Rack and its capabilities
+  - Flexibility in compute and hardware (Can we combine ANSYS03 and ANSYS04 to get 24 cores or more going?)
 
 ```markdown
-- TBA
+- Get dedicated desktop or add to rack? 
+- Right reasons for the long haul
+
 ```
-
----
-# FSTs 15% LNG, 100yr, HWL - FST Surge and Sway
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_dof_translation.png" alt="FST2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_dof_translation.png" alt="FST1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 95% LNG, 100yr, LWL - FST Rotations
-
-- TBA
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_dof_rotation.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_dof_rotation.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 15% LNG, 100yr, HWL - FST Rotations
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_dof_rotation_scale.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_dof_rotation_scale.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FST Rotations, 100 yr, LWL vs. HWL
-
-- TBA
-
-<div style="text-align: center;">
-LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_dof_rotation.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_dof_rotation.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- 15% LNG, HWL has low roll rotations compared to 95% LNG, LWL
-```
-
----
-<!-- _class: transition -->
-
-# 
-
-### FST Load Response, Static
-
----
-# FSTs 95% LNG, 100yr, HWL, FST Forces, X Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Lx_stat.png" alt="FST2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Lx_stat.png" alt="FST1" style="width: 48%;">
-</div>
-
-```markdown
-- Wind loads dominate the FST forces
-```
-
----
-# FSTs 95% LNG, 100yr, HWL, FST Forces, Y Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Ly_stat.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Ly_stat.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 15% LNG, 100yr, LWL, FST Forces, X Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Lx_stat.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Lx_stat.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 15% LNG, 100yr, LWL, FST Forces, Y Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Ly_stat.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Ly_stat.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-<!-- _class: transition -->
-
-# 
-
-### FST Load Response, Dynamic
-
----
-# FSTs 95% LNG, 100yr, HWL, FST Forces, X Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Lx.png" alt="FST2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Lx.png" alt="FST1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 95% LNG, 100yr, HWL, FST Forces, Y Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_load_Ly.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_load_Ly.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 15% LNG, 100yr, LWL, FST Forces, X Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Lx.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Lx.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# FSTs 15% LNG, 100yr, LWL, FST Forces, Y Direction
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_load_Ly.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_load_Ly.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-<!-- _class: transition -->
-
-# 
-
-### Jacket Loads, Static
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, LWL, Fx
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gx_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gx_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, LWL, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gy_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gy_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, HWL, Fx
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gx_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gx_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, HWL, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gy_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gy_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-# Max Jacket Loads, FST1, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FSTs 95% LNG, 100yr, LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FSTs 15% LNG, 100yr, HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gy_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gy_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FST2, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FSTs 95% LNG, 100yr, LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FSTs 15% LNG, 100yr, HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gy_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gy_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-<!-- _class: transition -->
-
-# 
-
-### Jacket Loads, Dynamic
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, LWL, Fx
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gx.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gx.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, LWL, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gy.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gy.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, HWL, Fx
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gx.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gx.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-# Max Jacket Loads, FSTs 95% LNG, 100yr, HWL, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FSTs 95% LNG, 100yr, LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FSTs 15% LNG, 100yr, HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gy.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gy.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FST1, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FSTs 95% LNG, 100yr, LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FSTs 15% LNG, 100yr, HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_jkt_Gy.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_jkt_Gy.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Jacket Loads, FST2, Fy
-
-- Two (2) struts contribute to each jacket global force
-
-<div style="text-align: center;">
-FSTs 95% LNG, 100yr, LWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FSTs 15% LNG, 100yr, HWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_jkt_Gy.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_jkt_Gy.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-<!-- _class: transition -->
-
-# 
-
-### Strut Loads, Static
-
----
-# Max Strut Loads, FSTs 95% LNG, 100yr, HWL, Tension, Static
-
-- TBA
-
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_strut_et_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_strut_et_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Strut Loads, FSTs 95% LNG, 100yr, LWL, Tension, Static
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_strut_et_stat.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_strut_et_stat.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-<!-- _class: transition -->
-
-# 
-
-### Strut Loads, Dynamic
-
----
-# Max Strut Loads, FSTs 95% LNG, 100yr, HWL, Tension, Dynamic
-
-- TBA
-
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_strut_et.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_hwl_100yr_fst1_strut_et.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Strut Loads, FSTs 95% LNG, 100yr, LWL, Tension, Dynamic
-
-- TBA
-
-<div style="text-align: center;">
-FST2 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; FST1
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_strut_et.png" alt="fst2" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst1_strut_et.png" alt="fst1" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
----
-# Max Strut Loads, 100yr, HWL vs. LWL, Tension, Dynamic
-
-- TBA
-
-<div style="text-align: center;">
-15% LNG HWL &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; 95% LNG LWL
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/fsts/au_hwl_100yr_fst2_strut_et.png" alt="hwl" style="width: 48%;">
-    <img src="./plots/fsts/au_lwl_100yr_fst2_strut_et.png" alt="lwl" style="width: 48%;">
-</div>
-
-```markdown
-- TBA
-```
-
-
----
-
-# FSTs 95% LNG, 100yr, LWL - Force Timetrace
-
-<div style="text-align: center;">
-Min -ve &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Max +ve
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/timetrace/au_fst2_LWL_100yr_D075_struts_min_f.png" alt="FST2" style="width: 48%;">
-    <img src="./plots/timetrace/au_fst2_LWL_100yr_D240_struts_max_f.png" alt="FST1" style="width: 48%;">
-</div>
-
-```markdown
-- The struts are in sync
-- Results in lower strut forces when compared to HWL results
-```
-
----
-
-# FSTs 95% LNG, 100yr, LWL - Force Timetrace, 240 deg
-
-<div style="text-align: center;">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/QA3RmtbFTfE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
-```markdown
-- Time trace with extreme loading at 1359 s for FST2
-```
-
----
-
-# FSTs 15% LNG, 100yr, HWL - Force Timetrace
-
-<div style="text-align: center;">
-Min -ve &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Max +ve
-</div>
-<div style="display: flex; justify-content: space-between;">
-    <img src="./plots/timetrace/au_fst2_HWL_100yr_D030_struts_min_f.png" alt="FST1" style="width: 48%;">
-    <img src="./plots/timetrace/au_fst1_HWL_100yr_D345_struts_max_f.png" alt="FST2" style="width: 48%;">
-</div>
-
-```markdown
-- The 2 struts pairs are locked FST in tension-compression position
-  - Results in high strut forces for FSTs 15% LNG, LWL condition
-- This tension-compression lock position is similar to what was obtained in AQWA
-```
-
----
-
-# FSTs 15% LNG, 100yr, HWL - Force Timetrace, FST1, 345 deg
-
-<div style="text-align: center;">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/breV6vJoA30" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
-```markdown
-- Time trace with extreme loading at 6918 s for FST1
-```
-
-
----
-# FSTs, 100yr Discussion
-
-- 100yr, HWL has tension-compression lock position
-  - potentially due to force coefficients used
-  - Perform sensitivity analysis with wind force yaw-coefficients = 0
-  - Perform timestep senstivity with 0.05s and 0.025s. Current timestep is 0.1s.
-- Determine whether tension-compression lock position is realistic due to prevailing external static loads (e.g. wind, current, wave etc.)
-
----
-
-# Conclusions
-
-### Way Forward
-
-- FST tension-compression lock position
-  - Theorically, this effect may be possible. 
-  - Recommend permanemnt moring system designer, WSP to verify that this phenomenon does not occur from their design.
-  - FST strut interface foundation is currently designed for all loads presented in this document.
-
 ---
 
 # Way Forward
 
-- 100 yr FSTs only QA/QC (Ongoing)
-
-- 5 yr FSTs with LNGC
-  - Will get this running after few more insights in 100 yr analysis
-
-
+TBA
