@@ -87,6 +87,10 @@ I
 | Dell Precision 7960 Tower Workstation  | | Not specified | Not specified | Not specified | Not specified | Not specified | 5389 | [Dell](https://www.dell.com/en-us/shop/cty/pdp/spd/precision-t7960-workstation/xctopt7960us_vp_cc_fy25?tfcid=91049735&&gacd=9684992-1105-5761040-266906002-0&dgc=ST&SA360CID=71700000109798566&gclsrc=aw.ds&gad_source=1&gbraid=0AAAAADllXQeRwmGrtvlV1GI6DxO31PG9P&gclid=CjwKCAiAw5W-BhAhEiwApv4goJXmBIwrLokeVfP10u3FCs4nrHKbEk_aaURx1cegKI7rPPcRrQkl7RoC1OEQAvD_BwE) |
 | BIZON AMD Threadripper Workstations  | | Up to 96 cores with AMD Threadripper 7000 series processors | Not specified | Up to 1 TB DDR5 memory | Not specified |
 
+```markdown
+- Add USD4000 to 5000 for rack type servers
+```
+
 
 ---
 # Conclusions and Recommendations
