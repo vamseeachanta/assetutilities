@@ -122,7 +122,7 @@ class ExcelUtilities:
 
             csvs = group['csvs']
 
-            # Load the target Excel file
+            logging.info(f"For Excel file: {target_file}:")
             for csv in csvs:
                 inputs_csv = csv['input']['filename']
                 is_file_valid, inputs_csv = is_file_valid_func(inputs_csv, analysis_root_folder)
@@ -139,4 +139,4 @@ class ExcelUtilities:
                 with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
                     df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
 
-                logging.info(f"CSV data, {worksheet} copied to Excel file: {target_file}")
+                logging.info(f"   ... Copying data in {inputs_csv} to {worksheet}")
