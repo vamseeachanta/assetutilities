@@ -1,0 +1,56 @@
+﻿Bodies:
+  - BodyName: Body1
+    BodyMeshPosition: [0, 0, 0]
+    BodyMeshAttitude: [0, 0, 0]
+    BodyIncludedInAnalysis: Yes
+    BodyMeshFileName: K:\1522\ctr7\orcawave\L01 Default vessel\L01 Vessel mesh.gdf
+    BodyMeshFormat: Wamit gdf
+    BodyMeshLengthUnits: m
+    BodyMeshSymmetry: xz plane
+    BodyMeshDipolePanels:
+    BodyAddInteriorSurfacePanels: Yes
+    BodyInteriorSurfacePanelMethod: Triangulation method
+    BodyControlSurfaceType: Defined by mesh file
+    BodyControlSurfaceMeshFileName: K:\1522\ctr7\orcawave\L01 Default vessel\L01 Control
+      surface mesh.gdf
+    BodyControlSurfaceMeshFormat: Wamit gdf
+    BodyControlSurfaceMeshLengthUnits: m
+    BodyOrcaFlexImportSymmetry: Use global mesh symmetry
+    BodyOrcaFlexImportLength: 103
+    BodyHydrostaticIntegralMethod: Standard
+    BodyHydrostaticStiffnessMethod: Displacement
+    BodyInertiaSpecifiedBy: Matrix (for a general body)
+    BodyCentreOfMass: [2.53, 0, -1.974]
+    BodyMass: 9017.95
+    BodyInertiaTensorRx, BodyInertiaTensorRy, BodyInertiaTensorRz:
+      - [254.9374465e3, 0, 0]
+      - [0, 5.979802645e6, 0]
+      - [0, 0, 5.979802645e6]
+    BodyInertiaTensorOriginType: Centre of mass
+    ? BodyExternalStiffnessMatrixx, BodyExternalStiffnessMatrixy, BodyExternalStiffnessMatrixz,
+      BodyExternalStiffnessMatrixRx, BodyExternalStiffnessMatrixRy, BodyExternalStiffnessMatrixRz
+    :   - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+    BodyExternalStiffnessMatrixOriginType: Body origin
+    ? BodyExternalDampingMatrixx, BodyExternalDampingMatrixy, BodyExternalDampingMatrixz,
+      BodyExternalDampingMatrixRx, BodyExternalDampingMatrixRy, BodyExternalDampingMatrixRz
+    :   - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 36.01e3, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0]
+    BodyExternalDampingMatrixOriginType: Body origin
+    BodyConnectionParent: Free
+    BodyIncreaseRollDampingToTarget: No
+    BodyFixedDOFx: No
+    BodyFixedDOFy: No
+    BodyFixedDOFz: No
+    BodyFixedDOFRx: No
+    BodyFixedDOFRy: No
+    BodyFixedDOFRz: No
+# Field points

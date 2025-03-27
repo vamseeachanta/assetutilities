@@ -25,27 +25,45 @@ class RuamelYaml:
         for file_name in yml_files:
             cfg_divide = cfg['yml_analysis']['divide']
             if cfg_divide['by'] == 'primary_key':
-                logger.debug(f"Dividing primary keys data : {file_name}")
+                logger.debug(f"Splitting primary keys data : {file_name}")
                 self.divide_yaml_file_by_primary_keys(cfg, file_name)
 
-        return cfg
+        return cfg 
     def divide_yaml_file_by_primary_keys(self, cfg, file_name):
-
         result_folder = cfg['Analysis']['result_folder']
         file_name_stem = Path(file_name).stem
-       
+        
         with open(file_name, "r", encoding='utf-8-sig') as file:
             yaml_content = file.read()
             
-            # Clean the YAML content
             cleaned_yaml = self.clean_yaml_file(yaml_content)
             cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
             
             data = yaml.load(cleaned_yaml)
         
-        # Extract primary keys
-        primary_keys = list(data.keys())
-        for key in primary_keys:
+        primary_key_patterns = []
+        for line in cleaned_yaml.splitlines():
+            # Match primary key definitions (key: value)
+            match = re.match(r'^(\s*)([^:]+)\s*:', line)
+            if match:
+                #indent = match.group(1)
+                key = match.group(2).strip()
+                # Check if the rest of the line contains the value (single-line)
+                value_part = line[match.end():].strip()
+                if value_part:  # If there's content after the colon
+                    primary_key_patterns.append((key, True))  # True = single line
+                else:
+                    primary_key_patterns.append((key, False))  # False = multi-line
+        
+        # Convert to dictionary for easy lookup
+        is_single_line = {key: single for key, single in primary_key_patterns}
+        
+        # Process each primary key
+        for key in data.keys():
+            # Skip if the key is marked as single-line in the original YAML
+            if is_single_line.get(key, False):
+                continue
+                
             output_file_name = f"{file_name_stem}_{key}.yml"
             output_file_path = os.path.join(result_folder, output_file_name)
             
