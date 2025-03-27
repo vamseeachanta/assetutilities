@@ -1,4 +1,9 @@
-### while loading yml file encountered below error 
+# PyYaml
+
+PyYAML is a Python library that provides a set of tools for parsing YAML files.
+
+
+#### while loading yml file encountered below error 
 
 
 ❗[ERROR] Exception has occurred: ScannerError ✖
@@ -36,12 +41,6 @@ def clean_yaml_line(self,line):
     return line
 ```
 
-
-# PyYaml
-
-PyYAML is a Python library that provides a set of tools for parsing YAML files.
-
-
 ## PyYAML dump
 
 Yaml.dump() function provides several parameters to customize the output.
@@ -49,15 +48,10 @@ Yaml.dump() function provides several parameters to customize the output.
 
 ```yaml
 data: object  # Data to serialize
-
 default_flow_style: bool | None  # False for block style, True for inline flow style
-
 sort_keys: bool  # Sort keys alphabetically in the output
-
 indent: int  # Number of indentation spaces
-
 allow_unicode: bool  # Encode non-ASCII characters as Unicode
-
 width: int  # Max line width for better readability
 explicit_start: bool  # Add `---` at the beginning of the YAML document
 explicit_end: bool  # Add `...` at the end of the YAML document
@@ -92,7 +86,7 @@ print(yaml_str)
 ---
 
 
-> **Note:** PyYAML is not suitable for well-formatting main YAML file data into new output YAML files; `ruamel.yaml` is best for it's advanced level of handling yml complex files without even explicitly including conditions.
+> **Note:** PyYAML is not suitable for well-formatting YAML file data ; `ruamel.yaml` is best for it's advanced level of handling complex yml files without even explicitly including some conditions.
 
 ---
 
