@@ -21,6 +21,12 @@ from assetutilities.common.utilities import (
     get_common_name_from_2_filenames,
     is_file_valid_func,
 )
+from assetutilities.common.visualization.visualization_templates import (
+    VisualizationTemplates,
+)
+#from assetutilities.engine import engine as aus_engine
+
+viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
 
@@ -51,9 +57,42 @@ class WorkingWithYAML:
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['flag']:
             self.divide_yaml_files(cfg)
+        elif 'plot_yml_arrays' in cfg and cfg['plot_yml_arrays']['flag']:
+            self.get_plot_yml(cfg)
 
         return cfg
+    
+    def get_plot_yml(self, cfg):
 
+        yml_files = cfg['file_management']['input_files']['yml']
+        for yml_file in yml_files:
+            self.plot_from_yml_arrays(yml_file, cfg)
+
+    def plot_from_yml_arrays(self, yml_file, cfg):
+
+        with open(yml_file, "r") as ymlfile:
+            documents = list(yaml.safe_load_all(ymlfile))
+        data = {}
+        for doc in documents:
+            if isinstance(doc, dict):
+                data.update(doc)
+        arrays = [v for v in data.values() if isinstance(v, list) and all(isinstance(i, (int, float)) for i in v)]
+    
+        if len(arrays) < 2:
+            raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
+        
+        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
+        settings = {'file_name': yml_file.name,
+                    'title': 'Line Plot',
+                    'xlabel': 'PeriodOrFrequency',
+                    'ylabel': 'WaveHeading',
+                    }
+        plot_yml['settings'].update(settings)
+        plot_yml['data']["groups"][0]["x"] = arrays[0]
+        plot_yml['data']["groups"][0]["y"] = arrays[1]
+        from assetutilities.engine import engine as aus_engine
+        aus_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+        
     def ymlInput(self, defaultYml, updateYml=None):
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")

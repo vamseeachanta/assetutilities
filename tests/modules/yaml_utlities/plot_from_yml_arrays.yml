@@ -1,15 +1,13 @@
-basename: yaml_utlities 
+basename: yaml_utlities
 
 default:
-  log_level: INFO
+  log_level: DEBUG
   config:
     overwrite:
       output: True
 
-yml_analysis:
-  divide:
+plot_yml_arrays:
     flag: True
-    by: primary_key
 
 file_management:
   flag: True
@@ -20,5 +18,7 @@ file_management:
       auto_read: True
       directory: yml
       file_extensions: [yml]
-      filename_pattern: LWL
+      filename_pattern: L01
     output_directory: NULL
+  
+

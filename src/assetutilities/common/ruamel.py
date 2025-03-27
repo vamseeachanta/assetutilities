@@ -25,7 +25,7 @@ class RuamelYaml:
         for file_name in yml_files:
             cfg_divide = cfg['yml_analysis']['divide']
             if cfg_divide['by'] == 'primary_key':
-                logger.debug(f"Splitting primary keys data : {file_name}")
+                logger.debug("Splitting primary keys data START...")
                 self.divide_yaml_file_by_primary_keys(cfg, file_name)
 
         return cfg 
@@ -69,6 +69,8 @@ class RuamelYaml:
             
             with open(output_file_path, "w", encoding='utf-8-sig') as f:
                 yaml.dump({key: data[key]}, f)
+            logger.debug("Splitting primary keys data END...")
+            
 
     
     def clean_yaml_line(self,line):

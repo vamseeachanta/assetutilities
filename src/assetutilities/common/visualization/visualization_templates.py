@@ -1,8 +1,8 @@
 # Reader imports
 from assetutilities.common.data import AttributeDict
-from assetutilities.common.yml_utilities import WorkingWithYAML
+# from assetutilities.common.yml_utilities import WorkingWithYAML
 
-wwy = WorkingWithYAML()
+# wwy = WorkingWithYAML()
 
 
 class VisualizationTemplates:
@@ -16,6 +16,9 @@ class VisualizationTemplates:
             'filename': 'base_configs/modules/visualization/template_xy_scatter_input.yml',
             'library_name': library_name
         }
+        from assetutilities.common.yml_utilities import WorkingWithYAML
+
+        wwy = WorkingWithYAML()
         plot_template = wwy.get_library_yaml_file(library_yaml_cfg)
         plot_template['Analysis'] = custom_analysis_dict
         plot_template = AttributeDict(plot_template)
@@ -28,6 +31,8 @@ class VisualizationTemplates:
             'filename': 'base_configs/modules/visualization/template_xy_line_input.yml',
             'library_name': library_name
         }
+        from assetutilities.common.yml_utilities import WorkingWithYAML
+        wwy = WorkingWithYAML()
         plot_template = wwy.get_library_yaml_file(library_yaml_cfg)
         plot_template['Analysis'] = custom_analysis_dict
         plot_template = AttributeDict(plot_template)
@@ -40,6 +45,8 @@ class VisualizationTemplates:
             'filename': 'base_configs/modules/visualization/template_xy_scatter_csv.yml',
             'library_name': library_name
         }
+        from assetutilities.common.yml_utilities import WorkingWithYAML
+        wwy = WorkingWithYAML()
         plot_template = wwy.get_library_yaml_file(library_yaml_cfg)
         plot_template['Analysis'] = custom_analysis_dict
         plot_template = AttributeDict(plot_template)
@@ -52,6 +59,8 @@ class VisualizationTemplates:
             'filename': 'base_configs/modules/visualization/template_xy_line_csv.yml',
             'library_name': library_name
         }
+        from assetutilities.common.yml_utilities import WorkingWithYAML
+        wwy = WorkingWithYAML()
         plot_template = wwy.get_library_yaml_file(library_yaml_cfg)
         plot_template['Analysis'] = custom_analysis_dict
         plot_template = AttributeDict(plot_template)
