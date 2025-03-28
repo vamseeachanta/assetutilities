@@ -1,3 +1,7 @@
+meta:
+  basename: yaml_utlities
+  library: assetutlities
+
 basename: yaml_utlities
 
 default:
@@ -6,8 +10,16 @@ default:
     overwrite:
       output: True
 
+
+#TODO Clean up
 plot_yml_arrays:
-    flag: True
+  flag: True
+
+visualization:
+  template: _xy
+  flag: True
+#    array keys etc.
+
 
 file_management:
   flag: True

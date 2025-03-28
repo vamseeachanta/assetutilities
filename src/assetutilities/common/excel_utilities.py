@@ -126,6 +126,9 @@ class ExcelUtilities:
             for csv in csvs:
                 inputs_csv = csv['input']['filename']
                 is_file_valid, inputs_csv = is_file_valid_func(inputs_csv, analysis_root_folder)
+                if not is_file_valid:
+                    logging.info(f"File {inputs_csv} not found. Skipping {target_file}")
+                    logging.error(f"Skipping {target_file}  .. FAIL")
                 df = pd.read_csv(inputs_csv)
 
                 wb = load_workbook(target_file, data_only=False)  # Keep formulas intact

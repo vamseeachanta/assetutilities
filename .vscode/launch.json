@@ -123,5 +123,18 @@
             "program": "${workspaceFolder}/path/to/script.sh",
             "args": []
         },
+        {
+            "name": "au_test_zip_by_stem_argparse_dict",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/zip_utilities/test_zip_by_stem.py",
+                "{"meta": {"arg_parse_dict": True}}"
+
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
     ]
 }
