@@ -92,4 +92,4 @@ cd -
 exit 1 
 
 
-python src/assetutilities/tests/test_data/test_all_yml.py 
+python src/assetutilities/tests/modules/all_yml_tests/test_all_yml.py 
