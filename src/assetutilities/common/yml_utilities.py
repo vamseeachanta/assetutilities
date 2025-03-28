@@ -82,7 +82,7 @@ class WorkingWithYAML:
             raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
         
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': yml_file.name,
+        settings = {'file_name': yml_file.stem,
                     'title': 'Line Plot',
                     'xlabel': 'PeriodOrFrequency',
                     'ylabel': 'WaveHeading',
