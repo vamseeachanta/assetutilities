@@ -48,3 +48,5 @@ def set_logging(cfg):
 
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     logging.info("Logging started successfully ...")
+
+    return cfg

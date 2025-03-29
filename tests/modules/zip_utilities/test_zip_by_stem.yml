@@ -1,0 +1,27 @@
+meta:
+  library: assetutlities
+  basename: zip_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+analysis_settings:
+  flag: True
+  by: stem
+  directory: csv
+  file_extensions: [csv]
+
+file_management:
+  flag: True
+
+  files:
+    files_in_current_directory:
+      flag: False
+      auto_read: True
+      directory: yml
+      file_extensions: [yml]
+      filename_pattern: NULL
+    output_directory: NULL

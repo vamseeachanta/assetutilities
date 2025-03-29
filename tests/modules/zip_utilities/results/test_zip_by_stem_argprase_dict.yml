@@ -1,0 +1,101 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  library: assetutlities
+  basename: zip_utilities
+  default:
+    log_level: INFO
+    config:
+      overwrite:
+        output: true
+  analysis_settings:
+    flag: true
+    by: stem
+    directory: csv
+    file_extensions:
+    - csv
+  file_management:
+    flag: true
+    files:
+      files_in_current_directory:
+        flag: false
+        auto_read: true
+        directory: yml
+        file_extensions:
+        - yml
+        filename_pattern: ~
+      output_directory: ~
+    input_files:
+      yml:
+      - !!python/object/apply:pathlib.WindowsPath
+        - K:\
+        - github
+        - assetutilities
+        - tests
+        - modules
+        - zip_utilities
+        - yml
+        - FST2F_FST1F_LWL_000deg.yml
+      - !!python/object/apply:pathlib.WindowsPath
+        - K:\
+        - github
+        - assetutilities
+        - tests
+        - modules
+        - zip_utilities
+        - yml
+        - FST2L_FST1L_HWL_345deg.yml
+  meta:
+    library: assetutlities
+    basename: zip_utilities
+    arg_parse_dict: true
+    label: argprase_dict
+  Analysis:
+    basename: zip_utilities
+    analysis_root_folder: K:\github\assetutilities/tests/modules/zip_utilities
+    file_name: test_zip_by_stem_argprase_dict
+    file_name_for_overwrite: test_zip_by_stem_argprase_dict
+    result_folder: K:\github\assetutilities/tests/modules/zip_utilities\results
+    log_folder: K:\github\assetutilities/tests/modules/zip_utilities\logs
+    start_time: 2025-03-29 05:34:44.024654
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: K:\github\assetutilities/tests/modules/zip_utilities/test_zip_by_stem.yml
+    fe_folder: K:\github\assetutilities/tests/modules/zip_utilities\results
+    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
+    - K:\
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - zip_utilities
+    - yml
+    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
+    - K:\
+    - github
+    - assetutilities
+    - tests
+    - modules
+    - zip_utilities
+  zip_utilities:
+  - stem: FST2F_FST1F_LWL_000deg
+    zip_file_path: K:\github\assetutilities/tests/modules/zip_utilities\results\FST2F_FST1F_LWL_000deg.zip
+    files:
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Jacket1.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Jacket2.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Jacket3.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Jacket4.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut1.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut2.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut3.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut4.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut5.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut6.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut7.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2F_FST1F_LWL_000deg_Strut8.csv
+  - stem: FST2L_FST1L_HWL_345deg
+    zip_file_path: K:\github\assetutilities/tests/modules/zip_utilities\results\FST2L_FST1L_HWL_345deg.zip
+    files:
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2L_FST1L_HWL_345deg_Jacket1.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2L_FST1L_HWL_345deg_Jacket2.csv
+    - K:\github\assetutilities/tests/modules/zip_utilities\csv\FST2L_FST1L_HWL_345deg_Jacket3.csv
