@@ -139,11 +139,6 @@ class ConfigureApplicationInputs:
         try:
             if sys.argv[1] is not None:
                 self.customYaml = sys.argv[1]
-                print(
-                    "Updating default values with contents in file {0}".format(
-                        self.customYaml
-                    )
-                )
         except:
             self.customYaml = None
             print(
@@ -205,8 +200,11 @@ class ConfigureApplicationInputs:
                 )
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)
-            
+            print(f"Update default app configuration with contents in file {self.customYaml} ... DONE")
+            print(f"Update default app configuration with dictionary content in:  ... START")
+            print(f"\t{ cfg_argv_dict}")
             cfg = update_deep_dictionary(cfg, cfg_argv_dict)
+            print(f"Update default app configuration with dictionary content ... FINISH")
 
         return cfg
 
@@ -300,7 +298,6 @@ class ConfigureApplicationInputs:
         - from function call (i.e. engine(inputfile))
         
         """
-        cfg_argv_dict = {}
 
         if len(sys.argv) > 1 and inputfile is not None:
             raise (
@@ -309,16 +306,29 @@ class ConfigureApplicationInputs:
                 )
             )
 
-        if len(sys.argv) > 1:
+        cfg_argv_dict = {}
+        if len(sys.argv) > 2:
             try:
-                cfg_argv_dict = eval(sys.argv[2])
+                cfg_argv_dict_eval = eval(sys.argv[2])
             except Exception as e:
+                print(sys.argv[2])
                 print(f"Error: {e}")
-                raise("Check dictionary format provided provided in sys.argv[2] ... FAIL")
+                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
 
-            if not type(cfg_argv_dict) is dict:
-                cfg_argv_dict = {}
 
+            if isinstance(cfg_argv_dict_eval, dict):
+                cfg_argv_dict = cfg_argv_dict_eval
+            else:
+                print("Dictionary not provided in sys.argv[2]. sys.arg vaules are:")
+                print(sys.argv[2])
+
+                print("System argument values are:")
+                for item in sys.argv:
+                    print(f"item : {item}")
+                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
+
+
+        if len(sys.argv) > 1:
             if not os.path.isfile(sys.argv[1]):
                 raise (FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL"))
             else:
@@ -329,6 +339,7 @@ class ConfigureApplicationInputs:
                 raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
             else:
                 sys.argv.append(inputfile)
+
         return inputfile, cfg_argv_dict
 
 
