@@ -332,7 +332,7 @@ class ConfigureApplicationInputs:
         return inputfile, cfg_argv_dict
 
 
-    def save_cfg(cfg_base):
+    def save_cfg(self, cfg_base):
         output_dir = cfg_base.Analysis["analysis_root_folder"]
 
         filename = cfg_base.Analysis["file_name"]

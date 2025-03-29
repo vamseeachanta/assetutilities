@@ -30,9 +30,9 @@ def run_process(input_file, expected_result):
 
 
 def test_run_process():
-    input_file = "zip_by_stem.yml"
+    input_file = "test_zip_by_stem.yml"
 
-    pytest_output_file = "results/zip_by_stem_pytest.yml"
+    pytest_output_file = "results/test_zip_by_stem_pytest.yml"
     pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)
     expected_result = ymlInput(pytest_output_file, updateYml=None)
 

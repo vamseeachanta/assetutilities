@@ -34,11 +34,11 @@ class ZipUtilities:
     def zip_files_by_file_extension(self, cfg, file_extension):
         stem_files_list = cfg['file_management']['input_files'][file_extension]
         stem_list = [file.stem for file in stem_files_list]
-        
-        input_file_directory = cfg['analysis_settings']['directory']
+
+        input_file_directory = cfg['analysis']['directory']
         analysis_root_folder = cfg['Analysis']['analysis_root_folder']
         test_flag, input_file_directory = is_dir_valid_func(input_file_directory, analysis_root_folder)
-        input_file_extenstions = cfg['analysis_settings']['file_extensions']
+        input_file_extenstions = cfg['analysis']['file_extensions']
         cfg[cfg['basename']] = []
         for stem in stem_list:
             files = []

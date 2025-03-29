@@ -8,8 +8,9 @@ default:
     overwrite:
       output: True
 
-analysis_settings:
+analysis:
   flag: True
+  type: zip_by_stem
   by: stem
   directory: csv
   file_extensions: [csv]
