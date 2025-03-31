@@ -169,11 +169,26 @@ class FileManagement:
     def get_file_management_output_directory(self, cfg):
 
         output_directory = cfg.file_management.get("output_directory", None)
-        file_management_output_directory = output_directory
-        if file_management_output_directory is None:
-            file_management_output_directory = cfg["Analysis"]["analysis_root_folder"]
 
-        if file_management_output_directory is not None:
+        # Use analysis root folder if output directory is not provided
+        file_management_output_directory = output_directory
+        dir_is_valid = False
+        if file_management_output_directory is None:
+            file_management_output_directory = cfg["Analysis"]['result_folder']
+            dir_is_valid = True
+
+        # Check if user-provided-directory is valid
+        if not dir_is_valid:
+            analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
+            dir_is_valid, file_management_output_directory = is_dir_valid_func(
+                file_management_output_directory, analysis_root_folder
+            )
+
+        # Create user-provided-directory if not exists
+        if not dir_is_valid:
+            file_management_output_directory = pathlib.Path(file_management_output_directory)
+            file_management_output_directory.mkdir(parents=True, exist_ok=True)
+
             analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
             dir_is_valid, file_management_output_directory = is_dir_valid_func(
                 file_management_output_directory, analysis_root_folder

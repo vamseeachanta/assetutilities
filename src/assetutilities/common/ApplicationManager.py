@@ -214,15 +214,15 @@ class ConfigureApplicationInputs:
 
         if self.customYaml is not None:
             custom_file_name = os.path.split(self.customYaml)[1].split(".")[0]
-            AnalysisRootFolder = os.path.split(self.customYaml)[0]
-            if AnalysisRootFolder == "":
-                AnalysisRootFolder = os.getcwd()
+            analysis_root_folder = os.path.split(self.customYaml)[0]
+            if analysis_root_folder == "":
+                analysis_root_folder = os.getcwd()
         elif self.CustomInputs is not None:
             custom_file_name = run_dict["RunName"]
-            AnalysisRootFolder = os.path.join(os.getcwd(), "tests", "cfg", basename)
+            analysis_root_folder = os.path.join(os.getcwd(), "tests", "cfg", basename)
         else:
             custom_file_name = os.path.split(self.ApplicationInputFile)[1].split(".")[0]
-            AnalysisRootFolder = os.getcwd()
+            analysis_root_folder = os.getcwd()
 
         filename_label = cfg.get('meta', {}).get('label', None)
         if filename_label is not None:
@@ -232,30 +232,21 @@ class ConfigureApplicationInputs:
             custom_file_name + "_" + application_start_time.strftime("%Y%m%d_%Hh%Mm")
         )
         file_name_for_overwrite = custom_file_name
-        result_folder = os.path.join(AnalysisRootFolder, "results")
-        result_data_folder = os.path.join(result_folder, "Data")
-        result_plot_folder = os.path.join(result_folder, "Plot")
-        result_folder = os.path.join(AnalysisRootFolder, "results")
-        log_folder = os.path.join(AnalysisRootFolder, "logs")
 
-        if not os.path.exists(result_folder):
-            os.mkdir(result_folder)
+        result_folder_dict, cfg_with_fm = self.configure_result_folder(analysis_root_folder)
+
+        log_folder = os.path.join(analysis_root_folder, "logs")
         if not os.path.exists(log_folder):
             os.mkdir(log_folder)
-        if not os.path.exists(result_data_folder):
-            os.mkdir(result_data_folder)
-        if not os.path.exists(result_plot_folder):
-            os.mkdir(result_plot_folder)
 
         cfg_array_file_names = None
 
-        application_configuration_parameters = {
+        app_config_params = {
             "Analysis": {
                 "basename": basename,
-                "analysis_root_folder": AnalysisRootFolder,
+                "analysis_root_folder": analysis_root_folder,
                 "file_name": file_name,
                 "file_name_for_overwrite": file_name_for_overwrite,
-                "result_folder": result_folder,
                 "log_folder": log_folder,
                 "start_time": application_start_time,
                 "cfg_array_file_names": cfg_array_file_names,
@@ -264,9 +255,44 @@ class ConfigureApplicationInputs:
             }
         }
 
-        cfg = update_deep_dictionary(cfg, application_configuration_parameters)
-        
+        app_config_params["Analysis"] = update_deep_dictionary(app_config_params["Analysis"], result_folder_dict)
+
+        cfg = update_deep_dictionary(cfg, app_config_params)
+
         return cfg
+
+    def configure_result_folder(self, analysis_root_folder, cfg_with_fm={}):
+
+        if analysis_root_folder is None:
+            analysis_root_folder = cfg_with_fm['Analysis']['analysis_root_folder']
+
+        if len(cfg_with_fm) == 0:
+            result_sub_folder = 'results'
+        else:
+            result_sub_folder = cfg_with_fm['file_management']['output_directory']
+        result_folder = os.path.join(analysis_root_folder, result_sub_folder)
+        if not os.path.exists(result_folder):
+            os.mkdir(result_folder)
+
+        result_data_folder = os.path.join(result_folder, "Data")
+        if not os.path.exists(result_data_folder):
+            os.mkdir(result_data_folder)
+
+        result_plot_folder = os.path.join(result_folder, "Plot")
+        if not os.path.exists(result_plot_folder):
+            os.mkdir(result_plot_folder)
+
+        result_folder_dict = {
+            "result_folder": result_folder,
+            "result_data_folder": result_data_folder,
+            "result_plot_folder": result_plot_folder,
+        }
+
+
+        if len(cfg_with_fm) != 0:
+            cfg_with_fm["Analysis"] = update_deep_dictionary(cfg_with_fm["Analysis"], result_folder_dict)
+
+        return result_folder_dict, cfg_with_fm
 
     def configure_overwrite_filenames(self, cfg):
         if cfg["default"]["config"]["overwrite"]["output"] is True:

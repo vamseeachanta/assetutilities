@@ -49,6 +49,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         fm = FileManagement()
         cfg_base = app_manager.configure(cfg, library_name, basename, cfg_argv_dict)
         cfg_base = fm.router(cfg_base)
+        result_folder_dict, cfg_base = app_manager.configure_result_folder(None, cfg_base)
     else:
         cfg_base = cfg
 
@@ -62,18 +63,11 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     elif basename in ["visualization"]:
         viz_comp = VisualizationComponents()
         viz_comp.visualization_router(cfg_base)
-    # elif basename in ["read_pdf"]:
-    #     read_pdf = ReadPDF()
-    #     read_pdf.read_pdf(cfg_base)
     elif basename in ["file_management"]:
-        fm = FileManagement()
         fm.router(cfg_base)
     elif basename in ["file_edit"]:
         fe = FileEdit()
         fe.router(cfg_base)
-    # elif basename in ["edit_pdf"]:
-    #     edit_pdf = EditPDF()
-    #     edit_pdf.edit_pdf(cfg_base)
     elif basename in ["gitpython"]:
         # Reader imports
         from assetutilities.tools.git.git_python_utilities import GitPythonUtilities
