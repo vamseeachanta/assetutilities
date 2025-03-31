@@ -1,0 +1,30 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  basename: file_management
+  default:
+    log_level: DEBUG
+    config:
+      overwrite:
+        output: true
+  files:
+    files_in_current_directory:
+      flag: false
+      directory: ~
+    extension: bat
+    filters:
+      filename_contains:
+      - management
+      filename_not_contains: []
+  Analysis:
+    basename: file_management
+    analysis_root_folder: .
+    file_name: file_management
+    file_name_for_overwrite: file_management
+    result_folder: .\results
+    log_folder: .\logs
+    start_time: 2025-03-29 06:49:14.613219
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: .\file_management.yml
+    fe_folder: .\results

@@ -35,50 +35,44 @@ class FileManagement:
             {"file_management_output_directory": file_management_output_directory}
         )
 
-        if (
-            cfg.file_management["files"]["files_in_current_directory"]["flag"]
-            or cfg.file_management["files"]["files_in_current_directory"]["auto_read"]
-        ):
-            file_extensions = cfg.file_management["files"][
-                "files_in_current_directory"
-            ].get("file_extensions", [])
-            input_files = {}
+        filename_cfg = cfg.file_management["filename"].copy()
 
-            for file_ext in file_extensions:
+        file_extensions = cfg.file_management["filename"].get("extension", [])
+        input_files = {}
 
-                filename_pattern = cfg["file_management"]["files"][
-                    "files_in_current_directory"
-                ].get("filename_pattern", None)
-                if filename_pattern is None:
-                    glob_search = f"*.{file_ext}"
-                else:
-                    glob_search = f"*{filename_pattern}*.{file_ext}"
+        for file_ext in file_extensions:
 
-                raw_input_files_for_ext = list(
-                    file_management_input_directory.glob(glob_search)
-                )
-                input_files.update({file_ext: raw_input_files_for_ext})
+            filename_pattern = filename_cfg.get("filename_pattern", None)
+            if filename_pattern is None:
+                glob_search = f"*.{file_ext}"
+            else:
+                glob_search = f"*{filename_pattern}*.{file_ext}"
 
-            cfg.file_management.update({"input_files": input_files})
+            raw_input_files_for_ext = list(
+                file_management_input_directory.glob(glob_search)
+            )
+            input_files.update({file_ext: raw_input_files_for_ext})
 
-        else:
-            file_extensions = cfg.file_management["input_files"].keys()
-            for file_ext in file_extensions:
-                raw_input_files_for_ext = cfg.file_management["input_files"][file_ext]
+        cfg.file_management.update({"input_files": input_files})
 
-                valid_file_count = 0
-                for input_file_index in range(0, len(raw_input_files_for_ext)):
-                    input_file = raw_input_files_for_ext[input_file_index]
-                    if not os.path.isfile(input_file):
-                        raw_input_files_for_ext[input_file_index] = os.path.join(
-                            cfg.Analysis["analysis_root_folder"], input_file
-                        )
-                    if os.path.isfile(raw_input_files_for_ext[input_file_index]):
-                        valid_file_count = valid_file_count + 1
+        # else:
+        #     file_extensions = cfg.file_management["input_files"].keys()
+        #     for file_ext in file_extensions:
+        #         raw_input_files_for_ext = cfg.file_management["input_files"][file_ext]
 
-                logging.info(
-                    f"Number of '{file_ext}' input files : {len(raw_input_files_for_ext)} . Valid files are: {valid_file_count}."
-                )
+        #         valid_file_count = 0
+        #         for input_file_index in range(0, len(raw_input_files_for_ext)):
+        #             input_file = raw_input_files_for_ext[input_file_index]
+        #             if not os.path.isfile(input_file):
+        #                 raw_input_files_for_ext[input_file_index] = os.path.join(
+        #                     cfg.Analysis["analysis_root_folder"], input_file
+        #                 )
+        #             if os.path.isfile(raw_input_files_for_ext[input_file_index]):
+        #                 valid_file_count = valid_file_count + 1
+
+        #         logging.info(
+        #             f"Number of '{file_ext}' input files : {len(raw_input_files_for_ext)} . Valid files are: {valid_file_count}."
+        #         )
 
         return cfg
 
@@ -152,15 +146,10 @@ class FileManagement:
 
     def get_file_management_input_directory(self, cfg):
 
-        if cfg.file_management["files"]["files_in_current_directory"]["flag"]:
-            file_management_input_directory = cfg.Analysis["analysis_root_folder"]
-        else:
-            file_management_input_directory = cfg.file_management["files"][
-                "files_in_current_directory"
-            ]["directory"]
-
+        file_management_input_directory = cfg.file_management["input_directory"]
         if file_management_input_directory is None:
-            file_management_input_directory = "./"
+            file_management_input_directory = cfg.Analysis["analysis_root_folder"]
+
         analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
         dir_is_valid, file_management_input_directory = is_dir_valid_func(
             file_management_input_directory, analysis_root_folder
@@ -179,7 +168,7 @@ class FileManagement:
 
     def get_file_management_output_directory(self, cfg):
 
-        output_directory = cfg.file_management["files"].get("output_directory", None)
+        output_directory = cfg.file_management.get("output_directory", None)
         file_management_output_directory = output_directory
         if file_management_output_directory is None:
             file_management_output_directory = cfg["Analysis"]["analysis_root_folder"]

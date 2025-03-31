@@ -1,0 +1,19 @@
+basename: file_management
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+  input_directory: NULL
+  output_directory: NULL
+
+  filename:
+    extension: [bat]
+    filename_pattern: NULL
+    filters:
+      contains: [management]
+      not_contains: []
