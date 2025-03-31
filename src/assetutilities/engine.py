@@ -122,7 +122,3 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     app_manager.save_cfg(cfg_base=cfg_base)
 
     return cfg_base
-
-
-
-

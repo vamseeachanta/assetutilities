@@ -12,17 +12,19 @@ analysis:
   flag: True
   type: zip_by_stem
   by: stem
-  directory: csv
-  file_extensions: [csv]
+  input_directory: csv
+
+  filename:
+    extension: [csv]
 
 file_management:
   flag: True
+  input_directory: yml
+  output_directory: NULL
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: yml
-      file_extensions: [yml]
-      filename_pattern: NULL
-    output_directory: NULL
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

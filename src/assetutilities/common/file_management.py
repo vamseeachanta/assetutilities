@@ -42,7 +42,7 @@ class FileManagement:
 
         for file_ext in file_extensions:
 
-            filename_pattern = filename_cfg.get("filename_pattern", None)
+            filename_pattern = filename_cfg.get("pattern", None)
             if filename_pattern is None:
                 glob_search = f"*.{file_ext}"
             else:

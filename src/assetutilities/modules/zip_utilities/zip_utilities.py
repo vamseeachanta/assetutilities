@@ -27,7 +27,7 @@ class ZipUtilities:
         Zips files in analysis_settings directory 
         Uses stem name from file_management settings
         '''
-        file_extensions = cfg['file_management']['files']['files_in_current_directory']['file_extensions']
+        file_extensions = cfg['file_management']['filename']['extension']
         for file_extension in file_extensions:
             files = self.zip_files_by_file_extension(cfg, file_extension)
 
@@ -35,10 +35,10 @@ class ZipUtilities:
         stem_files_list = cfg['file_management']['input_files'][file_extension]
         stem_list = [file.stem for file in stem_files_list]
 
-        input_file_directory = cfg['analysis']['directory']
+        input_file_directory = cfg['analysis']['input_directory']
         analysis_root_folder = cfg['Analysis']['analysis_root_folder']
         test_flag, input_file_directory = is_dir_valid_func(input_file_directory, analysis_root_folder)
-        input_file_extenstions = cfg['analysis']['file_extensions']
+        input_file_extenstions = cfg['analysis']['filename']['extension']
         cfg[cfg['basename']] = []
         for stem in stem_list:
             files = []

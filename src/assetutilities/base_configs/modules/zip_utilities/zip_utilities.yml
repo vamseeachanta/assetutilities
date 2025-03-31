@@ -13,12 +13,12 @@ analysis_settings:
 
 file_management:
   flag: True
+  input_directory: yml
+  output_directory: NULL
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: csv
-      file_extensions: [csv]
-      filename_pattern: NULL
-    output_directory: NULL
+  filename:
+    extension: [csv]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []
