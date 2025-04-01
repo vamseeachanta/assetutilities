@@ -17,8 +17,17 @@ dictitems:
         directory: yml
         file_extensions:
         - yml
-        filename_pattern: L01
+        filename_pattern: ~
       output_directory: ~
+    input_directory: yml
+    output_directory: results
+    filename:
+      extension:
+      - yml
+      pattern: L01
+      filters:
+        contains: []
+        not_contains: []
     input_files:
       yml:
       - !!python/object/apply:pathlib.WindowsPath
@@ -46,12 +55,14 @@ dictitems:
     analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
     file_name: test_plot_from_yml_arrays
     file_name_for_overwrite: test_plot_from_yml_arrays
-    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
     log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-03-29 10:39:16.723720
+    start_time: 2025-04-01 12:02:56.683977
     cfg_array_file_names: ~
     DefaultInputFile: ~
     CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
+    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
+    result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
     fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
     file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
     - c:\
@@ -74,3 +85,4 @@ dictitems:
     - tests
     - modules
     - yaml_utlities
+    - results

@@ -13,6 +13,7 @@ import yaml
 from deepdiff import DeepDiff
 
 from loguru import logger
+import yaml.composer
 
 # Reader imports
 from assetutilities.common.data import ReadData
@@ -100,7 +101,8 @@ class WorkingWithYAML:
         with open(defaultYml, "r") as ymlfile:
             try:
                 cfg = yaml.safe_load(ymlfile)
-            except yaml.composer.ComposerError:
+            except yaml.composer.ComposerError as e:
+                logger.error(f"YAML parsing error: {e}")
                 cfg = self.yml_read_stream(defaultYml)
 
         if updateYml != None:

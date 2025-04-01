@@ -10,11 +10,10 @@ default:
     overwrite:
       output: True
 
-
-#TODO Clean up
 plot_yml_arrays:
   flag: True
-
+  
+#TODO Clean up
 visualization:
   template: _xy_input
   flag: True
@@ -23,14 +22,14 @@ visualization:
 
 file_management:
   flag: True
+  input_directory: yml
+  output_directory: results
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: yml
-      file_extensions: [yml]
-      filename_pattern: L01
-    output_directory: NULL
+  filename:
+    extension: [yml]
+    pattern: L01
+    filters:
+      contains: []
+      not_contains: []
   
 

@@ -13,12 +13,12 @@ yml_analysis:
 
 file_management:
   flag: True
+  input_directory: yml
+  output_directory: results
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: yml
-      file_extensions: [yml]
-      filename_pattern: LWL
-    output_directory: NULL
+  filename:
+    extension: [yml]
+    pattern: L01
+    filters:
+      contains: []
+      not_contains: []
