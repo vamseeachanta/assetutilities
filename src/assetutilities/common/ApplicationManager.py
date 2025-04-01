@@ -266,10 +266,11 @@ class ConfigureApplicationInputs:
         if analysis_root_folder is None:
             analysis_root_folder = cfg_with_fm['Analysis']['analysis_root_folder']
 
-        if 'file_management' not in cfg_with_fm or not cfg_with_fm['file_management']['flag'] or len(cfg_with_fm) == 0:
-            result_sub_folder = 'results'
-        else:
-            result_sub_folder = cfg_with_fm['file_management']['output_directory']
+        result_sub_folder = 'results'
+        if len(cfg_with_fm) != 0 and 'file_management' in cfg_with_fm:
+            result_sub_folder_cfg = cfg_with_fm['file_management'].get('output_directory', 'results')
+            if result_sub_folder_cfg is not None:
+                result_sub_folder = result_sub_folder_cfg
 
         result_folder = os.path.join(analysis_root_folder, result_sub_folder)
         if not os.path.exists(result_folder):

@@ -20,7 +20,7 @@ dictitems:
         filename_pattern: ~
       output_directory: ~
     input_directory: yml
-    output_directory: results
+    output_directory: ~
     filename:
       extension:
       - yml
@@ -31,10 +31,7 @@ dictitems:
     input_files:
       yml:
       - !!python/object/apply:pathlib.WindowsPath
-        - c:\
-        - Users
-        - Sk Samdan
-        - Desktop
+        - k:\
         - github
         - assetutilities
         - tests
@@ -52,23 +49,20 @@ dictitems:
     flag: true
   Analysis:
     basename: yaml_utlities
-    analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
     file_name: test_plot_from_yml_arrays
     file_name_for_overwrite: test_plot_from_yml_arrays
-    log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-04-01 12:02:56.683977
+    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
+    start_time: 2025-04-01 11:27:45.087968
     cfg_array_file_names: ~
     DefaultInputFile: ~
-    CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
-    result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
-    result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
-    result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
-    fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
+    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
+    result_data_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results\Data
+    result_plot_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results\Plot
+    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
     file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - c:\
-    - Users
-    - Sk Samdan
-    - Desktop
+    - k:\
     - github
     - assetutilities
     - tests
@@ -76,10 +70,7 @@ dictitems:
     - yaml_utlities
     - yml
     file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - c:\
-    - Users
-    - Sk Samdan
-    - Desktop
+    - k:\
     - github
     - assetutilities
     - tests
