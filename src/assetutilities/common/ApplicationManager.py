@@ -268,7 +268,7 @@ class ConfigureApplicationInputs:
 
         result_sub_folder = 'results'
         if len(cfg_with_fm) != 0 and 'file_management' in cfg_with_fm:
-            result_sub_folder_cfg = cfg_with_fm['file_management'].get('output_directory', 'results')
+            result_sub_folder_cfg = cfg_with_fm['file_management'].get('output_directory', None)
             if result_sub_folder_cfg is not None:
                 result_sub_folder = result_sub_folder_cfg
 
