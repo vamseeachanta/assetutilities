@@ -266,10 +266,11 @@ class ConfigureApplicationInputs:
         if analysis_root_folder is None:
             analysis_root_folder = cfg_with_fm['Analysis']['analysis_root_folder']
 
-        if len(cfg_with_fm) == 0:
+        if 'file_management' not in cfg_with_fm or not cfg_with_fm['file_management']['flag'] or len(cfg_with_fm) == 0:
             result_sub_folder = 'results'
         else:
             result_sub_folder = cfg_with_fm['file_management']['output_directory']
+
         result_folder = os.path.join(analysis_root_folder, result_sub_folder)
         if not os.path.exists(result_folder):
             os.mkdir(result_folder)
