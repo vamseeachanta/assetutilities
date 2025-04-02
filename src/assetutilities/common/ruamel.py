@@ -69,9 +69,8 @@ class RuamelYaml:
             
             with open(output_file_path, "w", encoding='utf-8-sig') as f:
                 yaml.dump({key: data[key]}, f)
-            logger.debug("Splitting primary keys data END...")
+        logger.debug("Splitting primary keys data END...")
             
-
     
     def clean_yaml_line(self,line):
         """

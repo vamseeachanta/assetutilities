@@ -5,6 +5,7 @@ import logging
 import os
 import pkgutil
 import sys
+from pathlib import Path
 
 # Third party imports
 import yaml
@@ -376,5 +377,17 @@ class ConfigureApplicationInputs:
 
         filename = cfg_base.Analysis["file_name"]
         filename_path = os.path.join(output_dir, "results", filename)
+        cfg_base = self.fix_windows_path(cfg_base)
 
         save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)
+    
+    def fix_windows_path(self,data):
+        """Recursively convert all WindowsPath objects of dictionaries and lists to strings.
+        """
+        if isinstance(data, dict):  # Process dictionaries
+            return {key: self.fix_windows_path(value) for key, value in data.items()}
+        elif isinstance(data, list):  # Process lists
+            return [self.fix_windows_path(item) for item in data]
+        elif isinstance(data, Path):  # Convert WindowsPath to string
+            return str(data)
+        return data 

@@ -1,79 +1,54 @@
-&id001 !!python/object/new:assetutilities.common.data.AttributeDict
-state: *id001
-dictitems:
-  library: assetutlities
-  basename: yaml_utlities
-  default:
-    log_level: DEBUG
-    config:
-      overwrite:
-        output: true
-  file_management:
-    flag: true
-    files:
-      files_in_current_directory:
-        flag: false
-        auto_read: true
-        directory: yml
-        file_extensions:
-        - yml
-        filename_pattern: ~
-      output_directory: ~
-    input_directory: yml
-    output_directory: ~
-    filename:
-      extension:
+library: assetutlities
+basename: yaml_utlities
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
       - yml
-      pattern: L01
-      filters:
-        contains: []
-        not_contains: []
-    input_files:
-      yml:
-      - !!python/object/apply:pathlib.WindowsPath
-        - k:\
-        - github
-        - assetutilities
-        - tests
-        - modules
-        - yaml_utlities
-        - yml
-        - L01_default_vessel.yml
-  meta:
-    basename: yaml_utlities
-    library: assetutlities
-  plot_yml_arrays:
-    flag: true
-  visualization:
-    template: _xy_input
-    flag: true
-  Analysis:
-    basename: yaml_utlities
-    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
-    file_name: test_plot_from_yml_arrays
-    file_name_for_overwrite: test_plot_from_yml_arrays
-    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2025-04-01 11:36:50.307569
-    cfg_array_file_names: ~
-    DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
-    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    result_data_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results\Data
-    result_plot_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results\Plot
-    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
-    - github
-    - assetutilities
-    - tests
-    - modules
-    - yaml_utlities
+      filename_pattern: ~
+    output_directory: ~
+  input_directory: yml
+  output_directory: ~
+  filename:
+    extension:
     - yml
-    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
-    - github
-    - assetutilities
-    - tests
-    - modules
-    - yaml_utlities
-    - results
+    pattern: L01
+    filters:
+      contains: []
+      not_contains: []
+  input_files:
+    yml:
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\L01_default_vessel.yml
+meta:
+  basename: yaml_utlities
+  library: assetutlities
+plot_yml_arrays:
+  flag: true
+visualization:
+  template: _xy_input
+  flag: true
+Analysis:
+  basename: yaml_utlities
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+  file_name: test_plot_from_yml_arrays
+  file_name_for_overwrite: test_plot_from_yml_arrays
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+  start_time: 2025-04-02 12:20:32.304930
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml
+  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
