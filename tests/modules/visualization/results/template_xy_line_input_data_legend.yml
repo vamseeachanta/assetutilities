@@ -1,0 +1,150 @@
+basename: visualization
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - 0.5
+  - 1
+  - 2
+  - 2.5
+  - 3
+  - 4
+  theta:
+  - 35
+  - 70
+  - 120
+  - 155
+  - 205
+  - 240
+  type: input
+  groups:
+  - x:
+    - - 35
+      - 70
+      - 120
+      - 155
+      - 205
+      - 240
+    y:
+    - - 1
+      - 2
+      - 2.5
+      - 2.5
+      - 3
+      - 5
+    label: Legend 1
+  - x:
+    - - 35
+      - 70
+      - 120
+      - 155
+      - 205
+      - 240
+    y:
+    - - 1
+      - 2
+      - 2.5
+      - 2.5
+      - 3
+      - 5
+    label: Legend 2
+  color:
+  - blue
+  - green
+  alpha:
+  - 1
+  - 0.75
+  linestyle:
+  - --
+  - '-'
+  - '-'
+  - ':'
+settings:
+  type: xy_line
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  pairs: false
+  multiple: false
+  file_name: x_y_line_data_legend
+  plt_save_extensions:
+  - .png
+  title: Allowable Significant Wave Height (Hs)
+  xlabel: Direction (deg)
+  ylabel: Allowable Wave Height (m)
+  set_rmax: 10
+  set_rticks:
+  - 1
+  - 2
+  - 3
+  set_thetagrids:
+  - 0
+  - 30
+  - 60
+  - 90
+  - 120
+  - 150
+  - 180
+  - 210
+  - 240
+  - 270
+  - 300
+  - 330
+  set_rlabel_position: -22.5
+  legend:
+    flag: true
+    label:
+    - Legend 1
+    - Legend 2
+    loc: best
+    prop:
+      family: Arial
+      size: 5
+  color:
+  - '#17becf'
+  - '#bcbd22'
+  linestyle:
+  - '-'
+  - '-'
+  markerprops:
+  - marker: ~
+    markersize: ~
+  - marker: ~
+    markersize: ~
+  alpha:
+  - 1.0
+  - 1.0
+  traces: 2
+master_settings:
+  groups:
+    x:
+    - - 35
+      - 70
+      - 120
+      - 155
+      - 205
+      - 240
+    y:
+    - - 1
+      - 2
+      - 2.5
+      - 2.5
+      - 3
+      - 5
+    label: Legend 2
+Analysis:
+  basename: visualization
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization
+  file_name: template_xy_line_input_data_legend
+  file_name_for_overwrite: template_xy_line_input_data_legend
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\logs
+  start_time: 2025-04-03 12:03:16.854025
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\template_xy_line_input_data_legend.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results

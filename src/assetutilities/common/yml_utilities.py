@@ -89,8 +89,8 @@ class WorkingWithYAML:
                     'ylabel': 'WaveHeading',
                     }
         plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = arrays[0][0:9]
-        plot_yml['data']["groups"][0]["y"] = arrays[1]
+        plot_yml['data']["groups"][0]["x"] = [arrays[0][0:9]]
+        plot_yml['data']["groups"][0]["y"] = [arrays[1]]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 

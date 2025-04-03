@@ -43,10 +43,7 @@ class VisualizationXY:
 
         elif cfg["data"]["type"] == "csv":
             data_dict, cfg = self.get_xy_mapped_data_dict_from_csv(cfg)
-
-        print("Data Dictionary:", data_dict)
         data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
-        print("DataFrame Preview:\n", data_df.head())
 
         cfg = visualization_common.get_plot_properties_for_df(cfg, data_df)
 
@@ -55,6 +52,7 @@ class VisualizationXY:
     def get_xy_mapped_data_dict_from_input(self, mapped_data_cfg):
         data_dict = {}
         legend = []
+        trace_count = 0
         
         for group_cfg in mapped_data_cfg["data"]['groups']:
             x_data = group_cfg["x"]
@@ -63,19 +61,19 @@ class VisualizationXY:
             legend.append(legend_item if legend_item else f"Series {len(legend) + 1}")
 
             # Ensure both x and y have the same length
-            no_of_points = max(len(x_data), len(y_data))
+            no_of_trends = max(len(x_data), len(y_data))
 
-            if len(x_data) < no_of_points:
-                x_data = [x_data[0]] * no_of_points
-            if len(y_data) < no_of_points:
-                y_data = [y_data[0]] * no_of_points
+            if len(x_data) < len(y_data):
+                x_data = [x_data[0]] * len(y_data)
+            if len(x_data) > len(y_data):
+                y_data = [y_data[0]] * len(x_data)
 
-            # Store entire series as lists instead of single values
-            data_dict[f"x_{len(legend)-1}"] = x_data
-            data_dict[f"y_{len(legend)-1}"] = y_data
+            for i in range(0, no_of_trends):
+                data_dict.update({"x_" + str(i+trace_count): x_data[i]})
+                data_dict.update({"y_" + str(i+trace_count): y_data[i]})
+            trace_count += no_of_trends
 
         return data_dict, legend
-
 
     def get_xy_mapped_data_dict_from_csv(self, cfg):
         mapped_data_cfg = {}
@@ -171,8 +169,6 @@ class VisualizationXY:
         plot_mode = cfg["settings"].get("mode", ["line"])
 
         for index in range(0, plt_settings["traces"]):
-            print(f"Plotting x_{index} vs y_{index}")
-            print(df[f"x_{index}"], df[f"y_{index}"])
             linestyle = linestyle_list[index]
             marker_style = dict(
                 color=color_list[index],
