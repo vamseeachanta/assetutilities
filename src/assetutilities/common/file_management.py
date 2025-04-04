@@ -63,35 +63,6 @@ class FileManagement:
 
         return cfg
 
-    def get_files_in_directory_superseded(self, cfg):
-        if cfg["files"]["files_in_current_directory"]["flag"]:
-            file_folder = cfg["Analysis"]["analysis_root_folder"]
-        else:
-            file_folder = cfg["files"]["files_in_current_directory"]["directory"]
-
-        extension = cfg["files"]["extension"]
-        os.path.join(file_folder, "*." + extension)
-        files = glob.glob(os.path.join(file_folder, "*." + extension))
-
-        if "filters" in cfg["files"]:
-            cfg_filter = cfg["files"]["filters"]
-            filtered_files = self.get_filtered_files(files, cfg_filter)
-        else:
-            filtered_files = files.copy()
-
-        basenames = self.get_basenames(filtered_files)
-        cfg.update(
-            {
-                cfg["basename"]: {
-                    "files": filtered_files,
-                    "basenames": basenames,
-                    "file_folder": file_folder,
-                }
-            }
-        )
-
-        return cfg
-
     def get_filtered_files(self, files, cfg_filter):
         #TODO Test for multiple filter values
         # Only singleton array for cfg_filter['contains'] and cfg_filter['not_contains'] tested
