@@ -69,15 +69,17 @@ class FileManagement:
         filtered_files = files.copy()
         for file in files:
             file_stem = pathlib.Path(file).stem
+
             filter_flag = False
-            
             for cfg_filter_contains_item in cfg_filter['contains']:
                 if not cfg_filter_contains_item in file_stem:
                     filter_flag = True
+                    break
 
             for cfg_filter_not_contains_item in cfg_filter['not_contains']:
-                if cfg_filter_not_contains_item in file_stem:
-                    filter_flag = True
+                if not filter_flag:
+                    if cfg_filter_not_contains_item in file_stem:
+                        filter_flag = True
 
             if filter_flag:
                 filtered_files.remove(file)
