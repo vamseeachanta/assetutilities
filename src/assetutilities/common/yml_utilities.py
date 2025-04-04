@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Third party imports
 import yaml
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML as ruamelYAML
 from deepdiff import DeepDiff
 
 from loguru import logger
@@ -31,7 +31,7 @@ from assetutilities.common.visualization.visualization_templates import (
 viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
-ruamel_yaml = YAML()
+ruamel_yaml = ruamelYAML()
 ruamel_yaml.preserve_quotes = True  # Keeps quotes if present 
 ruamel_yaml.allow_duplicate_keys = True  # Allows duplicate keys if required
 ruamel_yaml.indent(mapping=2, sequence=4, offset=2) 
