@@ -5,31 +5,27 @@
   JacobianBufferingPolicy: 01
   JacobianPerturbationFactor: 0
   # Statics
-  BuoysIncludedInStatics: All
+  BuoysIncludedInStatics: Individually specified
   LineStaticsStep1Policy: All lines included
   LineStaticsStep2Policy: Solve coupled systems
   WholeSystemStaticsEnabled: Yes
-  StaticsMaxIterations: 26000
-  StaticsMinDamping: 15
-  StaticsMaxDamping: 2000
   # Dynamics
   DynamicsSolutionMethod: Implicit time domain
   ImplicitUseVariableTimeStep: No
-  ImplicitConstantTimeStep: 0.1
-  ImplicitConstantMaxNumOfIterations: 150
+  ImplicitConstantTimeStep: 0.05
   LogPrecision: Single
-  TargetLogSampleInterval: 0.1
+  TargetLogSampleInterval: 1
   LogStartTime:
   # Stages
   StartTime:
-  FirstStage: 0
+  FirstStage:
   RampStartTime:
   RampFinishTime:
   TimeHistoryImportFrom:
   TimeHistoryImportTo:
   StageDuration:
-    - 20
-    - 10.8e3
+    - 40
+    - 200
   # Restart state
   RestartStateRecordingPeriodicCount: 0
   RestartStateRecordingTest:

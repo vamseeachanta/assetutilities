@@ -9,6 +9,7 @@ from pathlib import Path
 
 # Third party imports
 import yaml
+import numpy as np
 
 # Reader imports
 from assetutilities.common.data import AttributeDict
@@ -377,17 +378,24 @@ class ConfigureApplicationInputs:
 
         filename = cfg_base.Analysis["file_name"]
         filename_path = os.path.join(output_dir, "results", filename)
-        cfg_base = self.fix_windows_path(cfg_base)
+        cfg_base = self.standardize_yml_data(cfg_base)
 
         save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)
     
-    def fix_windows_path(self,data):
-        """Recursively convert all WindowsPath objects of dictionaries and lists to strings.
+    def standardize_yml_data(self, data):
+        """
+        Recursively clean up the yml data structure to ensure readability and consistency.
         """
         if isinstance(data, dict):  # Process dictionaries
-            return {key: self.fix_windows_path(value) for key, value in data.items()}
+            return {key: self.standardize_yml_data(value) for key, value in data.items()}
         elif isinstance(data, list):  # Process lists
-            return [self.fix_windows_path(item) for item in data]
+            return [self.standardize_yml_data(item) for item in data]
         elif isinstance(data, Path):  # Convert WindowsPath to string
             return str(data)
+        elif isinstance(data, np.ndarray):  # Convert NumPy arrays to lists
+            return data.tolist()
+        elif isinstance(data, (np.integer, np.int32, np.int64)):  # Convert NumPy int to Python int
+            return int(data)
+        elif isinstance(data, (np.float32, np.float64)):  # Convert NumPy float to Python float
+            return float(data)
         return data 

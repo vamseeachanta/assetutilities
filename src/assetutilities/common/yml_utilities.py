@@ -10,6 +10,7 @@ from pathlib import Path
 
 # Third party imports
 import yaml
+from ruamel.yaml import YAML
 from deepdiff import DeepDiff
 
 from loguru import logger
@@ -30,6 +31,10 @@ from assetutilities.common.visualization.visualization_templates import (
 viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
+ruamel_yaml = YAML()
+ruamel_yaml.preserve_quotes = True  # Keeps quotes if present 
+ruamel_yaml.allow_duplicate_keys = True  # Allows duplicate keys if required
+ruamel_yaml.indent(mapping=2, sequence=4, offset=2) 
 
 
 def represent_none(self, _):
@@ -139,26 +144,6 @@ class WorkingWithYAML:
             raise Exception("Stopping Program due to some inefficient data in the YAML file")
 
         return stream_dict
-    
-    def clean_yaml_line(self,line):
-        """
-        Cleans a single line of YAML by removing invalid tokens or characters.
-        """
-        # Remove lines that are comments or contain invalid tokens
-        if '%' in line:
-            line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
-        return line
-
-    def clean_yaml_file(self,yaml_content):
-        """
-        Cleans the entire YAML content by removing invalid lines and tokens.
-        """
-        cleaned_lines = []
-        for line in yaml_content.splitlines():
-            cleaned_line = self.clean_yaml_line(line)
-            if cleaned_line:
-                cleaned_lines.append(cleaned_line)
-        return '\n'.join(cleaned_lines)
 
     def update_deep(self, d, u):
         for k, v in u.items():
@@ -316,37 +301,82 @@ class WorkingWithYAML:
         for file_name in yml_files:
             cfg_divide = cfg['yml_analysis']['divide']
             if cfg_divide['by'] == 'primary_key':
+                logger.debug("Splitting primary keys data START...")
                 output_file_name_array = self.divide_yaml_file_by_primary_keys(cfg, file_name)
                 cfg[cfg['basename']]['divide']['groups'].append(output_file_name_array)
             else:
                 raise Exception("No divide by method specified")
 
-    def divide_yaml_file_by_primary_keys(self, cfg, file_name) -> None:
-        '''
-        Divide yaml file by primary keys into individual yaml files and save them
-        '''
-        file_name_content = ymlInput(file_name)
-    
-        primary_keys = list(file_name_content.keys())
-
-        file_name_stem = Path(file_name).stem
+    def divide_yaml_file_by_primary_keys(self, cfg, file_name):
         result_folder = cfg['Analysis']['result_folder']
-
-        output_file_name_array = []
-        for primary_key in primary_keys:
-
-            primary_key_clean = primary_key.encode('ascii', 'ignore').decode('ascii')
-            output_file_name = f"{file_name_stem}_{primary_key_clean}.yml"
-            output_file_path = os.path.join(result_folder, output_file_name)
-
-            # Create a dictionary to add primary key to the output file 
-            data_to_write = {primary_key: file_name_content[primary_key]}
-
-            with open(output_file_path, "w") as f:
-                yaml.dump(data_to_write, f, default_flow_style=False, encoding='utf-8-sig', sort_keys=False, indent=2)
-                logger.info(f"{primary_key_clean}.yml has been saved in the current file directory")
-
-            output_file_name_array.append({'data': output_file_path})
+        file_name_stem = Path(file_name).stem
         
+        with open(file_name, "r", encoding='utf-8-sig') as file:
+            yaml_content = file.read()
+            
+            cleaned_yaml = self.clean_yaml_file(yaml_content)
+            cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
+            
+            data = ruamel_yaml.load(cleaned_yaml)
+        
+        primary_key_patterns = []
+        for line in cleaned_yaml.splitlines():
+            # Match primary key definitions (key: value)
+            match = re.match(r'^(\s*)([^:]+)\s*:', line)
+            if match:
+                #indent = match.group(1)
+                key = match.group(2).strip()
+                # Check if the rest of the line contains the value (single-line)
+                value_part = line[match.end():].strip()
+                if value_part:  # If there's content after the colon
+                    primary_key_patterns.append((key, True))  # True = single line
+                else:
+                    primary_key_patterns.append((key, False))  # False = multi-line
+        
+        # Convert to dictionary for easy lookup
+        is_single_line = {key: single for key, single in primary_key_patterns}
+        
+        output_file_name_array = []
+        for key in data.keys():
+            # Skip if the key is marked as single-line in the original YAML
+            if is_single_line.get(key, False):
+                continue
+                
+            output_file_name = f"{file_name_stem}_{key}.yml"
+            output_file_path = os.path.join(result_folder, output_file_name)
+            
+            with open(output_file_path, "w", encoding='utf-8-sig') as f:
+                ruamel_yaml.dump({key: data[key]}, f)
+            output_file_name_array.append({'data':output_file_path})
+            
+        logger.debug("Splitting primary keys data FINISH...")
         return output_file_name_array
+            
+    def clean_yaml_line(self,line):
+        """
+        Cleans a single line of YAML by removing invalid tokens or characters.
+        """
+        if '%' in line:
+            line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
+        return line
 
+    def clean_yaml_file(self,yaml_content):
+        """
+        Cleans the entire YAML content by removing invalid lines and tokens.
+        """
+        cleaned_lines = []
+        for line in yaml_content.splitlines():
+            cleaned_line = self.clean_yaml_line(line)
+            if cleaned_line:
+                cleaned_lines.append(cleaned_line)
+        return '\n'.join(cleaned_lines)
+
+    def extract_data_after_document_start(self, yaml_content):
+        """
+        Extracts the YAML content after the document start symbol (---).
+        """
+        # Split the content by the document start symbol
+        parts = yaml_content.split('---', 1)
+        if len(parts) > 1:
+            return parts[1].strip()  # Return the content after '---'
+        return yaml_content
