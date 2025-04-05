@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 
 from io import BytesIO
 
-class ReadZiptoDf:
+class ZipFilestoDf:
 
     def __init__(self):
         pass
@@ -13,7 +13,7 @@ class ReadZiptoDf:
     def zip_to_dataframes(self,zip_file: Union[BytesIO, bytes], column_names: Optional[List[str]] = None) ->  Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         
         """
-        Extracts CSV or TXT files from a ZIP archive and loads them into Pandas DataFrames.
+        Extracts CSV or TXT files from a ZIP archive and loads them and returns Pandas DataFrames.
         
         Returns:
             Union[Dict[str, pd.DataFrame], pd.DataFrame]:
@@ -49,7 +49,7 @@ class ReadZiptoDf:
                     print(f"Loaded file: {file_to_read}")
                     dataframes[file_to_read] = df
             
-            # If only one file, return the DataFrame istead of a dictionary
+            # If only one file, return the DataFrame instead of a dictionary
             if len(dataframes) == 1:
                 return list(dataframes.values())[0]
             

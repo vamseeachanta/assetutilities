@@ -8,7 +8,6 @@ from zipfile import ZipFile
 from assetutilities.common.utilities import is_dir_valid_func
 
 
-
 class ZipUtilities:
     def __init__(self):
         pass

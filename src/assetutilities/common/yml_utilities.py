@@ -7,10 +7,10 @@ import pkgutil
 import types
 from collections.abc import Mapping
 from pathlib import Path
+from io import StringIO
 
 # Third party imports
 import yaml
-from ruamel.yaml import YAML as ruamelYAML
 from deepdiff import DeepDiff
 
 from loguru import logger
@@ -26,15 +26,13 @@ from assetutilities.common.utilities import (
 from assetutilities.common.visualization.visualization_templates import (
     VisualizationTemplates,
 )
+from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML
 #from assetutilities.engine import engine as aus_engine
 
 viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
-ruamel_yaml = ruamelYAML()
-ruamel_yaml.preserve_quotes = True  # Keeps quotes if present 
-ruamel_yaml.allow_duplicate_keys = True  # Allows duplicate keys if required
-ruamel_yaml.indent(mapping=2, sequence=4, offset=2) 
+ruamel_yaml = RuamelYAML()
 
 
 def represent_none(self, _):
@@ -54,15 +52,14 @@ def update_deep(d, u):
     return WorkingWithYAML().update_deep(d, u)
 
 
-
 class WorkingWithYAML:
 
     def __init__(self):
         pass
 
     def router(self, cfg):
-        if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['flag']:
-            self.divide_yaml_files(cfg)
+        if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
+            ruamel_yaml.router(cfg)
         elif 'plot_yml_arrays' in cfg and cfg['plot_yml_arrays']['flag']:
             self.get_plot_yml(cfg)
 
@@ -103,7 +100,7 @@ class WorkingWithYAML:
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
-        with open(defaultYml, "r") as ymlfile:
+        with open(defaultYml, "r",encoding='utf-8') as ymlfile:
             try:
                 cfg = yaml.safe_load(ymlfile)
             except yaml.composer.ComposerError as e:
@@ -132,8 +129,8 @@ class WorkingWithYAML:
                 yaml_content = ymlfile.read()
             
                 # Clean the YAML content
-                cleaned_yaml = self.clean_yaml_file(yaml_content)
-                docs = yaml.safe_load_all(cleaned_yaml)
+                #cleaned_yaml = self.clean_yaml_file(yaml_content)
+                docs = yaml.safe_load_all(yaml_content)
                 if type(docs) is types.GeneratorType:
                     for doc in docs:
                         if type(doc) is dict:
