@@ -4,17 +4,13 @@ import sys
 import deepdiff
 
 import colorama
-from assetutilities.common.yml_utilities import ymlInput
+from assetutilities.common.yml_utilities import ymlInput #noqa
 
 # Reader imports
-from assetutilities.engine import engine
-from assetutilities.common.yml_utilities import ymlInput
-from assetutilities.engine import engine
+from assetutilities.engine import engine #noqa
 from assetutilities.modules.test_utilities.test_utilities import TestUtilities
 
 colorama.init(autoreset=True)
-
-# Standard library imports
 
 tu = TestUtilities()
 

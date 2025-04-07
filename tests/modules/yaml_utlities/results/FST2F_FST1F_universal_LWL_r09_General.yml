@@ -1,6 +1,4 @@
-﻿%YAML 1.1
----
-General:
+﻿General:
   # Units
   UnitsSystem: SI
   # Analysis data
@@ -10,13 +8,13 @@ General:
   BuoysIncludedInStatics: All
   LineStaticsStep1Policy: All lines included
   LineStaticsStep2Policy: Solve coupled systems
-  WholeSystemStaticsEnabled: true
+  WholeSystemStaticsEnabled: Yes
   StaticsMaxIterations: 26000
   StaticsMinDamping: 15
   StaticsMaxDamping: 2000
   # Dynamics
   DynamicsSolutionMethod: Implicit time domain
-  ImplicitUseVariableTimeStep: false
+  ImplicitUseVariableTimeStep: No
   ImplicitConstantTimeStep: 0.1
   ImplicitConstantMaxNumOfIterations: 150
   LogPrecision: Single

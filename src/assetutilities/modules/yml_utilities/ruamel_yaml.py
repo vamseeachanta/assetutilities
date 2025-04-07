@@ -52,29 +52,36 @@ class RuamelYAML:
             
             data = ruamel_yaml.load(cleaned_yaml)
         
-        primary_key_patterns = []
-        for line in cleaned_yaml.splitlines():
-            # Match primary key definitions (key: value)
-            match = re.match(r'^(\s*)([^:]+)\s*:', line)
-            if match:
-                #indent = match.group(1)
-                key = match.group(2).strip()
-                # Check if the rest of the line contains the value (single-line)
-                value_part = line[match.end():].strip()
-                if value_part:  # If there's content after the colon
-                    primary_key_patterns.append((key, True))  # True = single line
-                else:
-                    primary_key_patterns.append((key, False))  # False = multi-line
-        
-        # Convert to dictionary for easy lookup
-        is_single_line = {key: single for key, single in primary_key_patterns}
-        
+        # Split the YAML into lines for analysis
+        lines = cleaned_yaml.splitlines()
+        primary_key_info = {}
+        current_key = None
+
+        for i, line in enumerate(lines):
+            # Check for key definition
+            key_match = re.match(r'^([^:]+):', line)
+            if key_match:
+                current_key = key_match.group(1).strip()
+                value_part = line[key_match.end():].strip()
+                
+                # Check if this is a single-line value
+                is_single_line = bool(value_part)  # Starts with content after colon
+                
+                # Look ahead to see if there are more lines for this value
+                if is_single_line and i+1 < len(lines):
+                    next_line = lines[i+1]
+                    # If next line is indented (more value content) or empty line before next key
+                    if next_line and (next_line[0].isspace() or not next_line.strip()):
+                        is_single_line = False
+                
+                primary_key_info[current_key] = is_single_line
+
         output_file_name_array = []
         for key in data.keys():
-            # Skip if the key is marked as single-line in the original YAML
-            if is_single_line.get(key, False):
-                continue
-                
+            # Skip if the key is marked as single-line in our analysis
+            if primary_key_info.get(key, False):
+                continue        
+                    
             output_file_name = f"{file_name_stem}_{key}.yml"
             output_file_path = os.path.join(result_folder, output_file_name)
             

@@ -1,13 +1,11 @@
-﻿%YAML 1.1
----
-VariableData:
+﻿VariableData:
   Constrainttranslationalstiffness:
     - Name: Linear_Vertical_Stiffness
       IndependentValue, DependentValue:
         - [-100, -50e9]
         - [0, 0]
         - [100, 500]
-      Hysteretic: false
+      Hysteretic: No
     - Name: SCN2500
       IndependentValue, DependentValue:
         - [-2.225, -4.9847e6]
@@ -47,7 +45,7 @@ VariableData:
         - [2.05, 4531.6]
         - [2.125, 4984.7]
         - [2.225, 4.9847e6]
-      Hysteretic: false
+      Hysteretic: No
     - Name: SCN2500_Double
       IndependentValue, DependentValue:
         - [-2.225, -9.9694e6]
@@ -87,7 +85,7 @@ VariableData:
         - [2.05, 9063.2]
         - [2.125, 9969.4]
         - [2.225, 9.9694e6]
-      Hysteretic: false
+      Hysteretic: No
     - Name: surge_stiffness
       IndependentValue, DependentValue:
         - [-2.125, -4.9847e6]
@@ -127,7 +125,7 @@ VariableData:
         - [1.95, 4531.6]
         - [2.025, 4984.7]
         - [2.125, 4.9847e6]
-      Hysteretic: false
+      Hysteretic: No
     - Name: sway_stiffness
       IndependentValue, DependentValue:
         - [-1.15, -4.73231e6]
@@ -167,11 +165,11 @@ VariableData:
         - [1.95, 9063.2]
         - [2.025, 9969.4]
         - [2.125, 9.9694e6]
-      Hysteretic: false
+      Hysteretic: No
     - Name: Sway_Stiffness_75%
-      Hysteretic: false
+      Hysteretic: No
     - Name: Surge_Stiffness_50%
-      Hysteretic: false
+      Hysteretic: No
   Constrainttranslationaldamping:
     - Name: Y_Damping_Set_05
       IndependentValue, DependentValue:
