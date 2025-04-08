@@ -64,26 +64,60 @@ class FileManagement:
         return cfg
 
     def get_filtered_files(self, files, cfg_filter):
-        #TODO Test for multiple filter values
-        # Only singleton array for cfg_filter['contains'] and cfg_filter['not_contains'] tested
         filtered_files = files.copy()
+        match_logic = cfg_filter.get('match_logic', 'AND').upper()
+        
         for file in files:
-            file_stem = pathlib.Path(file).stem
-
-            filter_flag = False
-            for cfg_filter_contains_item in cfg_filter['contains']:
-                if not cfg_filter_contains_item in file_stem:
-                    filter_flag = True
-                    break
-
-            for cfg_filter_not_contains_item in cfg_filter['not_contains']:
-                if not filter_flag:
-                    if cfg_filter_not_contains_item in file_stem:
-                        filter_flag = True
-
-            if filter_flag:
+            file_path = pathlib.Path(file)
+            file_stem = file_path.stem
+            conditions = []
+            
+            # Existing contains/not_contains filters
+            if 'contains' in cfg_filter:
+                conditions.append(all(
+                    item in file_stem 
+                    for item in cfg_filter['contains']
+                ))
+                
+            if 'not_contains' in cfg_filter:
+                conditions.append(all(
+                    item not in file_stem 
+                    for item in cfg_filter['not_contains']
+                ))
+                
+            # New filters
+            if 'starts_with' in cfg_filter:
+                conditions.append(any(
+                    file_stem.startswith(prefix)
+                    for prefix in cfg_filter['starts_with']
+                ))
+                
+            if 'ends_with' in cfg_filter:
+                conditions.append(any(
+                    file_stem.endswith(suffix)
+                    for suffix in cfg_filter['ends_with']
+                ))
+                
+            if 'regex' in cfg_filter and cfg_filter['regex']:
+                import re
+                conditions.append(bool(
+                    re.search(cfg_filter['regex'], file_stem)
+                ))
+                
+            if 'min_size_kb' in cfg_filter:
+                file_size_kb = file_path.stat().st_size / 1024
+                conditions.append(file_size_kb >= cfg_filter['min_size_kb'])
+                
+            if 'max_size_kb' in cfg_filter:
+                file_size_kb = file_path.stat().st_size / 1024
+                conditions.append(file_size_kb <= cfg_filter['max_size_kb'])
+            
+            # Apply the matching logic
+            if match_logic == 'AND' and not all(conditions):
                 filtered_files.remove(file)
-
+            elif match_logic == 'OR' and not any(conditions):
+                filtered_files.remove(file)
+                
         return filtered_files
 
     def get_basenames(self, files):

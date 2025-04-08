@@ -21,13 +21,14 @@ file_management:
   filename:
     extension:
     - yml
-    pattern: LWL
+    pattern: ~
     filters:
-      contains: []
-      not_contains: []
+      contains:
+      - wwyaml _items
+      not_contains:
+      - wwyaml _changed
   input_files:
-    yml:
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\FST2F_FST1F_universal_LWL_r09.yml
+    yml: []
 yml_analysis:
   divide:
     flag: true
@@ -39,7 +40,7 @@ Analysis:
   file_name: divide_yaml_file_by_primary_key
   file_name_for_overwrite: divide_yaml_file_by_primary_key
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-07 12:23:18.867291
+  start_time: 2025-04-08 10:31:27.536151
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
@@ -51,14 +52,4 @@ Analysis:
   file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
 yaml_utlities:
   divide:
-    groups:
-    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_General.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_VariableData.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Environment.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_VesselTypes.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_LineTypes.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Vessels.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Lines.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_MultibodyGroups.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Constraints.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\FST2F_FST1F_universal_LWL_r09_Groups.yml
+    groups: []

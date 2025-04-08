@@ -1,0 +1,25 @@
+basename: file_management
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+  input_directory: filename_scenarios
+  output_directory: NULL
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      # contains: [report_india]
+      # not_contains: [report_us]
+      # starts_with: [app_]  
+      # ends_with: [_2023 , _sales]    
+      regex: '^[a-z]{2}_[0-9]{4}_.*$'  # 2 letters + _ + 4 digits + _ + anything           
+      # min_size_kb: 10        
+      # max_size_kb: 100     
+      #match_logic: AND  # (AND/OR)
