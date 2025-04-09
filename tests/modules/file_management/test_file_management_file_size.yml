@@ -1,0 +1,19 @@
+basename: file_management
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+  input_directory: test_files
+  output_directory: NULL
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:   
+      min_size_kb: 10     
+      max_size_kb: 40

@@ -14,7 +14,7 @@ with open(defaultYml, "r") as ymlfile:
 After introducing encoding format , code goes toexcept block and then error got resolved.
 
 ```python
-with open(defaultYml, "r",encoding="utf-8-sig") as ymlfile:
+with open(defaultYml, "r",encoding="utf-8") as ymlfile:
     try:
         cfg = yaml.safe_load(ymlfile)
     except yaml.composer.ComposerError as e:

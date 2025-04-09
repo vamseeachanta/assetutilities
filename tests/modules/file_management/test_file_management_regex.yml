@@ -1,0 +1,18 @@
+basename: file_management
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+  input_directory: test_files
+  output_directory: NULL
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:   
+      regex: '^[a-z]{2}_[0-9]{4}_.*$'  # 2 letters + _ + 4 digits + _ + anything ( customize accordingly  ) 

@@ -71,7 +71,7 @@ dumper: DumperType  # Custom dumper for advanced configurations
 
 ---
 
-## Example Usage with Dumper
+## Example Usage with Dumper Types
 
 ```python
 import yaml
