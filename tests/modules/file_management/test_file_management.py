@@ -25,7 +25,7 @@ def run_process(input_file, expected_result):
 
 
 def test_run_process():
-    input_file = "test_file_management_regex.yml"
+    input_file = "test_file_management_file_size.yml"
 
     # pytest_output_file = "results/test_zip_by_stem_pytest.yml"
     # pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)

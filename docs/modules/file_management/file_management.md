@@ -47,13 +47,23 @@ filters:
 ❌ Skips: wwyaml_SZ_trim_QA_changed.yaml - 50kb
 
 ```
+## 📊  Comparison table of filters ( best to least preferred )
 
----
----
+| Rank | Filter           | Purpose                                     | Preference Reason                                      |
+|------|------------------|---------------------------------------------|--------------------------------------------------------|
+| 1️⃣  | contains and not_contains         | mostly cover all file names   | Most readable, predictable, and intuitive              |                |
+| 2️⃣  | min_size_kb / max_size_kb | useful when same names exists      | Ensures data completeness or avoids oversized files    |
+| 3️⃣  | regex             | Advanced pattern matching             | Powerful but harder to maintain 
+
+
+> ✅ `contains` + `not_contains` are enough in most cases for getting files. 
+
+
 
 **Run tests for better understanding :**
 
 - `tests\modules\file_management\test_file_management.py`
 
-**Note: Code can be viewed in :** 
+**Note: Code can be inspected in :** 
+
 - `src\assetutilities\common\file_management.py`

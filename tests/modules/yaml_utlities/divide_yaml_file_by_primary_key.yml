@@ -14,12 +14,12 @@ yml_analysis:
 
 file_management:
   flag: True
-  input_directory: yml
+  input_directory: yml/test_data
   output_directory: NULL
 
   filename:
     extension: [yml]
-    pattern: NULL
+    pattern: hwl_125km3
     filters:
-      contains: [QA_items]
-      not_contains: [QA_values_changed]
+      contains: []
+      not_contains: []

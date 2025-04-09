@@ -16,19 +16,18 @@ file_management:
       - yml
       filename_pattern: ~
     output_directory: ~
-  input_directory: yml
+  input_directory: yml/test_data
   output_directory: ~
   filename:
     extension:
     - yml
-    pattern: ~
+    pattern: hwl_125km3
     filters:
-      contains:
-      - wwyaml _items
-      not_contains:
-      - wwyaml _changed
+      contains: []
+      not_contains: []
   input_files:
-    yml: []
+    yml:
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\includefile_fsts_l095_hwl_125km3_l000_sb.yml
 yml_analysis:
   divide:
     flag: true
@@ -40,7 +39,7 @@ Analysis:
   file_name: divide_yaml_file_by_primary_key
   file_name_for_overwrite: divide_yaml_file_by_primary_key
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-08 10:31:27.536151
+  start_time: 2025-04-09 12:03:27.871551
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
@@ -48,8 +47,24 @@ Analysis:
   result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
   result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
   fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
-  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml
+  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data
   file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
 yaml_utlities:
   divide:
-    groups: []
+    groups:
+    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line01.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line02.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line03.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line04.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line05.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line06.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line07.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line08.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line09.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line10.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line11.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line12.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line13.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line14.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line15.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line16.yml
