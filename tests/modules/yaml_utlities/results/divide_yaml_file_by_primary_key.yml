@@ -21,14 +21,16 @@ file_management:
   filename:
     extension:
     - yml
-    pattern: hwl_125km3
+    pattern: L01
     filters:
       contains: []
       not_contains: []
   input_files:
     yml:
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\includefile_fsts_l095_hwl_125km3_l000_sb.yml
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\L01_default_vessel.yml
 yml_analysis:
+  shape_output:
+    flag: false
   divide:
     flag: true
     by: primary_key
@@ -39,7 +41,7 @@ Analysis:
   file_name: divide_yaml_file_by_primary_key
   file_name_for_overwrite: divide_yaml_file_by_primary_key
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-09 12:03:27.871551
+  start_time: 2025-04-10 10:46:17.367946
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
@@ -52,19 +54,6 @@ Analysis:
 yaml_utlities:
   divide:
     groups:
-    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line01.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line02.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line03.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line04.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line05.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line06.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line07.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line08.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line09.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line10.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line11.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line12.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line13.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line14.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line15.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\includefile_fsts_l095_hwl_125km3_l000_sb_Line16.yml
+    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_PeriodOrFrequency.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_WaveHeading.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_Bodies.yml

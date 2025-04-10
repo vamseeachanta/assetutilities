@@ -84,9 +84,26 @@ class RuamelYAML:
                     
             output_file_name = f"{file_name_stem}_{key}.yml"
             output_file_path = os.path.join(result_folder, output_file_name)
+
+            # Post-process the file to convert lists to single-line format
+            if cfg['yml_analysis']['shape_output']['flag']:
+                with open(output_file_path, "r", encoding='utf-8-sig') as f:
+                    content = f.read()
             
-            with open(output_file_path, "w", encoding='utf-8-sig') as f:
-                ruamel_yaml.dump({key: data[key]}, f)
+                # Apply regex to convert to single-line format
+                modified_content = re.sub(
+                    r'-\s+-\s+([^\n]+)\n\s+-\s+([^\n]+)',
+                    r'- [\1, \2]',
+                    content
+                )
+                
+                # Write the modified content back
+                with open(output_file_path, "w", encoding='utf-8-sig') as f:
+                    f.write(modified_content)
+            else:
+                with open(output_file_path, "w", encoding='utf-8-sig') as f:
+                    ruamel_yaml.dump({key: data[key]}, f)
+
             output_file_name_array.append({'data':output_file_path})
             
         logger.debug("Splitting primary keys data FINISH...")

@@ -7,6 +7,8 @@ default:
       output: True
 
 yml_analysis:
+  shape_output:
+    flag: False
   divide:
     flag: True
     by: primary_key
@@ -19,7 +21,7 @@ file_management:
 
   filename:
     extension: [yml]
-    pattern: hwl_125km3
+    pattern: L01
     filters:
       contains: []
       not_contains: []
