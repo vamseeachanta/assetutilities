@@ -21,13 +21,15 @@ file_management:
   filename:
     extension:
     - yml
-    pattern: L01
+    pattern: ~
     filters:
-      contains: []
-      not_contains: []
+      contains:
+      - FST1F_D
+      not_contains:
+      - FST1L_D
   input_files:
     yml:
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\L01_default_vessel.yml
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\Template_FST2F_FST1F_D.yml
 yml_analysis:
   shape_output:
     flag: false
@@ -41,7 +43,7 @@ Analysis:
   file_name: divide_yaml_file_by_primary_key
   file_name_for_overwrite: divide_yaml_file_by_primary_key
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-10 10:46:17.367946
+  start_time: 2025-04-10 11:05:27.825879
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
@@ -54,6 +56,8 @@ Analysis:
 yaml_utlities:
   divide:
     groups:
-    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_PeriodOrFrequency.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_WaveHeading.yml
-      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\L01_default_vessel_Bodies.yml
+    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_VesselTypes.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_General.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Environment.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Constraints.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Lines.yml
