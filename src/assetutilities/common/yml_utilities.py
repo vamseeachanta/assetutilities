@@ -71,30 +71,27 @@ class WorkingWithYAML:
 
         yml_files = cfg['file_management']['input_files']['yml']
         for yml_file in yml_files:
-            self.plot_yml_arrays(yml_file, cfg)
+            self.plot_yml_arrays(cfg)
 
-    def plot_yml_arrays(self, yml_file, cfg):
+    def plot_yml_arrays(self, cfg):
 
-        with open(yml_file, "r") as ymlfile:
-            documents = list(yaml.safe_load_all(ymlfile))
-        data = {}
-        for doc in documents:
-            if isinstance(doc, dict):
-                data.update(doc)
-        arrays = [v for v in data.values() if isinstance(v, list) and all(isinstance(i, (int, float)) for i in v)]
+        plot_arrays = cfg['visualization']['arrays']
+        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
+        y_array = plot_arrays[0]['RAOSurgeAmp']
+        file_name = cfg['visualization']['file_name']
     
-        if len(arrays) < 2:
+        if len(plot_arrays[0]) < 2:
             raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
         
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': yml_file.stem,
-                    'title': 'Line Plot',
-                    'xlabel': 'PeriodOrFrequency',
-                    'ylabel': 'WaveHeading',
+        settings = {'file_name': file_name,
+                    'title': 'RAOsDirectionPlot',
+                    'xlabel': 'RAOPeriodOrFrequency',
+                    'ylabel': 'RAOSurgeAmp',
                     }
         plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = [arrays[0][0:9]]
-        plot_yml['data']["groups"][0]["y"] = [arrays[1]]
+        plot_yml['data']["groups"][0]["x"] = [x_array]
+        plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 
@@ -311,6 +308,8 @@ class WorkingWithYAML:
     
     def test_directive_block(self,cfg):
 
+        file_name = cfg['data']['groups'][0]['csvs'][0]['target']['file_name']
+        print("File name placeholder is reusable:", file_name)
         try:
             target_block = cfg['data']['groups'][0]['target']
             logger.debug("Directive block is reusable:")

@@ -10,6 +10,10 @@ define: &output_config
   template: collated/template_block_template.xlsx
   filename: collated/output_block_file.xlsx
 
+output_config:
+  template: collated/template_block_template.xlsx
+  filename: collated/output_block_file.xlsx
+  
 task: csv_copy_to_excel
 
 default:
@@ -31,7 +35,7 @@ data:
           input:
             filename: results\dm_fsts_lngc_fsts_l015_hwl_125km3_l100_sb_inputs.csv
           target:
-            sheet_name: inputs
+            file_name: "{output_config['file_name']}"
         -
           input:
             filename: results\dm_fsts_lngc_fsts_l015_hwl_125km3_l100_sb_strut_stat.csv

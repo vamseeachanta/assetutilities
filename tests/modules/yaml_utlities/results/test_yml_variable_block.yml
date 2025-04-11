@@ -25,6 +25,9 @@ test_variables:
 define:
   template: collated/template_block_template.xlsx
   filename: collated/output_block_file.xlsx
+output_config:
+  template: collated/template_block_template.xlsx
+  filename: collated/output_block_file.xlsx
 task: csv_copy_to_excel
 data:
   input_format: csv
@@ -36,7 +39,8 @@ data:
     - input:
         filename: results\dm_fsts_lngc_fsts_l015_hwl_125km3_l100_sb_inputs.csv
       target:
-        sheet_name: inputs
+        file_name:
+          output_config: ~
     - input:
         filename: results\dm_fsts_lngc_fsts_l015_hwl_125km3_l100_sb_strut_stat.csv
       target:
@@ -79,7 +83,7 @@ Analysis:
   file_name: test_yml_variable_block
   file_name_for_overwrite: test_yml_variable_block
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-11 11:13:44.211914
+  start_time: 2025-04-11 11:30:13.064940
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_yml_variable_block.yml
