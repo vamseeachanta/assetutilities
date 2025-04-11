@@ -62,6 +62,8 @@ class WorkingWithYAML:
             ruamel_yaml.router(cfg)
         elif 'plot_yml_arrays' in cfg and cfg['plot_yml_arrays']['flag']:
             self.get_plot_yml(cfg)
+        elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
+            self.test_variables(cfg)
 
         return cfg
     
@@ -69,9 +71,9 @@ class WorkingWithYAML:
 
         yml_files = cfg['file_management']['input_files']['yml']
         for yml_file in yml_files:
-            self.plot_from_yml_arrays(yml_file, cfg)
+            self.plot_yml_arrays(yml_file, cfg)
 
-    def plot_from_yml_arrays(self, yml_file, cfg):
+    def plot_yml_arrays(self, yml_file, cfg):
 
         with open(yml_file, "r") as ymlfile:
             documents = list(yaml.safe_load_all(ymlfile))
@@ -288,92 +290,33 @@ class WorkingWithYAML:
                     raise FileNotFoundError()
 
             return filepath_with_lib_path
+    
+    def test_variables(self, cfg):
+    
+        if cfg['test_variables']['method']=='single':
+            self.test_single_variable(cfg)
+        elif cfg['test_variables']['method']=='directive_block':
+            self.test_directive_block(cfg)
 
-    def divide_yaml_files(self, cfg) -> None:
-        '''
-        Iterate through yml files
-        '''
-        yml_files = cfg['file_management']['input_files']['yml']
-        cfg[cfg['basename']] = {'divide': {'groups':[]}}
-        for file_name in yml_files:
-            cfg_divide = cfg['yml_analysis']['divide']
-            if cfg_divide['by'] == 'primary_key':
-                logger.debug("Splitting primary keys data START...")
-                output_file_name_array = self.divide_yaml_file_by_primary_keys(cfg, file_name)
-                cfg[cfg['basename']]['divide']['groups'].append(output_file_name_array)
-            else:
-                raise Exception("No divide by method specified")
+        return cfg
 
-    def divide_yaml_file_by_primary_keys(self, cfg, file_name):
-        result_folder = cfg['Analysis']['result_folder']
-        file_name_stem = Path(file_name).stem
-        
-        with open(file_name, "r", encoding='utf-8-sig') as file:
-            yaml_content = file.read()
-            
-            cleaned_yaml = self.clean_yaml_file(yaml_content)
-            cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
-            
-            data = ruamel_yaml.load(cleaned_yaml)
-        
-        primary_key_patterns = []
-        for line in cleaned_yaml.splitlines():
-            # Match primary key definitions (key: value)
-            match = re.match(r'^(\s*)([^:]+)\s*:', line)
-            if match:
-                #indent = match.group(1)
-                key = match.group(2).strip()
-                # Check if the rest of the line contains the value (single-line)
-                value_part = line[match.end():].strip()
-                if value_part:  # If there's content after the colon
-                    primary_key_patterns.append((key, True))  # True = single line
-                else:
-                    primary_key_patterns.append((key, False))  # False = multi-line
-        
-        # Convert to dictionary for easy lookup
-        is_single_line = {key: single for key, single in primary_key_patterns}
-        
-        output_file_name_array = []
-        for key in data.keys():
-            # Skip if the key is marked as single-line in the original YAML
-            if is_single_line.get(key, False):
-                continue
-                
-            output_file_name = f"{file_name_stem}_{key}.yml"
-            output_file_path = os.path.join(result_folder, output_file_name)
-            
-            with open(output_file_path, "w", encoding='utf-8-sig') as f:
-                ruamel_yaml.dump({key: data[key]}, f)
-            output_file_name_array.append({'data':output_file_path})
-            
-        logger.debug("Splitting primary keys data FINISH...")
-        return output_file_name_array
-            
-    def clean_yaml_line(self,line):
-        """
-        Cleans a single line of YAML by removing invalid tokens or characters.
-        """
-        if '%' in line:
-            line = re.sub(r'(\s*[^:]+:\s*)%([^%]+)%', r'\1"\2"', line)  # Wrap %...% in quotes
-        return line
+    def test_single_variable(self, cfg):
+        try:
+            label = cfg['data']['groups'][0]['label']
+            print("Label is reusable:", label)
+            return True, label
+        except KeyError as e:
+            logger.error("Label cannot be accesible:", e)
+            return False, None
+    
+    def test_directive_block(self,cfg):
 
-    def clean_yaml_file(self,yaml_content):
-        """
-        Cleans the entire YAML content by removing invalid lines and tokens.
-        """
-        cleaned_lines = []
-        for line in yaml_content.splitlines():
-            cleaned_line = self.clean_yaml_line(line)
-            if cleaned_line:
-                cleaned_lines.append(cleaned_line)
-        return '\n'.join(cleaned_lines)
-
-    def extract_data_after_document_start(self, yaml_content):
-        """
-        Extracts the YAML content after the document start symbol (---).
-        """
-        # Split the content by the document start symbol
-        parts = yaml_content.split('---', 1)
-        if len(parts) > 1:
-            return parts[1].strip()  # Return the content after '---'
-        return yaml_content
+        try:
+            target_block = cfg['data']['groups'][0]['target']
+            logger.debug("Directive block is reusable:")
+            print("block_Template:", target_block['template'])
+            print("block_Filename:", target_block['filename'])
+            return True, target_block
+        except KeyError as e:
+            logger.error("Directive block not accessible:", e)
+            return False, None
