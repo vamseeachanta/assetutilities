@@ -9,8 +9,12 @@ class ZipFilestoDf:
 
     def __init__(self):
         pass
+
+    def router(self,cfg):
+        self.zip_to_dataframes(cfg)
+        return cfg
     
-    def zip_to_dataframes(self,zip_file: Union[BytesIO, bytes], column_names: Optional[List[str]] = None) ->  Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+    def zip_to_dataframes(self,cfg) ->  Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         
         """
         Extracts CSV or TXT files from a ZIP archive and loads them and returns Pandas DataFrames.
@@ -21,9 +25,19 @@ class ZipFilestoDf:
             - A dictionary where keys are filenames and values are Pandas DataFrames if multiple files exist.
         """
         
-        delimiter = ','
-        zip_file = zip_file
-        column_names = column_names
+        folder_path = cfg['zip_utilities']['folder_path']
+        column_names = None # Default to None, can be set in the configuration if needed
+
+        if not os.path.exists(folder_path):
+            raise FileNotFoundError(f"The folder path '{folder_path}' is not valid to load zip files.")
+
+        for file_name in os.listdir(folder_path):
+            if file_name.endswith(".zip"):
+                zip_filepath = os.path.join(folder_path, file_name)
+                # Load the ZIP file into memory
+                with open(zip_filepath, "rb") as f:
+                    zip_bytes = f.read()
+        zip_file = zip_bytes
 
          # Ensure the input is a file-like object
         if isinstance(zip_file, bytes):
@@ -38,12 +52,13 @@ class ZipFilestoDf:
                 raise ValueError("No CSV or TXT files found in the ZIP archive.")
             
             dataframes = {}
+            delimiter = ','
             for file_to_read in csv_or_txt_files:
                 with zf.open(file_to_read) as txtcsvf:
                     df = pd.read_csv(txtcsvf, sep=delimiter)
                     
-                    # If column names are provided and the file has no header, set column names
-                    if column_names is not None:
+                    # If column names are provided and the df has no header(columns are defaulted to integers), set the column names
+                    if column_names is not None and all(isinstance(col, int) for col in df.columns): 
                         df.columns = column_names
                     
                     print(f"Loaded file: {file_to_read}")

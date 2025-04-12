@@ -61,21 +61,21 @@ class WorkingWithYAML:
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
             ruamel_yaml.router(cfg)
         elif 'plot_yml_arrays' in cfg and cfg['plot_yml_arrays']['flag']:
-            self.get_plot_yml(cfg)
+            self.get_plotting_data(cfg)
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
 
         return cfg
     
-    def get_plot_yml(self, cfg):
-
-        yml_files = cfg['file_management']['input_files']['yml']
-        for yml_file in yml_files:
-            self.plot_yml_arrays(cfg)
-
-    def plot_yml_arrays(self, cfg):
+    def get_plotting_data(self, cfg):
 
         plot_arrays = cfg['visualization']['arrays']
+        cfg = self.plot_yml_arrays(cfg, plot_arrays)
+
+        return cfg
+
+    def plot_yml_arrays(self, cfg, plot_arrays=None):
+
         x_array = plot_arrays[0]['RAOPeriodOrFrequency']
         y_array = plot_arrays[0]['RAOSurgeAmp']
         file_name = cfg['visualization']['file_name']
@@ -94,6 +94,8 @@ class WorkingWithYAML:
         plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+
+        return cfg
 
     def ymlInput(self, defaultYml, updateYml=None):
         if not is_file_valid_func(defaultYml):
@@ -307,9 +309,10 @@ class WorkingWithYAML:
             return False, None
     
     def test_directive_block(self,cfg):
+        #TODO : Check if the placeholder variable is working
+        # file_name = cfg['data']['groups'][0]['csvs'][0]['target']['file_name']
+        # print("File name placeholder is reusable:", file_name)
 
-        file_name = cfg['data']['groups'][0]['csvs'][0]['target']['file_name']
-        print("File name placeholder is reusable:", file_name)
         try:
             target_block = cfg['data']['groups'][0]['target']
             logger.debug("Directive block is reusable:")
