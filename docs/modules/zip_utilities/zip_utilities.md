@@ -18,6 +18,7 @@ To use this module , the configuration needs to be updated to include the follow
 
 ```python
 cfg['zip_utilities'] = {
+            'technique': 'zip_files_to_df',
             'input_directory': folder_path,
             'column_names': column_names # only if your df has no header
         }

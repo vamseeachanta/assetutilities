@@ -12,7 +12,8 @@ class ZipFilestoDf:
         pass
 
     def router(self,cfg):
-        self.zip_to_dataframes(cfg)
+        if cfg['zip_utilities']['technique'] == 'zip_files_to_df':
+            cfg = self.zip_to_dataframes(cfg)
         return cfg
     
     def zip_to_dataframes(self,cfg) ->  Union[Dict[str, pd.DataFrame], pd.DataFrame]:
