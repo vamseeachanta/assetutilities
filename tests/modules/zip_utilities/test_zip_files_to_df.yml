@@ -11,17 +11,17 @@ default:
 zip_utilities:
   flag: True
   technique: zip_files_to_df
+  input_directory: tests\modules\zip_utilities\zip
 
-  filename:
-    extension: [csv]
-file_management:
-  flag: True
-  input_directory: NULL
-  output_directory: NULL
+  
+# file_management:
+#   flag: True
+#   input_directory: NULL
+#   output_directory: NULL
 
-  filename:
-    extension: []
-    pattern: NULL
-    filters:
-      contains: []
-      not_contains: []
+#   filename:
+#     extension: []
+#     pattern: NULL
+#     filters:
+#       contains: []
+#       not_contains: []
