@@ -127,19 +127,23 @@ class ExcelUtilities:
                 inputs_csv = csv['input']['filename']
                 is_file_valid, inputs_csv = is_file_valid_func(inputs_csv, analysis_root_folder)
                 if not is_file_valid:
-                    logging.info(f"File {inputs_csv} not found. Skipping {target_file}")
-                    logging.error(f"Skipping {target_file}  .. FAIL")
-                df = pd.read_csv(inputs_csv)
+                    logging.debug(f"File {inputs_csv} not found. Skipping {target_file}")
+                    logging.debug(f"Skipping {target_file}  .. FAIL")
+                    if os.path.exists(target_file):
+                        logging.info(f"Removing {target_file} as it is not updated")
+                        os.remove(target_file)
+                else:
+                    df = pd.read_csv(inputs_csv)
 
-                wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
-                sheet_name = csv['target']['sheet_name']
-                worksheet = wb[sheet_name]
-                for row in worksheet['A1:BZ1000']:
-                    for cell in row:
-                        cell.value = None
-                wb.save(target_file)
+                    wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
+                    sheet_name = csv['target']['sheet_name']
+                    worksheet = wb[sheet_name]
+                    for row in worksheet['A1:BZ1000']:
+                        for cell in row:
+                            cell.value = None
+                    wb.save(target_file)
 
-                with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
-                    df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
+                    with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
+                        df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
 
-                logging.info(f"   ... Copying data in {inputs_csv} to {worksheet}")
+                    logging.info(f"   ... Copying data in {inputs_csv} to {worksheet}")

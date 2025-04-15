@@ -1,3 +1,9 @@
+Problem solving for small teams
+
+https://www.linkedin.com/pulse/why-every-health-system-needs-small-skilled-dev-team-bill-russell-e4xde/?trackingId=WlShYoWHS3W6JEACv7eYGA%3D%3D
+
+
+
 https://www.hyperact.co.uk/blog/product-development-blueprint
 
 key metrics for engineering director to track performance of software engineering team which owns multiple applications and consists of multiple scrum teams

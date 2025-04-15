@@ -91,7 +91,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         ddfu = DownloadDataFromURL()
         cfg_base = ddfu.router(cfg_base)
 
-    elif basename == "yaml_utlities" or basename == "yml_utilities":
+    elif basename == "yaml_utilities" or basename == "yml_utilities":
         cfg_base = wwyaml.router(cfg_base)
 
     elif basename == "reportgen":
