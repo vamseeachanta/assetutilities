@@ -6,6 +6,8 @@ from zipfile import ZipFile
 
 # Reader imports
 from assetutilities.common.utilities import is_dir_valid_func
+from assetutilities.modules.zip_utilities.zip_files_to_dataframe import ZipFilestoDf
+zip_files_to_df = ZipFilestoDf()
 
 
 class ZipUtilities:
@@ -13,11 +15,10 @@ class ZipUtilities:
         pass
 
     def router(self, cfg):
-        if cfg['analysis_settings']['flag']:
-            if cfg['analysis_settings']['by'] == 'stem':
+        if cfg['analysis_settings']['flag'] and cfg['analysis_settings']['by'] == 'stem':
                 self.zip_files_by_stem(cfg)
-        else:
-            raise NotImplementedError
+        elif 'zip_utilities' in cfg and cfg['zip_utilities']['technique'] == 'zip_files_to_df':
+            zip_files_to_df.router(cfg)
 
         return cfg
 

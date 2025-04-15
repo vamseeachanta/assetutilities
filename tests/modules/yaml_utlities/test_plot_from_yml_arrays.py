@@ -11,15 +11,6 @@ def run_visualization_polar(input_file, expected_result={}):
         input_file = os.path.join(os.path.dirname(__file__), input_file)
     cfg = engine(input_file)
 
-    # obtained_result = cfg[cfg['basename']]['properties']
-    # expected_result = expected_result[cfg['basename']]['properties'].copy()
-
-    # assert not deepdiff.DeepDiff(obtained_result,
-    #                              expected_result,
-    #                              ignore_order=True,
-    #                              significant_digits=4)
-
-
 def get_valid_pytest_output_file(pytest_output_file):
     if pytest_output_file is not None and not os.path.isfile(pytest_output_file):
         pytest_output_file = os.path.join(os.path.dirname(__file__), pytest_output_file)
