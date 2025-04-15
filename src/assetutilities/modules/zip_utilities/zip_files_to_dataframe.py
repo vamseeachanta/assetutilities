@@ -60,10 +60,10 @@ class ZipFilestoDf:
                     df = pd.read_csv(file, sep=delimiter)
                     
                     # If column names are provided and the df has no header(columns are defaulted to integers), set the column names
-                    if column_names is not None and all(isinstance(col, int) for col in df.columns): 
+                    if column_names is not None: 
                         df.columns = column_names
                     
-                    logger.debug(f"Loaded file: {file_to_read}")
+                    #logger.debug(f"Loaded file: {file_to_read}")
                     file_name = os.path.splitext(file_to_read)[0]
                     dataframes[file_name] = df
             
