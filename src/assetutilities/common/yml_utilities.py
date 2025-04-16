@@ -94,7 +94,7 @@ class WorkingWithYAML:
         plot_yml['data']["groups"][0]["x"] = [x_array]
         plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
-        au_engine(inputfile=None, cfg=plot_yml, cfg_flag=False)
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 
         return cfg
 
