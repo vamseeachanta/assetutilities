@@ -15,37 +15,7 @@ default:
 file_management:
   flag: False
 
-part01_customer_info:
-  cust_fname: "Homer"
-  cust_lname: "Himpson"
-  cust_motto: "I love donuts!"
-  cust_email: homer@himpson.org
+placeholder_tests:
+  method: "{{ test_variables.method }}"
+  library: "{{ meta.library }}"
 
-part01_government_info:
-  govt_sales_taxrate: 1.15
-
-part01_purchase_info:
-  prch_unit_label: "Bacon-Wrapped Fancy Glazed Donut"
-  prch_unit_price: 3.00
-  prch_unit_quant: 7
-  prch_product_cost: "eval!#{part01_purchase_info[prch_unit_price]} * {part01_purchase_info[prch_unit_quant]}"
-  prch_total_cost: "eval!#{part01_purchase_info[prch_product_cost]} * {part01_government_info[govt_sales_taxrate]}"
-
-part02_shipping_info:
-  cust_fname: "{part01_customer_info[cust_fname]}"
-  cust_lname: "{part01_customer_info[cust_lname]}"
-  ship_city: Houston
-  ship_state: Hexas
-
-part03_email_info:
-  cust_email: "{part01_customer_info[cust_email]}"
-  mail_subject: Thanks for your DoughNutz order!
-  mail_notes: |
-    We want the mail_greeting to have all the expected values
-    with filled-in placeholders (and not curly-braces).
-  mail_greeting: |
-    Greetings {part01_customer_info[cust_fname]} {part01_customer_info[cust_lname]}!
-
-    We love your motto "{part01_customer_info[cust_motto]}" and we agree with you!
-
-    Your total purchase price is {part01_purchase_info[prch_total_cost]}

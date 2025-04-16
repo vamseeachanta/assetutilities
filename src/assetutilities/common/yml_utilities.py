@@ -14,6 +14,7 @@ import yaml
 from deepdiff import DeepDiff
 
 from loguru import logger
+from jinja2 import Environment, StrictUndefined
 import yaml.composer
 
 # Reader imports
@@ -93,7 +94,7 @@ class WorkingWithYAML:
         plot_yml['data']["groups"][0]["x"] = [x_array]
         plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
-        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+        au_engine(inputfile=None, cfg=plot_yml, cfg_flag=False)
 
         return cfg
 
@@ -296,6 +297,8 @@ class WorkingWithYAML:
             self.test_single_variable(cfg)
         elif cfg['test_variables']['method']=='directive_block':
             self.test_directive_block(cfg)
+        elif cfg['test_variables']['method']=='placeholder':
+            self.test_variable_placeholder(cfg)
 
         return cfg
 
@@ -309,16 +312,41 @@ class WorkingWithYAML:
             return False, None
     
     def test_directive_block(self,cfg):
-        #TODO : Check if the placeholder variable is working
-        # file_name = cfg['data']['groups'][0]['csvs'][0]['target']['file_name']
-        # print("File name placeholder is reusable:", file_name)
 
         try:
             target_block = cfg['data']['groups'][0]['target']
-            logger.debug("Directive block is reusable:")
-            print("block_Template:", target_block['template'])
-            print("block_Filename:", target_block['filename'])
+            block_nested_value = target_block['template']
+            logger.debug("block and it's nested value reusable:")
             return True, target_block
         except KeyError as e:
             logger.error("Directive block not accessible:", e)
             return False, None
+
+    def test_variable_placeholder(self, cfg):
+
+        cfg = self.process_placeholders(cfg, cfg)
+        try:
+            method = cfg['placeholder_tests']['method']
+            print("yml key placeholder is reusable:", method)
+            return True, method
+        except KeyError as e:
+            logger.error("yml key cannot be accesible:", e)
+            return False, None
+    
+    def process_placeholders(self,data, context):
+        """
+        Recursively resolve all string fields using Jinja2 templates.
+        """
+        env = Environment(undefined=StrictUndefined)
+
+        if isinstance(data, str):
+            try:
+                return env.from_string(data).render(**context)
+            except Exception as e:
+                logger.warning("Template failed: %s", e)
+                return data
+        elif isinstance(data, dict):
+            return {k: self.process_placeholders(v, context) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self.process_placeholders(i, context) for i in data]
+        return data

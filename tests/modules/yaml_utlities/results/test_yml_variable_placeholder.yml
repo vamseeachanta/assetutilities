@@ -1,0 +1,41 @@
+library: assetutlities
+basename: yaml_utilities
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: false
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+meta:
+  basename: yaml_utilities
+  library: assetutilities
+test_variables:
+  flag: true
+  method: placeholder
+placeholder_tests:
+  method: '{{ test_variables.method }}'
+  library: '{{ meta.library }}'
+Analysis:
+  basename: yaml_utilities
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+  file_name: test_yml_variable_placeholder
+  file_name_for_overwrite: test_yml_variable_placeholder
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+  start_time: 2025-04-16 11:48:19.289830
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_yml_variable_placeholder.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
