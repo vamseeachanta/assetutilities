@@ -101,3 +101,11 @@ cfg = self.process_placeholders(cfg, cfg)
 method = cfg['placeholder_tests']['method']
 logger.debug("yml key placeholder is reusable:", method)
 ```
+
+### 📌 Summary Table
+
+| Type | Purpose | YAML Key Example |
+| ---- | ------- | ---------------- |
+Single Variable | Direct scalar access | label: "customer-A"
+Block | Dictionary with nested values | target: { template: "...", ... }
+Jinja2 Placeholder | Dynamic string interpolation | method: "GET /api/v1/{{ endpoint }}"
