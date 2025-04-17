@@ -6,7 +6,7 @@ default:
     overwrite:
       output: true
 file_management:
-  flag: true
+  flag: false
   files:
     files_in_current_directory:
       flag: false
@@ -25,12 +25,6 @@ file_management:
     filters:
       contains: []
       not_contains: []
-  input_files:
-    yml:
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_yml_single_variable.yml
-    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_yml_variable_block.yml
 meta:
   basename: yaml_utilities
   library: assetutlities
@@ -134,7 +128,7 @@ Analysis:
   file_name: test_plot_from_yml_arrays
   file_name_for_overwrite: test_plot_from_yml_arrays
   log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
-  start_time: 2025-04-12 10:25:17.135576
+  start_time: 2025-04-17 10:42:20.779259
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\test_plot_from_yml_arrays.yml
@@ -142,5 +136,3 @@ Analysis:
   result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
   result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
   fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
-  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
-  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results

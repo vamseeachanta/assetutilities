@@ -59,8 +59,8 @@ class ZipFilestoDf:
                 with zf.open(file_to_read) as file:
                     df = pd.read_csv(file, sep=delimiter)
                     
-                    # If column names are provided and the df has no header(columns are defaulted to integers), set the column names
-                    if column_names is not None: 
+                    # If column names are provided and the df has no header set the column names
+                    if column_names: 
                         df.columns = column_names
                     
                     #logger.debug(f"Loaded file: {file_to_read}")
