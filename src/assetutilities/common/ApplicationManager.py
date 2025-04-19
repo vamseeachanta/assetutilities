@@ -381,6 +381,7 @@ class ConfigureApplicationInputs:
         cfg_base = self.standardize_yml_data(cfg_base)
 
         save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)
+        return cfg_base
     
     def standardize_yml_data(self, data):
         """
