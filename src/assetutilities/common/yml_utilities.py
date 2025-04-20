@@ -275,7 +275,6 @@ class WorkingWithYAML:
 
         return filename_with_lib_path
 
-
     def get_library_filepath(self, cfg, src_relative_location_flag=False):
             
             filepath_with_lib_path = cfg["filepath"]
@@ -294,11 +293,11 @@ class WorkingWithYAML:
     def test_variables(self, cfg):
     
         if cfg['test_variables']['method']=='single':
-            self.test_single_variable(cfg)
+            flag, label = self.test_single_variable(cfg)
         elif cfg['test_variables']['method']=='directive_block':
-            self.test_directive_block(cfg)
+            flag, label = self.test_directive_block(cfg)
         elif cfg['test_variables']['method']=='placeholder':
-            self.test_variable_placeholder(cfg)
+            flag, label = self.test_variable_placeholder(cfg)
 
         return cfg
 
@@ -310,6 +309,7 @@ class WorkingWithYAML:
         except KeyError as e:
             logger.error("Label cannot be accesible:", e)
             return False, None
+    
     
     def test_directive_block(self,cfg):
 

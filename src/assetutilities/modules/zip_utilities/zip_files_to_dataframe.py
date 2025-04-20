@@ -72,3 +72,53 @@ class ZipFilestoDf:
                 return list(dataframes.values())[0]
             else:
                 return dataframes
+            
+    def zip_to_dataframe_by_filename(self, cfg) ->  Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+        
+        """
+        Extracts files from a ZIP archive , loads them and returns Pandas DataFrame.
+        
+        Returns:
+            Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+            - A single DataFrame if there's only one CSV/TXT file in zip.
+            - A dictionary where keys are filenames and values are Pandas DataFrames if multiple files exist.
+        """
+        
+        column_names = cfg['zip_utilities']['column_names']
+        zip_file_name_with_path = cfg['zip_utilities']['file_name']
+
+        with open(zip_file_name_with_path, "rb") as f:
+            zip_bytes = f.read()
+
+        zip_file = zip_bytes
+
+         # Ensure the input is a file-like object
+        if isinstance(zip_file, bytes):
+            zip_file = BytesIO(zip_file)
+        
+        with zipfile.ZipFile(zip_file, 'r') as zf:
+            file_list = zf.namelist()
+            
+            # check if file_list is empty
+            if not file_list:
+                raise ValueError(f"The ZIP file '{zip_filepath}' is empty.")
+            
+            dataframes = {}
+            delimiter = ','
+            for file_to_read in file_list:
+                with zf.open(file_to_read) as file:
+                    df = pd.read_csv(file, sep=delimiter)
+                    
+                    # If column names are provided and the df has no header set the column names
+                    if column_names: 
+                        df.columns = column_names
+                    
+                    #logger.debug(f"Loaded file: {file_to_read}")
+                    file_name = os.path.splitext(file_to_read)[0]
+                    dataframes[file_name] = df
+            
+            # If only one file, return the DataFrame instead of a dictionary
+            if len(dataframes) == 1:
+                return list(dataframes.values())[0]
+            else:
+                return dataframes
