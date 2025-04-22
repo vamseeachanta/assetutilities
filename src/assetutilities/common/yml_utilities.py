@@ -3,6 +3,7 @@ import importlib.util
 #import logging
 import os
 import re
+from datetime import datetime, timedelta
 import pkgutil
 import types
 from collections.abc import Mapping
@@ -61,7 +62,7 @@ class WorkingWithYAML:
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
             ruamel_yaml.router(cfg)
-        elif 'plot_yml_arrays' in cfg and cfg['plot_yml_arrays']['flag']:
+        elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
             self.get_plotting_data(cfg)
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
@@ -70,29 +71,35 @@ class WorkingWithYAML:
     
     def get_plotting_data(self, cfg):
 
-        plot_arrays = cfg['visualization']['arrays']
-        cfg = self.plot_yml_arrays(cfg, plot_arrays)
+        plot_data = cfg['visualization']['groups']
+        cfg = self.plot_yml_data(cfg, plot_data)
 
         return cfg
 
-    def plot_yml_arrays(self, cfg, plot_arrays=None):
+    def plot_yml_data(self, cfg, plot_data):
 
-        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
-        y_array = plot_arrays[0]['RAOSurgeAmp']
-        file_name = cfg['visualization']['file_name']
+        start_time = datetime(2024,8,1)
+        end_time = datetime.now()
+        dates = cfg['visualization']['groups'][0]['dates']
+        current = start_time
+        while current <= end_time:
+            dates.append(current.strftime("%Y-%m-%d"))
+            current += timedelta(days=1)
+
+        y_data = plot_data[0]['RAOSurgeAmp']
     
-        if len(plot_arrays[0]) < 2:
+        if len(plot_data[0]) < 2:
             raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
         
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': file_name,
-                    'title': 'RAOsDirectionPlot',
-                    'xlabel': 'RAOPeriodOrFrequency',
-                    'ylabel': 'RAOSurgeAmp',
+        settings = {'file_name': cfg['visualization']['file_name'],
+                    'title': cfg['visualization']['title'],
+                    'xlabel': cfg['visualization']['xlabel'],
+                    'ylabel': cfg['visualization']['ylabel'],
                     }
         plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = [x_array]
-        plot_yml['data']["groups"][0]["y"] = [y_array]
+        plot_yml['data']["groups"][0]["x"] = dates
+        plot_yml['data']["groups"][0]["y"] = [y_data]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 

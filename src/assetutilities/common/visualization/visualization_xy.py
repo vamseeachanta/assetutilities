@@ -223,8 +223,6 @@ class VisualizationXY:
         suptitle = plt_settings.get("suptitle", None)
         if suptitle is not None:
             fig.suptitle(suptitle)
-        # if cfg['settings']['xlabel'] == "Date" or cfg['settings']['ylabel'] == "Date":
-        #     fig.autofmt_xdate()
 
         legend_settings = plt_settings.get("legend", None)
         legend_flag = legend_settings.get("flag", True)
@@ -252,7 +250,17 @@ class VisualizationXY:
         import matplotlib.dates as mdates  # noqa
 
         if cfg['settings']['xlabel'] == "date" or cfg['settings']['xlabel'] == "Date":
-            ax.xaxis.set_major_locator(mdates.DayLocator(interval=2)) # sets interval of 2 days
+            locator = cfg['settings'].get("locator", None)
+            locator_map = {
+                "monthly": (mdates.MonthLocator(interval=2), mdates.DateFormatter("%b %Y")),
+                "daily": (mdates.DayLocator(interval=2), mdates.DateFormatter("%d %b %Y")),
+                "weekly": (mdates.WeekdayLocator(interval=2), mdates.DateFormatter("%d %b %Y")),
+                "yearly": (mdates.YearLocator(interval=2), mdates.DateFormatter("%Y"))
+            }
+
+            loc, fmt = locator_map.get(locator,locator_map[locator])
+            ax.xaxis.set_major_locator(loc)
+            ax.xaxis.set_major_formatter(fmt)
 
             plt.xticks(rotation=45) # rotates x-axis labels
             fig.autofmt_xdate() # auto formats x-axis date
