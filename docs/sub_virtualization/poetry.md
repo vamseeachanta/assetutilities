@@ -1,5 +1,7 @@
 ## Poetry Setup Guide
 
+### Install poetry on Windows
+
 **🔍 Check Python path**
 
 ```bash
@@ -34,7 +36,7 @@ Poetry (version 2.1.2)
 
 ---
 
-**🚀 Using poetry in existing project**
+### 🚀 Using poetry in existing project
 
 Navigate to your project directory:
 
@@ -43,8 +45,9 @@ cd your-project/
 poetry init
 ```
 
-- This will generate a `pyproject.toml` file.
-- If the file already exists, it will be modified accordingly.
+- This will prompt you to create a new `pyproject.toml` file.
+- You can provide the necessary information or just press `Enter` to accept the defaults.
+- If the toml file already exists, you can skip this step.
 
 ---
 
@@ -87,7 +90,6 @@ poetry install
 
 ```bash
 poetry config virtualenvs.in-project true
-poetry install
 ```
 
 ### 2. ⚙️ Select the Python Interpreter in VSCode
