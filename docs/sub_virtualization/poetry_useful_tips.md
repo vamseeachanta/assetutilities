@@ -52,3 +52,7 @@ poetry show
 ```
 This will list out the library in the environment.
 
+
+references
+
+https://stackoverflow.com/questions/66474844/import-local-package-during-poetry-run
