@@ -39,7 +39,6 @@ wkhtmltopdf = "*"
 python-docx = "*"
 black = "*"
 isort = "*"
-scrapy = "*"
 bs4 = "*"
 gitpython = "==3.1.31"
 excel2img = { version = "*", markers = "sys_platform == 'win32'" }
@@ -49,6 +48,8 @@ sympy = ">=1.13.3"
 utm = "*"
 ruamel-yaml = "*"
 jinja2 = "*"
+scrapy = "^2.12.0"
+
 
 [tool.poetry.group.dev.dependencies]
 black = "*"

@@ -47,7 +47,7 @@ poetry init
 
 - This will prompt you to create a new `pyproject.toml` file.
 - You can provide the necessary information or just press `Enter` to accept the defaults.
-- If the toml file already exists, you have to change it to poetry like toml file.
+- If the toml file of different version already exists, you have to change it to poetry like toml file.
 
 ---
 
@@ -86,7 +86,7 @@ poetry install
 
 ## 🧪 Run Python Scripts in VSCode with Poetry
 
-### 1. Enable Local `.venv` in Your Project Root
+### 1. (Optional) Enable Local `.venv` in Your Project Root
 
 ```bash
 poetry config virtualenvs.in-project true
@@ -97,6 +97,3 @@ poetry config virtualenvs.in-project true
 - Press `Ctrl + Shift + P`
 - Type: `Python: Select Interpreter`
 - Select the one that looks like: Python 3.11.8 (.venv:Poetry)
-- 
-
-#TODO - Utilize self install library with poetry 
