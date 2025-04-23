@@ -1,0 +1,51 @@
+@startwbs visualization
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title visualization
+
+* visualization
+
+** data: \n  transformation:
+
+*** No
+**** yml input file 
+***** template_xy_line_input
+
+**** csv input
+***** template_xy_line_csv.yml
+***** template_xy_scatter_csv
+
+*** yml_utilities
+**** program generated input file
+
+*** csv input
+
+
+** Plot type
+
+*** XY
+**** Line
+***** template_xy_line_input
+***** template_xy_line_csv.yml
+**** Scatter
+***** template_xy_scatter_input
+***** template_xy_scatter_csv
+
+
+*** Polar
+**** template?
+
+*** Compound plots
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs
