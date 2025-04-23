@@ -47,7 +47,7 @@ poetry init
 
 - This will prompt you to create a new `pyproject.toml` file.
 - You can provide the necessary information or just press `Enter` to accept the defaults.
-- If the toml file already exists, you can skip this step.
+- If the toml file already exists, you have to change it to poetry like toml file.
 
 ---
 

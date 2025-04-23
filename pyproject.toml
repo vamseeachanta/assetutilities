@@ -1,65 +1,89 @@
-[build-system]
-requires      = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-dynamic = ["dependencies"]
-
+[tool.poetry]
 name = "assetutilities"
 version = "0.0.5"
 description = "utilities for general use"
 readme = "README.md"
-authors = [{ name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com" }]
-license = { file = "LICENSE" }
+authors = ["Vamsee Achanta <vamsee.achanta@aceengineer.com>"]
+license = "MIT"
+packages = [
+    { include = "assetutilities", from = "src" }
+]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords=['package', 'library', 'module']
-requires-python = ">=3.7"
+keywords = ['package', 'library', 'module']
 
-    [project.optional-dependencies]
-    build = ["build", "twine"]
-    dev   = ["black", "bumpver", "isort", "pytest"]
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+docutils = "0.21.2"
+loguru = "0.7.3"
+build = "*"
+twine = "*"
+bumpver = "*"
+pyyaml = "*"
+numpy = "*"
+pandas = "*"
+plotly = "*"
+matplotlib = "*"
+chardet = "*"
+python-certifi-win32 = "*"
+webcolors = "*"
+xlsxwriter = "*"
+plantuml = "*"
+pytest = "*"
+deepdiff = "*"
+pandoc = "*"
+wkhtmltopdf = "*"
+python-docx = "*"
+black = "*"
+isort = "*"
+scrapy = "*"
+bs4 = "*"
+gitpython = "==3.1.31"
+excel2img = { version = "*", markers = "sys_platform == 'win32'" }
+PyPDF2 = "*"
+tabula = "*"
+sympy = ">=1.13.3"
+utm = "*"
+ruamel-yaml = "*"
+jinja2 = "*"
 
-    [project.scripts]
-    sample_calculation = "assetutilities:__main__"
+[tool.poetry.group.dev.dependencies]
+black = "*"
+bumpver = "*"
+isort = "*"
+pytest = "*"
+build = "*"
+twine = "*"
 
-    [project.urls]
-    repository    = "https://github.com/vamseeachanta/assetutilities"
-    documentation = "https://github.com/vamseeachanta/assetutilities/blob/main/README.md"
+[tool.poetry.scripts]
+sample_calculation = "assetutilities:__main__"
 
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["dev_tools/requirements.txt"]}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-[tool.setuptools.package-data]
-"*" = ["*.yml", "*.csv", "*.xlsx", "*.html", "*.txt"]
+[tool.poetry.urls]
+repository = "https://github.com/vamseeachanta/assetutilities"
+documentation = "https://github.com/vamseeachanta/assetutilities/blob/main/README.md"
 
 [tool.bumpver]
 current_version = "0.0.5"
 version_pattern = "MAJOR.MINOR.PATCH"
-commit_message  = "bump version {old_version} -> {new_version}"
-commit          = true
-tag             = true
-push            = false
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = false
 
-    [tool.bumpver.file_patterns]
-    "pyproject.toml" = [
-        'current_version = "{version}"',
-        'version = "{version}"',
-    ]
-    "src/assetutilities/__init__.py" = ["{version}"]
-    "src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"',
+]
+"src/assetutilities/__init__.py" = ["{version}"]
+"src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
 
 [tool.isort]
-profile                   = "black"
-import_heading_stdlib     = "Standard library imports"
+profile = "black"
+import_heading_stdlib = "Standard library imports"
 import_heading_thirdparty = "Third party imports"
 import_heading_firstparty = "Reader imports"
 multi_line_output = 3
@@ -70,10 +94,13 @@ line_length = 88
 [tool.mypy]
 strict = true
 
-    [[tool.mypy.overrides]]
-    module                 = "feedparser"
-    ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "feedparser"
+ignore_missing_imports = true
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 exclude = '''
