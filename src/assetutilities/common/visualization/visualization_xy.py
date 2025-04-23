@@ -252,10 +252,10 @@ class VisualizationXY:
         if cfg['settings']['xlabel'] == "date" or cfg['settings']['xlabel'] == "Date":
             locator = cfg['settings'].get("locator", None)
             locator_map = {
-                "monthly": (mdates.MonthLocator(interval=2), mdates.DateFormatter("%b %Y")),
+                "monthly": (mdates.MonthLocator(interval=1), mdates.DateFormatter("%b %Y")),
                 "daily": (mdates.DayLocator(interval=2), mdates.DateFormatter("%d %b %Y")),
-                "weekly": (mdates.WeekdayLocator(interval=2), mdates.DateFormatter("%d %b %Y")),
-                "yearly": (mdates.YearLocator(interval=2), mdates.DateFormatter("%Y"))
+                "weekly": (mdates.WeekdayLocator(interval=1), mdates.DateFormatter("%d %b %Y")),
+                "yearly": (mdates.YearLocator(), mdates.DateFormatter("%Y"))
             }
 
             loc, fmt = locator_map.get(locator,locator_map[locator])

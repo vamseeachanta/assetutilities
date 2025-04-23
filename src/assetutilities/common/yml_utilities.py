@@ -83,8 +83,8 @@ class WorkingWithYAML:
         dates = cfg['visualization']['groups'][0]['dates']
         current = start_time
         while current <= end_time:
-            dates.append(current.strftime("%Y-%m-%d"))
-            current += timedelta(days=1)
+            dates.append(current)
+            current += timedelta(days=32)
 
         y_data = plot_data[0]['RAOSurgeAmp']
     
@@ -96,10 +96,11 @@ class WorkingWithYAML:
                     'title': cfg['visualization']['title'],
                     'xlabel': cfg['visualization']['xlabel'],
                     'ylabel': cfg['visualization']['ylabel'],
+                    'locator': cfg['visualization']['locator']
                     }
         plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = dates
-        plot_yml['data']["groups"][0]["y"] = [y_data]
+        plot_yml['data']["groups"][0]["x"] = [dates]
+        plot_yml['data']["groups"][0]["y"] = [y_data[0:9]]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 
