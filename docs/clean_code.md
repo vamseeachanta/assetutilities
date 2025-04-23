@@ -1,8 +1,15 @@
 - Objective: Assumption that consistent code will help AI add new code/documentation faster, seamless, 
 - [ ] Prerequisite: Robust test structure
-  - [ ] Consistent tests
-  - [ ] clean up stale tests etc.
+  - Consistent unfailing tests
+  - [ ] Test folder is always independent. see https://github.com/vamseeachanta/assetutilities/issues/53
+  - [ ] Create batchfile for each basename
+  - [ ] Clean up stale tests etc.
   - [ ] test architecture for creating automatic pull requests to GH.
+  - [ ] This architecture gives users to have standalone tests independent of other repository folders
+
+For example the start and result should be in "tests" folder for "excel_utilities", the below folder and contents should be tests and not in docs.
+assetutilities\docs\modules\excel_utilities\another_folder
+
 - [ ] Architecture and AI improvements:
   - [ ] Tackle refactoring of code using AI with basename by basename (file by file).
 - [ ] Code should be commented such that documentation is left to AI
@@ -14,7 +21,6 @@
 - [ ] Repo order:
   - [ ] energydata (SS)
 
-- [ ] Test folder is always independent. see https://github.com/vamseeachanta/assetutilities/issues/53
 - [ ] Consistent frequently used words for messages and logging
   - [ ] Tests PASS/FAIL (4 letters) across all repos. Success and failure are longer words
   - [ ] Process START/STOP
