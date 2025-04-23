@@ -1,4 +1,8 @@
 - Objective: Assumption that consistent code will help AI add new code/documentation faster, seamless, 
+
+- [ ] Prerequisite: Running codes
+  - [ ] Templates are saved in base_config folder in src.
+
 - [ ] Prerequisite: Robust test structure
   - Consistent unfailing tests
   - [ ] Test folder is always independent. see https://github.com/vamseeachanta/assetutilities/issues/53
@@ -6,6 +10,7 @@
   - [ ] Clean up stale tests etc.
   - [ ] test architecture for creating automatic pull requests to GH.
   - [ ] This architecture gives users to have standalone tests independent of other repository folders
+
 
 For example the start and result should be in "tests" folder for "excel_utilities", the below folder and contents should be tests and not in docs.
 assetutilities\docs\modules\excel_utilities\another_folder
@@ -31,7 +36,7 @@ assetutilities\docs\modules\excel_utilities\another_folder
   - [ ] Improve the story #55 if shortfall exists
 - [ ] Lint
   - [ ] Utilize AI to fix it for new code
-  - [ ] For legacy code, ensure tests exists before using AI to fix.
+  - [ ] For legacy code, ensure tests exists before using AI to fix. Then retest.
 - [ ] All Function 
   - [ ] returns
     - [ ] Utilize a dict to return values. 

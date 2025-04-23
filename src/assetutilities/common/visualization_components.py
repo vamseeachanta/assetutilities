@@ -18,6 +18,9 @@ class VisualizationComponents:
 
         cfg = self.get_cfg_with_master_data(cfg)
 
+        #TODO Data Transformation
+        
+
         plt_settings = cfg["settings"]
         if "polar" in cfg["settings"]["type"]:
             visualization_polar = VisualizationPolar()

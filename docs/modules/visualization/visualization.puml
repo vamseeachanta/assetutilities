@@ -10,10 +10,10 @@ title visualization
 
 * visualization
 
-** data: \n  transformation:
+** data: \n    transformation:
 
-*** No
-**** yml input file 
+*** NULL
+**** yml input file
 ***** template_xy_line_input
 
 **** csv input
@@ -26,11 +26,13 @@ title visualization
 *** csv input
 
 
-** Plot type
+** settings: \n    type:
 
 *** XY
 **** Line
 ***** template_xy_line_input
+***** template_xy_line_csv.yml
+**** X Date Line
 ***** template_xy_line_csv.yml
 **** Scatter
 ***** template_xy_scatter_input
