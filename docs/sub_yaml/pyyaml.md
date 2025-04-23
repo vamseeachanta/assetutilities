@@ -10,7 +10,7 @@ PyYAML is a Python library that provides a set of tools for parsing YAML files.
 yaml.scanner.ScannerError: while scanning for the next token found character '%' that cannot start any token❗
 
 
-code fix :
+**code fix :**
 
 ```python
 with open(file_name, "r", encoding='utf-8-sig') as file:

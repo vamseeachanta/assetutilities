@@ -109,6 +109,5 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         save_application_cfg(cfg_base=cfg_base)
 
     logger.info(f"{basename}, application ... END")
-    app_manager.save_cfg(cfg_base=cfg_base)
-
+    cfg_base = app_manager.save_cfg(cfg_base=cfg_base)
     return cfg_base
