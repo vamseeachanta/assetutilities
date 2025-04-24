@@ -1,6 +1,7 @@
 # Standard library imports
-import logging
+from loguru import logger
 import math
+from datetime import datetime, timedelta
 
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
@@ -56,7 +57,18 @@ class VisualizationXY:
         
         for group_cfg in mapped_data_cfg["data"]['groups']:
             x_data = group_cfg["x"]
+            if len(x_data[0]) == 0 and "x_datetime" in mapped_data_cfg['settings']['plt_model']:
+                self.add_sample_dates_to_x_data(group_cfg)
+            x_data = group_cfg["x"]
             y_data = group_cfg["y"]
+            length_x = len(x_data[0])
+            length_y = len(y_data[0])
+            # equal the length of x and y data
+            if length_x != length_y:
+                min_length = min(length_x, length_y)
+                x_data = [x[:min_length] for x in x_data]
+                y_data = [y[:min_length] for y in y_data]
+                
             legend_item = group_cfg.get("label", None)
             legend.append(legend_item if legend_item else f"Series {len(legend) + 1}")
 
@@ -74,6 +86,20 @@ class VisualizationXY:
             trace_count += no_of_trends
 
         return data_dict, legend
+    
+    def add_sample_dates_to_x_data(self, group_cfg):
+        '''
+        Add sample dates to x data for test
+        '''
+        start_time = datetime(2024,8,1)
+        end_time = datetime.now()
+        dates = group_cfg['x'][0]
+        current = start_time
+        while current <= end_time:
+            dates.append(current)
+            current += timedelta(days=32)
+        group_cfg["x"] = [dates]
+        return group_cfg
 
     def get_xy_mapped_data_dict_from_csv(self, cfg):
         mapped_data_cfg = {}
@@ -87,9 +113,9 @@ class VisualizationXY:
                 group_cfg["file_name"], analysis_root_folder
             )
             if not file_is_valid:
-                logging.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
-                logging.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
-                logging.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
+                logger.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
+                logger.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
+                logger.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
 
             else:
                 df = pd.read_csv(valid_file)
@@ -123,12 +149,12 @@ class VisualizationXY:
 
         if len(cfg["settings"]["legend"]["label"]) == len(legend_data):
             legend_data = cfg["settings"]["legend"]["label"]
-            logging.info("Using legend labels from the input file")
+            logger.info("Using legend labels from the input file")
         elif len(cfg["settings"]["legend"]["label"]) > 0:
-            logging.warning(
+            logger.warning(
                 "The number of legend labels is not equal to the number of data columns."
             )
-            logging.warning("Ignoring the legend labels in the input file")
+            logger.warning("Ignoring the legend labels in the input file")
 
         mapped_data_cfg = {"data": {"groups": [{"x": x_data_array, "y": y_data_array}]}}
         cfg["settings"]["legend"]["label"] = legend_data
@@ -236,7 +262,7 @@ class VisualizationXY:
 
         plt_properties = {"plt": plt, "fig": fig}
         if "add_axes" in cfg and len(cfg.add_axes) > 0:
-            self.add_axes_to_plt(plt_properties, cfg)
+            visualization_common.add_axes_to_plt(plt_properties, cfg)
 
         ax.set(
             xlabel=plt_settings.get("xlabel", None),
@@ -249,7 +275,7 @@ class VisualizationXY:
         # Third party imports
         import matplotlib.dates as mdates  # noqa
 
-        if cfg['settings']['xlabel'] == "date" or cfg['settings']['xlabel'] == "Date":
+        if "plt_model" in cfg['settings'] and cfg['settings']['plt_model'] == "x_datetime":
             locator = cfg['settings'].get("locator", None)
             locator_map = {
                 "monthly": (mdates.MonthLocator(interval=1), mdates.DateFormatter("%b %Y")),
@@ -278,17 +304,18 @@ class VisualizationXY:
         plt.close()
 
     def resolve_legends(self):
+        pass
         # TODO Resolve legends in a comprehensive manner
         # Get legend data
-        if "legend" in mapped_data_cfg["data"]:
-            legend_data = mapped_data_cfg["data"]["legend"]
-        elif "legend_data" in mapped_data_cfg:
-            legend_data = mapped_data_cfg["legend_data"]
-        else:
-            legend_data = []
+        # if "legend" in mapped_data_cfg["data"]:
+        #     legend_data = mapped_data_cfg["data"]["legend"]
+        # elif "legend_data" in mapped_data_cfg:
+        #     legend_data = mapped_data_cfg["legend_data"]
+        # else:
+        #     legend_data = []
 
-        no_of_trends = max(len(x_data), len(y_data))
+        # no_of_trends = max(len(x_data), len(y_data))
 
-        if not len(legend_data) == no_of_trends:
-            legend_data = ["legend_" + str(i) for i in range(0, no_of_trends)]
+        # if not len(legend_data) == no_of_trends:
+        #     legend_data = ["legend_" + str(i) for i in range(0, no_of_trends)]
 

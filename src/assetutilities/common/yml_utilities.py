@@ -76,31 +76,24 @@ class WorkingWithYAML:
 
         return cfg
 
-    def plot_yml_data(self, cfg, plot_data):
+    def plot_yml_data(self, cfg, plot_arrays):
 
-        start_time = datetime(2024,8,1)
-        end_time = datetime.now()
-        dates = cfg['visualization']['groups'][0]['dates']
-        current = start_time
-        while current <= end_time:
-            dates.append(current)
-            current += timedelta(days=32)
-
-        y_data = plot_data[0]['RAOSurgeAmp']
+        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
+        y_array = plot_arrays[0]['RAOSurgeAmp']
+        file_name = cfg['visualization']['file_name']
     
-        if len(plot_data[0]) < 2:
+        if len(plot_arrays[0]) < 2:
             raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
         
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': cfg['visualization']['file_name'],
-                    'title': cfg['visualization']['title'],
-                    'xlabel': cfg['visualization']['xlabel'],
-                    'ylabel': cfg['visualization']['ylabel'],
-                    'locator': cfg['visualization']['locator']
+        settings = {'file_name': file_name,
+                    'title': 'RAOsDirectionPlot',
+                    'xlabel': 'RAOPeriodOrFrequency',
+                    'ylabel': 'RAOSurgeAmp',
                     }
         plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = [dates]
-        plot_yml['data']["groups"][0]["y"] = [y_data[0:9]]
+        plot_yml['data']["groups"][0]["x"] = [x_array]
+        plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 
