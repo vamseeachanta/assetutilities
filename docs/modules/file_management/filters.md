@@ -1,12 +1,9 @@
-## File Management
-
-### 📂 Filters (Scenarios) for getting input files
+## 📂 File Management Filters (Scenarios) for getting input files
 
 The following filters can be configured under `file_management` to control which files are selected:
 
 1. **contains**
    - Includes files that contain all specified substrings in their name.
-  
 
 2. **not_contains**
    - Excludes files that contain any of the specified substrings.
@@ -57,7 +54,6 @@ filters:
 
 
 > ✅ `contains` + `not_contains` are enough in most cases for getting files. 
-
 
 
 **Run tests for better understanding :**

@@ -3,44 +3,24 @@
 scale 2
 skinparam titleBorderRoundCorner 15
 skinparam titleBorderThickness 2
-skinparam titleBorderColor red
-skinparam titleBackgroundColor Tomato
+skinparam titleBorderColor white
+skinparam titleBackgroundColor palegreen
 
 title file_management
 
 * file_management
 
-** data: \n  transformation:
+** Configuration
 
-*** No
-**** yml input file 
-***** template_xy_line_input
-
-**** csv input
-***** template_xy_line_csv.yml
-***** template_xy_scatter_csv
-
-*** yml_utilities
-**** program generated input file
-
-*** csv input
-
-
-** Plot type
-
-*** XY
-**** Line
-***** template_xy_line_input
-***** template_xy_line_csv.yml
-**** Scatter
-***** template_xy_scatter_input
-***** template_xy_scatter_csv
-
-
-*** Polar
-**** template?
-
-*** Compound plots
+*** flag 
+**** True 
+***** Parameters given
+****** Input file selection
+******* Input directory
+******* filename , extensions
+******* Filters
+**** False
+***** No process
 
 
 footer
