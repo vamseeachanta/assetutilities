@@ -90,7 +90,8 @@ class VisualizationXY:
     
     def add_sample_dates_to_x_data(self, group_cfg):
         '''
-        Add sample dates to x data for test
+        #TODO DELETE
+        # Add sample dates to x data for test
         '''
         start_time = datetime(2024,8,1)
         end_time = datetime.now()
@@ -271,8 +272,10 @@ class VisualizationXY:
         )
         ax.label_outer()
 
+
         plt = visualization_common.add_x_y_lim_formats(cfg, plt) 
 
+        #TODO Move to another function, format axis labels so that the we read x-axis labels.
         # Third party imports
         import matplotlib.dates as mdates  # noqa
 
@@ -288,8 +291,8 @@ class VisualizationXY:
             loc, fmt = locator_map.get(locator,locator_map[locator])
             ax.xaxis.set_major_locator(loc)
             ax.xaxis.set_major_formatter(fmt)
-
-            plt.xticks(rotation=45) # rotates x-axis labels
+            xticks_rotation = cfg['settings'].get("xticks_rotation", 45)
+            plt.xticks(rotation=xticks_rotation) # rotates x-axis labels
             fig.autofmt_xdate() # auto formats x-axis date
                
 

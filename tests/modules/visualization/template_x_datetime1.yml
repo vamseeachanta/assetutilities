@@ -1,0 +1,52 @@
+meta:
+  basename: visualization
+  library: assetutlities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+  
+settings:
+  type: xy_x_datetime
+  mode: line
+  plt_model: x_datetime
+
+  pairs: False
+  multiple: False
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  file_name: x_datetime1
+  title: Datetime plot
+  xlabel: Date
+  ylabel: RAO Surge Amplitude (m/N)
+  locator: monthly
+  plt_save_extensions: [".png"]
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  xticks_rotation: 45
+  legend:
+    flag: True
+    label: []
+    loc: best
+    prop: { family: Arial, size: 5 }
+  
+master_settings:
+  groups: {}
+
+data:
+  type : input
+  groups:
+    - x : 
+          - [2007-08-31, 2007-09-30, 2007-10-31, 2007-11-30, 2007-12-31, 2008-01-31, 2008-02-29,2008-03-31,2008-04-30,2008-05-31,2008-06-30,2008-07-31,2008-08-31,2008-09-30,2008-10-31,2008-11-30,2008-12-31,2009-01-31,2009-02-28,2009-03-31,2009-04-30,2009-05-31,2009-06-30,2009-07-31,2009-08-31,2009-09-30,2009-10-31,2009-11-30,2009-12-31, 2010-01-31, 2010-02-28, 2010-03-31] # x-axis data is datetime, so provide x values in script
+      y : 
+          - [0.0024, 0.0026, 0.0027, 0.003, 0.0037, 0.0055, 0.0039, 0.0045, 0.0047, 0.0054, 0.0062, 0.0069, 0.0074, 0.0086, 0.0091, 0.0108, 0.0113, 0.0139, 0.0143, 0.0186, 0.0179, 0.025, 0.0252, 0.0332, 0.0405, 0.0341, 0.0641, 0.0407, 0.0622, 0.0849, 0.0708, 0.0649, 0.0961, 0.136, 0.1563, 0.1218, 0.039, 0.1583, 0.4239, 0.7356, 1.2248, 1.7912, 2.6295]
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]
+
+  
+
