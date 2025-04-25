@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
+import plotly.io as pio  # noqa
 import pandas as pd  # noqa
 from colorama import Fore, Style
 from colorama import init as colorama_init
@@ -26,13 +27,13 @@ class VisualizationXY:
 
     def xy_plot_set_up_and_save(self, cfg, plt_settings):
         data_df, cfg = self.get_data_df_and_plot_properties(cfg)
-        # if cfg['settings']['plt_engine'] == 'plotly':
-        #     plt = self.get_xy_plot_plotly(data_df, plt_settings)
-        #     self.save_xy_plot_and_close_plotly(plt, cfg)
-        if cfg["settings"]["plt_engine"] == "matplotlib":
+        if cfg['settings']['plt_engine'] == 'plotly':
+            fig = self.get_xy_plot_plotly(data_df, plt_settings,cfg)
+            self.save_xy_plot_and_close_plotly(fig, cfg)
+        elif cfg["settings"]["plt_engine"] == "matplotlib":
             plt_properties = visualization_common.add_image_to_xy_plot(cfg, plt_settings)
             plt_properties = self.get_xy_plot_matplotlib(data_df, plt_settings, cfg, plt_properties)
-            self.save_xy_plot_and_close_matplotlib(plt_properties, cfg)
+            self.save_xy_plot_and_close_matplotlib(cfg)
         else:
             raise ValueError("Invalid plt_engine")
 
@@ -294,10 +295,176 @@ class VisualizationXY:
 
         plt_properties = {"plt": plt, "fig": fig, 'ax': ax}
         return plt_properties
+    
+    def get_xy_plot_plotly(self, df, plt_settings, cfg):
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
+        
+        # Create figure
+        fig = go.Figure()
+        
+        # Get plot settings
+        plt_settings["traces"] = int(len(df.columns) / 2)
+        color_list = cfg["settings"]["color"]
+        linestyle_list = cfg["settings"]["linestyle"]
+        if len(linestyle_list) < plt_settings["traces"]:
+            linestyle_list = linestyle_list * math.ceil(plt_settings["traces"]/len(linestyle_list))
+        alpha_list = cfg["settings"]["alpha"]
+        markerprops_list = cfg["settings"]["markerprops"]
+        if len(markerprops_list) < plt_settings["traces"]:
+            markerprops_list = markerprops_list * math.ceil(plt_settings["traces"]/len(markerprops_list))
 
-    def save_xy_plot_and_close_matplotlib(self, plt_properties, cfg):
+        plot_mode = cfg["settings"].get("mode", ["line"])
+        
+        # Mapping from matplotlib linestyle to plotly dash style
+        line_style_map = {
+            '-': 'solid',
+            '--': 'dash',
+            ':': 'dot',
+            '-.': 'dashdot',
+            'solid': 'solid',
+            'dashed': 'dash',
+            'dotted': 'dot',
+            'dashdot': 'dashdot'
+        }
+        # Add traces
+        for index in range(0, plt_settings["traces"]):
+            label = None
+            if (isinstance(plt_settings["legend"]["label"], list) and len(plt_settings["legend"]["label"]) > index):
+                label = plt_settings["legend"]["label"][index]
+            
+            x_data = df["x_" + str(index)]
+            y_data = df["y_" + str(index)]
+            
+            # Convert matplotlib linestyle to plotly dash style
+            line_style = linestyle_list[index]
+            plotly_dash = line_style_map.get(line_style, 'solid')
+            if "line" in plot_mode and "scatter" in plot_mode:
+                fig.add_trace(go.Scatter(
+                    x=x_data,
+                    y=y_data,
+                    name=label,
+                    mode='lines+markers',
+                    line=dict(
+                        color=color_list[index],
+                        dash=plotly_dash,
+                    ),
+                    marker=dict(
+                        symbol=markerprops_list[index]["marker"],
+                        size=markerprops_list[index]["markersize"],
+                        color=color_list[index],
+                        line=dict(width=0)
+                    ),
+                    opacity=alpha_list[index]
+                ))
+            elif "line" in plot_mode:
+                fig.add_trace(go.Scatter(
+                    x=x_data,
+                    y=y_data,
+                    name=label,
+                    mode='lines',
+                    line=dict(
+                        color=color_list[index],
+                        dash=plotly_dash,
+                    ),
+                    opacity=alpha_list[index]
+                ))
+            elif "scatter" in plot_mode:
+                fig.add_trace(go.Scatter(
+                    x=x_data,
+                    y=y_data,
+                    name=label,
+                    mode='markers',
+                    marker=dict(
+                        symbol=markerprops_list[index]["marker"],
+                        size=markerprops_list[index]["markersize"],
+                        color=color_list[index],
+                        line=dict(width=0)
+                    ),
+                    opacity=alpha_list[index]
+                ))
+        
+        # Set titles and labels
+        title = plt_settings.get("title", None)
+        if title is not None:
+            fig.update_layout(title=title)
+        
+        suptitle = plt_settings.get("suptitle", None)
+        if suptitle is not None:
+            fig.update_layout(title_text=suptitle, title_y=0.98)
+        
+        fig.update_layout(
+            xaxis_title=plt_settings.get("xlabel", None),
+            yaxis_title=plt_settings.get("ylabel", None),
+            showlegend=plt_settings.get("legend", {}).get("flag", True)
+        )
+        
+        # Handle legend
+        legend_settings = plt_settings.get("legend", None)
+        if legend_settings and legend_settings.get("flag", True):
+            loc = legend_settings.get("loc", "best")
+            # Map matplotlib legend locations to plotly
+            loc_mapping = {
+                "best": None,
+                "upper right": "top right",
+                "upper left": "top left",
+                "lower left": "bottom left",
+                "lower right": "bottom right",
+                "right": "right",
+                "center left": "left",
+                "center right": "right",
+                "lower center": "bottom",
+                "upper center": "top",
+                "center": "center"
+            }
+            legend_loc = loc_mapping.get(loc, None)
+            fig.update_layout(legend=dict(
+                orientation="h" if loc in ["upper center", "lower center", "center"] else "v",
+                yanchor="auto",
+                xanchor="auto",
+                x=0.5 if loc in ["upper center", "lower center", "center"] else None,
+                y=1.1 if loc == "upper center" else -0.2 if loc == "lower center" else None
+            ))
+        
+        # Handle grid
+        grid = plt_settings.get("grid", True)
+        fig.update_layout(
+            xaxis=dict(showgrid=grid),
+            yaxis=dict(showgrid=grid)
+        )
+        
+        # Handle date formatting
+        if "plt_model" in cfg['settings'] and cfg['settings']['plt_model'] == "x_datetime":
+            locator = cfg['settings'].get("locator", None)
+            locator_map = {
+                "monthly": "%b %Y",
+                "daily": "%d %b %Y",
+                "weekly": "%d %b %Y",
+                "yearly": "%Y"
+            }
+            date_format = locator_map.get(locator, "%b %Y")
+            fig.update_layout(
+                xaxis=dict(
+                    tickformat=date_format
+                )
+            )
+        
+        # Handle axes limits
+        if 'xlim' in cfg['settings']:
+            fig.update_xaxes(range=cfg['settings']['xlim'])
+        if 'ylim' in cfg['settings']:
+            fig.update_yaxes(range=cfg['settings']['ylim'])
+        
+        return fig
+    
+    def save_xy_plot_and_close_plotly(self, fig, cfg):
+    
         plot_name_paths = visualization_common.get_plot_name_path(cfg)
-        plt = plt_properties["plt"]
+        for file_path in plot_name_paths:
+            pio.write_image(fig, file_path) 
+
+    def save_xy_plot_and_close_matplotlib(self,  cfg):
+        plot_name_paths = visualization_common.get_plot_name_path(cfg)
         for file_name in plot_name_paths:
             plt.savefig(file_name, dpi=800)
 
