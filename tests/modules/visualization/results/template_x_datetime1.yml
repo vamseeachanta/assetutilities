@@ -87,17 +87,6 @@ data:
       - 0.0849
       - 0.0708
       - 0.0649
-      - 0.0961
-      - 0.136
-      - 0.1563
-      - 0.1218
-      - 0.039
-      - 0.1583
-      - 0.4239
-      - 0.7356
-      - 1.2248
-      - 1.7912
-      - 2.6295
   color:
   - blue
   - green
@@ -113,20 +102,19 @@ meta:
   basename: visualization
   library: assetutlities
 settings:
-  type: xy
+  type: xy_x_datetime
   mode: line
   pairs: false
   multiple: false
-  plt_engine: matplotlib
-  plt_model: x_datetime
+  plt_engine: plotly
   label: Allowable Wave Height
-  file_name: x_datetime
+  file_name: x_datetime1
   title: Datetime plot
   xlabel: Date
   ylabel: RAO Surge Amplitude (m/N)
   locator: monthly
   plt_save_extensions:
-  - .png
+  - .html
   set_rmax: 10
   set_rticks:
   - 1
@@ -146,8 +134,9 @@ settings:
   - 300
   - 330
   set_rlabel_position: -22.5
+  xticks_rotation: 30
   legend:
-    flag: true
+    flag: false
     label:
     - Series 1
     loc: best
@@ -232,28 +221,17 @@ master_settings:
       - 0.0849
       - 0.0708
       - 0.0649
-      - 0.0961
-      - 0.136
-      - 0.1563
-      - 0.1218
-      - 0.039
-      - 0.1583
-      - 0.4239
-      - 0.7356
-      - 1.2248
-      - 1.7912
-      - 2.6295
 Analysis:
   basename: visualization
-  analysis_root_folder: k:\github\assetutilities\tests\modules\visualization
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization
   file_name: template_x_datetime1
   file_name_for_overwrite: template_x_datetime1
-  log_folder: k:\github\assetutilities\tests\modules\visualization\logs
-  start_time: 2025-04-25 11:02:49.606444
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\logs
+  start_time: 2025-04-26 11:24:27.773702
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: k:\github\assetutilities\tests\modules\visualization\template_x_datetime1.yml
-  result_folder: k:\github\assetutilities\tests\modules\visualization\results
-  result_data_folder: k:\github\assetutilities\tests\modules\visualization\results\Data
-  result_plot_folder: k:\github\assetutilities\tests\modules\visualization\results\Plot
-  fe_folder: k:\github\assetutilities\tests\modules\visualization\results
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\template_x_datetime1.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results

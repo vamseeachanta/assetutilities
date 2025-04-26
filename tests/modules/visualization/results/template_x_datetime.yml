@@ -22,15 +22,38 @@ data:
   type: input
   groups:
   - x:
-    - - 2024-08-01 00:00:00
-      - 2024-09-02 00:00:00
-      - 2024-10-04 00:00:00
-      - 2024-11-05 00:00:00
-      - 2024-12-07 00:00:00
-      - 2025-01-08 00:00:00
-      - 2025-02-09 00:00:00
-      - 2025-03-13 00:00:00
-      - 2025-04-14 00:00:00
+    - - 2007-08-31
+      - 2007-09-30
+      - 2007-10-31
+      - 2007-11-30
+      - 2007-12-31
+      - 2008-01-31
+      - 2008-02-29
+      - 2008-03-31
+      - 2008-04-30
+      - 2008-05-31
+      - 2008-06-30
+      - 2008-07-31
+      - 2008-08-31
+      - 2008-09-30
+      - 2008-10-31
+      - 2008-11-30
+      - 2008-12-31
+      - 2009-01-31
+      - 2009-02-28
+      - 2009-03-31
+      - 2009-04-30
+      - 2009-05-31
+      - 2009-06-30
+      - 2009-07-31
+      - 2009-08-31
+      - 2009-09-30
+      - 2009-10-31
+      - 2009-11-30
+      - 2009-12-31
+      - 2010-01-31
+      - 2010-02-28
+      - 2010-03-31
     y:
     - - 0.0024
       - 0.0026
@@ -64,17 +87,6 @@ data:
       - 0.0849
       - 0.0708
       - 0.0649
-      - 0.0961
-      - 0.136
-      - 0.1563
-      - 0.1218
-      - 0.039
-      - 0.1583
-      - 0.4239
-      - 0.7356
-      - 1.2248
-      - 1.7912
-      - 2.6295
   color:
   - blue
   - green
@@ -90,12 +102,11 @@ meta:
   basename: visualization
   library: assetutlities
 settings:
-  type: xy
+  type: xy_x_datetime
   mode: line
   pairs: false
   multiple: false
   plt_engine: matplotlib
-  plt_model: x_datetime
   label: Allowable Wave Height
   file_name: x_datetime
   title: Datetime plot
@@ -144,7 +155,38 @@ settings:
 master_settings:
   groups:
     x:
-    - []
+    - - 2007-08-31
+      - 2007-09-30
+      - 2007-10-31
+      - 2007-11-30
+      - 2007-12-31
+      - 2008-01-31
+      - 2008-02-29
+      - 2008-03-31
+      - 2008-04-30
+      - 2008-05-31
+      - 2008-06-30
+      - 2008-07-31
+      - 2008-08-31
+      - 2008-09-30
+      - 2008-10-31
+      - 2008-11-30
+      - 2008-12-31
+      - 2009-01-31
+      - 2009-02-28
+      - 2009-03-31
+      - 2009-04-30
+      - 2009-05-31
+      - 2009-06-30
+      - 2009-07-31
+      - 2009-08-31
+      - 2009-09-30
+      - 2009-10-31
+      - 2009-11-30
+      - 2009-12-31
+      - 2010-01-31
+      - 2010-02-28
+      - 2010-03-31
     y:
     - - 0.0024
       - 0.0026
@@ -178,28 +220,17 @@ master_settings:
       - 0.0849
       - 0.0708
       - 0.0649
-      - 0.0961
-      - 0.136
-      - 0.1563
-      - 0.1218
-      - 0.039
-      - 0.1583
-      - 0.4239
-      - 0.7356
-      - 1.2248
-      - 1.7912
-      - 2.6295
 Analysis:
   basename: visualization
-  analysis_root_folder: k:\github\assetutilities\tests\modules\visualization
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization
   file_name: template_x_datetime
   file_name_for_overwrite: template_x_datetime
-  log_folder: k:\github\assetutilities\tests\modules\visualization\logs
-  start_time: 2025-04-24 18:06:24.890968
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\logs
+  start_time: 2025-04-26 11:27:51.319657
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: k:\github\assetutilities\tests\modules\visualization\template_x_datetime.yml
-  result_folder: k:\github\assetutilities\tests\modules\visualization\results
-  result_data_folder: k:\github\assetutilities\tests\modules\visualization\results\Data
-  result_plot_folder: k:\github\assetutilities\tests\modules\visualization\results\Plot
-  fe_folder: k:\github\assetutilities\tests\modules\visualization\results
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\template_x_datetime.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\visualization\results

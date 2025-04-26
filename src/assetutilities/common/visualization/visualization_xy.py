@@ -2,6 +2,8 @@
 from loguru import logger
 import math
 from datetime import datetime, timedelta
+import matplotlib.dates as mdates  # noqa
+from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
@@ -35,7 +37,7 @@ class VisualizationXY:
             plt_properties = self.get_xy_plot_matplotlib(data_df, plt_settings, cfg, plt_properties)
             self.save_xy_plot_and_close_matplotlib(cfg)
         else:
-            raise ValueError("Invalid plt_engine")
+            raise ValueError("Invalid plot engine specified in the configuration file.")
 
     def get_data_df_and_plot_properties(self, cfg):
         if cfg["data"]["type"] == "input":
@@ -58,18 +60,12 @@ class VisualizationXY:
         
         for group_cfg in mapped_data_cfg["data"]['groups']:
             x_data = group_cfg["x"]
-            if len(x_data[0]) == 0 and "x_datetime" in mapped_data_cfg['settings']['plt_model']:
-                self.add_sample_dates_to_x_data(group_cfg)
-            x_data = group_cfg["x"]
-            y_data = group_cfg["y"]
+            y_data = group_cfg["y"] 
             length_x = len(x_data[0])
             length_y = len(y_data[0])
-            # equal the length of x and y data
             if length_x != length_y:
-                min_length = min(length_x, length_y)
-                x_data = [x[:min_length] for x in x_data]
-                y_data = [y[:min_length] for y in y_data]
-                
+                logger.error("Length of x and y data do not match")
+                raise ValueError("Length of x and y data do not match")
             legend_item = group_cfg.get("label", None)
             legend.append(legend_item if legend_item else f"Series {len(legend) + 1}")
 
@@ -87,21 +83,6 @@ class VisualizationXY:
             trace_count += no_of_trends
 
         return data_dict, legend
-    
-    def add_sample_dates_to_x_data(self, group_cfg):
-        '''
-        #TODO DELETE
-        # Add sample dates to x data for test
-        '''
-        start_time = datetime(2024,8,1)
-        end_time = datetime.now()
-        dates = group_cfg['x'][0]
-        current = start_time
-        while current <= end_time:
-            dates.append(current)
-            current += timedelta(days=32)
-        group_cfg["x"] = [dates]
-        return group_cfg
 
     def get_xy_mapped_data_dict_from_csv(self, cfg):
         mapped_data_cfg = {}
@@ -275,35 +256,62 @@ class VisualizationXY:
 
         plt = visualization_common.add_x_y_lim_formats(cfg, plt) 
 
-        #TODO Move to another function, format axis labels so that the we read x-axis labels.
-        # Third party imports
-        import matplotlib.dates as mdates  # noqa
-
-        if "plt_model" in cfg['settings'] and cfg['settings']['plt_model'] == "x_datetime":
-            locator = cfg['settings'].get("locator", None)
-            locator_map = {
-                "monthly": (mdates.MonthLocator(interval=1), mdates.DateFormatter("%b %Y")),
-                "daily": (mdates.DayLocator(interval=2), mdates.DateFormatter("%d %b %Y")),
-                "weekly": (mdates.WeekdayLocator(interval=1), mdates.DateFormatter("%d %b %Y")),
-                "yearly": (mdates.YearLocator(), mdates.DateFormatter("%Y"))
-            }
-
-            loc, fmt = locator_map.get(locator,locator_map[locator])
-            ax.xaxis.set_major_locator(loc)
-            ax.xaxis.set_major_formatter(fmt)
-            xticks_rotation = cfg['settings'].get("xticks_rotation", 45)
-            plt.xticks(rotation=xticks_rotation) # rotates x-axis labels
-            fig.autofmt_xdate() # auto formats x-axis date
+        if "xy_x_datetime" in cfg['settings']['type']:
+            self.format_x_axis_dates_matplotlib(cfg, plt, fig, ax)
                
 
         plt_properties = {"plt": plt, "fig": fig, 'ax': ax}
         return plt_properties
-    
+
+    def format_x_axis_dates_matplotlib(self, cfg, plt, fig, ax):  
+        x_min, x_max = ax.get_xlim()
+        date_min = mdates.num2date(x_min)
+        date_max = mdates.num2date(x_max)
+        date_range = date_max - date_min
+
+        locator = cfg['settings'].get("locator", None)
+
+        if locator:
+            locator_map = {
+                "monthly": (mdates.MonthLocator, "%b %Y"),
+                "daily": (mdates.DayLocator, "%d %b %Y"),
+                "weekly": (mdates.WeekdayLocator, "%d %b %Y"),
+                "yearly": (mdates.YearLocator, "%Y")
+            }
+            
+            if locator in locator_map:
+                locator_class, date_format = locator_map[locator]
+                
+                # Calculate appropriate interval based on date range
+                if locator == "monthly":
+                    total_months = date_range.days / 30
+                    interval = max(1, int(total_months / 10))  # Aim for ~10 ticks
+                elif locator == "daily":
+                    interval = max(1, int(date_range.days / 10))
+                elif locator == "weekly":
+                    interval = max(1, int((date_range.days / 7) / 10))
+                else: 
+                    interval = max(1, int(date_range.days / 365 / 5))
+                
+                loc = locator_class(interval=interval)
+                fmt = mdates.DateFormatter(date_format)
+            else:
+                loc = mdates.MonthLocator(interval=1)
+                fmt = mdates.DateFormatter("%b %Y")
+        else:
+            loc = mdates.AutoDateLocator()
+            fmt = mdates.AutoDateFormatter(loc)
+        
+        ax.xaxis.set_major_locator(loc)
+        ax.xaxis.set_major_formatter(fmt)
+        
+        xticks_rotation = cfg['settings'].get("xticks_rotation", 45)
+        plt.xticks(rotation=xticks_rotation)
+        fig.autofmt_xdate()
+     
     def get_xy_plot_plotly(self, df, plt_settings, cfg):
         import plotly.graph_objects as go
-        from plotly.subplots import make_subplots
         
-        # Create figure
         fig = go.Figure()
         
         # Get plot settings
@@ -319,7 +327,6 @@ class VisualizationXY:
 
         plot_mode = cfg["settings"].get("mode", ["line"])
         
-        # Mapping from matplotlib linestyle to plotly dash style
         line_style_map = {
             '-': 'solid',
             '--': 'dash',
@@ -330,7 +337,6 @@ class VisualizationXY:
             'dotted': 'dot',
             'dashdot': 'dashdot'
         }
-        # Add traces
         for index in range(0, plt_settings["traces"]):
             label = None
             if (isinstance(plt_settings["legend"]["label"], list) and len(plt_settings["legend"]["label"]) > index):
@@ -387,7 +393,6 @@ class VisualizationXY:
                     opacity=alpha_list[index]
                 ))
         
-        # Set titles and labels
         title = plt_settings.get("title", None)
         if title is not None:
             fig.update_layout(title=title)
@@ -402,11 +407,9 @@ class VisualizationXY:
             showlegend=plt_settings.get("legend", {}).get("flag", True)
         )
         
-        # Handle legend
         legend_settings = plt_settings.get("legend", None)
         if legend_settings and legend_settings.get("flag", True):
             loc = legend_settings.get("loc", "best")
-            # Map matplotlib legend locations to plotly
             loc_mapping = {
                 "best": None,
                 "upper right": "top right",
@@ -429,7 +432,6 @@ class VisualizationXY:
                 y=1.1 if loc == "upper center" else -0.2 if loc == "lower center" else None
             ))
         
-        # Handle grid
         grid = plt_settings.get("grid", True)
         fig.update_layout(
             xaxis=dict(showgrid=grid),
@@ -437,34 +439,78 @@ class VisualizationXY:
         )
         
         # Handle date formatting
-        if "plt_model" in cfg['settings'] and cfg['settings']['plt_model'] == "x_datetime":
-            locator = cfg['settings'].get("locator", None)
-            locator_map = {
-                "monthly": "%b %Y",
-                "daily": "%d %b %Y",
-                "weekly": "%d %b %Y",
-                "yearly": "%Y"
-            }
-            date_format = locator_map.get(locator, "%b %Y")
-            fig.update_layout(
-                xaxis=dict(
-                    tickformat=date_format
-                )
-            )
-        
-        # Handle axes limits
+        if "xy_x_datetime" in cfg['settings']['type']:
+            self.format_x_axis_dates_plotly(fig, cfg)
+
         if 'xlim' in cfg['settings']:
             fig.update_xaxes(range=cfg['settings']['xlim'])
         if 'ylim' in cfg['settings']:
             fig.update_yaxes(range=cfg['settings']['ylim'])
         
         return fig
+
+    def format_x_axis_dates_plotly(self, fig, cfg):
+        """
+        Dynamically adjusts x-axis date formatting in Plotly based on date range.
+        Maintains the locator setting from config but auto-adjusts intervals.
+        """      
+        # Get the current x-axis range (if already plotted)
+        if not fig.data:
+            return fig  # No data to format
+        
+        # Extract date range from data (assuming x-axis is datetime)
+        x_data = fig.data[0].x  # Get first trace's x values
+        if x_data.size == 0 :
+            return fig
+        
+        date_min = min(x_data)
+        date_max = max(x_data)
+        date_range = date_max - date_min
+        
+        # Get locator setting from config (default: "monthly")
+        locator = cfg['settings'].get("locator", "monthly")
+        
+        # Define adaptive tick intervals based on date range
+        if locator == "monthly":
+            total_months = date_range.days / 30
+            tick_interval = max(1, int(total_months / 10))  # Aim for ~10 ticks
+            dtick = f"M{tick_interval}"  # Plotly's format (e.g., "M3" = every 3 months)
+            tick_format = "%b %Y"  # Format like "Jan 2024"
+        
+        elif locator == "daily":
+            tick_interval = max(1, int(date_range.days / 10))
+            dtick = f"D{tick_interval}"  # "D7" = every 7 days
+            tick_format = "%d %b %Y"  # "05 Jan 2024"
+        
+        elif locator == "weekly":
+            tick_interval = max(1, int((date_range.days / 7) / 10))
+            dtick = f"W{tick_interval}"  # "W2" = every 2 weeks
+            tick_format = "%d %b %Y"  # "05 Jan 2024"
+        
+        elif locator == "yearly":
+            tick_interval = max(1, int(date_range.days / 365 / 5))
+            dtick = f"Y{tick_interval}"  # "Y1" = every year
+            tick_format = "%Y"  # "2024"
+        
+        else:  # Auto mode (Plotly default)
+            dtick = None  # Let Plotly decide
+            tick_format = None
+        
+        # Apply formatting to x-axis
+        fig.update_xaxes(
+            tickformat=tick_format,
+            dtick=dtick
+        )
     
     def save_xy_plot_and_close_plotly(self, fig, cfg):
-    
+        '''
+        save plot in html format and close plotly
+        '''
         plot_name_paths = visualization_common.get_plot_name_path(cfg)
-        for file_path in plot_name_paths:
-            pio.write_image(fig, file_path) 
+        for file_name in plot_name_paths:
+            fig.write_html(file_name, include_plotlyjs="cdn")
+            #fig.write_image(file_name.replace(".html", ".png"), width=1200, height=800, scale=2)
+      
 
     def save_xy_plot_and_close_matplotlib(self,  cfg):
         plot_name_paths = visualization_common.get_plot_name_path(cfg)

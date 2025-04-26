@@ -28,6 +28,10 @@ class VisualizationComponents:
         elif "xy" in cfg["settings"]["type"]:
             visualization_xy = VisualizationXY()
             visualization_xy.xy_plot_set_up_and_save(cfg, plt_settings)
+        elif "xy_x_datetime" in cfg["settings"]["type"]:
+            visualization_xy = VisualizationXY()
+            visualization_xy.xy_plot_set_up_and_save(cfg, plt_settings)
+
         else:
             raise (Exception("Other plots coding to be completed ... FAIL"))
         
