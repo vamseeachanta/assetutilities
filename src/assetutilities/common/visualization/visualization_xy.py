@@ -454,62 +454,52 @@ class VisualizationXY:
         Dynamically adjusts x-axis date formatting in Plotly based on date range.
         Maintains the locator setting from config but auto-adjusts intervals.
         """      
-        # Get the current x-axis range (if already plotted)
         if not fig.data:
-            return fig  # No data to format
-        
-        # Extract date range from data (assuming x-axis is datetime)
-        x_data = fig.data[0].x  # Get first trace's x values
+            return fig  
+
+        x_data = fig.data[0].x 
         if x_data.size == 0 :
             return fig
         
         date_min = min(x_data)
         date_max = max(x_data)
         date_range = date_max - date_min
-        
-        # Get locator setting from config (default: "monthly")
+
         locator = cfg['settings'].get("locator", "monthly")
         
-        # Define adaptive tick intervals based on date range
         if locator == "monthly":
             total_months = date_range.days / 30
             tick_interval = max(1, int(total_months / 10))  # Aim for ~10 ticks
-            dtick = f"M{tick_interval}"  # Plotly's format (e.g., "M3" = every 3 months)
-            tick_format = "%b %Y"  # Format like "Jan 2024"
+            dtick = f"M{tick_interval}"  
+            tick_format = "%b %Y" 
         
         elif locator == "daily":
             tick_interval = max(1, int(date_range.days / 10))
-            dtick = f"D{tick_interval}"  # "D7" = every 7 days
-            tick_format = "%d %b %Y"  # "05 Jan 2024"
+            dtick = f"D{tick_interval}"  
+            tick_format = "%d %b %Y"  
         
         elif locator == "weekly":
             tick_interval = max(1, int((date_range.days / 7) / 10))
-            dtick = f"W{tick_interval}"  # "W2" = every 2 weeks
-            tick_format = "%d %b %Y"  # "05 Jan 2024"
-        
+            dtick = f"W{tick_interval}" 
+            tick_format = "%d %b %Y"  
+
         elif locator == "yearly":
             tick_interval = max(1, int(date_range.days / 365 / 5))
-            dtick = f"Y{tick_interval}"  # "Y1" = every year
-            tick_format = "%Y"  # "2024"
-        
-        else:  # Auto mode (Plotly default)
-            dtick = None  # Let Plotly decide
+            dtick = f"Y{tick_interval}"  
+            tick_format = "%Y"  
+        else:  
+            dtick = None  
             tick_format = None
-        
-        # Apply formatting to x-axis
+
         fig.update_xaxes(
             tickformat=tick_format,
             dtick=dtick
         )
     
     def save_xy_plot_and_close_plotly(self, fig, cfg):
-        '''
-        save plot in html format and close plotly
-        '''
         plot_name_paths = visualization_common.get_plot_name_path(cfg)
         for file_name in plot_name_paths:
             fig.write_html(file_name, include_plotlyjs="cdn")
-            #fig.write_image(file_name.replace(".html", ".png"), width=1200, height=800, scale=2)
       
 
     def save_xy_plot_and_close_matplotlib(self,  cfg):
