@@ -1,0 +1,28 @@
+@startwbs application_manager
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title application_manager
+
+* application_manager
+
+** logging
+*** loguru logger config
+*** block
+*** placeholder
+
+
+** divide
+*** by_primary_keys
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs

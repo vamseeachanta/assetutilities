@@ -1,27 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 17 10:05:12 2018
+import logging
+import os
+import sys
+import inspect
 
-@author: achantv
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Author: Vamsee Achanta
-Date Updated: 2017-11-25
-Objective: To set logging level. logLevels can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
-Outputs: Settings for logging
-"""
-
+from loguru import logger
 
 def set_logging(cfg):
-    # Standard library imports
-    import logging
-    import os
-    import sys
 
-    logNumericLevel = getattr(logging, cfg["default"]["log_level"].upper())
+    log_level = cfg["default"]["log_level"].upper()
+    logNumericLevel = getattr(logging, log_level)
 
     if not isinstance(logNumericLevel, int):
         raise ValueError("Invalid log level: %s" % cfg["default"]["log_level"])
@@ -39,14 +26,53 @@ def set_logging(cfg):
         cfg["Analysis"]["log_folder"], cfg["Analysis"]["file_name"] + ".log"
     )
     logging.basicConfig(
+        # handlers=[InterceptHandler()],
         level=logNumericLevel,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",
         filename=logfilename,
         filemode="w",
+        force=True,
     )
-
+    
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     logging.info("Logging started successfully ...")
 
+    config = {
+        "handlers": [
+            {"sink": sys.stdout, "format": "{time} - {name} - {levelname} - {message}", 'level': log_level},
+            {"sink": logfilename, "serialize": True, 'level': log_level},
+        ],
+        # "extra": {"user": "someone"},
+        }
+    logger.configure(**config)
+    logger.add(PropagateHandler())
+
     return cfg
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        # Get corresponding Loguru level if it exists.
+        try:
+            level: str | int = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message.
+        frame, depth = inspect.currentframe(), 0
+        while frame:
+            filename = frame.f_code.co_filename
+            is_logging = filename == logging.__file__
+            is_frozen = "importlib" in filename and "_bootstrap" in filename
+            if depth > 0 and not (is_logging or is_frozen):
+                break
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+class PropagateHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        logging.getLogger(record.name).handle(record)
+

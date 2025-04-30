@@ -10,3 +10,9 @@
 
 Fixed the no logs problem  [#16](https://github.com/vamseeachanta/assetutilities/issues/16) using the resetting of the handler as given in below
 <https://stackoverflow.com/questions/30861524/logging-basicconfig-not-creating-log-file-when-i-run-in-pycharm>
+
+## loguru
+
+added to application_manager
+
+https://github.com/Delgan/loguru?tab=readme-ov-file#entirely-compatible-with-standard-logging
