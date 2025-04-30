@@ -56,17 +56,24 @@ class ZipFilestoDf:
             dataframes = {}
             delimiter = ','
             for file_to_read in file_list:
+                df = pd.DataFrame()
                 with zf.open(file_to_read) as file:
-                    df = pd.read_csv(file, sep=delimiter)
-                    
+                    try:
+                        df = pd.read_csv(file, sep=delimiter)
+                    except Exception as e:
+                        try:
+                            df = pd.read_csv(file, sep=delimiter, encoding='unicode_escape')
+                        except Exception as e:
+                            logger.error(f"Error reading file '{file_to_read}': {e}")
+
                     # If column names are provided and the df has no header set the column names
-                    if column_names: 
+                    if len(df) > 0 and column_names:
                         df.columns = column_names
-                    
                     #logger.debug(f"Loaded file: {file_to_read}")
-                    file_name = os.path.splitext(file_to_read)[0]
-                    dataframes[file_name] = df
-            
+                    file_basename = os.path.basename(file_to_read)
+                    file_name_without_extension, extension = os.path.splitext(file_basename)
+                    dataframes[file_name_without_extension] = df
+
             # If only one file, return the DataFrame instead of a dictionary
             if len(dataframes) == 1:
                 return list(dataframes.values())[0]
