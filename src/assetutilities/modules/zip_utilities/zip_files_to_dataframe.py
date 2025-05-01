@@ -42,7 +42,7 @@ class ZipFilestoDf:
 
             # check if file_list is empty
             if not file_list:
-                raise ValueError(f"The ZIP file '{zip_filepath}' is empty.")
+                raise ValueError(f"The ZIP file '{zip_file_name_with_path}' is empty.")
 
             dataframe_dict = {}
             delimiter = ','

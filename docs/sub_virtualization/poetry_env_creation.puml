@@ -1,0 +1,31 @@
+@startwbs poetry_env_creation
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title poetry_env_creation
+
+
+* poetry_env_creation
+
+** pyproject.toml
+*** doesn't have
+**** run poetry init
+*** has existing
+**** modify to poetry like file
+
+** create env via requirements.txt
+
+** self installing library
+*** through poetry pyproject.toml
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs
