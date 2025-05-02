@@ -53,6 +53,8 @@ poetry init
 
 **🛠️ Install the Environment**
 
+install from pyproject.toml file:
+
 ```bash
 poetry install
 ```
@@ -60,7 +62,13 @@ poetry install
 > ⚠️ It may raise errors like "no matching version found" for a package.  
 > 💡 Solution: Check the version availability on [PyPI](https://pypi.org/) and update accordingly.
 
----
+> install via requirements.txt file:
+     
+```bash
+poetry run pip install -r requirements.txt
+
+ex : poetry run pip install -r ./dev_tools/requirements.txt
+```
 
 **Post-Installation Steps**
 

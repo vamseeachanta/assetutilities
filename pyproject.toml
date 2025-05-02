@@ -16,39 +16,8 @@ classifiers = [
 keywords = ['package', 'library', 'module']
 
 [tool.poetry.dependencies]
+assethold = { path = "../assethold", develop = true }
 python = ">=3.9,<4.0"
-docutils = "0.21.2"
-loguru = "0.7.3"
-build = "*"
-twine = "*"
-bumpver = "*"
-pyyaml = "*"
-numpy = "*"
-pandas = "*"
-plotly = "*"
-matplotlib = "*"
-chardet = "*"
-python-certifi-win32 = "*"
-webcolors = "*"
-xlsxwriter = "*"
-plantuml = "*"
-pytest = "*"
-deepdiff = "*"
-pandoc = "*"
-wkhtmltopdf = "*"
-python-docx = "*"
-black = "*"
-isort = "*"
-bs4 = "*"
-gitpython = "==3.1.31"
-excel2img = { version = "*", markers = "sys_platform == 'win32'" }
-PyPDF2 = "*"
-tabula = "*"
-sympy = ">=1.13.3"
-utm = "*"
-ruamel-yaml = "*"
-jinja2 = "*"
-scrapy = "^2.12.0"
 
 
 [tool.poetry.group.dev.dependencies]
