@@ -35,21 +35,10 @@ fi
 echo "[INFO] Locking updated dependencies..."
 poetry lock
 
-# Try installing, catch error if Python version conflict occurs
 if ! poetry install; then
-    echo "[WARN] poetry install failed. Attempting to resolve Python version compatibility..."
-
-    REQUIRED_VERSION=$(poetry install 2>&1 | grep -oP 'Python >=\K[0-9.]+(?=,<)' | head -1)
-
-    if [ -n "$REQUIRED_VERSION" ]; then
-        echo "[INFO] Updating Python version to >=$REQUIRED_VERSION,<4.0 in $PYPROJECT..."
-        sed -i.bak "/^python = /c\python = \"\>=${REQUIRED_VERSION},<4.0\"" "$PYPROJECT"
-        poetry lock
-        poetry install
-    else
-        echo "[ERROR] Could not auto-detect required Python version. Please update pyproject.toml manually."
-        exit 1
-    fi
+    echo "[ERROR] poetry install failed with exit code $?. Please check the error message above."
+    echo "[INFO] ensure you have the correct Python version installed and all dependencies are available in pyproject.toml."
+    exit 1
 else
     echo "[INFO] poetry install completed successfully."
 fi
