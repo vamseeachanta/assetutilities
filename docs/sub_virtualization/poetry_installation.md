@@ -36,40 +36,6 @@ Poetry (version 2.1.2)
 
 ---
 
-### 🚀 Using poetry in existing project
-
-Navigate to your project directory:
-
-```bash
-cd your-project/
-poetry init
-```
-
-- This will prompt you to create a new `pyproject.toml` file.
-- You can provide the necessary information or just press `Enter` to accept the defaults.
-- If the toml file of different version already exists, you have to change it to poetry like toml file.
-
----
-
-**🛠️ Install the Environment**
-
-install from pyproject.toml file:
-
-```bash
-poetry install
-```
-
-> ⚠️ It may raise errors like "no matching version found" for a package.  
-> 💡 Solution: Check the version availability on [PyPI](https://pypi.org/) and update accordingly.
-
-> install via requirements.txt file:
-     
-```bash
-poetry run pip install -r requirements.txt
-
-ex : poetry run pip install -r ./dev_tools/requirements.txt
-```
-
 **Post-Installation Steps**
 
 ### ➕ Add `.venv` to `.gitignore`
@@ -83,14 +49,6 @@ echo ".venv/" >> .gitignore
 ```bash
 poetry config virtualenvs.in-project true
 ```
-
-Re-run:
-
-```bash
-poetry install
-```
-
----
 
 ## 🧪 Run Python Scripts in VSCode with Poetry
 
