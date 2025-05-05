@@ -66,7 +66,7 @@ When branch is ready for review (and/or approval):
   - Create the pull request
 - Copy the person who should be reviewing the code in the pull request.
 
-### Rebase
+### Rebase - Pycharm
 
 Git Rebase. Always rebase the local branch that typically (way) behind master. Rebase is more easier to merge stale code than direct merge.
 
@@ -90,6 +90,19 @@ Git Rebase. Always rebase the local branch that typically (way) behind master. R
 <https://stackoverflow.com/questions/804115/when-do-you-use-git-rebase-instead-of-git-merge>
 <https://www.perforce.com/blog/vcs/git-rebase-vs-merge-which-better>
 <https://www.atlassian.com/git/tutorials/merging-vs-rebasing>
+
+
+### Rebase - VS COde
+
+
+- source control
+- branch
+- rebase branch
+  - select branch (eg: master or main)
+  
+
+https://dev.to/colbygarland/using-vs-code-to-git-rebase-1lc
+
 
 ## Commands
 
