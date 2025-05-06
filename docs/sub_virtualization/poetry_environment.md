@@ -48,3 +48,17 @@ again , run `poetry install` to install the environment.
 - poetry add <package_name> - to add a new package to the environment
 - poetry remove <package_name> - to remove a package from the environment
 - poetry update - to update the packages in the environment
+
+## 🧪 Run Python Scripts in VSCode with Poetry
+
+### (Optional) Enable Local `.venv` in Your Project Root
+
+```bash
+poetry config virtualenvs.in-project true
+```
+
+### ⚙️ Select the Python Interpreter in VSCode
+
+- Press `Ctrl + Shift + P`
+- Type: `Python: Select Interpreter`
+- Select the one that looks like: Python 3.11.8 (.venv:Poetry)

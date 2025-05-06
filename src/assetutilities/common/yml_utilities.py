@@ -25,7 +25,7 @@ from assetutilities.common.utilities import (
     get_common_name_from_2_filenames,
     is_file_valid_func,
 )
-from assetutilities.common.visualization.visualization_templates import (
+from assetutilities.common.visualization.visualization_templates_matplotlib import (
     VisualizationTemplates,
 )
 from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML

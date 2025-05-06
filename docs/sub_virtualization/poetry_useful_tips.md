@@ -24,8 +24,7 @@ show latest version of the dependencies:
 poetry show --latest
 ```
 
-
-**Self installing library in poetry** 
+**Install local repository into environment** 
 
 In pyproject.toml file, add the following code to install a library from a local path:
 
@@ -60,22 +59,21 @@ So, we need to use pip commands to manage the environment.
 - poetry run pip list - to view the packages in the environment
 - poetry pip show <package_name> - to view the details of a specific package in the environment
 
-> Managing the dependencies 
+### Managing the dependencies 
 
 **Add a new package**
 
 ```bash
-add package manually in requirements.txt file and run the below command
+add package manually in requirements.txt file and run
 poetry run pip install -r requirements.txt
 ```
 
 **Remove a package**
 ```bash
 poetry pip uninstall <package_name>
-and update environment using below command 
+and update environment :
 poetry run pip install -r requirements.txt 
 ```
-
 
 references:
 

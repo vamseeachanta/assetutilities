@@ -38,7 +38,8 @@ class ZipFilestoDf:
             zip_file = BytesIO(zip_file)
 
         with zipfile.ZipFile(zip_file, 'r') as zf:
-            file_list = zf.namelist()
+            files_in_zip = zf.namelist()
+            file_list = [name for name in files_in_zip if not name.endswith('/')]
 
             # check if file_list is empty
             if not file_list:
