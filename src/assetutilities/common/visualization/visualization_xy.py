@@ -411,7 +411,7 @@ class VisualizationXY:
                     ),
                     opacity=alpha_list[index]
                 ))
-            elif "df" in plot_mode:
+            # elif "df" in plot_mode:
                 
         
         title = plt_settings.get("title", None)
