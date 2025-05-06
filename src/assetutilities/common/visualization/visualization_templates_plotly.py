@@ -10,10 +10,10 @@ class VisualizationTemplatesPlotly:
     def __init__(self):
         pass
 
-    def get_xy_scatter_input(self, custom_analysis_dict={}):
+    def get_xy_line_df(self, custom_analysis_dict={}):
         library_name = 'assetutilities'
         library_yaml_cfg = {
-            'filename': 'base_configs/modules/visualization/template_xy_scatter_input.yml',
+            'filename': 'base_configs/modules/visualization/template_xy_line_df.yml',
             'library_name': library_name
         }
         from assetutilities.common.yml_utilities import WorkingWithYAML

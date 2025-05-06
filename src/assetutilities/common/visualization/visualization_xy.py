@@ -47,6 +47,11 @@ class VisualizationXY:
 
         elif cfg["data"]["type"] == "csv":
             data_dict, cfg = self.get_xy_mapped_data_dict_from_csv(cfg)
+
+        #TODO Add capability for pandas dataframe
+        elif cfg["data"]["type"] == "df":
+            data_dict,cfg = self.get_xy_mapped_data_dict_from_df(cfg)
+
         data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
 
         cfg = visualization_common.get_plot_properties_for_df(cfg, data_df)
@@ -142,6 +147,20 @@ class VisualizationXY:
         mapped_data_cfg = {"data": {"groups": [{"x": x_data_array, "y": y_data_array}]}}
         cfg["settings"]["legend"]["label"] = legend_data
         data_dict, legend_unused = self.get_xy_mapped_data_dict_from_input(mapped_data_cfg)
+
+        return data_dict, cfg
+    
+    def get_xy_mapped_data_dict_from_df(self, cfg):
+        df = cfg["data"]["df"]
+        x_col = cfg["id_vars"]["x"]
+        y_cols = cfg["id_vars"]["y"]  # list of columns to map as Y series
+
+        if isinstance(y_cols, str):
+            y_cols = [y_cols]
+
+        data_dict = {"x": df[x_col].tolist()}
+        for i, y_col in enumerate(y_cols):
+            data_dict[f"y_{i}"] = df[y_col].tolist()
 
         return data_dict, cfg
 
@@ -392,6 +411,8 @@ class VisualizationXY:
                     ),
                     opacity=alpha_list[index]
                 ))
+            elif "df" in plot_mode:
+                
         
         title = plt_settings.get("title", None)
         if title is not None:
