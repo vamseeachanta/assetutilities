@@ -15,7 +15,7 @@ settings:
   file_name: NULL
   plt_save_extensions: [".html"]
   title: Wind Coefficients for FSTs, Cx
-  xlabel: Direction (deg)
+  xlabel: Heading
   ylabel: data
   set_rmax: 10
   set_rticks: [1, 2, 3]
@@ -23,7 +23,7 @@ settings:
   set_rlabel_position: -22.5
   legend:
     flag: True
-    label: []
+    label: api12
     loc: best
     prop: { family: Arial, size: 8 }
   xlim: NULL
@@ -42,7 +42,7 @@ master_settings:
       size: 5  
       line:
         width: 1  
-        color: "black"  
+        color: "black" 
     filter: []
     transform: []
 

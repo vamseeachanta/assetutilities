@@ -8,6 +8,7 @@ from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
 import plotly.io as pio  # noqa
+import plotly.express as px  # noqa
 import pandas as pd  # noqa
 from colorama import Fore, Style
 from colorama import init as colorama_init
@@ -40,6 +41,7 @@ class VisualizationXY:
             raise ValueError("Invalid plot engine specified in the configuration file.")
 
     def get_data_df_and_plot_properties(self, cfg):
+        data_dict = {}
         if cfg["data"]["type"] == "input":
             data_dict, legend = self.get_xy_mapped_data_dict_from_input(cfg)
             if len(cfg["settings"]["legend"]["label"]) == 0:
@@ -47,10 +49,6 @@ class VisualizationXY:
 
         elif cfg["data"]["type"] == "csv":
             data_dict, cfg = self.get_xy_mapped_data_dict_from_csv(cfg)
-
-        #TODO Add capability for pandas dataframe
-        elif cfg["data"]["type"] == "df":
-            data_dict,cfg = self.get_xy_mapped_data_dict_from_df(cfg)
 
         data_df = pd.DataFrame.from_dict(data_dict, orient="index").transpose()
 
@@ -147,20 +145,6 @@ class VisualizationXY:
         mapped_data_cfg = {"data": {"groups": [{"x": x_data_array, "y": y_data_array}]}}
         cfg["settings"]["legend"]["label"] = legend_data
         data_dict, legend_unused = self.get_xy_mapped_data_dict_from_input(mapped_data_cfg)
-
-        return data_dict, cfg
-    
-    def get_xy_mapped_data_dict_from_df(self, cfg):
-        df = cfg["data"]["df"]
-        x_col = cfg["id_vars"]["x"]
-        y_cols = cfg["id_vars"]["y"]  # list of columns to map as Y series
-
-        if isinstance(y_cols, str):
-            y_cols = [y_cols]
-
-        data_dict = {"x": df[x_col].tolist()}
-        for i, y_col in enumerate(y_cols):
-            data_dict[f"y_{i}"] = df[y_col].tolist()
 
         return data_dict, cfg
 
@@ -329,145 +313,177 @@ class VisualizationXY:
         fig.autofmt_xdate()
      
     def get_xy_plot_plotly(self, df, plt_settings, cfg):
-        import plotly.graph_objects as go
-        
-        fig = go.Figure()
-        
-        # Get plot settings
-        plt_settings["traces"] = int(len(df.columns) / 2)
-        color_list = cfg["settings"]["color"]
-        linestyle_list = cfg["settings"]["linestyle"]
-        if len(linestyle_list) < plt_settings["traces"]:
-            linestyle_list = linestyle_list * math.ceil(plt_settings["traces"]/len(linestyle_list))
-        alpha_list = cfg["settings"]["alpha"]
-        markerprops_list = cfg["settings"]["markerprops"]
-        if len(markerprops_list) < plt_settings["traces"]:
-            markerprops_list = markerprops_list * math.ceil(plt_settings["traces"]/len(markerprops_list))
 
-        plot_mode = cfg["settings"].get("mode", ["line"])
-        
-        line_style_map = {
-            '-': 'solid',
-            '--': 'dash',
-            ':': 'dot',
-            '-.': 'dashdot',
-            'solid': 'solid',
-            'dashed': 'dash',
-            'dotted': 'dot',
-            'dashdot': 'dashdot'
-        }
-        for index in range(0, plt_settings["traces"]):
-            label = None
-            if (isinstance(plt_settings["legend"]["label"], list) and len(plt_settings["legend"]["label"]) > index):
-                label = plt_settings["legend"]["label"][index]
+        if cfg['data']['type'] == "df":
+            fig = self.get_xy_line_df_plot(plt_settings,cfg)
+        else:
+            import plotly.graph_objects as go
             
-            x_data = df["x_" + str(index)]
-            y_data = df["y_" + str(index)]
+            fig = go.Figure()
             
-            # Convert matplotlib linestyle to plotly dash style
-            line_style = linestyle_list[index]
-            plotly_dash = line_style_map.get(line_style, 'solid')
-            if "line" in plot_mode and "scatter" in plot_mode:
-                fig.add_trace(go.Scatter(
-                    x=x_data,
-                    y=y_data,
-                    name=label,
-                    mode='lines+markers',
-                    line=dict(
-                        color=color_list[index],
-                        dash=plotly_dash,
-                    ),
-                    marker=dict(
-                        symbol=markerprops_list[index]["marker"],
-                        size=markerprops_list[index]["markersize"],
-                        color=color_list[index],
-                        line=dict(width=0)
-                    ),
-                    opacity=alpha_list[index]
-                ))
-            elif "line" in plot_mode:
-                fig.add_trace(go.Scatter(
-                    x=x_data,
-                    y=y_data,
-                    name=label,
-                    mode='lines',
-                    line=dict(
-                        color=color_list[index],
-                        dash=plotly_dash,
-                    ),
-                    opacity=alpha_list[index]
-                ))
-            elif "scatter" in plot_mode:
-                fig.add_trace(go.Scatter(
-                    x=x_data,
-                    y=y_data,
-                    name=label,
-                    mode='markers',
-                    marker=dict(
-                        symbol=markerprops_list[index]["marker"],
-                        size=markerprops_list[index]["markersize"],
-                        color=color_list[index],
-                        line=dict(width=0)
-                    ),
-                    opacity=alpha_list[index]
-                ))
-            # elif "df" in plot_mode:
-                
-        
-        title = plt_settings.get("title", None)
-        if title is not None:
-            fig.update_layout(title=title)
-        
-        suptitle = plt_settings.get("suptitle", None)
-        if suptitle is not None:
-            fig.update_layout(title_text=suptitle, title_y=0.98)
-        
-        fig.update_layout(
-            xaxis_title=plt_settings.get("xlabel", None),
-            yaxis_title=plt_settings.get("ylabel", None),
-            showlegend=plt_settings.get("legend", {}).get("flag", True)
-        )
-        
-        legend_settings = plt_settings.get("legend", None)
-        if legend_settings and legend_settings.get("flag", True):
-            loc = legend_settings.get("loc", "best")
-            loc_mapping = {
-                "best": None,
-                "upper right": "top right",
-                "upper left": "top left",
-                "lower left": "bottom left",
-                "lower right": "bottom right",
-                "right": "right",
-                "center left": "left",
-                "center right": "right",
-                "lower center": "bottom",
-                "upper center": "top",
-                "center": "center"
+            # Get plot settings
+            plt_settings["traces"] = int(len(df.columns) / 2)
+            color_list = cfg["settings"]["color"]
+            linestyle_list = cfg["settings"]["linestyle"]
+            if len(linestyle_list) < plt_settings["traces"]:
+                linestyle_list = linestyle_list * math.ceil(plt_settings["traces"]/len(linestyle_list))
+            alpha_list = cfg["settings"]["alpha"]
+            markerprops_list = cfg["settings"]["markerprops"]
+            if len(markerprops_list) < plt_settings["traces"]:
+                markerprops_list = markerprops_list * math.ceil(plt_settings["traces"]/len(markerprops_list))
+
+            plot_mode = cfg["settings"].get("mode", ["line"])
+            
+            line_style_map = {
+                '-': 'solid',
+                '--': 'dash',
+                ':': 'dot',
+                '-.': 'dashdot',
+                'solid': 'solid',
+                'dashed': 'dash',
+                'dotted': 'dot',
+                'dashdot': 'dashdot'
             }
-            legend_loc = loc_mapping.get(loc, None)
-            fig.update_layout(legend=dict(
-                orientation="h" if loc in ["upper center", "lower center", "center"] else "v",
-                yanchor="auto",
-                xanchor="auto",
-                x=0.5 if loc in ["upper center", "lower center", "center"] else None,
-                y=1.1 if loc == "upper center" else -0.2 if loc == "lower center" else None
-            ))
-        
-        grid = plt_settings.get("grid", True)
-        fig.update_layout(
-            xaxis=dict(showgrid=grid),
-            yaxis=dict(showgrid=grid)
-        )
-        
-        # Handle date formatting
-        if "xy_x_datetime" in cfg['settings']['type']:
-            self.format_x_axis_dates_plotly(fig, cfg)
+            for index in range(0, plt_settings["traces"]):
+                label = None
+                if (isinstance(plt_settings["legend"]["label"], list) and len(plt_settings["legend"]["label"]) > index):
+                    label = plt_settings["legend"]["label"][index]
+                
+                x_data = df["x_" + str(index)]
+                y_data = df["y_" + str(index)]
+                
+                # Convert matplotlib linestyle to plotly dash style
+                line_style = linestyle_list[index]
+                plotly_dash = line_style_map.get(line_style, 'solid')
+                if "line" in plot_mode and "scatter" in plot_mode:
+                    fig.add_trace(go.Scatter(
+                        x=x_data,
+                        y=y_data,
+                        name=label,
+                        mode='lines+markers',
+                        line=dict(
+                            color=color_list[index],
+                            dash=plotly_dash,
+                        ),
+                        marker=dict(
+                            symbol=markerprops_list[index]["marker"],
+                            size=markerprops_list[index]["markersize"],
+                            color=color_list[index],
+                            line=dict(width=0)
+                        ),
+                        opacity=alpha_list[index]
+                    ))
+                elif "line" in plot_mode:
+                    fig.add_trace(go.Scatter(
+                        x=x_data,
+                        y=y_data,
+                        name=label,
+                        mode='lines',
+                        line=dict(
+                            color=color_list[index],
+                            dash=plotly_dash,
+                        ),
+                        opacity=alpha_list[index]
+                    ))
+                elif "scatter" in plot_mode:
+                    fig.add_trace(go.Scatter(
+                        x=x_data,
+                        y=y_data,
+                        name=label,
+                        mode='markers',
+                        marker=dict(
+                            symbol=markerprops_list[index]["marker"],
+                            size=markerprops_list[index]["markersize"],
+                            color=color_list[index],
+                            line=dict(width=0)
+                        ),
+                        opacity=alpha_list[index]
+                    ))
+                # elif "df" in plot_mode:
+                    
+            
+            title = plt_settings.get("title", None)
+            if title is not None:
+                fig.update_layout(title=title)
+            
+            suptitle = plt_settings.get("suptitle", None)
+            if suptitle is not None:
+                fig.update_layout(title_text=suptitle, title_y=0.98)
+            
+            fig.update_layout(
+                xaxis_title=plt_settings.get("xlabel", None),
+                yaxis_title=plt_settings.get("ylabel", None),
+                showlegend=plt_settings.get("legend", {}).get("flag", True)
+            )
+            
+            legend_settings = plt_settings.get("legend", None)
+            if legend_settings and legend_settings.get("flag", True):
+                loc = legend_settings.get("loc", "best")
+                loc_mapping = {
+                    "best": None,
+                    "upper right": "top right",
+                    "upper left": "top left",
+                    "lower left": "bottom left",
+                    "lower right": "bottom right",
+                    "right": "right",
+                    "center left": "left",
+                    "center right": "right",
+                    "lower center": "bottom",
+                    "upper center": "top",
+                    "center": "center"
+                }
+                legend_loc = loc_mapping.get(loc, None)
+                fig.update_layout(legend=dict(
+                    orientation="h" if loc in ["upper center", "lower center", "center"] else "v",
+                    yanchor="auto",
+                    xanchor="auto",
+                    x=0.5 if loc in ["upper center", "lower center", "center"] else None,
+                    y=1.1 if loc == "upper center" else -0.2 if loc == "lower center" else None
+                ))
+            
+            grid = plt_settings.get("grid", True)
+            fig.update_layout(
+                xaxis=dict(showgrid=grid),
+                yaxis=dict(showgrid=grid)
+            )
+            
+            # Handle date formatting
+            if "xy_x_datetime" in cfg['settings']['type']:
+                self.format_x_axis_dates_plotly(fig, cfg)
 
-        if 'xlim' in cfg['settings']:
-            fig.update_xaxes(range=cfg['settings']['xlim'])
-        if 'ylim' in cfg['settings']:
-            fig.update_yaxes(range=cfg['settings']['ylim'])
-        
+            if 'xlim' in cfg['settings']:
+                fig.update_xaxes(range=cfg['settings']['xlim'])
+            if 'ylim' in cfg['settings']:
+                fig.update_yaxes(range=cfg['settings']['ylim'])
+            
+            return fig
+    
+        return fig
+    
+    def get_xy_line_df_plot(self, plt_settings,cfg):
+        """
+        Converts a DataFrame to a Plotly figure with line traces.
+        """
+        cfg_df = cfg['data']['groups'][0]['file_name']
+        df = pd.read_csv(cfg_df)
+        x_label = plt_settings['xlabel']
+        y_label = plt_settings['ylabel']
+        legend = plt_settings['legend']['label']
+        title = plt_settings['title']
+        markers = cfg['master_settings']['groups']['marker']
+
+        df_melted = df.melt(id_vars=x_label, 
+                            var_name=legend, 
+                            value_name=y_label)
+        fig = px.line(
+            df_melted,
+            x=x_label,
+            y=y_label,
+            color=legend,
+            markers=markers,
+            title=title
+        )
+
         return fig
 
     def format_x_axis_dates_plotly(self, fig, cfg):
