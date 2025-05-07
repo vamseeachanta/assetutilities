@@ -94,7 +94,6 @@ Git Rebase. Always rebase the local branch that typically (way) behind master. R
 
 ### Rebase - VS COde
 
-
 - source control
 - branch
 - rebase branch
@@ -102,6 +101,11 @@ Git Rebase. Always rebase the local branch that typically (way) behind master. R
   
 
 https://dev.to/colbygarland/using-vs-code-to-git-rebase-1lc
+
+Git reset comments to single comment
+
+git reset $(git commit-tree "HEAD^{tree}" -m "202502")
+git pull origin master --allow-unrelated-histories (if errors persist)
 
 
 ## Commands
