@@ -77,7 +77,7 @@ Error:
 </pre>
 
 
-## REferences
+## References
 
 
 https://conda.io/projects/conda/en/latest/user-guide/configuration/disable-ssl-verification.html 
