@@ -40,7 +40,7 @@ def set_logging(cfg):
 
     config = {
         "handlers": [
-            {"sink": sys.stdout, "format": "{time} - {name} - {levelname} - {message}", 'level': log_level},
+            {"sink": sys.stdout, "format": "{time} - {name} - {level} - {message}", 'level': log_level},
             {"sink": logfilename, "serialize": True, 'level': log_level},
         ],
         # "extra": {"user": "someone"},
