@@ -15,11 +15,6 @@ classifiers = [
 ]
 keywords = ['package', 'library', 'module']
 
-[tool.poetry.dependencies]
-assetutilities = { path = "../assetutilities", develop = true }
-python = ">=3.9,<4.0"
-
-
 [tool.poetry.group.dev.dependencies]
 black = "*"
 bumpver = "*"
