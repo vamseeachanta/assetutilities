@@ -30,6 +30,12 @@ git reset --soft HEAD~N
 
 ### Git commit files larger than 100MB
 
+encountered below error while pushing some refs to github :
+
+```
+git push origin 202502:202502 error: RPC failed; HTTP 408 curl 22 The requested URL returned error: 408 send-pack: unexpected disconnect while reading sideband packet fatal: the remote end hung up unexpectedly Everything up-to-date
+```
+
 GitHub restricts individual file sizes to 100MB. To commit files larger than this, Git Large File Storage (LFS) should be used. Here's how: Install Git LFS.
 Code
 
@@ -46,13 +52,12 @@ git lfs track "filename"
 Replace "filename" with the actual name of your large file or a pattern like "*.zip" to include all zip files. This command creates or modifies a .gitattributes file. Add and commit.
 
 ```bash
-git add .
 git commit -m "Your commit message"
 ```
 Push to the remote repository.
 
 ```
-git push origin main
+git push origin 
 ```
 
 Replace "main" with your branch name if necessary. Git LFS automatically handles the large files during the push.

@@ -50,13 +50,13 @@ class ZipFilestoDf:
             for file_to_read in file_list:
                 with zf.open(file_to_read) as file:
                     try:
-                        df = pd.read_csv(file, sep=delimiter)
+                        df = pd.read_csv(file, sep=delimiter,encoding='latin-1', on_bad_lines='warn',low_memory=False)
+                    # except Exception as e:
+                        # try:
+                            # df = pd.read_csv(file, sep=delimiter, encoding='unicode_escape')
                     except Exception as e:
-                        try:
-                            df = pd.read_csv(file, sep=delimiter, encoding='unicode_escape')
-                        except Exception as e:
-                            logger.error(f"Error reading file '{file_to_read}': {e}")
-                            continue
+                        logger.error(f"Error reading file '{file_to_read}': {e}")
+                        continue
 
                     # If column names are provided and the df has no header set the column names
                     if column_names: 
