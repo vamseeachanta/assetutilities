@@ -1,7 +1,7 @@
 # Standard library imports
 import datetime
 import functools
-import logging
+from loguru import logger
 import os
 import pkgutil
 import sys
@@ -34,7 +34,7 @@ def applicationTimer(func):
 
         end_time = time.perf_counter()
         run_time = end_time - start_time
-        print(f"Finished {func.__name__!r} in {run_time:.2f} secs")
+        logger.info(f"Finished {func.__name__!r} in {run_time:.2f} secs")
 
         return function_value
 
@@ -45,11 +45,8 @@ def setupApplicationRuns(func):
 
     @functools.wraps(func)
     def wrapper_applicationRuns(*args, **kwargs):
-        # Standard library imports
-        import logging
-
         app_runs = ApplicationRuns(basename=func.__name__)
-        logging.info("  ******Set Up Application Runs .... ******")
+        logger.info("  ******Set Up Application Runs .... ******")
         cfg = app_runs.configureApplication()
         kwargs["cfg"] = cfg
 
@@ -89,7 +86,7 @@ def setupApplicationRuns(func):
                         cfg=kwargs["cfg"], run_time=run_time, run_dict=run_dict
                     )
 
-        logging.info("  ****** Application Runs .... COMPLETE ******")
+        logger.info("  ****** Application Runs .... COMPLETE ******")
 
         return function_value
 
@@ -109,7 +106,7 @@ class ConfigureApplicationInputs:
         cfg = self.convert_cfg_to_attribute_dictionary(cfg)
         cfg = set_logging(cfg)
 
-        logging.debug(cfg)
+        logger.debug(cfg)
 
         return cfg
 
@@ -202,11 +199,11 @@ class ConfigureApplicationInputs:
                 )
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)
-            print(f"Update default app configuration with contents in file {self.customYaml} ... DONE")
-            print(f"Update default app configuration with dictionary content in:  ... START")
-            print(f"\t{ cfg_argv_dict}")
+            logger.debug(f"Update default app configuration with contents in file {self.customYaml} ... DONE")
+            logger.debug(f"Update default app configuration with dictionary content in:  ... START")
+            logger.debug(f"\t{ cfg_argv_dict}")
             cfg = update_deep_dictionary(cfg, cfg_argv_dict)
-            print(f"Update default app configuration with dictionary content ... FINISH")
+            logger.debug(f"Update default app configuration with dictionary content ... FINISH")
 
         return cfg
 
@@ -310,8 +307,8 @@ class ConfigureApplicationInputs:
                     "result_folder"
                 ]
         except KeyError as e:
-            logging.info("No fe_folder key in Analysis section of yml file")
-            logging.info("Error is : {}".format(e))
+            logger.info("No fe_folder key in Analysis section of yml file")
+            logger.info("Error is : {}".format(e))
 
         return cfg
 
