@@ -34,7 +34,7 @@ def set_logging(cfg):
         filemode="w",
         force=True,
     )
-    
+
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     logging.info("Logging started successfully ...")
 

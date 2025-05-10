@@ -1,8 +1,5 @@
 # Standard library imports
 import logging
-from loguru import logger
-import os
-import sys
 
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
@@ -51,7 +48,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     else:
         cfg_base = cfg
 
-    logger.info(f"{basename}, application ... START")
+    logging.info(f"{basename}, application ... START")
 
     if basename in ["excel_utilities"]:
         # Reader imports
@@ -108,6 +105,6 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     if cfg is None:
         save_application_cfg(cfg_base=cfg_base)
 
-    logger.info(f"{basename}, application ... END")
+    logging.info(f"{basename}, application ... END")
     cfg_base = app_manager.save_cfg(cfg_base=cfg_base)
     return cfg_base
