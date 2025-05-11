@@ -27,13 +27,13 @@ class ZipFilestoDf:
 
         column_names = cfg['zip_utilities']['column_names']
         zip_file_name_with_path = cfg['zip_utilities']['file_name']
+        rows = 50000 # to limit file size 
 
         with open(zip_file_name_with_path, "rb") as f:
             zip_bytes = f.read()
 
         zip_file = zip_bytes
 
-         # Ensure the input is a file-like object
         if isinstance(zip_file, bytes):
             zip_file = BytesIO(zip_file)
 
@@ -50,13 +50,13 @@ class ZipFilestoDf:
             for file_to_read in file_list:
                 with zf.open(file_to_read) as file:
                     try:
-                        df = pd.read_csv(file, sep=delimiter,encoding='latin-1', on_bad_lines='warn',low_memory=False)
-                    # except Exception as e:
-                        # try:
-                            # df = pd.read_csv(file, sep=delimiter, encoding='unicode_escape')
+                        df = pd.read_csv(file, sep=delimiter, on_bad_lines='warn',nrows=rows)
                     except Exception as e:
-                        logger.error(f"Error reading file '{file_to_read}': {e}")
-                        continue
+                        try:
+                            df = pd.read_csv(file, sep=delimiter, encoding='latin-1', on_bad_lines='warn',low_memory=False,nrows=rows)
+                        except Exception as e:
+                            logger.error(f"Error reading file '{file_to_read}': {e}")
+                            continue
 
                     # If column names are provided and the df has no header set the column names
                     if column_names: 
