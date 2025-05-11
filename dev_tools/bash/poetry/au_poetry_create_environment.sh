@@ -5,8 +5,13 @@
 
 set -e
 
-# Define top-level repo path (assumed one level up)
-TOPLEVEL="$(cd "$(dirname "$0")/.." && pwd)"
+# Find the top-level directory of the git repo
+TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+if [ "$TOPLEVEL" = "." ]; then
+    echo "[ERROR] Not in a git repository. Please run this script from within your project."
+    exit 1
+fi
+
 REQ="$TOPLEVEL/dev_tools/requirements.txt"
 PYPROJECT="$TOPLEVEL/pyproject.toml"
 
