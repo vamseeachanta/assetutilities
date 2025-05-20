@@ -64,4 +64,6 @@ class ZipFilestoDf:
                 file_basename = os.path.basename(file_to_read)
                 file_name_without_extension, extension = os.path.splitext(file_basename)
                 dataframe_dict[file_name_without_extension] = df
+                
+        return dataframe_dict
 

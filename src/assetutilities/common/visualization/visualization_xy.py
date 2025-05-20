@@ -462,24 +462,34 @@ class VisualizationXY:
     
     def get_xy_line_df_plot(self, plt_settings,cfg):
         """
-        Converts a DataFrame to a Plotly figure with line traces.
+        Converts a Pandas DataFrame to a Plotly figure with line traces.
         """
         cfg_df = cfg['data']['groups'][0]['file_name']
-        df = pd.read_csv(cfg_df)
         x_label = plt_settings['xlabel']
         y_label = plt_settings['ylabel']
-        legend = plt_settings['legend']['label']
+        columns_var_name = plt_settings['columns_var_name']
         title = plt_settings['title']
         markers = cfg['master_settings']['groups']['marker']
+        if 'date' in x_label.lower():
+            x_label = 'Date'
+        else:
+            x_label = x_label
+        if isinstance(cfg_df, str) and cfg_df.endswith('.csv'):
+            df = pd.read_csv(cfg_df)
+        elif isinstance(cfg_df, pd.DataFrame):
+            df = cfg_df
 
         df_melted = df.melt(id_vars=x_label, 
-                            var_name=legend, 
-                            value_name=y_label)
+                            var_name=columns_var_name, 
+                            value_name=y_label)   
+        
+        df_melted = df_melted.dropna(subset=[x_label, y_label])
+        
         fig = px.line(
             df_melted,
             x=x_label,
             y=y_label,
-            color=legend,
+            color=columns_var_name,
             markers=markers,
             title=title
         )

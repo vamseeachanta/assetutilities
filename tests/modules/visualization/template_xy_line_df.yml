@@ -17,13 +17,14 @@ settings:
   title: Wind Coefficients for FSTs, Cx
   xlabel: Heading
   ylabel: data
+  columns_var_name: NULL
   set_rmax: 10
   set_rticks: [1, 2, 3]
   set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
   set_rlabel_position: -22.5
   legend:
     flag: True
-    label: api12
+    # label: api12
     loc: best
     prop: { family: Arial, size: 8 }
   xlim: NULL
