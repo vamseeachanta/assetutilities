@@ -38,7 +38,8 @@ def run_process(input_file, expected_result):
 
 
 def test_run_process():
-    input_file = "test_yml_variable_placeholder.yml"
+    # input_file = "test_yml_variable_placeholder.yml"
+    input_file = "test_yml_single_variable.yml"
 
     # pytest_output_file = "results/divide_yaml_file_by_primary_key_pytest.yml"
     # pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)
