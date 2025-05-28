@@ -470,23 +470,18 @@ class VisualizationXY:
         columns_var_name = plt_settings['columns_var_name']
         title = plt_settings['title']
         markers = cfg['master_settings']['groups']['marker']
-        if 'date' in x_label.lower():
-            x_label = 'Date'
-        else:
-            x_label = x_label
-        if isinstance(cfg_df, str) and cfg_df.endswith('.csv'):
-            df = pd.read_csv(cfg_df)
-        elif isinstance(cfg_df, pd.DataFrame):
-            df = cfg_df
+        
+        df = self.load_and_prepare_data(cfg_df)
 
         df_melted = df.melt(id_vars=x_label, 
                             var_name=columns_var_name, 
-                            value_name=y_label)   
+                            value_name=y_label)
         
         df_melted = df_melted.dropna(subset=[x_label, y_label])
-        
+        x_label,df_filtered = self.filter_xdates_range(plt_settings, x_label, df_melted, df)
+            
         fig = px.line(
-            df_melted,
+            df_filtered,
             x=x_label,
             y=y_label,
             color=columns_var_name,
@@ -495,6 +490,34 @@ class VisualizationXY:
         )
 
         return fig
+
+    def filter_xdates_range(self, plt_settings, x_label, df_melted, df):
+
+        if 'date' in x_label.lower() and x_label in df.columns:
+            x_label = 'Date'
+        else:
+            x_label = x_label
+
+        if 'customize_xdate_ticks' in plt_settings and plt_settings['customize_xdate_ticks']['flag'] and 'date' in x_label.lower():
+            df_melted[x_label] = pd.to_datetime(df_melted[x_label])
+            start = plt_settings['customize_xdate_ticks']['start_time']
+            end = plt_settings['customize_xdate_ticks']['end_time']
+            df_melted = df_melted[
+                (df_melted['Date'] >= start) &
+                (df_melted['Date'] <= end) ]
+                
+        return x_label,df_melted
+
+    def load_and_prepare_data(self, cfg_df):
+
+        if isinstance(cfg_df, str) and cfg_df.endswith('.csv'):
+            df = pd.read_csv(cfg_df)
+        elif isinstance(cfg_df, pd.DataFrame):
+            df = cfg_df.copy()
+        else:
+            raise ValueError("Invalid data source. Expected a DataFrame or a CSV file path.")
+        
+        return df
 
     def format_x_axis_dates_plotly(self, fig, cfg):
         """
