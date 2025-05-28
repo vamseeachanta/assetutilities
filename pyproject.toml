@@ -23,6 +23,12 @@ pytest = "*"
 build = "*"
 twine = "*"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["dev_tools/requirements.txt"]}
+
 [tool.poetry.scripts]
 sample_calculation = "assetutilities:__main__"
 
