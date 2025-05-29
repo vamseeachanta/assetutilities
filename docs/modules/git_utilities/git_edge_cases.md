@@ -13,19 +13,18 @@ Applicability:
 - Mistakenly committed to wrong branch
 - Committed a very large file (> 100 MB)
 
-if you won't undo commit which leads merge branch commit issue.
-
-
 Undo the Last Commit but Keep Changes
 
 <code>
 git reset --soft HEAD~1
 </code>
 
-
 <code>
 git reset --soft HEAD~N
 </code>
+
+**Committed Too Soon? Here is How to Change Your Last Git Commit**
+https://levelup.gitconnected.com/committed-too-soon-here-is-how-to-change-your-last-git-commit-30700d0d2732
 
 
 ### Git commit files larger than 100MB
