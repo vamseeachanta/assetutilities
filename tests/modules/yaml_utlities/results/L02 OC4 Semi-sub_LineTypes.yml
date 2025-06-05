@@ -1,0 +1,83 @@
+﻿LineTypes:
+  - Name: Mooring line
+    Category: General
+    # Geometry and mass
+    OD: 0.0766
+    ID: 0
+    CentreOfMass: [0, 0]
+    BulkModulus: Infinity
+    MassPerUnitLength: 0.11335
+    # Limits
+    CompressionIsLimited: No
+    AllowableTension:
+    MinRadius: [null, null]
+    # Structure
+    EI: [0, null]
+    EA: 753.6e3
+    PoissonRatio: 0.5
+    ExpansionTable: None
+    GJ: 80
+    TensionTorqueCoupling: 0
+    # Contact
+    OuterContactDiameter:
+    InnerContactDiameter:
+    ClashStiffness: 0
+    # Added mass, inertia and slam
+    Ca: [1, null, 0]
+    Cm: [null, null, null]
+    Cs: 0
+    Ce: 0
+    # Drag and lift
+    Cd: [1.1, null, 0.008]
+    Cl: 0
+    NormalDragLiftDiameter:
+    AxialDragLiftDiameter:
+    # Stress
+    StressOD:
+    StressID:
+    AllowableStress:
+    TensileStressLoadingFactor: 1
+    BendingStressLoadingFactor: 1
+    ShearStressLoadingFactor: 1
+    TorsionalStressLoadingFactor: 1
+    # Friction
+    SeabedLateralFrictionCoefficient: 0.5
+    SeabedAxialFrictionCoefficient:
+    # Structural damping
+    RayleighDampingCoefficients: (no damping)
+    # Drawing
+    Pen: [1, Solid, $FF8000]
+  - Name: Tower line type
+    Category: Homogeneous pipe
+    # Geometry and density
+    OD: OD profile
+    ID: ID profile
+    MaterialDensity: 8.502550000000001
+    # Structure
+    E: 210e6
+    PoissonRatio: 0.30000000000000004
+    ExpansionTable: None
+    # Drag, lift, added mass and slam
+    Cdn: 1.2
+    Cdz: 0.008
+    Cl: 0
+    Can: 1
+    Caz: 0
+    Cs: 0
+    Ce: 0
+    # Friction
+    SeabedLateralFrictionCoefficient: 0.5
+    SeabedAxialFrictionCoefficient:
+    # Contact
+    ClashStiffness: 0
+    # Stress
+    AllowableStress:
+    # Structural damping
+    RayleighDampingCoefficients: (no damping)
+    # Coating and lining
+    CoatingThickness: 0
+    LiningThickness: 0
+    # Additional stiffness
+    AdditionalEI: 0
+    # Drawing
+    Pen: [5, Solid, White]

@@ -1,0 +1,228 @@
+basename: file_management
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+
+  # Test cases
+  test_cases:
+    - name: "Test Case 1"
+      description: "Test case with a specific pattern"
+      pattern: "test_case_1"
+      expected_output: "test_case_1.yml"
+
+    - name: "Test Case 2"
+      description: "Test case with a different pattern"
+      pattern: "test_case_2"
+      expected_output: "test_case_2.yml"
+
+    - name: "Test Case 3"
+      description: "Test case with no pattern specified"
+      pattern: NULL
+      expected_output: "file_management.yml"
+
+    - name: "Test Case 4"
+      description: "Test case with an empty pattern"
+      pattern: ""
+      expected_output: "file_management.yml"
+
+    - name: "Test Case 5"
+      description: "Test case with a special character in the pattern"
+      pattern: "@special_case!"
+      expected_output: "@special_case!.yml"
+
+    InFrameConnection: Fixed
+    InFrameInitialPosition: [-67.78, 71.25, 12.7]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: 0
+    RotationalStiffness: 0
+    TranslationalDamping: 0
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket2_X_Springs
+    InFrameConnection: Jacket2_Center
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: surge_stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: X_Damping_Set_05
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket2_Y_Springs
+    InFrameConnection: Jacket2_X_Springs
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: sway_stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: Y_Damping_Set_05
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket2_Z_Springs
+    InFrameConnection: Jacket2_Y_Springs
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [No]
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: Linear_Vertical_Stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: 0
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket3_Center
+    InFrameConnection: Fixed
+    InFrameInitialPosition: [67.78, 71.25, 12.7]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: 0
+    RotationalStiffness: 0
+    TranslationalDamping: 0
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket3_X_Springs
+    InFrameConnection: Jacket3_Center
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: surge_stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: X_Damping_Set_05
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket3_Y_Springs
+    InFrameConnection: Jacket3_X_Springs
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: sway_stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: Y_Damping_Set_05
+    RotationalDamping: 0
+    # Drawing
+    HideAfterOutFrameRelease: No
+  - Name: Jacket3_Z_Springs
+    InFrameConnection: Jacket3_Y_Springs
+    InFrameInitialPosition: [0, 0, 0]
+    InFrameInitialAttitude: [0, 0, 0]
+    ConstraintType: Calculated DOFs
+    SolutionMethod: Direct
+    # General
+    CalculatedModelType: Cartesian
+    OutFrameReleaseStage: ~
+    # Degrees of freedom
+    DOFFree, DOFInitialValue:
+      - [No]
+      - [No]
+      - [Yes, 0]
+      - [No]
+      - [No]
+      - [No]
+    # Stiffness and damping
+    TranslationalStiffness: Linear_Vertical_Stiffness
+    RotationalStiffness: 0
+    TranslationalDamping: 0
+    RotationalDamping: 0

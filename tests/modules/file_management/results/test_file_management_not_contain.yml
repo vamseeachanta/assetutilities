@@ -1,0 +1,47 @@
+basename: file_management
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+files:
+  files_in_current_directory:
+    flag: false
+    directory: C:\Users\vamseea\Desktop\Wood Deliverables
+  extension: pdf
+  filters:
+    filename_contains:
+    - -WLNG
+    filename_not_contains: []
+file_management:
+  flag: true
+  input_directory: ~
+  output_directory: ~
+  filename:
+    extension:
+    - bat
+    pattern: ~
+    filters:
+      contains:
+      - management
+      not_contains:
+      - WLNG
+  input_files:
+    bat:
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\file_management.bat
+Analysis:
+  basename: file_management
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management
+  file_name: test_file_management_not_contain
+  file_name_for_overwrite: test_file_management_not_contain
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\logs
+  start_time: 2025-04-09 10:46:23.514994
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\test_file_management_not_contain.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\results
+  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management
+  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\file_management\results

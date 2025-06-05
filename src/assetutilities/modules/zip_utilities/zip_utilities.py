@@ -6,7 +6,8 @@ from zipfile import ZipFile
 
 # Reader imports
 from assetutilities.common.utilities import is_dir_valid_func
-
+from assetutilities.modules.zip_utilities.zip_files_to_dataframe import ZipFilestoDf
+zip_files_to_df = ZipFilestoDf()
 
 
 class ZipUtilities:
@@ -14,11 +15,10 @@ class ZipUtilities:
         pass
 
     def router(self, cfg):
-        if cfg['analysis_settings']['flag']:
-            if cfg['analysis_settings']['by'] == 'stem':
+        if cfg['analysis_settings']['flag'] and cfg['analysis_settings']['by'] == 'stem':
                 self.zip_files_by_stem(cfg)
-        else:
-            raise NotImplementedError
+        elif 'zip_utilities' in cfg and cfg['zip_utilities']['technique'] == 'zip_files_to_df':
+            zip_files_to_df.router(cfg)
 
         return cfg
 
@@ -27,18 +27,18 @@ class ZipUtilities:
         Zips files in analysis_settings directory 
         Uses stem name from file_management settings
         '''
-        file_extensions = cfg['file_management']['files']['files_in_current_directory']['file_extensions']
+        file_extensions = cfg['file_management']['filename']['extension']
         for file_extension in file_extensions:
             files = self.zip_files_by_file_extension(cfg, file_extension)
 
     def zip_files_by_file_extension(self, cfg, file_extension):
         stem_files_list = cfg['file_management']['input_files'][file_extension]
         stem_list = [file.stem for file in stem_files_list]
-        
-        input_file_directory = cfg['analysis_settings']['directory']
+
+        input_file_directory = cfg['analysis']['input_directory']
         analysis_root_folder = cfg['Analysis']['analysis_root_folder']
         test_flag, input_file_directory = is_dir_valid_func(input_file_directory, analysis_root_folder)
-        input_file_extenstions = cfg['analysis_settings']['file_extensions']
+        input_file_extenstions = cfg['analysis']['filename']['extension']
         cfg[cfg['basename']] = []
         for stem in stem_list:
             files = []

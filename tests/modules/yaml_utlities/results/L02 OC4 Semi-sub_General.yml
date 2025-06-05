@@ -1,0 +1,41 @@
+﻿General:
+  Comments: 'Note: The properties applied in these examples are based on our interpretation
+    of the data provided in the OC3/OC4 studies, and are not necessarily correct.
+    If you use these models for your own analysis purposes, you must first satisfy
+    yourself that they are correct and appropriate for the scenario being analysed.'
+  # Units
+  UnitsSystem: SI
+  # Analysis data
+  JacobianBufferingPolicy: 01
+  JacobianPerturbationFactor: 0
+  # Statics
+  BuoysIncludedInStatics: Individually specified
+  LineStaticsStep1Policy: All lines included
+  LineStaticsStep2Policy: Solve coupled systems
+  WholeSystemStaticsEnabled: Yes
+  # Dynamics
+  DynamicsSolutionMethod: Implicit time domain
+  ImplicitUseVariableTimeStep: No
+  ImplicitConstantTimeStep: 0.1
+  LogPrecision: Single
+  TargetLogSampleInterval: 0.1
+  LogStartTime:
+  # Stages
+  StartTime:
+  FirstStage:
+  RampStartTime:
+  RampFinishTime:
+  TimeHistoryImportFrom:
+  TimeHistoryImportTo:
+  StageDuration:
+    - 8
+    - 200
+  # Restart state
+  RestartStateRecordingPeriodicCount: 0
+  RestartStateRecordingTest:
+  # Default view parameters
+  DefaultViewMode: Wire frame
+  DefaultViewSize: 253.10068716072374
+  DefaultViewCentre: [0, 0, 50]
+  DefaultViewAzimuth: 180
+  DefaultViewElevation: 0

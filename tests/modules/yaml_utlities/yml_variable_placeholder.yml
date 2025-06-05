@@ -1,0 +1,21 @@
+meta:
+  basename: yaml_utilities
+  library: assetutilities
+
+test_variables:
+  flag: True
+  method: placeholder
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: False
+
+placeholder_tests:
+  method: "{{ test_variables.method }}"
+  library: "{{ meta.library }}"
+

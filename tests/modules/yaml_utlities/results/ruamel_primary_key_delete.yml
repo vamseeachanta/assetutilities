@@ -1,0 +1,50 @@
+library: assetutlities
+basename: ruamel
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+  input_directory: yml
+  output_directory: ~
+  filename:
+    extension:
+    - yml
+    pattern: L01
+    filters:
+      contains: []
+      not_contains: []
+  input_files:
+    yml:
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\L01_default_vessel.yml
+yml_analysis:
+  divide:
+    flag: true
+    by: primary_key
+Analysis:
+  basename: ruamel
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+  file_name: ruamel_primary_key_delete
+  file_name_for_overwrite: ruamel_primary_key_delete
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+  start_time: 2025-04-02 12:15:57.032328
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\ruamel_primary_key_delete.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml
+  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results

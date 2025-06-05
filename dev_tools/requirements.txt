@@ -1,9 +1,7 @@
 assetutilities
-
 build
 twine
 bumpver
-
 pyyaml
 numpy
 pandas
@@ -11,36 +9,25 @@ plotly
 matplotlib
 chardet
 python-certifi-win32
-
 webcolors
 xlsxwriter
 plantuml
 pytest
 deepdiff
-
 pandoc
 wkhtmltopdf
 python-docx
-
-
 black
 isort
-# poetry # why do we need poetry here? we are not using it anywhere. we use setup tools instead now.
-
-scrapy
+scrapy==2.12
 bs4
-
 gitpython==3.1.31
 excel2img; sys_platform == 'win32'
-
-# imp
-# git
-# popplerqt5 Only available in linux systems
-# pdfannots
-# fitz
-# camelot
-# GitPython
-# siva - adding this to make ``python -m assetutilities ./test_data/visualization/visualization_polar_plotly.yml``
 PyPDF2
 tabula
 sympy>=1.13.3
+utm
+ruamel.yaml
+jinja2
+openpyxl
+crochet

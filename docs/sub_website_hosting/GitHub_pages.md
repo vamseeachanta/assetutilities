@@ -25,6 +25,6 @@ the site configured at this address does not contain the requested file. if this
 
 ### References
 
-YT Video reference for hosting website in gh-pages:
+YT reference for hosting website in gh-pages:
 
 https://youtu.be/57u6a_iQB8E?si=m1XlplDycvbWBL4w

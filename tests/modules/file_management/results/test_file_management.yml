@@ -1,0 +1,48 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  basename: file_management
+  default:
+    log_level: DEBUG
+    config:
+      overwrite:
+        output: true
+  files:
+    files_in_current_directory:
+      flag: false
+      directory: C:\Users\vamseea\Desktop\Wood Deliverables
+    extension: pdf
+    filters:
+      filename_contains:
+      - -WLNG
+      filename_not_contains: []
+  file_management:
+    flag: true
+    input_directory: ~
+    output_directory: ~
+    filename:
+      extension:
+      - bat
+      pattern: ~
+      filters:
+        contains:
+        - management
+        not_contains: []
+    input_files:
+      bat:
+      - !!python/object/apply:pathlib.WindowsPath
+        - file_management.bat
+  Analysis:
+    basename: file_management
+    analysis_root_folder: .
+    file_name: test_file_management
+    file_name_for_overwrite: test_file_management
+    result_folder: .\results
+    log_folder: .\logs
+    start_time: 2025-03-31 05:00:20.483141
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: .\test_file_management.yml
+    fe_folder: .\results
+    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath []
+    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath []

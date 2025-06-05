@@ -1,0 +1,31 @@
+﻿General:
+  # Units
+  UnitsSystem: SI
+  # Analysis data
+  JacobianBufferingPolicy: 01
+  JacobianPerturbationFactor: 0
+  # Statics
+  BuoysIncludedInStatics: Individually specified
+  LineStaticsStep1Policy: All lines included
+  LineStaticsStep2Policy: Solve coupled systems
+  WholeSystemStaticsEnabled: Yes
+  # Dynamics
+  DynamicsSolutionMethod: Implicit time domain
+  ImplicitUseVariableTimeStep: No
+  ImplicitConstantTimeStep: 0.05
+  LogPrecision: Single
+  TargetLogSampleInterval: 1
+  LogStartTime:
+  # Stages
+  StartTime:
+  FirstStage:
+  RampStartTime:
+  RampFinishTime:
+  TimeHistoryImportFrom:
+  TimeHistoryImportTo:
+  StageDuration:
+    - 40
+    - 200
+  # Restart state
+  RestartStateRecordingPeriodicCount: 0
+  RestartStateRecordingTest:

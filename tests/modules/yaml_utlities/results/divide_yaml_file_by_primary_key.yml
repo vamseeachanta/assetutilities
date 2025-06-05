@@ -1,68 +1,63 @@
-&id001 !!python/object/new:assetutilities.common.data.AttributeDict
-state: *id001
-dictitems:
-  basename: yaml_utlities
-  default:
-    log_level: INFO
-    config:
-      overwrite:
-        output: true
-  yml_analysis:
-    divide:
-      flag: true
-      by: primary_key
-  file_management:
-    flag: true
-    files:
-      files_in_current_directory:
-        flag: false
-        auto_read: true
-        directory: yml
-        file_extensions:
-        - yml
-        filename_pattern: ~
-      output_directory: ~
-    input_files:
-      yml:
-      - !!python/object/apply:pathlib.WindowsPath
-        - k:\
-        - github
-        - assetutilities
-        - tests
-        - modules
-        - yaml_utlities
-        - yml
-        - SZ_trim_QA.yml
-  Analysis:
-    basename: yaml_utlities
-    analysis_root_folder: k:\github\assetutilities\tests\modules\yaml_utlities
-    file_name: divide_yaml_file_by_primary_key
-    file_name_for_overwrite: divide_yaml_file_by_primary_key
-    result_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    log_folder: k:\github\assetutilities\tests\modules\yaml_utlities\logs
-    start_time: 2024-12-23 04:38:49.845716
-    cfg_array_file_names: ~
-    DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
-    fe_folder: k:\github\assetutilities\tests\modules\yaml_utlities\results
-    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
-    - github
-    - assetutilities
-    - tests
-    - modules
-    - yaml_utlities
+library: assetutlities
+basename: yaml_utilities
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+  input_directory: yml/test_data
+  output_directory: ~
+  filename:
+    extension:
     - yml
-    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - k:\
-    - github
-    - assetutilities
-    - tests
-    - modules
-    - yaml_utlities
-  yaml_utlities:
-    divide:
-      groups:
-      - - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_BaseFile.yml
-        - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_General.yml
-        - data: k:\github\assetutilities\tests\modules\yaml_utlities\results\SZ_trim_QA_Environment.yml
+    pattern: ~
+    filters:
+      contains:
+      - FST1F_D
+      not_contains:
+      - FST1L_D
+  input_files:
+    yml:
+    - c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data\Template_FST2F_FST1F_D.yml
+yml_analysis:
+  shape_output:
+    flag: false
+  divide:
+    flag: true
+    by: primary_key
+    technique: ruamel_yml
+Analysis:
+  basename: yaml_utilities
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities
+  file_name: divide_yaml_file_by_primary_key
+  file_name_for_overwrite: divide_yaml_file_by_primary_key
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\logs
+  start_time: 2025-04-23 12:07:30.083465
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\divide_yaml_file_by_primary_key.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+  file_management_input_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yml\test_data
+  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results
+yaml_utilities:
+  divide:
+    groups:
+    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_VesselTypes.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_General.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Environment.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Constraints.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\results\Template_FST2F_FST1F_D_Lines.yml

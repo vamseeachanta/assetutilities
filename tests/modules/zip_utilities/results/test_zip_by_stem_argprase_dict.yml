@@ -1,0 +1,82 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  library: assetutlities
+  basename: zip_utilities
+  default:
+    log_level: INFO
+    config:
+      overwrite:
+        output: true
+  analysis_settings:
+    flag: true
+    by: stem
+  file_management:
+    flag: true
+    input_directory: yml
+    output_directory: ~
+    filename:
+      extension:
+      - yml
+      pattern: ~
+      filters:
+        contains: []
+        not_contains: []
+    input_files:
+      yml:
+      - !!python/object/apply:pathlib.WindowsPath
+        - yml
+        - FST2F_FST1F_LWL_000deg.yml
+      - !!python/object/apply:pathlib.WindowsPath
+        - yml
+        - FST2L_FST1L_HWL_345deg.yml
+  meta:
+    library: assetutlities
+    basename: zip_utilities
+    arg_parse_dict: true
+    label: argprase_dict
+  analysis:
+    flag: true
+    type: zip_by_stem
+    by: stem
+    input_directory: csv
+    filename:
+      extension:
+      - csv
+  Analysis:
+    basename: zip_utilities
+    analysis_root_folder: .
+    file_name: test_zip_by_stem_argprase_dict
+    file_name_for_overwrite: test_zip_by_stem_argprase_dict
+    result_folder: .\results
+    log_folder: .\logs
+    start_time: 2025-03-31 05:22:58.304491
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: .\test_zip_by_stem.yml
+    fe_folder: .\results
+    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
+    - yml
+    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath []
+  zip_utilities:
+  - stem: FST2F_FST1F_LWL_000deg
+    zip_file_path: .\results\FST2F_FST1F_LWL_000deg.zip
+    files:
+    - csv\FST2F_FST1F_LWL_000deg_Jacket1.csv
+    - csv\FST2F_FST1F_LWL_000deg_Jacket2.csv
+    - csv\FST2F_FST1F_LWL_000deg_Jacket3.csv
+    - csv\FST2F_FST1F_LWL_000deg_Jacket4.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut1.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut2.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut3.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut4.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut5.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut6.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut7.csv
+    - csv\FST2F_FST1F_LWL_000deg_Strut8.csv
+  - stem: FST2L_FST1L_HWL_345deg
+    zip_file_path: .\results\FST2L_FST1L_HWL_345deg.zip
+    files:
+    - csv\FST2L_FST1L_HWL_345deg_Jacket1.csv
+    - csv\FST2L_FST1L_HWL_345deg_Jacket2.csv
+    - csv\FST2L_FST1L_HWL_345deg_Jacket3.csv

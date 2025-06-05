@@ -1,0 +1,31 @@
+@startwbs file_management
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor white
+skinparam titleBackgroundColor palegreen
+
+title file_management
+
+* file_management
+
+** Configuration
+
+*** flag 
+**** True 
+***** Parameters given
+****** Input file selection
+******* Input directory
+******* filename , extensions
+******* Filters
+**** False
+***** No process
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs

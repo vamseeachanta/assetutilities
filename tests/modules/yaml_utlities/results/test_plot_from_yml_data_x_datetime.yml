@@ -1,0 +1,108 @@
+library: assetutlities
+basename: yaml_utilities
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: false
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+  input_directory: ~
+  output_directory: ~
+  filename:
+    extension:
+    - yml
+    pattern: ~
+    filters:
+      contains: []
+      not_contains: []
+meta:
+  basename: yaml_utilities
+  library: assetutlities
+plot_yml_data:
+  flag: true
+visualization:
+  file_name: RAOsDirection0
+  title: RAO's plot
+  xlabel: Date
+  ylabel: RAO Surge Amplitude (m/N)
+  locator: monthly
+  flag: true
+  groups:
+  - dates:
+    - 2024-08-01 00:00:00
+    - 2024-09-02 00:00:00
+    - 2024-10-04 00:00:00
+    - 2024-11-05 00:00:00
+    - 2024-12-07 00:00:00
+    - 2025-01-08 00:00:00
+    - 2025-02-09 00:00:00
+    - 2025-03-13 00:00:00
+    - 2025-04-14 00:00:00
+    RAOSurgeAmp:
+    - 0.0024
+    - 0.0026
+    - 0.0027
+    - 0.003
+    - 0.0037
+    - 0.0055
+    - 0.0039
+    - 0.0045
+    - 0.0047
+    - 0.0054
+    - 0.0062
+    - 0.0069
+    - 0.0074
+    - 0.0086
+    - 0.0091
+    - 0.0108
+    - 0.0113
+    - 0.0139
+    - 0.0143
+    - 0.0186
+    - 0.0179
+    - 0.025
+    - 0.0252
+    - 0.0332
+    - 0.0405
+    - 0.0341
+    - 0.0641
+    - 0.0407
+    - 0.0622
+    - 0.0849
+    - 0.0708
+    - 0.0649
+    - 0.0961
+    - 0.136
+    - 0.1563
+    - 0.1218
+    - 0.039
+    - 0.1583
+    - 0.4239
+    - 0.7356
+    - 1.2248
+    - 1.7912
+    - 2.6295
+Analysis:
+  basename: yaml_utilities
+  analysis_root_folder: .
+  file_name: test_plot_from_yml_data_x_datetime
+  file_name_for_overwrite: test_plot_from_yml_data_x_datetime
+  log_folder: .\logs
+  start_time: 2025-04-23 05:36:30.845039
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: .\test_plot_from_yml_data_x_datetime.yml
+  result_folder: .\results
+  result_data_folder: .\results\Data
+  result_plot_folder: .\results\Plot
+  fe_folder: .\results

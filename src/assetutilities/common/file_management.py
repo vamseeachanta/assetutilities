@@ -35,101 +35,89 @@ class FileManagement:
             {"file_management_output_directory": file_management_output_directory}
         )
 
-        if (
-            cfg.file_management["files"]["files_in_current_directory"]["flag"]
-            or cfg.file_management["files"]["files_in_current_directory"]["auto_read"]
-        ):
-            file_extensions = cfg.file_management["files"][
-                "files_in_current_directory"
-            ].get("file_extensions", [])
-            input_files = {}
+        filename_cfg = cfg.file_management["filename"].copy()
 
-            for file_ext in file_extensions:
+        file_extensions = cfg.file_management["filename"].get("extension", [])
+        input_files = {}
 
-                filename_pattern = cfg["file_management"]["files"][
-                    "files_in_current_directory"
-                ].get("filename_pattern", None)
-                if filename_pattern is None:
-                    glob_search = f"*.{file_ext}"
-                else:
-                    glob_search = f"*{filename_pattern}*.{file_ext}"
+        for file_ext in file_extensions:
 
-                raw_input_files_for_ext = list(
-                    file_management_input_directory.glob(glob_search)
-                )
-                input_files.update({file_ext: raw_input_files_for_ext})
+            filename_pattern = filename_cfg.get("pattern", None)
+            if filename_pattern is None:
+                glob_search = f"*.{file_ext}"
+            else:
+                glob_search = f"*{filename_pattern}*.{file_ext}"
 
-            cfg.file_management.update({"input_files": input_files})
+            raw_input_files_for_ext = list(
+                file_management_input_directory.glob(glob_search)
+            )
 
-        else:
-            file_extensions = cfg.file_management["input_files"].keys()
-            for file_ext in file_extensions:
-                raw_input_files_for_ext = cfg.file_management["input_files"][file_ext]
+            filtered_files = raw_input_files_for_ext.copy()
+            if "filters" in filename_cfg:
+                cfg_filter = filename_cfg["filters"]
+                filtered_files = self.get_filtered_files(raw_input_files_for_ext, cfg_filter)
 
-                valid_file_count = 0
-                for input_file_index in range(0, len(raw_input_files_for_ext)):
-                    input_file = raw_input_files_for_ext[input_file_index]
-                    if not os.path.isfile(input_file):
-                        raw_input_files_for_ext[input_file_index] = os.path.join(
-                            cfg.Analysis["analysis_root_folder"], input_file
-                        )
-                    if os.path.isfile(raw_input_files_for_ext[input_file_index]):
-                        valid_file_count = valid_file_count + 1
+            input_files.update({file_ext: filtered_files})
 
-                logging.info(
-                    f"Number of '{file_ext}' input files : {len(raw_input_files_for_ext)} . Valid files are: {valid_file_count}."
-                )
-
-        return cfg
-
-    def get_files_in_directory_superseded(self, cfg):
-        if cfg["files"]["files_in_current_directory"]["flag"]:
-            file_folder = cfg["Analysis"]["analysis_root_folder"]
-        else:
-            file_folder = cfg["files"]["files_in_current_directory"]["directory"]
-
-        extension = cfg["files"]["extension"]
-        os.path.join(file_folder, "*." + extension)
-        files = glob.glob(os.path.join(file_folder, "*." + extension))
-
-        if "filters" in cfg["files"]:
-            cfg_filter = cfg["files"]["filters"]
-            filtered_files = self.get_filtered_files(files, cfg_filter)
-        else:
-            filtered_files = files.copy()
-
-        basenames = self.get_basenames(filtered_files)
-        cfg.update(
-            {
-                cfg["basename"]: {
-                    "files": filtered_files,
-                    "basenames": basenames,
-                    "file_folder": file_folder,
-                }
-            }
-        )
+        cfg.file_management.update({"input_files": input_files})
 
         return cfg
 
     def get_filtered_files(self, files, cfg_filter):
+        #TODO Test for multiple filter values
+        # Only singleton array for cfg_filter['contains'] and cfg_filter['not_contains'] tested
+
         filtered_files = files.copy()
-        for file in filtered_files:
-            filter_flag = False
-            if (
-                len(cfg_filter["filename_contains"]) > 0
-                and cfg_filter["filename_contains"][0] not in file
-            ):
-                filter_flag = True
-            if (
-                len(cfg_filter["filename_not_contains"]) > 0
-                and cfg_filter["filename_not_contains"][0] in file
-            ):
-                filter_flag = True
-
-            if filter_flag:
+        for file in files:
+            file_path = pathlib.Path(file)
+            file_stem = file_path.stem
+            conditions = []
+            
+            # Helper function for all filters to check if None or empty
+            def apply_filter(filter_key):
+                filter_value = cfg_filter.get(filter_key)
+                return (
+                    filter_value is not None 
+                    and filter_value != 'NULL' 
+                    and (not isinstance(filter_value, list) or len(filter_value) > 0)
+                )
+            
+            # 1. CONTAINS (must include ALL specified substrings)
+            if apply_filter('contains'):
+                conditions.append(
+                    all(item in file_stem for item in cfg_filter['contains'])
+                )
+            
+            # 2. NOT_CONTAINS (must exclude ALL specified substrings)
+            if apply_filter('not_contains'):
+                conditions.append(
+                    all(item not in file_stem for item in cfg_filter['not_contains'])
+                )
+            
+            # 3. FILE SIZE (min/max KB check)
+            file_size_kb = file_path.stat().st_size / 1024  # Get size in KB
+            
+            if apply_filter('min_size_kb'):
+                conditions.append(file_size_kb >= cfg_filter['min_size_kb'])
+            
+            if apply_filter('max_size_kb'):
+                conditions.append(file_size_kb <= cfg_filter['max_size_kb'])
+            
+            # 4. REGEX (pattern matching)
+            if apply_filter('regex'):
+                import re
+                try:
+                    conditions.append(
+                        bool(re.search(cfg_filter['regex'], file_stem))
+                    )
+                except re.error:  # Invalid regex → treat as no match
+                    conditions.append(False)
+            
+            # Apply AND logic (all conditions must be True)
+            if conditions and not all(conditions):
                 filtered_files.remove(file)
-
-        return filtered_files
+        
+        return filtered_files    
 
     def get_basenames(self, files):
         basenames = []
@@ -152,15 +140,10 @@ class FileManagement:
 
     def get_file_management_input_directory(self, cfg):
 
-        if cfg.file_management["files"]["files_in_current_directory"]["flag"]:
-            file_management_input_directory = cfg.Analysis["analysis_root_folder"]
-        else:
-            file_management_input_directory = cfg.file_management["files"][
-                "files_in_current_directory"
-            ]["directory"]
-
+        file_management_input_directory = cfg.file_management["input_directory"]
         if file_management_input_directory is None:
-            file_management_input_directory = "./"
+            file_management_input_directory = cfg.Analysis["analysis_root_folder"]
+
         analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
         dir_is_valid, file_management_input_directory = is_dir_valid_func(
             file_management_input_directory, analysis_root_folder
@@ -179,12 +162,27 @@ class FileManagement:
 
     def get_file_management_output_directory(self, cfg):
 
-        output_directory = cfg.file_management["files"].get("output_directory", None)
-        file_management_output_directory = output_directory
-        if file_management_output_directory is None:
-            file_management_output_directory = cfg["Analysis"]["analysis_root_folder"]
+        output_directory = cfg.file_management.get("output_directory", None)
 
-        if file_management_output_directory is not None:
+        # Use analysis root folder if output directory is not provided
+        file_management_output_directory = output_directory
+        dir_is_valid = False
+        if file_management_output_directory is None:
+            file_management_output_directory = cfg["Analysis"]['result_folder']
+            dir_is_valid = True
+
+        # Check if user-provided-directory is valid
+        if not dir_is_valid:
+            analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
+            dir_is_valid, file_management_output_directory = is_dir_valid_func(
+                file_management_output_directory, analysis_root_folder
+            )
+
+        # Create user-provided-directory if not exists
+        if not dir_is_valid:
+            file_management_output_directory = pathlib.Path(file_management_output_directory)
+            file_management_output_directory.mkdir(parents=True, exist_ok=True)
+
             analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
             dir_is_valid, file_management_output_directory = is_dir_valid_func(
                 file_management_output_directory, analysis_root_folder

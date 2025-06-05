@@ -9,16 +9,16 @@ default:
 
 analysis_settings:
   flag: True
-  by: stem
+  by: NULL
 
 file_management:
   flag: True
+  input_directory: NULL
+  output_directory: NULL
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: csv
-      file_extensions: [csv]
-      filename_pattern: NULL
-    output_directory: NULL
+  filename:
+    extension: []
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

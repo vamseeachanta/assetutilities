@@ -1,0 +1,191 @@
+﻿Lines:
+  - Name: Mooring1
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    ? Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination,
+      ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo
+    :   - [OC4 Semisub, -40.868, 0, -14, 180, 124.68106664118336, 0, null]
+        - [Anchored, -837.6, 0, 0.175, 180, 89.03020582742461, 0, null]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, null]
+      - [0, null]
+    # Feeding
+    ? ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor,
+      ConnectionApplyRamp, ConnectionUseSmoothGrowth
+    :   - [null, 0, 0.001]
+        - [null, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Mooring line, 835.5, 10]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    CoveredSectionsWarnIfLineLeavesCover: Yes
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature:
+    ContentsPressureRefZ:
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Catenary
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: As laid
+    LayAzimuth: 0
+    AsLaidTension: 0
+  - Name: Mooring2
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    ? Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination,
+      ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo
+    :   - [OC4 Semisub, 20.43399999999999, -35.392726201862445, -14, 299.99999999999994,
+          124.68106664118336, 0, null]
+        - [Anchored, 418.79999999999984, -725.3828782098459, 0.17500000000001137,
+          299.99999999999994, 89.03020582742461, 0, null]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, null]
+      - [0, null]
+    # Feeding
+    ? ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor,
+      ConnectionApplyRamp, ConnectionUseSmoothGrowth
+    :   - [null, 0, 0.001]
+        - [null, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Mooring line, 835.5, 10]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    CoveredSectionsWarnIfLineLeavesCover: Yes
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature:
+    ContentsPressureRefZ:
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Catenary
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: As laid
+    LayAzimuth: 120
+    AsLaidTension: 0
+  - Name: Mooring3
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    ? Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination,
+      ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo
+    :   - [OC4 Semisub, 20.43400000000002, 35.39272620186243, -14, 59.99999999999993,
+          124.68106664118336, 0, null]
+        - [Anchored, 418.8000000000003, 725.3828782098456, 0.17500000000001137, 59.99999999999994,
+          89.03020582742461, 0, null]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, null]
+      - [0, null]
+    # Feeding
+    ? ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor,
+      ConnectionApplyRamp, ConnectionUseSmoothGrowth
+    :   - [null, 0, 0.001]
+        - [null, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Mooring line, 835.5, 10]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    CoveredSectionsWarnIfLineLeavesCover: Yes
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature:
+    ContentsPressureRefZ:
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Catenary
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: As laid
+    LayAzimuth: 240
+    AsLaidTension: 0
+  - Name: Tower
+    IncludeTorsion: Yes
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    ? Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination,
+      ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo
+    :   - [Nacelle, -0.1703974840697582, 20.867673344879132e-18, -1.9476521551762802,
+          180, 175, 0, null]
+        - [OC4 Semisub, 0, 0, 10, 0, 180, 0, null]
+    # End connection stiffness and damping
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness, ConnectionTwistingStiffness, ConnectionDamping:
+      - [Infinity, null, Infinity]
+      - [Infinity, null, Infinity]
+    # Feeding
+    ? ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor,
+      ConnectionApplyRamp, ConnectionUseSmoothGrowth
+    :   - [null, 0, 0.001]
+        - [null, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Tower line type, 77.60000000000001, 2]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    ApplySeabedContactLoadsAtCentreline: No
+    CoveredSectionsWarnIfLineLeavesCover: Yes
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature:
+    ContentsPressureRefZ:
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Catenary
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: None
+    # Drawing
+    NodePen: [1, Solid, White]

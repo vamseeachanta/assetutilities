@@ -1,0 +1,28 @@
+@startwbs yml_utilities
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title yml_utilities
+
+* yml_utilities
+
+** variable
+*** single
+*** block
+*** placeholder
+
+
+** divide
+*** by_primary_keys
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs

@@ -1,4 +1,4 @@
-basename: yaml_utlities
+basename: yaml_utilities 
 
 default:
   log_level: INFO
@@ -7,18 +7,21 @@ default:
       output: True
 
 yml_analysis:
+  shape_output:
+    flag: False
   divide:
     flag: True
     by: primary_key
+    technique: ruamel_yml
 
 file_management:
   flag: True
+  input_directory: yml/test_data
+  output_directory: NULL
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: yml
-      file_extensions: [yml]
-      filename_pattern: NULL
-    output_directory: NULL
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      contains: [FST1F_D]
+      not_contains: [FST1L_D]

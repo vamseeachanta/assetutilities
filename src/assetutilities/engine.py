@@ -1,11 +1,8 @@
 # Standard library imports
 import logging
-import os
-import sys
 
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
-from assetutilities.common.data import SaveData
 from assetutilities.common.download_data.dwnld_from_zipurl import DownloadDataFromURL
 from assetutilities.common.file_edit import FileEdit
 from assetutilities.common.file_management import FileManagement
@@ -20,28 +17,34 @@ from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
 
 library_name = "assetutilities"
 
+app_manager = ConfigureApplicationInputs()
 de = DataExploration()
 fm = FileManagement()
-save_data = SaveData()
 wwyaml = WorkingWithYAML()
 
 
 def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) -> dict:
+
+    cfg_argv_dict = {}
     if cfg is None:
-        inputfile = validate_arguments_run_methods(inputfile)
+        inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
         cfg = wwyaml.ymlInput(inputfile, updateYml=None)
         cfg = AttributeDict(cfg)
         if cfg is None:
             raise ValueError("cfg is None")
 
-    basename = cfg["basename"]
-    application_manager = ConfigureApplicationInputs(basename)
-    application_manager.configure(cfg, library_name)
+    if 'basename' in cfg:
+        basename = cfg["basename"]
+    elif 'meta' in cfg:
+        basename = cfg["meta"]["basename"]
+    else:
+        raise ValueError("basename not found in cfg")
 
     if config_flag:
         fm = FileManagement()
-        cfg_base = application_manager.cfg
+        cfg_base = app_manager.configure(cfg, library_name, basename, cfg_argv_dict)
         cfg_base = fm.router(cfg_base)
+        result_folder_dict, cfg_base = app_manager.configure_result_folder(None, cfg_base)
     else:
         cfg_base = cfg
 
@@ -55,18 +58,11 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     elif basename in ["visualization"]:
         viz_comp = VisualizationComponents()
         viz_comp.visualization_router(cfg_base)
-    # elif basename in ["read_pdf"]:
-    #     read_pdf = ReadPDF()
-    #     read_pdf.read_pdf(cfg_base)
     elif basename in ["file_management"]:
-        fm = FileManagement()
         fm.router(cfg_base)
     elif basename in ["file_edit"]:
         fe = FileEdit()
         fe.router(cfg_base)
-    # elif basename in ["edit_pdf"]:
-    #     edit_pdf = EditPDF()
-    #     edit_pdf.edit_pdf(cfg_base)
     elif basename in ["gitpython"]:
         # Reader imports
         from assetutilities.tools.git.git_python_utilities import GitPythonUtilities
@@ -81,25 +77,25 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
 
         wu = WordUtilities()
         wu.router(cfg_base)
-    elif cfg["basename"] == "data_exploration":
+    elif basename == "data_exploration":
         cfg_base = de.router(cfg_base)
 
-    elif cfg["basename"] == "web_scraping":
+    elif basename == "web_scraping":
         ws = WebScraping()
         cfg_base = ws.router(cfg_base)
 
-    elif cfg["basename"] == "download_data":
+    elif basename == "download_data":
         ddfu = DownloadDataFromURL()
         cfg_base = ddfu.router(cfg_base)
 
-    elif cfg["basename"] == "yaml_utlities":
+    elif basename == "yaml_utilities" or basename == "yml_utilities":
         cfg_base = wwyaml.router(cfg_base)
 
-    elif cfg["basename"] == "reportgen":
+    elif basename == "reportgen":
         from assetutilities.common.reportgen import reportgen
         # init and run reportgen using config
         reportgen.run(cfg_base)
-    elif cfg["basename"] == "zip_utilities":
+    elif basename == "zip_utilities":
         zu = ZipUtilities()
         cfg_base = zu.router(cfg_base)
 
@@ -110,43 +106,5 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         save_application_cfg(cfg_base=cfg_base)
 
     logging.info(f"{basename}, application ... END")
-    save_cfg(cfg_base=cfg_base)
-
+    cfg_base = app_manager.save_cfg(cfg_base=cfg_base)
     return cfg_base
-
-
-def validate_arguments_run_methods(inputfile):
-    """
-    Validate inputs for following run methods:
-    - module (i.e. python -m digitalmodel input.yml)
-    - from python file (i.e. )
-    """
-
-    if len(sys.argv) > 1 and inputfile is not None:
-        raise (
-            Exception(
-                "2 Input files provided via arguments & function. Please provide only 1 file ... FAIL"
-            )
-        )
-
-    if len(sys.argv) > 1:
-        if not os.path.isfile(sys.argv[1]):
-            raise (FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL"))
-        else:
-            inputfile = sys.argv[1]
-
-    if len(sys.argv) <= 1:
-        if not os.path.isfile(inputfile):
-            raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
-        else:
-            sys.argv.append(inputfile)
-    return inputfile
-
-
-def save_cfg(cfg_base):
-    output_dir = cfg_base.Analysis["analysis_root_folder"]
-
-    filename = cfg_base.Analysis["file_name"]
-    filename_path = os.path.join(output_dir, "results", filename)
-
-    save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)

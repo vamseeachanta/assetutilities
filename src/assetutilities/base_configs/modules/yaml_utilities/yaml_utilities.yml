@@ -1,0 +1,20 @@
+library: assetutlities
+basename: yaml_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+
+  files:
+    files_in_current_directory:
+      flag: False
+      auto_read: True
+      directory: yml
+      file_extensions: [yml]
+      filename_pattern: NULL
+    output_directory: NULL

@@ -1,14 +1,22 @@
 # Standard library imports
 import importlib.util
+#import logging
 import os
+import re
+from datetime import datetime, timedelta
 import pkgutil
 import types
 from collections.abc import Mapping
 from pathlib import Path
+from io import StringIO
 
 # Third party imports
 import yaml
 from deepdiff import DeepDiff
+
+from loguru import logger
+from jinja2 import Environment, StrictUndefined
+import yaml.composer
 
 # Reader imports
 from assetutilities.common.data import ReadData
@@ -17,8 +25,16 @@ from assetutilities.common.utilities import (
     get_common_name_from_2_filenames,
     is_file_valid_func,
 )
+from assetutilities.common.visualization.visualization_templates_matplotlib import (
+    VisualizationTemplates,
+)
+from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML
+#from assetutilities.engine import engine as aus_engine
+
+viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
+ruamel_yaml = RuamelYAML()
 
 
 def represent_none(self, _):
@@ -38,15 +54,48 @@ def update_deep(d, u):
     return WorkingWithYAML().update_deep(d, u)
 
 
-
 class WorkingWithYAML:
 
     def __init__(self):
         pass
 
     def router(self, cfg):
-        if cfg['yml_analysis']['divide']['flag']:
-            self.divide_yaml_files(cfg)
+        if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
+            ruamel_yaml.router(cfg)
+        elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
+            self.get_plotting_data(cfg)
+        elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
+            self.test_variables(cfg)
+
+        return cfg
+    
+    def get_plotting_data(self, cfg):
+
+        plot_data = cfg['visualization']['groups']
+        cfg = self.plot_yml_data(cfg, plot_data)
+
+        return cfg
+
+    def plot_yml_data(self, cfg, plot_arrays):
+
+        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
+        y_array = plot_arrays[0]['RAOSurgeAmp']
+        file_name = cfg['visualization']['file_name']
+    
+        if len(plot_arrays[0]) < 2:
+            raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
+        
+        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
+        settings = {'file_name': file_name,
+                    'title': 'RAOsDirectionPlot',
+                    'xlabel': 'RAOPeriodOrFrequency',
+                    'ylabel': 'RAOSurgeAmp',
+                    }
+        plot_yml['settings'].update(settings)
+        plot_yml['data']["groups"][0]["x"] = [x_array]
+        plot_yml['data']["groups"][0]["y"] = [y_array]
+        from assetutilities.engine import engine as au_engine
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
 
         return cfg
 
@@ -54,11 +103,12 @@ class WorkingWithYAML:
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
-        with open(defaultYml, "r") as ymlfile:
+        with open(defaultYml, "r",encoding='utf-8') as ymlfile:
             try:
                 cfg = yaml.safe_load(ymlfile)
-            except yaml.composer.ComposerError:
-                cfg = yml_read_stream(defaultYml)
+            except yaml.composer.ComposerError as e:
+                logger.error(f"YAML parsing error: {e}")
+                cfg = self.yml_read_stream(defaultYml)
 
         if updateYml != None:
             #  Update values file
@@ -66,10 +116,10 @@ class WorkingWithYAML:
                 with open(updateYml, "r") as ymlfile:
                     cfgUpdateValues = yaml.safe_load(ymlfile)
                 #  Convert to logs
-                # print(cfgUpdateValues)
+                # logger.info(cfgUpdateValues)
                 cfg = update_deep(cfg, cfgUpdateValues)
             except:
-                print(
+                logger.info(
                     "Update Input file could not be loaded successfully. Running program default values"
                 )
 
@@ -79,13 +129,19 @@ class WorkingWithYAML:
         stream_dict = {}
         try:
             with open(yaml_file_name, "r") as ymlfile:
-                docs = yaml.safe_load_all(ymlfile)
+                yaml_content = ymlfile.read()
+            
+                # Clean the YAML content
+                #cleaned_yaml = self.clean_yaml_file(yaml_content)
+                docs = yaml.safe_load_all(yaml_content)
                 if type(docs) is types.GeneratorType:
                     for doc in docs:
                         if type(doc) is dict:
                             stream_dict = update_deep(stream_dict, doc)
-        except:
-            raise Exception("Stopping Program")
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error: {e}")                    
+        except Exception as e:
+            raise Exception("Stopping Program due to some inefficient data in the YAML file")
 
         return stream_dict
 
@@ -108,7 +164,7 @@ class WorkingWithYAML:
         Analyze Yaml file
         '''
         file_name_content = ymlInput(file_name)
-        print(file_name_content.keys())
+        logger.info(file_name_content.keys())
 
     def compare_yaml_root_keys(self, file_name1, file_name2):
         '''
@@ -120,10 +176,10 @@ class WorkingWithYAML:
         file_name1_keys = file_name1_content.keys()
         file_name2_keys = file_name2_content.keys()
         if file_name1_keys == file_name2_keys:
-            print("Yaml files have the same root keys")
+            logger.info("Yaml files have the same root keys")
         else:
-            print(f"The root keys for {file_name1}: {file_name1_keys}")
-            print(f"The root keys for {file_name2}: {file_name2_keys}")
+            logger.info(f"The root keys for {file_name1}: {file_name1_keys}")
+            logger.info(f"The root keys for {file_name2}: {file_name2_keys}")
 
     def compare_yaml_files_deepdiff(self, cfg):
         '''
@@ -135,7 +191,7 @@ class WorkingWithYAML:
         file_name2_content = ymlInput(file_name2)
         file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
         if file_diff == {}:  # if there is no difference
-            print("Yaml files are the same")
+            logger.info("Yaml files are the same")
         else:
             # get file root directory
             file_directory = os.path.dirname(file_name1)
@@ -163,7 +219,7 @@ class WorkingWithYAML:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
         if file_diff == {}:  # if there is no difference
-            print("Yaml files are the same")
+            logger.info("Yaml files are the same")
         else:
             # get file root directory
             file_directory = os.path.dirname(file_name1)
@@ -191,7 +247,7 @@ class WorkingWithYAML:
                 f"{file_directory}/wwyaml_{uniquebasename}_values_changed",
             )
 
-            print(
+            logger.info(
                 "Yaml files are different. See wwyaml files saved in the current file directory"
             )
 
@@ -234,44 +290,64 @@ class WorkingWithYAML:
                     raise FileNotFoundError()
 
             return filepath_with_lib_path
-
-    def divide_yaml_files(self, cfg) -> None:
-        '''
-        Iterate through yml files
-        '''
-        yml_files = cfg['file_management']['input_files']['yml']
-        cfg[cfg['basename']] = {'divide': {'groups':[]}}
-        for file_name in yml_files:
-            cfg_divide = cfg['yml_analysis']['divide']
-            if cfg_divide['by'] == 'primary_key':
-                output_file_name_array = self.divide_yaml_file_by_primary_keys(cfg, file_name)
-                cfg[cfg['basename']]['divide']['groups'].append(output_file_name_array)
-            else:
-                raise Exception("No divide by method specified")
-
-    def divide_yaml_file_by_primary_keys(self, cfg, file_name) -> None:
-        '''
-        Divide yaml file by primary keys into individual yaml files and save them
-        '''
-        file_name_content = ymlInput(file_name)
     
+    def test_variables(self, cfg):
+    
+        if cfg['test_variables']['method']=='single':
+            flag, label = self.test_single_variable(cfg)
+        elif cfg['test_variables']['method']=='directive_block':
+            flag, label = self.test_directive_block(cfg)
+        elif cfg['test_variables']['method']=='placeholder':
+            flag, label = self.test_variable_placeholder(cfg)
 
-        primary_keys = list(file_name_content.keys())
+        return cfg
 
-        file_name_stem = Path(file_name).stem
-        result_folder = cfg['Analysis']['result_folder']
+    def test_single_variable(self, cfg):
+        try:
+            label = cfg['data']['groups'][0]['label']
+            print("Label is reusable:", label)
+            return True, label
+        except KeyError as e:
+            logger.error("Label cannot be accesible:", e)
+            return False, None
+    
+    
+    def test_directive_block(self,cfg):
 
-        output_file_name_array = []
-        for primary_key in primary_keys:
+        try:
+            target_block = cfg['data']['groups'][0]['target']
+            block_nested_value = target_block['template']
+            logger.debug("block and it's nested value reusable:")
+            return True, target_block
+        except KeyError as e:
+            logger.error("Directive block not accessible:", e)
+            return False, None
 
-            primary_key_clean = primary_key.encode('ascii', 'ignore').decode('ascii')
-            output_file_name = f"{file_name_stem}_{primary_key_clean}.yml"
-            output_file_path = os.path.join(result_folder, output_file_name)
+    def test_variable_placeholder(self, cfg):
 
-            with open(output_file_path, "w") as f:
-                yaml.dump(file_name_content[primary_key], f, default_flow_style=False)
-                print(f"{primary_key_clean}.yml has been saved in the current file directory")
+        cfg = self.process_placeholders(cfg, cfg)
+        try:
+            method = cfg['placeholder_tests']['method']
+            print("yml key placeholder is reusable:", method)
+            return True, method
+        except KeyError as e:
+            logger.error("yml key cannot be accesible:", e)
+            return False, None
+    
+    def process_placeholders(self,data, context):
+        """
+        Recursively resolve all string fields using Jinja2 templates.
+        """
+        env = Environment(undefined=StrictUndefined)
 
-            output_file_name_array.append({'data': output_file_path})
-        
-        return output_file_name_array
+        if isinstance(data, str):
+            try:
+                return env.from_string(data).render(**context)
+            except Exception as e:
+                logger.warning("Template failed: %s", e)
+                return data
+        elif isinstance(data, dict):
+            return {k: self.process_placeholders(v, context) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self.process_placeholders(i, context) for i in data]
+        return data

@@ -1,0 +1,95 @@
+﻿LineTypes:
+  - Name: Mooring line
+    Category: General
+    # Geometry and mass
+    OD: 0.0766
+    ID: 0
+    CentreOfMass: [0, 0]
+    BulkModulus: Infinity
+    MassPerUnitLength: 0.11335
+    # Limits
+    CompressionIsLimited: No
+    AllowableTension:
+    MinRadius: [null, null]
+    # Structure
+    EI: [0, null]
+    EA: 753.6e3
+    PoissonRatio: 0.5
+    ExpansionTable: None
+    GJ: 80
+    TensionTorqueCoupling: 0
+    # Contact
+    OuterContactDiameter:
+    InnerContactDiameter:
+    ClashStiffness: 0
+    # Added mass, inertia and slam
+    Ca: [1, null, 0]
+    Cm: [null, null, null]
+    Cs: 0
+    Ce: 0
+    # Drag and lift
+    Cd: [1.1, null, 0.008]
+    Cl: 0
+    NormalDragLiftDiameter:
+    AxialDragLiftDiameter:
+    # Stress
+    StressOD:
+    StressID:
+    AllowableStress:
+    TensileStressLoadingFactor: 1
+    BendingStressLoadingFactor: 1
+    ShearStressLoadingFactor: 1
+    TorsionalStressLoadingFactor: 1
+    # Friction
+    SeabedLateralFrictionCoefficient: 0.5
+    SeabedAxialFrictionCoefficient:
+    # Structural damping
+    RayleighDampingCoefficients: (no damping)
+    # Drawing
+    Pen: [1, Solid, $FF8000]
+  - Name: Pontoons & cross bracing
+    Category: General
+    # Geometry and mass
+    OD: 1.6
+    ID: 1.565
+    CentreOfMass: [0, 0]
+    BulkModulus: Infinity
+    MassPerUnitLength: 0.683
+    # Limits
+    CompressionIsLimited: No
+    AllowableTension:
+    MinRadius: [null, null]
+    # Structure
+    EI: [572e6, null]
+    EA: 1.827e9
+    PoissonRatio: 0.28
+    ExpansionTable: None
+    GJ: 430.1e6
+    TensionTorqueCoupling: 0
+    # Contact
+    OuterContactDiameter:
+    InnerContactDiameter:
+    ClashStiffness: 0
+    # Added mass, inertia and slam
+    Ca: [0, null, 0]
+    Cm: [0, 0, 0]
+    Cs: 0
+    Ce: 0
+    # Drag and lift
+    Cd: [0.63, null, 0]
+    Cl: 0
+    NormalDragLiftDiameter:
+    AxialDragLiftDiameter:
+    # Stress
+    StressOD:
+    StressID:
+    AllowableStress:
+    TensileStressLoadingFactor: 1
+    BendingStressLoadingFactor: 1
+    ShearStressLoadingFactor: 1
+    TorsionalStressLoadingFactor: 1
+    # Friction
+    SeabedLateralFrictionCoefficient: 0
+    SeabedAxialFrictionCoefficient:
+    # Structural damping
+    RayleighDampingCoefficients: (no damping)

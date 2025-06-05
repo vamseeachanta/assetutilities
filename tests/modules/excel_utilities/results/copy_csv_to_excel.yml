@@ -1,0 +1,50 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+state: *id001
+dictitems:
+  basename: excel_utilities
+  default:
+    log_level: DEBUG
+    config:
+      overwrite:
+        output: true
+  task: csv_copy_to_excel
+  files:
+    target:
+      path: C:\Users\ss7a2365\Desktop\
+      workbook: Summary_1.xlsx
+      worksheet: Sheet1
+      cell_range: ~
+    source:
+      path: C:\Users\ss7a2365\Desktop\
+      workbook: S01-Dyn-FC180-2.5mHs.xlsx
+      worksheet: EditingTable
+      cell_range: ~
+  meta:
+    basename: excel_utilities
+    library: assetutilities
+  data:
+    input_format: csv
+    clear_existing_data: true
+    groups:
+    - input:
+        filename: docs/modules/excel_utilities/another_folder/inputs.csv
+      target:
+        filename: docs/modules/excel_utilities/another_folder/target.xlsx
+        sheet_name: inputs
+    - input:
+        filename: docs/modules/excel_utilities/another_folder/results.csv
+      target:
+        filename: docs/modules/excel_utilities/another_folder/target.xlsx
+        sheet_name: results
+  Analysis:
+    basename: excel_utilities
+    analysis_root_folder: k:\github\assetutilities\tests\modules\excel_utilities
+    file_name: copy_csv_to_excel
+    file_name_for_overwrite: copy_csv_to_excel
+    result_folder: k:\github\assetutilities\tests\modules\excel_utilities\results
+    log_folder: k:\github\assetutilities\tests\modules\excel_utilities\logs
+    start_time: 2025-03-13 22:54:17.362488
+    cfg_array_file_names: ~
+    DefaultInputFile: ~
+    CustomInputFile: k:\github\assetutilities\tests\modules\excel_utilities\copy_csv_to_excel.yml
+    fe_folder: k:\github\assetutilities\tests\modules\excel_utilities\results

@@ -1,20 +1,23 @@
 # Standard library imports
 import datetime
 import functools
-import logging
+from loguru import logger
 import os
 import pkgutil
 import sys
+from pathlib import Path
 
 # Third party imports
 import yaml
+import numpy as np
 
 # Reader imports
 from assetutilities.common.data import AttributeDict
-from assetutilities.common.database import Database
+from assetutilities.common.data import SaveData
 from assetutilities.common.set_logging import set_logging
 from assetutilities.common.update_deep import update_deep_dictionary
 
+save_data = SaveData()
 
 def applicationTimer(func):
     # Standard library imports
@@ -31,7 +34,7 @@ def applicationTimer(func):
 
         end_time = time.perf_counter()
         run_time = end_time - start_time
-        print(f"Finished {func.__name__!r} in {run_time:.2f} secs")
+        logger.info(f"Finished {func.__name__!r} in {run_time:.2f} secs")
 
         return function_value
 
@@ -42,11 +45,8 @@ def setupApplicationRuns(func):
 
     @functools.wraps(func)
     def wrapper_applicationRuns(*args, **kwargs):
-        # Standard library imports
-        import logging
-
         app_runs = ApplicationRuns(basename=func.__name__)
-        logging.info("  ******Set Up Application Runs .... ******")
+        logger.info("  ******Set Up Application Runs .... ******")
         cfg = app_runs.configureApplication()
         kwargs["cfg"] = cfg
 
@@ -86,117 +86,38 @@ def setupApplicationRuns(func):
                         cfg=kwargs["cfg"], run_time=run_time, run_dict=run_dict
                     )
 
-        logging.info("  ****** Application Runs .... COMPLETE ******")
+        logger.info("  ****** Application Runs .... COMPLETE ******")
 
         return function_value
 
     return wrapper_applicationRuns
 
 
-def decoratorWithArgumentExample(func=None, *, kw1=None):
-    """Decotrator with keyword argument Boiler Plate Example"""
-    # Standard library imports
-    import functools
-
-    @functools.wraps(func)
-    def wrapper_decoratorWithArgumentExample(*args, **kwargs):
-        cfg = func(*args, **kwargs)
-        return cfg
-
-    return wrapper_decoratorWithArgumentExample
-
-
-class ApplicationRuns:
-
-    def __init__(self, basename):
-        self.basename = basename
-
-    def configureApplication(self, run_dict=None):
-        configure_app = ConfigureApplicationInputs(self.basename)
-        self.cfg = configure_app.configure(run_dict)
-
-        return self.cfg
-
-    def getRuns(self):
-        # Third party imports
-        import pandas as pd
-
-        run_df = pd.DataFrame()
-        database_runs_flag = self.cfg.default.get("database_runs", None)
-        if database_runs_flag is not None and database_runs_flag:
-            self.addRunRecordsToDB()
-            run_df = self.getApplicatonRunsFromDB()
-
-        return run_df
-
-    def addRunRecordsToDB(self):
-
-        if self.cfg.__contains__("db"):
-            db_properties = self.cfg.db
-            dbe = Database(db_properties)
-            dbe.set_up_db_connection(db_properties)
-
-            run_file = os.path.join("tests\\cfg\\", self.basename, "runs.csv")
-            run_file_updated = os.path.join(
-                "tests\\cfg\\", self.basename, "runs_added_to_db.csv"
-            )
-
-            ApplicationIDQuery = "SELECT TOP 1 ApplicationID from [dbo].[Application] WHERE ApplicationName = '{}'".format(
-                self.basename
-            )
-            result_df = self.dbe.get_df_from_query(ApplicationIDQuery)
-            self.ApplicationId = result_df["ApplicationID"].iloc[0]
-
-            if os.path.isfile(run_file):
-                # Third party imports
-                import pandas as pd
-
-                df = pd.read_csv(run_file, header="infer")
-                df["ApplicationId"] = self.ApplicationId
-                dbe.save_to_db(df, table_name="ApplicationRuns")
-                logging.info("Runs records to add to db")
-            else:
-                logging.info("No Runs records to add to db")
-
-    def getApplicatonRunsFromDB(self):
-        ApplicationRunsQuery = "SELECT * FROM [master].[dbo].[ApplicationRuns] WHERE ApplicationId={} and RunStatus=0".format(
-            self.ApplicationId
-        )
-        run_df = self.dbe.get_df_from_query(ApplicationRunsQuery)
-
-        return run_df
-
 
 class ConfigureApplicationInputs:
 
-    def __init__(self, basename):
-        self.basename = basename
+    def __init__(self):
+        pass
 
-    def configure(self, run_dict, library_name):
-        self.unify_application_and_default_and_custom_yamls(run_dict, library_name)
-        self.get_application_configuration_parameters(run_dict=run_dict)
-        self.configure_overwrite_filenames()
-        self.convert_cfg_to_attribute_dictionary()
+    def configure(self, run_dict, library_name, basename, cfg_argv_dict):
+        cfg = self.unify_application_and_default_and_custom_yamls(run_dict, library_name, basename, cfg_argv_dict)
+        cfg = self.get_application_configuration_parameters(run_dict, basename, cfg)
+        cfg = self.configure_overwrite_filenames(cfg)
+        cfg = self.convert_cfg_to_attribute_dictionary(cfg)
+        cfg = set_logging(cfg)
 
-        set_logging(self.cfg)
-        logging.debug(self.cfg)
+        logger.debug(cfg)
 
-        return self.cfg
+        return cfg
 
-    def unify_application_and_default_and_custom_yamls(self, run_dict, library_name):
-        application_input_file_path = (
-            os.getcwd()
-            + "\\src\\"
-            + library_name
-            + "\\tests\\test_data\\"
-            + self.basename
-            + ".yml"
-        )
+    def unify_application_and_default_and_custom_yamls(self, run_dict, library_name, basename, cfg_argv_dict):
+        application_input_file_path = os.path.join(
+            os.getcwd(), "src", library_name, "tests", "test_data", basename + ".yml")
         self.ApplicationInputFile = application_input_file_path
         self.get_custom_file()
         if not os.path.isfile(self.ApplicationInputFile):
             try:
-                filename = os.path.join('base_configs', 'modules', self.basename, self.basename + '.yml')
+                filename = os.path.join('base_configs', 'modules', basename, basename + '.yml')
                 self.ApplicationInputFile = filename
                 data = pkgutil.get_data(library_name, self.ApplicationInputFile)
             except Exception:
@@ -208,18 +129,15 @@ class ConfigureApplicationInputs:
             self.ApplicationInputFile_dict = yaml.safe_load(data)
 
         # Get updated configuration file for Analysis
-        self.cfg = self.generateYMLInput(run_dict)
+        cfg = self.generateYMLInput(run_dict, cfg_argv_dict)
+
+        return cfg
 
     def get_custom_file(self, run_dict=None):
 
         try:
             if sys.argv[1] is not None:
                 self.customYaml = sys.argv[1]
-                print(
-                    "Updating default values with contents in file {0}".format(
-                        self.customYaml
-                    )
-                )
         except:
             self.customYaml = None
             print(
@@ -233,7 +151,7 @@ class ConfigureApplicationInputs:
         else:
             self.CustomInputs = None
 
-    def generateYMLInput(self, run_dict):
+    def generateYMLInput(self, run_dict, cfg_argv_dict):
 
         if os.path.isfile(self.ApplicationInputFile):
             with open(self.ApplicationInputFile, "r") as ymlfile:
@@ -281,181 +199,201 @@ class ConfigureApplicationInputs:
                 )
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)
+            logger.debug(f"Update default app configuration with contents in file {self.customYaml} ... DONE")
+            logger.debug(f"Update default app configuration with dictionary content in:  ... START")
+            logger.debug(f"\t{ cfg_argv_dict}")
+            cfg = update_deep_dictionary(cfg, cfg_argv_dict)
+            logger.debug(f"Update default app configuration with dictionary content ... FINISH")
 
         return cfg
 
-    def get_application_configuration_parameters(self, run_dict=None):
+    def get_application_configuration_parameters(self, run_dict, basename, cfg):
 
         application_start_time = datetime.datetime.now()
 
         if self.customYaml is not None:
             custom_file_name = os.path.split(self.customYaml)[1].split(".")[0]
-            AnalysisRootFolder = os.path.split(self.customYaml)[0]
-            if AnalysisRootFolder == "":
-                AnalysisRootFolder = os.getcwd()
+            analysis_root_folder = os.path.split(self.customYaml)[0]
+            if analysis_root_folder == "":
+                analysis_root_folder = os.getcwd()
         elif self.CustomInputs is not None:
             custom_file_name = run_dict["RunName"]
-            AnalysisRootFolder = os.path.join(os.getcwd(), r"tests\cfg", self.basename)
+            analysis_root_folder = os.path.join(os.getcwd(), "tests", "cfg", basename)
         else:
             custom_file_name = os.path.split(self.ApplicationInputFile)[1].split(".")[0]
-            AnalysisRootFolder = os.getcwd()
+            analysis_root_folder = os.getcwd()
+
+        filename_label = cfg.get('meta', {}).get('label', None)
+        if filename_label is not None:
+            custom_file_name = custom_file_name + "_" + filename_label
 
         file_name = (
             custom_file_name + "_" + application_start_time.strftime("%Y%m%d_%Hh%Mm")
         )
         file_name_for_overwrite = custom_file_name
-        result_folder = os.path.join(AnalysisRootFolder, "results")
-        result_data_folder = os.path.join(result_folder, "Data")
-        result_plot_folder = os.path.join(result_folder, "Plot")
-        result_folder = os.path.join(AnalysisRootFolder, "results")
-        log_folder = os.path.join(AnalysisRootFolder, "logs")
 
-        if not os.path.exists(result_folder):
-            os.mkdir(result_folder)
+        result_folder_dict, cfg_with_fm = self.configure_result_folder(analysis_root_folder)
+
+        log_folder = os.path.join(analysis_root_folder, "logs")
         if not os.path.exists(log_folder):
             os.mkdir(log_folder)
-        if not os.path.exists(result_data_folder):
-            os.mkdir(result_data_folder)
-        if not os.path.exists(result_plot_folder):
-            os.mkdir(result_plot_folder)
 
         cfg_array_file_names = None
 
-        application_configuration_parameters = {
+        app_config_params = {
             "Analysis": {
-                "basename": self.basename,
-                "analysis_root_folder": AnalysisRootFolder,
+                "basename": basename,
+                "analysis_root_folder": analysis_root_folder,
                 "file_name": file_name,
                 "file_name_for_overwrite": file_name_for_overwrite,
-                "result_folder": result_folder,
                 "log_folder": log_folder,
                 "start_time": application_start_time,
                 "cfg_array_file_names": cfg_array_file_names,
-                "DefaultInputFile": self.cfg.get("default_yaml", None),
+                "DefaultInputFile": cfg.get("default_yaml", None),
                 "CustomInputFile": self.customYaml,
             }
         }
 
-        self.cfg = update_deep_dictionary(
-            self.cfg, application_configuration_parameters
-        )
+        app_config_params["Analysis"] = update_deep_dictionary(app_config_params["Analysis"], result_folder_dict)
 
-    def configure_overwrite_filenames(self):
-        if self.cfg["default"]["config"]["overwrite"]["output"] is True:
-            self.cfg["Analysis"]["file_name"] = self.cfg["Analysis"][
+        cfg = update_deep_dictionary(cfg, app_config_params)
+
+        return cfg
+
+    def configure_result_folder(self, analysis_root_folder, cfg_with_fm={}):
+
+        if analysis_root_folder is None:
+            analysis_root_folder = cfg_with_fm['Analysis']['analysis_root_folder']
+
+        result_sub_folder = 'results'
+        if len(cfg_with_fm) != 0 and 'file_management' in cfg_with_fm:
+            result_sub_folder_cfg = cfg_with_fm['file_management'].get('output_directory', None)
+            if result_sub_folder_cfg is not None:
+                result_sub_folder = result_sub_folder_cfg
+
+        result_folder = os.path.join(analysis_root_folder, result_sub_folder)
+        if not os.path.exists(result_folder):
+            os.mkdir(result_folder)
+
+        result_data_folder = os.path.join(result_folder, "Data")
+        if not os.path.exists(result_data_folder):
+            os.mkdir(result_data_folder)
+
+        result_plot_folder = os.path.join(result_folder, "Plot")
+        if not os.path.exists(result_plot_folder):
+            os.mkdir(result_plot_folder)
+
+        result_folder_dict = {
+            "result_folder": result_folder,
+            "result_data_folder": result_data_folder,
+            "result_plot_folder": result_plot_folder,
+        }
+
+
+        if len(cfg_with_fm) != 0:
+            cfg_with_fm["Analysis"] = update_deep_dictionary(cfg_with_fm["Analysis"], result_folder_dict)
+
+        return result_folder_dict, cfg_with_fm
+
+    def configure_overwrite_filenames(self, cfg):
+        if cfg["default"]["config"]["overwrite"]["output"] is True:
+            cfg["Analysis"]["file_name"] = cfg["Analysis"][
                 "file_name_for_overwrite"
             ]
         try:
-            fe_folder = self.cfg["Analysis"].get("fe_folder", None)
+            fe_folder = cfg["Analysis"].get("fe_folder", None)
             if fe_folder is None:
-                self.cfg["Analysis"]["fe_folder"] = self.cfg["Analysis"][
+                cfg["Analysis"]["fe_folder"] = cfg["Analysis"][
                     "result_folder"
                 ]
         except KeyError as e:
-            logging.info("No fe_folder key in Analysis section of yml file")
-            logging.info("Error is : {}".format(e))
+            logger.info("No fe_folder key in Analysis section of yml file")
+            logger.info("Error is : {}".format(e))
 
-    def convert_cfg_to_attribute_dictionary(self):
-        self.cfg = AttributeDict(self.cfg)
+        return cfg
 
+    def convert_cfg_to_attribute_dictionary(self, cfg):
+        cfg = AttributeDict(cfg)
+        
+        return cfg
 
-class SaveApplicationResults_superseded:
-    # TODO Delete after 02/01/2025
-    def __init__(self):
-        pass
+    def validate_arguments_run_methods(self, inputfile):
+        """
+        Validate inputs for following run methods:
+        - module (i.e. python -m digitalmodel input.yml "{'key':'value'}")
+        - from python file (i.e. test_*.py)
+        - from function call (i.e. engine(inputfile))
+        
+        """
 
-    def saveApplicationResultsToDB(self, cfg, run_time, run_dict=None):
-        # Standard library imports
-        import json
-
-        # Third party imports
-        import pandas as pd
-        import yaml
-
-        # Reader imports
-        from assetutilities.common.database import Database
-
-        try:
-            db_properties = cfg.db
-            dbe = Database(db_properties)
-            dbe.set_up_db_connection(db_properties)
-
-            columns = [
-                "ApplicationId",
-                "ProjectId",
-                "RunName",
-                "RunStatus",
-                "DefaultInputFile",
-                "CustomInputFile",
-                "CustomInputs",
-                "AnalysisTime",
-                "RunTimeInSeconds",
-            ]
-            df = pd.DataFrame(columns=columns)
-
-            ApplicationName = cfg.Analysis["basename"]
-            ApplicationIDQuery = "SELECT TOP 1 ApplicationID from [dbo].[Application] WHERE ApplicationName = '{}'".format(
-                ApplicationName
-            )
-            result_df = dbe.get_df_from_query(ApplicationIDQuery)
-            ApplicationId = result_df["ApplicationID"].iloc[0]
-
-            ProjectName = cfg.get("ProjectName", "DigitalTwinFeed")
-            ProjectIDQuery = "SELECT TOP 1 ProjectId from [dbo].[Project] WHERE ProjectName = '{}'".format(
-                ProjectName
-            )
-            result_df = dbe.get_df_from_query(ProjectIDQuery)
-            ProjectId = result_df["ProjectId"].iloc[0]
-            if run_dict is not None:
-                RunName = run_dict["RunName"]
-            else:
-                RunName = None
-
-            RunStatus = 1
-            DefaultInputFile = cfg.Analysis.get("DefaultInputFile", None)
-
-            CustomInputFile = cfg.Analysis.get("CustomInputFile", None)
-
-            if run_dict is None:
-                if CustomInputFile is not None:
-                    with open(CustomInputFile, "r") as ymlfile:
-                        try:
-                            CustomInputs = json.dumps(
-                                yaml.load(ymlfile, Loader=yaml.Loader), default=str
-                            )
-                        except:
-                            CustomInputs = None
-                else:
-                    CustomInputs = None
-            else:
-                CustomInputs = (
-                    run_dict["CustomInputs"].replace("\\'", "'").replace("\\n", "\n")
+        if len(sys.argv) > 1 and inputfile is not None:
+            raise (
+                Exception(
+                    "2 Input files provided via arguments & function. Please provide only 1 file ... FAIL"
                 )
-
-            AnalysisTime = cfg.Analysis["start_time"]
-            RunTimeInSeconds = run_time
-
-            ApplicationRunQuery = """
-                BEGIN TRAN
-                UPDATE [ApplicationRuns]  SET RunStatus={0}, RunTimeInSeconds={1} WHERE ApplicationId={2} and ProjectId={3} and RunName = '{4}' and RunStatus=0
-                IF @@rowcount = 0
-                    BEGIN
-                        INSERT INTO [ApplicationRuns] (ApplicationId,ProjectId,RunName,RunStatus,DefaultInputFile,CustomInputFile,CustomInputs,AnalysisTime,RunTimeInSeconds) 
-                        VALUES ({2},{3},'{4}',{0},'{5}','{6}','{7}','{8}', {1})
-                    END
-                COMMIT TRAN
-                """.format(
-                RunStatus,
-                RunTimeInSeconds,
-                ApplicationId,
-                ProjectId,
-                RunName,
-                DefaultInputFile,
-                CustomInputFile,
-                CustomInputs,
-                AnalysisTime,
             )
 
-            dbe.executeNoDataQuery(ApplicationRunQuery)
-        except:
-            print("Encountered error while saving application result to db")
+        cfg_argv_dict = {}
+        if len(sys.argv) > 2:
+            try:
+                cfg_argv_dict_eval = eval(sys.argv[2])
+            except Exception as e:
+                print(sys.argv[2])
+                print(f"Error: {e}")
+                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
+
+
+            if isinstance(cfg_argv_dict_eval, dict):
+                cfg_argv_dict = cfg_argv_dict_eval
+            else:
+                print("Dictionary not provided in sys.argv[2]. sys.arg vaules are:")
+                print(sys.argv[2])
+
+                print("System argument values are:")
+                for item in sys.argv:
+                    print(f"item : {item}")
+                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
+
+
+        if len(sys.argv) > 1:
+            if not os.path.isfile(sys.argv[1]):
+                raise (FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL"))
+            else:
+                inputfile = sys.argv[1]
+
+        if len(sys.argv) <= 1:
+            if not os.path.isfile(inputfile):
+                raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
+            else:
+                sys.argv.append(inputfile)
+
+        return inputfile, cfg_argv_dict
+
+
+    def save_cfg(self, cfg_base):
+        output_dir = cfg_base.Analysis["analysis_root_folder"]
+
+        filename = cfg_base.Analysis["file_name"]
+        filename_path = os.path.join(output_dir, "results", filename)
+        cfg_base = self.standardize_yml_data(cfg_base)
+
+        save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)
+        return cfg_base
+    
+    def standardize_yml_data(self, data):
+        """
+        Recursively clean up the yml data structure to ensure readability and consistency.
+        """
+        if isinstance(data, dict):  # Process dictionaries
+            return {key: self.standardize_yml_data(value) for key, value in data.items()}
+        elif isinstance(data, list):  # Process lists
+            return [self.standardize_yml_data(item) for item in data]
+        elif isinstance(data, Path):  # Convert WindowsPath to string
+            return str(data)
+        elif isinstance(data, np.ndarray):  # Convert NumPy arrays to lists
+            return data.tolist()
+        elif isinstance(data, (np.integer, np.int32, np.int64)):  # Convert NumPy int to Python int
+            return int(data)
+        elif isinstance(data, (np.float32, np.float64)):  # Convert NumPy float to Python float
+            return float(data)
+        return data 

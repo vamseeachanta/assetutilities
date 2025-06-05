@@ -1,3 +1,5 @@
+import importlib.util
+
 import os
 import logging
 from pathlib import Path
@@ -61,6 +63,48 @@ def is_file_valid_func(file_name, analysis_root_folder=None):
             logging.error(f"File not found: {file_name}")
 
     return file_is_valid, file_name
+
+def get_repository_filename(cfg):
+
+    file_is_valid = True
+    filename_with_repo_path = cfg["filename"]
+    library_name = cfg["library_name"]
+    repository_path = cfg["repository_path"]
+
+    lib_spec = importlib.util.find_spec(library_name)
+    lib_path = Path(lib_spec.origin).parent
+
+    if repository_path is not None:
+        repo_path = repository_path
+    else:
+        repo_path = os.path.join(lib_path, '..', '..')
+    if not os.path.isdir(repo_path):
+        raise FileNotFoundError("Directory Not Found")
+    filename_with_repo_path = os.path.join(repo_path, cfg["filename"])
+    if not os.path.isfile(filename_with_repo_path):
+        file_is_valid = False
+        raise FileNotFoundError()
+
+    return file_is_valid, filename_with_repo_path
+
+def get_repository_filepath(cfg):
+
+    dir_is_valid = True
+    repo_filepath = cfg["filepath"]
+    library_name = cfg["library_name"]
+    repository_path = cfg["repository_path"]
+
+    lib_spec = importlib.util.find_spec(library_name)
+    lib_path = Path(lib_spec.origin).parent
+
+    if repository_path is not None:
+        repo_full_filepath = repository_path
+    else:
+        repo_full_filepath = os.path.join(lib_path, '..', '..', repo_filepath)
+    if not os.path.isdir(repo_full_filepath):
+        raise FileNotFoundError("Directory Not Found")
+
+    return dir_is_valid, repo_full_filepath
 
 
 def add_cwd_to_filename(file_name, cwd=None):

@@ -1,0 +1,37 @@
+﻿MorisonElementTypes:
+    # Drag
+  - Name: UC morison
+    NormalDragDiameter: 12
+    AxialDragDiameter:
+    Cd: [0.61, null, 0]
+    # Fluid Inertia
+    NormalHydrodynamicDiameter: 12
+    AxialHydrodynamicDiameter:
+    Ca: [0, null, 0]
+    Cm: [0, 0, 0]
+    # Drawing
+    Pen: [1, Dash, Yellow]
+    # Drag
+  - Name: BC morison
+    NormalDragDiameter: 24
+    AxialDragDiameter:
+    Cd: [0.68, null, 4.8]
+    # Fluid Inertia
+    NormalHydrodynamicDiameter: 24
+    AxialHydrodynamicDiameter:
+    Ca: [0, null, 0]
+    Cm: [0, 0, 0]
+    # Drawing
+    Pen: [1, Dash, Yellow]
+    # Drag
+  - Name: MC morison
+    NormalDragDiameter: 6.5
+    AxialDragDiameter:
+    Cd: [0.56, null, 0]
+    # Fluid Inertia
+    NormalHydrodynamicDiameter: 6.5
+    AxialHydrodynamicDiameter:
+    Ca: [0, null, 0]
+    Cm: [0, 0, 0]
+    # Drawing
+    Pen: [1, Dash, Aqua]

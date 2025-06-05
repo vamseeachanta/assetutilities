@@ -123,5 +123,18 @@
             "program": "${workspaceFolder}/path/to/script.sh",
             "args": []
         },
+        {
+            "name": "au_test_zip_by_stem_argparse_dict",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/zip_utilities/test_zip_by_stem.yml",
+                "{'meta': {'arg_parse_dict': True, 'label': 'argprase_dict'}}"
+
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
     ]
 }
