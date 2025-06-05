@@ -45,7 +45,7 @@ class ZipFilestoDf:
         return dataframe_dict
 
     def parse_zip_files(self, column_names, rows, zf, file_list, dataframe_dict, delimiter):
-        
+
         for file_to_read in file_list:
             with zf.open(file_to_read) as file:
                 try:
@@ -56,14 +56,14 @@ class ZipFilestoDf:
                     except Exception as e:
                         logger.error(f"Error reading file '{file_to_read}': {e}")
                         continue
-  
+
                 # If column names are provided and the df has no header set the column names
-                if column_names: 
+                if column_names:
                     df.columns = column_names
 
                 file_basename = os.path.basename(file_to_read)
                 file_name_without_extension, extension = os.path.splitext(file_basename)
                 dataframe_dict[file_name_without_extension] = df
-                
+
         return dataframe_dict
 
