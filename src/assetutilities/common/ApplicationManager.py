@@ -106,7 +106,7 @@ class ConfigureApplicationInputs:
         cfg = self.convert_cfg_to_attribute_dictionary(cfg)
         cfg = set_logging(cfg)
 
-        logger.debug(cfg)
+        # logger.debug(cfg)
 
         return cfg
 
