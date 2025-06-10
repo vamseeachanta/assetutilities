@@ -97,7 +97,7 @@ class WorkingWithYAML:
 
         data_default = file_name_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
         data_ruamel = ruamel_data_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
-        pass
+        #TODO : how to access data using data_ruamel package?
 
     def plot_yml_data(self, cfg, plot_arrays):
 
