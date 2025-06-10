@@ -7,13 +7,16 @@ from assetutilities.common.update_deep import update_deep_dictionary
 from assetutilities.common.visualization.visualization_polar import VisualizationPolar
 from assetutilities.common.visualization.visualization_xy import VisualizationXY
 
-
 class VisualizationComponents:
 
     def __init__(self, cfg=None):
         self.cfg = cfg
 
     def visualization_router(self, cfg):
+        logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+        logging.getLogger('PIL').setLevel(logging.WARNING)
+        # logging.getLogger('matplotlib.font_manager').disabled = True
+
         logging.info("Starting visualization application ...")
 
         cfg = self.get_cfg_with_master_data(cfg)
