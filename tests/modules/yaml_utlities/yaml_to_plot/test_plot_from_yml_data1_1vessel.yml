@@ -23,9 +23,9 @@ visualization:
 
 data:
   type: input
-  groups:
+  groups_key_chain:
     - x:
-        - [ 35, 70, 120, 155, 205, 240 ]
+        - {file_name: yml_to_plot_1/L01_import_vessels_1_vessel.yml, key_chain: ['VesselTypes', 0, 'Draughts', 0, 'DisplacementRAOs', 'RAOs']}
       y:
         - [0.5, 1, 2, 2.5, 3, 4]
         - [1, 2, 2.5, 2.5, 3, 5]

@@ -18,7 +18,9 @@ def get_valid_pytest_output_file(pytest_output_file):
 
 
 def test_run_process():
-    input_file = "test_plot_from_yml_data.yml"
+    # input_file = "test_plot_from_yml_data1.yml"
+    input_file = "test_plot_from_yml_data1_1vessel.yml"
+    
     # pytest_output_file = '../test_data/6d_buoy/buoy_6d_circular_px_0_pytest.yml'
     # pytest_output_file = get_valid_pytest_output_file(pytest_output_file)
     expected_result = {}

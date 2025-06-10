@@ -63,7 +63,9 @@ class WorkingWithYAML:
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
             ruamel_yaml.router(cfg)
         elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
-            self.get_plotting_data(cfg)
+            plot_data = self.get_plotting_data(cfg)
+            cfg = self.plot_yml_data(cfg, plot_data)
+
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
 
@@ -71,20 +73,41 @@ class WorkingWithYAML:
     
     def get_plotting_data(self, cfg):
 
-        plot_data = cfg['visualization']['groups']
-        cfg = self.plot_yml_data(cfg, plot_data)
+        groups_key_chain = cfg['data']['groups_key_chain']
+        groups = groups_key_chain.copy()
+        for group_idx, group in enumerate(groups_key_chain):
+            for x_list_idx, x_list in enumerate(group['x']):
+                x_list_values = self.get_data_from_file_keychain(cfg, x_list)
 
-        return cfg
+        plot_data = cfg['visualization']['groups']
+
+        return plot_data
+
+    def get_data_from_file_keychain(self, cfg, file_keychain):
+        file_name = file_keychain['file_name']
+        key_chain = file_keychain['key_chain']
+        
+        if not os.path.isfile(file_name):
+            file_name = os.path.join(cfg['Analysis']['analysis_root_folder'], file_name)
+            if not os.path.isfile(file_name):
+                raise FileNotFoundError(f"File {file_name} does not exist.")
+
+        file_name_dict = self.ymlInput(file_name)
+        cleaned_yaml, ruamel_data_dict = ruamel_yaml.load_clean_yaml_file(file_name)
+
+        data_default = file_name_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
+        data_ruamel = ruamel_data_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
+        pass
 
     def plot_yml_data(self, cfg, plot_arrays):
 
         x_array = plot_arrays[0]['RAOPeriodOrFrequency']
         y_array = plot_arrays[0]['RAOSurgeAmp']
         file_name = cfg['visualization']['file_name']
-    
+
         if len(plot_arrays[0]) < 2:
             raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
-        
+
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
         settings = {'file_name': file_name,
                     'title': 'RAOsDirectionPlot',
@@ -103,7 +126,7 @@ class WorkingWithYAML:
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
-        with open(defaultYml, "r",encoding='utf-8') as ymlfile:
+        with open(defaultYml, "r", encoding='utf-8') as ymlfile:
             try:
                 cfg = yaml.safe_load(ymlfile)
             except yaml.composer.ComposerError as e:
