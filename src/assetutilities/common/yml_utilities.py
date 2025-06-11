@@ -68,8 +68,8 @@ class WorkingWithYAML:
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
             ruamel_yaml_utilities.router(cfg)
         elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
-            plot_data = self.get_plotting_data(cfg)
-            cfg = self.plot_yml_data(cfg, plot_data)
+            cfg = self.get_plotting_data(cfg)
+            cfg = self.plot_yml_data(cfg)
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
 
@@ -80,12 +80,16 @@ class WorkingWithYAML:
         groups_key_chain = cfg['data']['groups_key_chain']
         groups = groups_key_chain.copy()
         for group_idx, group in enumerate(groups_key_chain):
-            for x_list_idx, x_list in enumerate(group['input_parameters']):
+            for x_list_idx, x_list in enumerate(group['x']):
                 x_list_values = self.get_data_from_file_keychain(cfg, x_list)
+                groups[group_idx]['x'][x_list_idx] = x_list_values
+            for y_list_idx, y_list in enumerate(group['y']):
+                y_list_values = self.get_data_from_file_keychain(cfg, y_list)
+                groups[group_idx]['y'][y_list_idx] = y_list_values
 
-        plot_data = cfg['visualization']['groups']
+        cfg['data']['groups'] = groups.copy()
 
-        return plot_data
+        return cfg
 
     def get_data_from_file_keychain(self, cfg, file_keychain):
         file_name = file_keychain['file_name']
@@ -98,42 +102,20 @@ class WorkingWithYAML:
 
         file_name_dict = self.ymlInput(file_name)
         cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
-        
         safe_yaml = YAML(typ='safe')
         ruamel_data_dict = safe_yaml.load(cleaned_yaml)
-        data_utf_8_sig = self.load_yml_with_utf_8_sig(file_name)
 
-        data_default = data_utf_8_sig['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
-        yaml_keys = list(data_default[0].keys())
-        RAOData_keys = yaml_keys[1].split(',')
+        data = self.load_yml_with_utf_8_sig(file_name)
 
-        # Convert to dataframe
+        for key in key_chain:
+            data = data[key].copy() if isinstance(data, dict) else data[int(key)]
 
-        # Access data and then send them into groups for plotting using au_engine
+        return data
 
-        data_ruamel = ruamel_data_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
-        #TODO : how to access data using data_ruamel package?
+    def plot_yml_data(self, cfg):
 
-    def plot_yml_data(self, cfg, plot_arrays):
-
-        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
-        y_array = plot_arrays[0]['RAOSurgeAmp']
-        file_name = cfg['visualization']['file_name']
-
-        if len(plot_arrays[0]) < 2:
-            raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
-
-        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': file_name,
-                    'title': 'RAOsDirectionPlot',
-                    'xlabel': 'RAOPeriodOrFrequency',
-                    'ylabel': 'RAOSurgeAmp',
-                    }
-        plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = [x_array]
-        plot_yml['data']["groups"][0]["y"] = [y_array]
         from assetutilities.engine import engine as au_engine
-        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+        au_engine(inputfile = None, cfg = cfg, config_flag = False)
 
         return cfg
 
