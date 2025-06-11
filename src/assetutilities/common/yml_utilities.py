@@ -115,8 +115,16 @@ class WorkingWithYAML:
     def plot_yml_data(self, cfg):
 
         from assetutilities.engine import engine as au_engine
-        au_engine(inputfile = None, cfg = cfg, config_flag = False)
 
+        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
+        plot_yml['settings'].update(cfg['settings'].copy())
+        
+        file_name = os.path.join(cfg['Analysis']['analysis_root_folder'], cfg['Analysis']['file_name'])
+        plot_yml['settings']['file_name'] = file_name
+        
+        plot_yml['data'] = cfg['data'].copy()
+
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
         return cfg
 
     def ymlInput(self, defaultYml, updateYml=None):
