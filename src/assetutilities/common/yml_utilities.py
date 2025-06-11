@@ -94,8 +94,16 @@ class WorkingWithYAML:
 
         file_name_dict = self.ymlInput(file_name)
         cleaned_yaml, ruamel_data_dict = ruamel_yaml.load_clean_yaml_file(file_name)
+        data_utf_8_sig = self.load_yml_with_utf_8_sig(file_name)
 
-        data_default = file_name_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
+        data_default = data_utf_8_sig['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
+        yaml_keys = list(data_default[0].keys())
+        RAOData_keys = yaml_keys[1].split(',')
+
+        # Convert to dataframe
+
+        # Access data and then send them into groups for plotting using au_engine
+
         data_ruamel = ruamel_data_dict['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
         #TODO : how to access data using data_ruamel package?
 
@@ -181,6 +189,11 @@ class WorkingWithYAML:
 
         return d
 
+    def load_yml_with_utf_8_sig(self, file_name):
+    
+        doc = yaml.safe_load(open(file_name, "r", encoding="utf-8-sig"))
+    
+        return doc
         
     def analyze_yaml_keys(self, file_name):
         '''
