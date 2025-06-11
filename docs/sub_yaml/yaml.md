@@ -40,18 +40,18 @@ If Scalar value spans multiple lines  we use | and > Characters ,  otherwise it 
 It is also called as key for accessing inside the scalar.
 
 Example. yml :
-```Example.yaml :
+```yaml
 
-  name: Samdan
+  name: Ravi
   location: Vijayawada
-  Profesion :student
+  Profesion : student
   Hobbies :
      Playing
      Social media
      Programming
   Favourites:
      fruits :grapes
-     celeb: Prabhas
+     books : mahabharata
   whatisthisabout:
      this is a basic outline of yaml
      File format
