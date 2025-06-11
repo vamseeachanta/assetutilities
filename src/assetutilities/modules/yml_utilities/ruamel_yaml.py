@@ -1,9 +1,9 @@
+import os
+import re
+
 from ruamel.yaml import YAML as ruamelYAML
 from pathlib import Path
 from loguru import logger
-
-import os
-import re
 #from ruamel.yaml.comments import CommentedMap
 
 ruamel_yaml = ruamelYAML()
@@ -13,6 +13,10 @@ ruamel_yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 class RuamelYAML:
+    """
+    ruamel yaml module for handling YAML files.
+    This class mainly divides YAML files by primary keys.
+    """
 
     def __init__(self):
         pass

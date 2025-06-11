@@ -17,6 +17,7 @@ from deepdiff import DeepDiff
 from loguru import logger
 from jinja2 import Environment, StrictUndefined
 import yaml.composer
+from ruamel.yaml import YAML
 
 # Reader imports
 from assetutilities.common.data import ReadData
@@ -34,7 +35,7 @@ from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML
 viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
-ruamel_yaml = RuamelYAML()
+ruamel_yaml_utilities = RuamelYAML()
 
 
 def represent_none(self, _):
@@ -55,17 +56,20 @@ def update_deep(d, u):
 
 
 class WorkingWithYAML:
+    """
+    yaml utilities module for handling YAML files.
+    
+    """
 
     def __init__(self):
         pass
 
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
-            ruamel_yaml.router(cfg)
+            ruamel_yaml_utilities.router(cfg)
         elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
             plot_data = self.get_plotting_data(cfg)
             cfg = self.plot_yml_data(cfg, plot_data)
-
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
 
@@ -76,7 +80,7 @@ class WorkingWithYAML:
         groups_key_chain = cfg['data']['groups_key_chain']
         groups = groups_key_chain.copy()
         for group_idx, group in enumerate(groups_key_chain):
-            for x_list_idx, x_list in enumerate(group['x']):
+            for x_list_idx, x_list in enumerate(group['input_parameters']):
                 x_list_values = self.get_data_from_file_keychain(cfg, x_list)
 
         plot_data = cfg['visualization']['groups']
@@ -93,7 +97,10 @@ class WorkingWithYAML:
                 raise FileNotFoundError(f"File {file_name} does not exist.")
 
         file_name_dict = self.ymlInput(file_name)
-        cleaned_yaml, ruamel_data_dict = ruamel_yaml.load_clean_yaml_file(file_name)
+        cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
+        
+        safe_yaml = YAML(typ='safe')
+        ruamel_data_dict = safe_yaml.load(cleaned_yaml)
         data_utf_8_sig = self.load_yml_with_utf_8_sig(file_name)
 
         data_default = data_utf_8_sig['VesselTypes'][0]['Draughts'][0]['DisplacementRAOs']['RAOs']
