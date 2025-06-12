@@ -3,24 +3,23 @@
 
 ### fix ruamel yaml data accessing bug 
 
-when we load yaml content using ruamel , we can't access the data in dictionary format.
-because it is in ruamel format. 
+when we load yaml content using ruamel , we can't access the data in regular dictionary format.
+because it is in ruamel library format. 
 
 ```python
 data = ruamel_yaml.load(cleaned_yaml)
 ```
-ex : data ['some_key'] will give something like this:
-
+ex : data['some_key'] will give something like below:
 ```
 <CommentedSeq, len() = 1> "
 ```
-
 so we have to load it in a safe way to access the yml data.
 
 ```python
 from ruamel.yaml import YAML
 safe_yaml = YAML(typ='safe')
-ruamel_data_dict = safe_yaml.load(cleaned_yaml)
+
+data = safe_yaml.load(cleaned_yaml)
 ```
 Now we can access the data as regular dictionary format.
 
