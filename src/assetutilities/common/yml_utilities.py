@@ -100,10 +100,10 @@ class WorkingWithYAML:
             if not os.path.isfile(file_name):
                 raise FileNotFoundError(f"File {file_name} does not exist.")
 
-        file_name_dict = self.ymlInput(file_name)
-        cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
-        safe_yaml = YAML(typ='safe')
-        ruamel_data_dict = safe_yaml.load(cleaned_yaml)
+        # file_name_dict = self.ymlInput(file_name)
+        # cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
+        # safe_yaml = YAML(typ='safe')
+        # ruamel_data_dict = safe_yaml.load(cleaned_yaml)
 
         data = self.load_yml_with_utf_8_sig(file_name)
 
@@ -119,7 +119,7 @@ class WorkingWithYAML:
         plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
         plot_yml['settings'].update(cfg['settings'].copy())
         
-        file_name = os.path.join(cfg['Analysis']['analysis_root_folder'], cfg['Analysis']['file_name'])
+        file_name = os.path.join(cfg['Analysis']['result_plot_folder'] ,cfg['Analysis']['file_name'])
         plot_yml['settings']['file_name'] = file_name
         
         plot_yml['data'] = cfg['data'].copy()
