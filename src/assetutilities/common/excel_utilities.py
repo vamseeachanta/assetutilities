@@ -83,6 +83,8 @@ class ExcelUtilities:
 
         for file in cfg["files"]:
             io = file["io"]
+            analysis_root_folder = cfg['Analysis']['analysis_root_folder']
+            is_file_valid, io = is_file_valid_func(io, analysis_root_folder)
             for sheetname in file["sheet_name"]:
                 for array_range in file["range"]:
                     cell_range = array_range[0] + ":" + array_range[1]
@@ -137,6 +139,10 @@ class ExcelUtilities:
 
                     wb = load_workbook(target_file, data_only=False)  # Keep formulas intact
                     sheet_name = csv['target']['sheet_name']
+                    wb_sheetnames = wb.sheetnames
+                    if sheet_name not in wb_sheetnames:
+                        logging.info(f"Sheet {sheet_name} does not exist in {target_file}.")
+                        wb.create_sheet(sheet_name)
                     worksheet = wb[sheet_name]
                     for row in worksheet['A1:BZ1000']:
                         for cell in row:
