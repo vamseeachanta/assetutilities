@@ -17,6 +17,7 @@ from deepdiff import DeepDiff
 from loguru import logger
 from jinja2 import Environment, StrictUndefined
 import yaml.composer
+from ruamel.yaml import YAML
 
 # Reader imports
 from assetutilities.common.data import ReadData
@@ -34,7 +35,7 @@ from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML
 viz_templates = VisualizationTemplates()
 
 read_data = ReadData()
-ruamel_yaml = RuamelYAML()
+ruamel_yaml_utilities = RuamelYAML()
 
 
 def represent_none(self, _):
@@ -55,15 +56,20 @@ def update_deep(d, u):
 
 
 class WorkingWithYAML:
+    """
+    yaml utilities module for handling YAML files.
+    
+    """
 
     def __init__(self):
         pass
 
     def router(self, cfg):
         if 'yml_analysis' in cfg and cfg['yml_analysis']['divide']['technique'] == 'ruamel_yml':
-            ruamel_yaml.router(cfg)
+            ruamel_yaml_utilities.router(cfg)
         elif 'plot_yml_data' in cfg and cfg['plot_yml_data']['flag']:
-            self.get_plotting_data(cfg)
+            cfg = self.get_plotting_data(cfg)
+            cfg = self.plot_yml_data(cfg)
         elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
             self.test_variables(cfg)
 
@@ -71,39 +77,61 @@ class WorkingWithYAML:
     
     def get_plotting_data(self, cfg):
 
-        plot_data = cfg['visualization']['groups']
-        cfg = self.plot_yml_data(cfg, plot_data)
+        groups_key_chain = cfg['data']['groups_key_chain']
+        groups = groups_key_chain.copy()
+        for group_idx, group in enumerate(groups_key_chain):
+            for x_list_idx, x_list in enumerate(group['x']):
+                x_list_values = self.get_data_from_file_keychain(cfg, x_list)
+                groups[group_idx]['x'][x_list_idx] = x_list_values
+            for y_list_idx, y_list in enumerate(group['y']):
+                y_list_values = self.get_data_from_file_keychain(cfg, y_list)
+                groups[group_idx]['y'][y_list_idx] = y_list_values
+
+        cfg['data']['groups'] = groups.copy()
 
         return cfg
 
-    def plot_yml_data(self, cfg, plot_arrays):
-
-        x_array = plot_arrays[0]['RAOPeriodOrFrequency']
-        y_array = plot_arrays[0]['RAOSurgeAmp']
-        file_name = cfg['visualization']['file_name']
-    
-        if len(plot_arrays[0]) < 2:
-            raise ValueError("YAML file must contain at least two numeric arrays for plotting.")
+    def get_data_from_file_keychain(self, cfg, file_keychain):
+        file_name = file_keychain['file_name']
+        key_chain = file_keychain['key_chain']
         
-        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
-        settings = {'file_name': file_name,
-                    'title': 'RAOsDirectionPlot',
-                    'xlabel': 'RAOPeriodOrFrequency',
-                    'ylabel': 'RAOSurgeAmp',
-                    }
-        plot_yml['settings'].update(settings)
-        plot_yml['data']["groups"][0]["x"] = [x_array]
-        plot_yml['data']["groups"][0]["y"] = [y_array]
-        from assetutilities.engine import engine as au_engine
-        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+        if not os.path.isfile(file_name):
+            file_name = os.path.join(cfg['Analysis']['analysis_root_folder'], file_name)
+            if not os.path.isfile(file_name):
+                raise FileNotFoundError(f"File {file_name} does not exist.")
 
+        # file_name_dict = self.ymlInput(file_name)
+        # cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
+        # safe_yaml = YAML(typ='safe')
+        # ruamel_data_dict = safe_yaml.load(cleaned_yaml)
+
+        data = self.load_yml_with_utf_8_sig(file_name)
+
+        for key in key_chain:
+            data = data[key].copy() if isinstance(data, dict) else data[int(key)]
+
+        return data
+
+    def plot_yml_data(self, cfg):
+
+        from assetutilities.engine import engine as au_engine
+
+        plot_yml = viz_templates.get_xy_line_input(cfg['Analysis'].copy())
+        plot_yml['settings'].update(cfg['settings'].copy())
+        
+        file_name = os.path.join(cfg['Analysis']['result_plot_folder'] ,cfg['Analysis']['file_name'])
+        plot_yml['settings']['file_name'] = file_name
+        
+        plot_yml['data'] = cfg['data'].copy()
+
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
         return cfg
 
     def ymlInput(self, defaultYml, updateYml=None):
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
-        with open(defaultYml, "r",encoding='utf-8') as ymlfile:
+        with open(defaultYml, "r", encoding='utf-8') as ymlfile:
             try:
                 cfg = yaml.safe_load(ymlfile)
             except yaml.composer.ComposerError as e:
@@ -158,6 +186,11 @@ class WorkingWithYAML:
 
         return d
 
+    def load_yml_with_utf_8_sig(self, file_name):
+    
+        doc = yaml.safe_load(open(file_name, "r", encoding="utf-8-sig"))
+    
+        return doc
         
     def analyze_yaml_keys(self, file_name):
         '''

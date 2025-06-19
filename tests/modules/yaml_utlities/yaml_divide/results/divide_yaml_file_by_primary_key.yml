@@ -1,0 +1,63 @@
+library: assetutlities
+basename: yaml_utilities
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+  input_directory: tests\modules\yaml_utlities\yml\test_data
+  output_directory: ~
+  filename:
+    extension:
+    - yml
+    pattern: ~
+    filters:
+      contains:
+      - FST1F_D
+      not_contains:
+      - FST1L_D
+  input_files:
+    yml:
+    - tests\modules\yaml_utlities\yml\test_data\Template_FST2F_FST1F_D.yml
+yml_analysis:
+  shape_output:
+    flag: false
+  divide:
+    flag: true
+    by: primary_key
+    technique: ruamel_yml
+Analysis:
+  basename: yaml_utilities
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide
+  file_name: divide_yaml_file_by_primary_key
+  file_name_for_overwrite: divide_yaml_file_by_primary_key
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\logs
+  start_time: 2025-06-11 11:12:52.050982
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\divide_yaml_file_by_primary_key.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results
+  file_management_input_directory: tests\modules\yaml_utlities\yml\test_data
+  file_management_output_directory: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results
+yaml_utilities:
+  divide:
+    groups:
+    - - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Template_FST2F_FST1F_D_VesselTypes.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Template_FST2F_FST1F_D_General.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Template_FST2F_FST1F_D_Environment.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Template_FST2F_FST1F_D_Constraints.yml
+      - data: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\yaml_utlities\yaml_divide\results\Template_FST2F_FST1F_D_Lines.yml

@@ -1,8 +1,0 @@
-services:
-  temp:
-    build:
-      context: .
-      dockerfile: docker\Dockerfile
-    image: myservice-temp
-    ports:
-      - "5016:5015"
