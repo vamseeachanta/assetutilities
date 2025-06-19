@@ -83,13 +83,14 @@ class ExcelUtilities:
 
         for file in cfg["files"]:
             io = file["io"]
+            io_basename = os.path.splitext(os.path.basename(io))[0]
             analysis_root_folder = cfg['Analysis']['analysis_root_folder']
             is_file_valid, io = is_file_valid_func(io, analysis_root_folder)
             for sheetname in file["sheet_name"]:
                 for array_range in file["range"]:
                     cell_range = array_range[0] + ":" + array_range[1]
                     sheet_range = sheetname + "!" + cell_range
-                    output_basename = sheetname + "_" + array_range[0] + array_range[1]
+                    output_basename = io_basename + "_" + sheetname + "_" + array_range[0] + array_range[1]
                     for ext in file["output_extension"]:
                         output_filename = output_basename + "." + ext
                         if file["output_dir"] is not None and os.path.isdir(

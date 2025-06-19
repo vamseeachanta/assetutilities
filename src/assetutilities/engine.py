@@ -52,7 +52,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
 
     if basename in ["excel_utilities"]:
         # Reader imports
-        from assetutilities.common.excel_utilities import ExcelUtilities
+        from assetutilities.modules.excel_utilities.excel_utilities import ExcelUtilities
         eu = ExcelUtilities()
         cfg_base = eu.excel_utility_router(cfg_base)
     elif basename in ["visualization"]:
