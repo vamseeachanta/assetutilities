@@ -12,17 +12,7 @@ input_settings:
   save_csv: True
   url: https://www.data.bsee.gov/Well/APD/Default.aspx
   output_dir : src\assetutilities\tests\test_data\web_scraping\results\Data
-
-form_data:
-  first_request:
-    ASPxFormLayout1$ASPxTextBoxAPI: "608164024500"
-    ASPxFormLayout1$ASPxButtonSubmitQ: "Submit Query"
-
-  second_request:
-    ASPxFormLayout1$ASPxTextBoxAPI: "608164024500"
-    __EVENTTARGET: "ASPxFormLayout2$btnCsvExport"
-    __EVENTARGUMENT: "Click"
-
+  
 input:
   - label: well_data_1
     input_box:

@@ -21,4 +21,6 @@ class WebScraping:
         elif web_scrape_engine == 'selenium':
             pass
 
+        return cfg
+
 
