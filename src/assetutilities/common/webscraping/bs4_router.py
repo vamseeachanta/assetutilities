@@ -1,6 +1,6 @@
-from assetutilities.common.webscraping.scrapper_bs4 import BS4Scrapper
+from assetutilities.common.webscraping.loopnet_scraper import LoopNetScraper
 
-bs4_scraper = BS4Scrapper()
+loop_net_scraper = LoopNetScraper()
 
 class BS4Router:
 
@@ -10,5 +10,5 @@ class BS4Router:
     def router(self, cfg):
 
         if "source" in cfg['scrape_data'] and  cfg['scrape_data']['source']=='loopnet':
-            bs4_scraper.router(cfg)
+            loop_net_scraper.scrape()
         return cfg
