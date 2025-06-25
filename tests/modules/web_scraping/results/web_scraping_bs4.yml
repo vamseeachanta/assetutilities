@@ -1,0 +1,40 @@
+basename: web_scraping
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+web_scrape_engine: bs4
+settings_master:
+  save_csv: true
+  url: https://www.data.bsee.gov/Well/APD/Default.aspx
+input:
+- label: well_data_1
+  input_box:
+    label: ASPxFormLayout1$ASPxTextBoxAPI
+    value: 608164024500
+form_data:
+  first_request:
+    ASPxFormLayout1$ASPxTextBoxAPI: '608164024500'
+    ASPxFormLayout1$ASPxButtonSubmitQ: Submit Query
+  second_request:
+    ASPxFormLayout1$ASPxTextBoxAPI: '608164024500'
+    __EVENTTARGET: ASPxFormLayout2$btnCsvExport
+    __EVENTARGUMENT: Click
+scrape_data:
+  flag: true
+  source: loopnet
+Analysis:
+  basename: web_scraping
+  analysis_root_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping
+  file_name: web_scraping_bs4
+  file_name_for_overwrite: web_scraping_bs4
+  log_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping\logs
+  start_time: 2025-06-25 10:32:05.037718
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: web_scraping_bs4.yml
+  result_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping\results
+  result_data_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping\results\Data
+  result_plot_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping\results\Plot
+  fe_folder: C:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\web_scraping\results
