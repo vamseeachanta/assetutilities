@@ -16,5 +16,5 @@ class LoopNetScraper:
             soup = BeautifulSoup(response.text, 'html.parser')
 
             # find the container with the specific id
-            container = soup.find(id="")
+            container = soup.find(id="placard-pseudo")
             

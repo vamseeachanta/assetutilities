@@ -14,6 +14,7 @@ from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
 from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
+from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
 
 library_name = "assetutilities"
 
@@ -98,6 +99,10 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     elif basename == "zip_utilities":
         zu = ZipUtilities()
         cfg_base = zu.router(cfg_base)
+    
+    elif basename == "csv_utilities":
+        csv_utilities_router = CSVUtilitiesRouter()
+        cfg_base = csv_utilities_router.router(cfg_base)
 
     else:
         raise (Exception(f"Analysis for basename: {basename} not found. ... FAIL"))

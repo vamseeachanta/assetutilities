@@ -20,7 +20,7 @@ def get_valid_pytest_output_file(pytest_output_file):
 
 
 def test_run_process():
-    input_file = 'web_scraping_scrapy.yml'
+    input_file = 'csv_with_latin1.yml'
     input_file = get_valid_pytest_output_file(input_file)
 
     pytest_output_file = None

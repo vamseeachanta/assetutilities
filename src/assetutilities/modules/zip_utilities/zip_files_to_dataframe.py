@@ -46,16 +46,20 @@ class ZipFilestoDf:
 
             dataframe_dict = {}
             delimiter = ','
-            dataframe_dict = self.parse_zip_files(column_names, rows, zf, file_list, dataframe_dict, delimiter)
+            dataframe_dict = self.parse_zip_files(cfg,column_names, rows, zf, file_list, dataframe_dict, delimiter)
 
         return dataframe_dict
 
-    def parse_zip_files(self, column_names, nrows, zf, file_list, dataframe_dict, delimiter):
+    def parse_zip_files(self, cfg,column_names, nrows, zf, file_list, dataframe_dict, delimiter):
 
         for file_to_read in file_list:
             try:
                 with zf.open(file_to_read) as file:
-                    df = csv_utilities.read_zip_file_with_latin1(file, delimiter=delimiter, nrows=nrows)
+                    cfg['csv_utilities'] = {}
+                    cfg['csv_utilities']['file'] = file
+                    cfg['csv_utilities']['delimiter'] = delimiter
+                    cfg['csv_utilities']['nrows'] = nrows
+                    df = csv_utilities.read_zip_file_with_latin1(cfg)
                     
                 # If column names are provided and the df has no header set the column names
                 if column_names:

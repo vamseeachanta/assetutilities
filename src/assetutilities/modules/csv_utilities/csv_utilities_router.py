@@ -13,5 +13,8 @@ csv_utilities = CSVUtilities()
 class CSVUtilitiesRouter:
 
     def router(self,cfg):
-        csv_utilities.read_zip_file_with_latin1()
+        if cfg['csv_utilities']['encoding'] == 'latin1':
+            pass
+
+        return cfg
     
