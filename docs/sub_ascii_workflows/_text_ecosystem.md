@@ -1,24 +1,52 @@
-# Comparisons
+# Text Based Ecosystem
 
-## Introduction
+Objective is to create a cohesive environment for text-based workflows. The text-based workflow is expected to leverage various tools (AI, agents, practices etc) to enhance productivity and collaboration.
 
 ## Summary
 
-Learn the following:
+An ecosystem of tools is given below:
+
+
+```mermaid
+graph LR
+    A["Text-Based EcoSystem"] --> B["Project Management<br/>and Collaboration"]
+    A --> C["Version control"]
+    A --> D["Documentation"]
+    A --> E["Programming - Core"]
+    A --> F["Programming - accessories"]
+    A --> G["Programming - Shell Scripting"]
+    
+    B --> B1["Github Issues"]
+    B --> B2["Jira"]
+    
+    C --> C1["Git"]
+    C --> C2["GitHub"]
+    
+    D --> D1["Markdown in Github"]
+    D --> D2["Flowcharts in<br/>PlantUML"]
+    
+    E --> E1["VS Code"]
+    E --> E2["Miniconda Python<br/>Virtual environments"]
+    E --> E3["Github Copilot"]
+    E --> E4["Github Actions<br/>for CI/CD and testing"]
+    
+    F --> F1["VS Code Settings Sync<br/>work env in multiple computers"]
+    F --> F2["VS Code Settings<br/>to execute scripts"]
+    
+    G --> G1["Git Bash<br/>Works in Linux, Windows"]
+```
+
+Resources:
 
 - Work in VS Code IDE (Environment).
-  - See, <https://github.com/vamseeachanta/assetutilities/blob/2024/docs/_python_in_vs_code.md>
+  - See, <https://github.com/vamseeachanta/assetutilities/blob/main/docs/sub_ide/vscode.md>
 - Version control in Git.
   - See, <https://github.com/vamseeachanta/energy/tree/apr_may/tools/git>
 - Code with Miniconda python
 - documentation with .md
-- simple flowcharts in plantuml
-  - see, <https://github.com/vamseeachanta/energy/tree/apr_may/tools/puml>
+- simple flowcharts in mermaid
+  - see, <https://mermaid.js.org/syntax/flowchart.html>
 - Other tools
-
-An ecosystem of tools is given below:
-
-<img src="_ascii_ecosystem.svg" width=auto, height=auto/>
 
 ### VS Code (VSC) IDE
 
