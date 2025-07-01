@@ -57,27 +57,6 @@ flowchart LR
 
 
 
-### Case study : AI First Workflows, Product Development
-
-    These days it's Claude code inside vs code for me. Looks like that's the way things are evolving, with Gemini cli released a couple of days ago
-
-```mermaid
-flowchart LR
-    A[User] --> B[Claude Code]
-    A --> C[VS Code]
-    B --> D[Generated Code]
-    D --> C
-    C --> E[Refined Code]
-    E --> B
-    B --> F[Further Refinement]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#e8f5e8
-    style F fill:#e8f5e8
-```
 
 ### Case study : Transportation SME Engineering
 
@@ -101,9 +80,74 @@ graph LR
     style F fill:#e8f5e8
 ```
 
+### Case study : AI First Workflows, Product Development
+
+    These days it's Claude code inside vs code for me. Looks like that's the way things are evolving, with Gemini cli released a couple of days ago
+
+```mermaid
+flowchart LR
+    A[User] --> B[Claude Code]
+    A --> C[VS Code]
+    B --> D[Generated Code]
+    D --> C
+    C --> E[Refined Code]
+    E --> B
+    B --> F[Further Refinement]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+    style E fill:#e8f5e8
+    style F fill:#e8f5e8
+```
 
 
+### Case study : AI First Workflows, Company (Vora)
+
+User Prepares a mental model for AI to do the following with user approval at every step:
+- Prepare a Github Issue
+- Prepare Code to implement the issue
+- Write tests
+- Write documentation
+- Create a PR
+- Run a test suite
+
+```mermaid
+flowchart TD
+    A[User Mental Model] --> B[Prepare GitHub Issue]
+    B --> C{User Approval}
+    C -->|Yes| D[Prepare Code Implementation]
+    C -->|No| B
+    D --> E{User Approval}
+    E -->|Yes| F[Write Tests]
+    E -->|No| D
+    F --> G{User Approval}
+    G -->|Yes| H[Write Documentation]
+    G -->|No| F
+    H --> I{User Approval}
+    I -->|Yes| J[Create Pull Request]
+    I -->|No| H
+    J --> K{User Approval}
+    K -->|Yes| L[Run Test Suite]
+    K -->|No| J
+    L --> M[Complete Workflow]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style D fill:#fff3e0
+    style F fill:#e8f5e8
+    style H fill:#e8f5e8
+    style J fill:#e8f5e8
+    style L fill:#e8f5e8
+    style M fill:#c8e6c9
+```
 
 References
 
 https://youtu.be/Lh_X32t9_po?si=CV3DXT9gaPTH8_xh
+
+
+### Other References
+
+TBA
