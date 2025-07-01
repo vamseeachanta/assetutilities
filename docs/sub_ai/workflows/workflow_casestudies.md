@@ -80,7 +80,7 @@ graph LR
     style F fill:#e8f5e8
 ```
 
-### Case study : AI First Workflows, Product Development
+### Case study : AI First Workflows, Product Development, Every
 
     These days it's Claude code inside vs code for me. Looks like that's the way things are evolving, with Gemini cli released a couple of days ago
 
