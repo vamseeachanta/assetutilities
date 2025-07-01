@@ -8,6 +8,10 @@ default:
 
 web_scrape_engine: bs4
 
+scrape_data:
+  flag: True
+  source: BSEE
+
 input_settings:
   save_csv: True
   url: https://www.data.bsee.gov/Well/APD/Default.aspx
