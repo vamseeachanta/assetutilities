@@ -16,11 +16,12 @@
   - TeamViewer (USD 25/mo for 3 devices), etc.
 - Cons: **No confidentiality**
 
-### Multiple User Login (Shared Resources)
+### Simultaneous User Login (Shared Resources)
 
 - Example: ANS 01 thru 04
-- Utilizes windows server loging to allow logging of multiple users
-
+- Utilizes windows server loging to allow logging of multiple users. For 2 user simultaneous login case study:
+  - Resources are halved
+  - Licenses are (not shared) doubled
 
 - Important Considerations For multiple users:
     - It is important to close all licensed software 
@@ -49,6 +50,14 @@ flowchart TD
         OS["Windows 11 Sufficient"]
     end
 
+    subgraph "Simultaneous User2 on same Server (Half-resources, additional license)"
+        CPU_user2_2["Additional OrcaFlex Dynamics<br/>Using Np Processors"]
+        Memory_user2_2["Process Power/2 <br/>Memory/2<br/>Memory/2<br/>Disk/2"]
+        Software_user2_2["Additional Software License i.e. OrcaFlex"]
+        Data_user2_2["**Data**"]
+
+    end
+
     subgraph "User1 on Server (Half-resources, 1-license)"
         CPU_user2_1["Run OrcaFlex Dynamics<br/>Using Np Processors"]
         Memory_user2_1["Process Power/2 <br/>Memory/2<br/>Memory/2<br/>Disk/2"]
@@ -57,13 +66,6 @@ flowchart TD
 
     end
 
-    subgraph "User2 on same Server (Half-resources, additional license)"
-        CPU_user2_2["Additional OrcaFlex Dynamics<br/>Using Np Processors"]
-        Memory_user2_2["Process Power/2 <br/>Memory/2<br/>Memory/2<br/>Disk/2"]
-        Software_user2_2["Additional Software License i.e. OrcaFlex"]
-        Data_user2_2["**Data**"]
-
-    end
 
     
 
