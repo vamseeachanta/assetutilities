@@ -20,7 +20,7 @@
 
 - Example: ANS 01 thru 04
 - Utilizes windows server loging to allow logging of multiple users
-  - 
+
 
 - Important Considerations For multiple users:
     - It is important to close all licensed software 
