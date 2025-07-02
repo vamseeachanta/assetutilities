@@ -9,9 +9,11 @@ Identify a good practice. Need not be the best practice, but a good practice tha
 - **Tools**: ChatGPT, Claude, Gemini, VS Code, GitHub Copilot, etc.
 - **Best Practice**: Encourage collaboration between AI tools and human developers to leverage the strengths of both.
 
+Coming Next … is to prepare a generic workflow with toolings at each level which can be easily interchanged or slotted-in. The best secret sauce lies in.. what we are using the AI on to (PDFs?, Word, Excel, python code, react code, csv files i.e. text files or markdown or  yaml files etc.).
+
 Mermaid flowchart TBA
 
-### Case study : Electrical SME Engineering
+### Case study : Electrical SME, Chip Design
 
 ChatGPT chat and get results
 
@@ -30,12 +32,12 @@ flowchart LR
 ```
 
 
-### Case study : Mechanical SME, Engineering
+### Case study : Mechanical SME, Engineering Consultancy
 
-Mainly work in text based files such as markdown, yaml, python code, mermaid charts using below tools:
-- VS code
-- GitHub Copilot Inline chat
-- Claude Sonnet 4
+    Mainly work in text based files such as markdown, yaml, python code, mermaid charts using below tools:
+    - VS code
+    - GitHub Copilot Inline chat
+    - Claude Sonnet 4
 
 ```mermaid
 flowchart LR
@@ -58,7 +60,7 @@ flowchart LR
 
 
 
-### Case study : Transportation SME Engineering
+### Case study : Transportation SME, Engineering
 
     I have been using the free Google AI Studio for the past few months....I really like it. I sometimes play the LLMs with each other. Give Google's Code to ChatGPT and ask it to refine further and vice-versa.
 
@@ -80,7 +82,7 @@ graph LR
     style F fill:#e8f5e8
 ```
 
-### Case study : AI First Workflows, Product Development, Every
+### Case study : AI First Workflows, AI Voice Bot 
 
     These days it's Claude code inside vs code for me. Looks like that's the way things are evolving, with Gemini cli released a couple of days ago
 
@@ -103,15 +105,15 @@ flowchart LR
 ```
 
 
-### Case study : AI First Workflows, Company (Vora)
+### Case study : AI First Workflows, Company, Every
 
-User Prepares a mental model for AI to do the following with user approval at every step:
-- Prepare a Github Issue
-- Prepare Code to implement the issue
-- Write tests
-- Write documentation
-- Create a PR
-- Run a test suite
+    User Prepares a mental model for AI to do the following with user approval at every step:
+    - Prepare a Github Issue
+    - Prepare Code to implement the issue
+    - Write tests
+    - Write documentation
+    - Create a PR
+    - Run a test suite
 
 ```mermaid
 flowchart TD
@@ -150,4 +152,7 @@ https://youtu.be/Lh_X32t9_po?si=CV3DXT9gaPTH8_xh
 
 ### Other References
 
-TBA
+https://addyo.substack.com/p/the-ai-native-software-engineer
+
+https://www.anthropic.com/engineering/claude-code-best-practices
+
