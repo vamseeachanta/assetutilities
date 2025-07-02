@@ -77,5 +77,9 @@ gh pr create --base master --head 202506 --title "Your PR Title" --body "Your PR
 ```
 Ex: gh pr create --base master --head 202506 --title "202507" --body "202507"
 
-Pull request will be created successfully , you can track it out in the browser.
+Result:
+
+- ✅ PR #38 created successfully
+- ✅ GitHub CLI handled large binary files
+- ✅ PR was functional for review/merge
 

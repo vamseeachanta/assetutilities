@@ -29,7 +29,7 @@ Prior to pull request, make sure the branch is up to date with the master branch
 ## Rebase
 
 - Manipulate commmits message
-- deelete commits
+- delete commits
 - reorder commits
 - Use to clean up local history
 
@@ -94,8 +94,41 @@ Steps:
 
 <https://www.youtube.com/watch?v=3o_01F04bZ4>
 
-### Interface: VS Code, GitLens
 
 ### References
-
 <https://stackoverflow.com/questions/4786972/get-a-list-of-all-git-commits-including-the-lost-ones>
+
+
+### Git resolve complex conflicts b/w branches
+
+When trying to merge, got complex merge conflicts:
+
+- 100+ conflicted files
+- Binary file conflicts
+- File rename conflicts
+- Delete/modify conflicts
+
+**Smart Resolution :**
+
+Instead of Fighting Conflicts and robust tests, original code mess issues due to rebasing ....
+Used the "Reset Strategy" since 202506 branch had the correct latest changes:
+
+```bash
+# 2. Switch to master
+git checkout master
+
+# 3. Make master latest to 202506
+git reset --hard 202506
+
+# 4. Force push with safety
+git push --force-with-lease origin master
+```
+Result:
+
+- ✅ 551 files updated instantly
+- ✅ Master now has all correct changes
+- ✅ Zero conflicts to resolve manually
+- ✅ Clean repository state
+
+Note: This is a powerful approach , apply it only if you are sure that the target branch has the correct and latest changes.
+else , it might lead to loss of some work.
