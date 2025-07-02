@@ -6,7 +6,7 @@
 - [Summary](#summary)
   - [Git undo last "N" commits](#git-undo-last-n-commits)
   - [Git commit files larger than 100MB](#git-commit-files-larger-than-100mb)
-  - [Git Large file Sync ( Local vs Git history)](#git-large-file-sync--local-vs-git-history)
+  - [Git Pull request error](#git-pull-request-error)
 
 ### Git undo last "N" commits
 
@@ -58,135 +58,24 @@ Push to the remote repository.
 git push origin 
 ```
 
-### Git Large file Sync ( Local vs Git history)
+### Git Pull request error
 
-Encountered below error while pushing changes to github which already deleted manually:
+Encountered below error while trying to create a pull request:
 
 ```
-remote: error: File data/modules/bsee/zip/dsptsdelimit/dsptsdelimit.ZIP is 132.54 MB; this exceeds GitHub's file size limit of 100.00 MB
- ! [remote rejected] 202506 -> 202506 (pre-receive hook declined)
-error: failed to push some refs to 'https://github.com/vamseeachanta/energydata.git'
+This comparison is taking too long to generate.
+Unfortunately it looks like we can’t render this comparison for you right now. It might be too big, or there might be something weird with your repository.
+You can try running this command locally to see the comparison on your machine:
+git diff master...202506 
 ```
+This error typically occurs when the pull request involves a large number of changes or a large number of files. Here are some steps to resolve this:
 
-To resolve this, you can use the following steps:
-
-Install git-filter-repo via pip :
-```bash
-pip install git-filter-repo
-```
-
-run below command to remove the file from the git history:
-```bash
-git filter-repo --path data/modules/bsee/zip/dsptsdelimit/dsptsdelimit.ZIP --invert-paths
-```
-
-This will raise one warning as follows:
-```
-Aborting: Refusing to destructively overwrite repo history since
-this does not look like a fresh clone.
-  (expected freshly packed repo)
-Please operate on a fresh clone instead.  If you want to proceed
-anyway, use --force.
-```
-
- Option 1: Recommended – Use a Fresh Clone
-```bash
-git clone --mirror https://github.com/vamseeachanta/energydata.git cleaned-repo
-```
-
-Go into the cloned repo:
-```bash
-cd cleaned-repo
-```
-
-run the filter-repo command again:
-```bash
-git filter-repo --path data/modules/bsee/zip/dsptsdelimit/dsptsdelimit.ZIP --invert-paths
-```
-
-Push the cleaned repo back to GitHub:
-```bash
-git push origin --force
-```
-
-If you get , below warning ,
-```
-fatal: The current branch master has no upstream branch.
-To push the current branch and set the remote as upstream, use
-
-    git push --set-upstream origin master
-
-To have this happen automatically for branches without a tracking
-upstream, see 'push.autoSetupRemote' in 'git help config'.
-```
-
-run this command 
-```bash
-git push --set-upstream origin 202506
-```
-
-if you again get anotehr warning called
-```bash
-fatal: 'origin' does not appear to be a git repository
-fatal: Could not read from remote repository.
-
-Please make sure you have the correct access rights
-and the repository exists.
-```
-✅ Step 1: Check Remote Configuration
-Run this to list your remotes:
+--> Use **GitHub CLI** to create the pull request instead of the web interface. This will bypass the limitations of the web interface.
 
 ```bash
-git remote -v
+gh pr create --base master --head 202506 --title "Your PR Title" --body "Your PR Description"
 ```
-If it returns nothing, then you don't have any remote (i.e., no origin).
+Ex: gh pr create --base master --head 202506 --title "202507" --body "202507"
 
-✅ Step 2: Add Your GitHub Repo as a Remote
-Since you're working with:
-```bash
-https://github.com/vamseeachanta/energydata.git
-``` 
-Run this:
-```bash
-git remote add origin https://github.com/vamseeachanta/energydata.git
-```
-Then confirm with:
-```bash
-git remote -v
-```
-You should now see:
-```bash
-origin  https://github.com/vamseeachanta/energydata.git (fetch)
-origin  https://github.com/vamseeachanta/energydata.git (push)
-```
-✅ Step 3: Push Your Branch
-Now push the 202506 branch and set the upstream:
+Pull request will be created successfully , you can track it out in the browser.
 
-```bash
-git push --set-upstream origin 202506
-```
-
-Now , if you get 
-```bash
-To https://github.com/vamseeachanta/energydata.git
- ! [rejected]        202506 -> 202506 (fetch first)
-error: failed to push some refs to 'https://github.com/vamseeachanta/energydata.git'
-hint: Updates were rejected because the remote contains work that you do not
-hint: have locally. This is usually caused by another repository pushing to
-hint: the same ref. If you want to integrate the remote changes, use
-hint: 'git pull' before pushing again.
-hint: See the 'Note about fast-forwards' in 'git push --help' for details.
-```
-the reason for this ,
-
-There are commits on GitHub that your local branch doesn’t have, and Git is being cautious to avoid overwriting remote changes.
-
-Since you've rewritten history with git filter-repo, we don’t want to merge the remote changes — we want to overwrite them.
-
-Solution: Force Push to Overwrite the Remote Branch
-Since this is intentional and you cleaned the repo:
-```bash
-git push --force origin 202506
-``` 
-
-Done , you are good to go.
