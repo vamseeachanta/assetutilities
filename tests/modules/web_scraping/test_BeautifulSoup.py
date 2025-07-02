@@ -27,7 +27,7 @@ def get_valid_pytest_output_file(pytest_output_file):
 
 
 def test_run_process():
-    input_file = 'web_scraping_bs4.yml'
+    input_file = 'web_scraping_loopnet.yml'
     input_file = get_valid_pytest_output_file(input_file)
 
     pytest_output_file = None

@@ -1,9 +1,9 @@
+import os
+import re
+
 from ruamel.yaml import YAML as ruamelYAML
 from pathlib import Path
 from loguru import logger
-
-import os
-import re
 #from ruamel.yaml.comments import CommentedMap
 
 ruamel_yaml = ruamelYAML()
@@ -13,6 +13,10 @@ ruamel_yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 class RuamelYAML:
+    """
+    ruamel yaml module for handling YAML files.
+    This class mainly divides YAML files by primary keys.
+    """
 
     def __init__(self):
         pass
@@ -44,13 +48,7 @@ class RuamelYAML:
         result_folder = cfg['Analysis']['result_folder']
         file_name_stem = Path(file_name).stem
     
-        with open(file_name, "r", encoding='utf-8-sig') as file:
-            yaml_content = file.read()
-            
-            cleaned_yaml = self.clean_yaml_file(yaml_content)
-            cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
-            
-            data = ruamel_yaml.load(cleaned_yaml)
+        cleaned_yaml, data = self.load_clean_yaml_file(file_name)
         
         # Split the YAML into lines for analysis
         lines = cleaned_yaml.splitlines()
@@ -108,6 +106,17 @@ class RuamelYAML:
             
         logger.debug("Splitting primary keys data FINISH...")
         return output_file_name_array
+
+    def load_clean_yaml_file(self, file_name):
+        with open(file_name, "r", encoding='utf-8-sig') as file:
+            yaml_content = file.read()
+            
+            cleaned_yaml = self.clean_yaml_file(yaml_content)
+            cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
+            
+            data = ruamel_yaml.load(cleaned_yaml)
+
+        return cleaned_yaml, data
     
     def clean_yaml_line(self,line):
         """

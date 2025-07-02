@@ -1,0 +1,25 @@
+basename: csv_utilities
+csv_utilities:
+  flag: true
+  txt_file: mv_apm_main_prop_narrative_csv_read_test1.txt
+  encoding: latin1
+  delimiter: ','
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+Analysis:
+  basename: csv_utilities
+  analysis_root_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities
+  file_name: csv_with_latin1
+  file_name_for_overwrite: csv_with_latin1
+  log_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\logs
+  start_time: 2025-06-27 12:53:23.078475
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\csv_with_latin1.yml
+  result_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\results
+  result_data_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\results\Data
+  result_plot_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\results\Plot
+  fe_folder: c:\Users\Sk Samdan\Desktop\github\assetutilities\tests\modules\csv_utilities\results

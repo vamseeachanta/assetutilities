@@ -1,0 +1,14 @@
+basename: web_scraping
+
+
+scrape_data:
+  flag: True
+  source: loopnet
+
+web_scrape_engine: bs4
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
