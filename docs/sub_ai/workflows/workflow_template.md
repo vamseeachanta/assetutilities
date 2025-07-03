@@ -61,7 +61,7 @@ graph TD;
 - **Tools**: ChatGPT, Claude, Gemini, VS Code, GitHub Copilot, etc.
 - **Best Practice**: Use a combination of AI tools to generate, refine, and improve prompts iteratively.
 - A basic prompt using specific instructions to build better prompt (iterate amongst AI tools)
-  - 
+  - tba
 - A more advanced prompt that incorporates user feedback and context to improve results (fine-tune AI tools)
 - A comprehensive prompt that combines multiple sources of information and advanced techniques for optimal results (leverage AI tools)
 
