@@ -6,11 +6,14 @@ default:
     overwrite:
       output: True
 
-files:
-  files_in_current_directory:
-    flag: False
-    directory: C:\Users\vamseea\Desktop\Wood Deliverables
-  extension: pdf
-  filters:
-    filename_contains: [-WLNG]
-    filename_not_contains: []
+file_management:
+  flag: True
+  input_directory: NULL
+  output_directory: NULL
+
+  filename:
+    extension: []
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

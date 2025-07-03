@@ -15,14 +15,15 @@ master_settings:
 
 file_management:
   flag: True
+  input_directory: csv
+  output_directory: NULL
 
-  files:
-    files_in_current_directory:
-      flag: False
-      auto_read: True
-      directory: csv
-      file_extensions: [csv]
-      filename_pattern: NULL
+  filename:
+    extension: [csv]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []
 
 default:
   log_level: DEBUG

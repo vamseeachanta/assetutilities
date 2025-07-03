@@ -10,7 +10,7 @@ from colorama import init as colorama_init
 
 colorama_init()
 
-class BS4Scrapper:
+class BS4Scraper:
     
     def __init__(self):
         pass
