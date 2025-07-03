@@ -11,8 +11,16 @@ A generic workflow template with tools highlighted. The tools and AI services ar
 #### Basic Engineering
 
 - input data
+  - Native files
+  - SME resources 
+    - Open source
+    - Research papers
+    - Proprietary
+    - Internal documentation
 - Read the data
+  - create experts to be a basic engineer, lead engineer, technical manager
 - Analyze/Process the data
+  - tba
 - Generate insights/outputs
 - Communicate findings
 - Save and share
@@ -24,7 +32,7 @@ graph TD;
     C --> D[Generate Insights/Outputs];
     D --> E[Communicate Findings];
     E --> F[Save and Share];
-    
+
     style A fill:#e1f5fe;
     style B fill:#f3e5f5;
     style C fill:#e8f5e9;
