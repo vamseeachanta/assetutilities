@@ -1,55 +1,56 @@
 ## Poetry Useful Tips
 
-add new package to the environment:
+### env
 
+**Activate env**
+find poetry path:
+```
+poetry env info --path
+C:\Users\Sk Samdan\Desktop\github\assethold\.venv
+```
+
+activate the environment:
+```
+C:\Users\Sk Samdan\Desktop\github\assethold\.venv\Scripts\activate
+```
+
+**env info**
+```
+poetry env info
+```
+
+**delete env**
+```
+poetry env remove /full/path/to/python
+poetry env remove python3.7
+```
+
+You can delete more than one environment at a time.
+```
+poetry env remove python3.7 python3.8
+```
+Use the --all option to delete all virtual environments at once.
+```
+poetry env remove --all
+```
+
+
+**Basic commands**
+
+add new package to the environment:
 ```bash
 poetry add <package_name>
 ```
 
 remove package from the environment:
-
 ```bash
 poetry remove <package_name>
 ```
 
 show all the dependencies in the environment:
-
 ```bash
 poetry show 
 ```
-
-show latest version of the dependencies:
-
-```bash
-poetry show --latest
-```
-
-**Install local repository into environment** 
-
-In pyproject.toml file, add the following code to install a library from a local path:
-
-```toml
-[tool.poetry.dependencies]
-my_library = { path = "../my_library", develop = true }
-
-Ex:
-[tool.poetry.dependencies]
-assetutilities = { path = "../assetutilities", develop = true }
-
-```
-and then update the the environment using command :
-
-```bash
-poetry update
-```
-
-Verify the installation using:
-
-```bash
-poetry show
-```
-This will list out the library in the environment.
-
 
 **Poetry environment via requirements.txt**
 
@@ -77,4 +78,5 @@ poetry run pip install -r requirements.txt
 
 references:
 
+https://python-poetry.org/docs/cli/
 https://stackoverflow.com/questions/66474844/import-local-package-during-poetry-run
