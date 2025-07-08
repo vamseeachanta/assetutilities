@@ -6,6 +6,7 @@
 - [Summary](#summary)
   - [Git undo last "N" commits](#git-undo-last-n-commits)
   - [Git commit files larger than 100MB](#git-commit-files-larger-than-100mb)
+    - [Git LFS Fails to push large files](#git-lfs-fails-to-push-large-files)
   - [Git Pull request error](#git-pull-request-error)
 
 ### Git undo last "N" commits
@@ -55,6 +56,21 @@ Replace "filename" with the actual name of your large file or a pattern like "*.
 Push to the remote repository.
 
 ```
+git push origin 
+```
+#### Git LFS Fails to push large files
+
+Sometimes, even with Git LFS, you might encounter issues pushing large files. If you see an error like:
+
+```
+remote: Resolving deltas: 100% (23/23), completed with 22 local objects.
+remote: error: File data/modules/bsee/bin/dsptsdelimit/dsptsdelimit.bin is 429.95 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+```
+
+quick fix from github support is to use the `git lfs migrate` command .
+```bash
+git lfs migrate import --include="your filename or pattern"
 git push origin 
 ```
 

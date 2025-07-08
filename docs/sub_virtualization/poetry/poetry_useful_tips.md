@@ -3,13 +3,13 @@
 ### env
 
 **Activate env**
-find poetry path:
+- find poetry path:
 ```
 poetry env info --path
 C:\Users\Sk Samdan\Desktop\github\assethold\.venv
 ```
 
-activate the environment:
+- activate the environment:
 ```
 C:\Users\Sk Samdan\Desktop\github\assethold\.venv\Scripts\activate
 ```
