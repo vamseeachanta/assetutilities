@@ -26,7 +26,7 @@ class ZipFilestoDf:
 
         column_names = cfg['zip_utilities']['column_names']
         zip_file_name_with_path = cfg['zip_utilities']['file_name']
-        rows = 50000 # to limit file size 
+        nrows = cfg['zip_utilities']['nrows']
 
         with open(zip_file_name_with_path, "rb") as f:
             zip_bytes = f.read()
@@ -46,7 +46,7 @@ class ZipFilestoDf:
 
             dataframe_dict = {}
             delimiter = ','
-            dataframe_dict = self.parse_zip_files(cfg,column_names, rows, zf, file_list, dataframe_dict, delimiter)
+            dataframe_dict = self.parse_zip_files(cfg,column_names, nrows, zf, file_list, dataframe_dict, delimiter)
 
         return dataframe_dict
 

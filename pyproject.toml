@@ -23,6 +23,9 @@ pytest = "*"
 build = "*"
 twine = "*"
 
+[tool.poetry.group.local.dependencies]
+digitalmodel = { path = "../digitalmodel", develop = true }
+
 [tool.setuptools]
 include-package-data = true
 

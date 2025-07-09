@@ -7,3 +7,6 @@ https://www.linkedin.com/pulse/best-practices-prompting-github-copilot-vs-code-p
 
 
 https://github.com/anthropics/courses/tree/master/prompt_engineering_interactive_tutorial/Anthropic%201P
+
+
+https://youtu.be/aQsdyREoDZo?si=yh-AIb9qLUtsBuXY

@@ -4,6 +4,9 @@ import os
 import zipfile
 from urllib.parse import urlparse
 
+import requests
+import pandas as pd
+
 class DownloadDataFromURL:
     
     def __init__(self):

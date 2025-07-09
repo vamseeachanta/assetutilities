@@ -6,6 +6,10 @@ default:
     overwrite:
       output: True
 
+scrape_data:
+  flag: True
+  source: BSEE
+  
 web_scrape_engine: scrapy
 
 input_settings:
