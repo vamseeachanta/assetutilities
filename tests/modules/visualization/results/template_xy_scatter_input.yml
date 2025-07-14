@@ -54,12 +54,12 @@ data:
   - ':'
 settings:
   type: xy
-  mode: line
+  mode: scatter
   pairs: false
   multiple: false
   plt_engine: matplotlib
   label: Allowable Wave Height
-  file_name: x_y_line
+  file_name: x_y_scatter
   plt_save_extensions:
   - .png
   title: Allowable Significant Wave Height (Hs)
@@ -132,13 +132,13 @@ master_settings:
 Analysis:
   basename: visualization
   analysis_root_folder: K:\github\assetutilities\tests\modules\visualization
-  file_name: template_xy_line_input
-  file_name_for_overwrite: template_xy_line_input
+  file_name: template_xy_scatter_input
+  file_name_for_overwrite: template_xy_scatter_input
   log_folder: K:\github\assetutilities\tests\modules\visualization\logs
-  start_time: 2025-07-13 20:07:46.529993
+  start_time: 2025-07-13 20:07:49.236153
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: K:\github\assetutilities\tests\modules\visualization\template_xy_line_input.yml
+  CustomInputFile: K:\github\assetutilities\tests\modules\visualization\template_xy_scatter_input.yml
   result_folder: K:\github\assetutilities\tests\modules\visualization\results
   result_data_folder: K:\github\assetutilities\tests\modules\visualization\results\Data
   result_plot_folder: K:\github\assetutilities\tests\modules\visualization\results\Plot

@@ -1,0 +1,55 @@
+library: assetutlities
+basename: data_exploration
+type:
+  df_statistics:
+    flag: true
+    df_array: true
+    df: true
+data:
+  type: file_management
+  groups:
+  - file_name: K:\github\assetutilities\tests\modules\data_exploration\csv\test_1.csv
+  - file_name: K:\github\assetutilities\tests\modules\data_exploration\csv\test_2.csv
+master_settings:
+  groups:
+    columns:
+      x:
+      - Heading
+      y:
+      - Cx
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  input_directory: csv
+  output_directory: ~
+  filename:
+    extension:
+    - csv
+    pattern: ~
+    filters:
+      contains: []
+      not_contains: []
+  input_files:
+    csv:
+    - K:\github\assetutilities\tests\modules\data_exploration\csv\test_1.csv
+    - K:\github\assetutilities\tests\modules\data_exploration\csv\test_2.csv
+Analysis:
+  basename: data_exploration
+  analysis_root_folder: K:\github\assetutilities\tests\modules\data_exploration
+  file_name: df_statistics_file_management
+  file_name_for_overwrite: df_statistics_file_management
+  log_folder: K:\github\assetutilities\tests\modules\data_exploration\logs
+  start_time: 2025-07-13 20:08:40.066866
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: K:\github\assetutilities\tests\modules\data_exploration\df_statistics_file_management.yml
+  result_folder: K:\github\assetutilities\tests\modules\data_exploration\results
+  result_data_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\data_exploration\results
+  file_management_input_directory: K:\github\assetutilities\tests\modules\data_exploration\csv
+  file_management_output_directory: K:\github\assetutilities\tests\modules\data_exploration\results

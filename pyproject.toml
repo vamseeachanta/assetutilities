@@ -1,43 +1,21 @@
-[tool.poetry]
+[project]
 name = "assetutilities"
 version = "0.0.7"
 description = "utilities for general use"
+authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
+license = {text = "MIT"}
 readme = "README.md"
-authors = ["Vamsee Achanta <vamsee.achanta@aceengineer.com>"]
-license = "MIT"
-packages = [
-    { include = "assetutilities", from = "src" }
-]
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-]
-keywords = ['package', 'library', 'module']
+requires-python = ">=3.8"
 
-[tool.poetry.group.dev.dependencies]
-black = "*"
-bumpver = "*"
-isort = "*"
-pytest = "*"
-build = "*"
-twine = "*"
-
-[tool.poetry.group.local.dependencies]
-digitalmodel = { path = "../digitalmodel", develop = true }
-
-[tool.setuptools]
+[setuptools]
 include-package-data = true
 
-[tool.setuptools.dynamic]
+[setuptools.dynamic]
 dependencies = {file = ["scripts/requirements.txt"]}
 
-[tool.poetry.scripts]
-sample_calculation = "assetutilities:__main__"
-
-[tool.poetry.urls]
-repository = "https://github.com/vamseeachanta/assetutilities"
-documentation = "https://github.com/vamseeachanta/assetutilities/blob/main/README.md"
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.bumpver]
 current_version = "0.0.7"
@@ -71,10 +49,6 @@ strict = true
 [[tool.mypy.overrides]]
 module = "feedparser"
 ignore_missing_imports = true
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 exclude = '''

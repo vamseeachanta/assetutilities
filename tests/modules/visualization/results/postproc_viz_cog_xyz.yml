@@ -1,0 +1,191 @@
+basename: visualization
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - 0.5
+  - 1
+  - 2
+  - 2.5
+  - 3
+  - 4
+  theta:
+  - 35
+  - 70
+  - 120
+  - 155
+  - 205
+  - 240
+  type: csv
+  groups:
+  - columns:
+      x:
+      - AQWA Direction
+      y:
+      - Surge (X)
+      - Sway (Y)
+      - Heave (Z)
+    color: []
+    alpha: []
+    linestyle: []
+    marker: []
+    label: No Tug
+    file_name: csv/b1516_cog.csv
+    filter:
+    - column: Moorings
+      value: All intact
+      contains: ~
+    - column: Wind Speed
+      value: 44.704
+      contains: ~
+    - column: Tug
+      value: false
+      contains: ~
+  - columns:
+      x:
+      - AQWA Direction
+      y:
+      - Surge (X)
+      - Sway (Y)
+      - Heave (Z)
+    color: []
+    alpha: []
+    linestyle: []
+    marker: []
+    label: Tug
+    file_name: csv/b1516_cog.csv
+    filter:
+    - column: Moorings
+      value: All intact
+      contains: ~
+    - column: Wind Speed
+      value: 44.704
+      contains: ~
+    - column: Tug
+      value: true
+      contains: ~
+settings:
+  type: xy_line
+  mode:
+  - line
+  - scatter
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: false
+  file_name: ~
+  plt_save_extensions:
+  - .png
+  suptitle: All Coast, LLC vs. Shore Offshore Services, et al.
+  title: COG Position, Without and with Tug
+  xlabel: Wind Direction w.r.t. Vessel Surge (deg)
+  ylabel: Change in CoG Position (m)
+  set_rmax: 10
+  set_rticks:
+  - 1
+  - 2
+  - 3
+  set_thetagrids:
+  - 0
+  - 30
+  - 60
+  - 90
+  - 120
+  - 150
+  - 180
+  - 210
+  - 240
+  - 270
+  - 300
+  - 330
+  set_rlabel_position: -22.5
+  legend:
+    flag: true
+    label:
+    - No Tug, Surge (X)
+    - No Tug, Sway (Y)
+    - No Tug, Heave (Z)
+    - Tug, Surge (X)
+    - Tug, Sway (Y)
+    - Tug, Heave (Z)
+    loc: best
+    framealpha: 0.3
+    prop:
+      family: Arial
+      size: 8
+  color:
+  - '#17becf'
+  - '#bcbd22'
+  - '#7f7f7f'
+  - '#17becf'
+  - '#bcbd22'
+  - '#7f7f7f'
+  linestyle:
+  - '-'
+  - '-'
+  - '-'
+  - --
+  - --
+  - --
+  markerprops:
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  alpha:
+  - 1.0
+  - 1.0
+  - 1.0
+  - 0.95
+  - 0.95
+  - 0.95
+  traces: 6
+master_settings:
+  groups:
+    columns:
+      x:
+      - AQWA Direction
+      y:
+      - Surge (X)
+      - Sway (Y)
+      - Heave (Z)
+    color: []
+    alpha: []
+    linestyle: []
+    marker: []
+    label: Tug
+    file_name: csv/b1516_cog.csv
+    filter:
+    - column: Moorings
+      value: All intact
+      contains: ~
+    - column: Wind Speed
+      value: 44.704
+      contains: ~
+    - column: Tug
+      value: true
+      contains: ~
+Analysis:
+  basename: visualization
+  analysis_root_folder: K:\github\assetutilities\tests\modules\visualization
+  file_name: postproc_viz_cog_xyz
+  file_name_for_overwrite: postproc_viz_cog_xyz
+  log_folder: K:\github\assetutilities\tests\modules\visualization\logs
+  start_time: 2025-07-13 20:08:57.124991
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: K:\github\assetutilities\tests\modules\visualization\postproc_viz_cog_xyz.yml
+  result_folder: K:\github\assetutilities\tests\modules\visualization\results
+  result_data_folder: K:\github\assetutilities\tests\modules\visualization\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\visualization\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\visualization\results

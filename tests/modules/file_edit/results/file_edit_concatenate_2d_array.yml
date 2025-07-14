@@ -1,49 +1,48 @@
-&id001 !!python/object/new:assetutilities.common.data.AttributeDict
-state: *id001
-dictitems:
+basename: file_edit
+edit_type: concatenate
+concatenate_type: 2d_array
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+input:
+- output_filename: ~
+  output_basename: D
+  output_dir: concatenate/dats
+  file_extension: dat
+  filename: ~
+  input_files:
+  - - concatenate/_0to9_static.deck
+  - - concatenate/_10_no_tug.deck
+  - - concatenate/_11_12.deck
+  - - concatenate/_13_000MPH000WD.deck
+    - concatenate/_13_100MPH000WD.deck
+  - - concatenate/_14_10moors.deck
+  - - concatenate/_15_.deck
+  input_file_labels:
+  - - ''
+  - - no_tug
+  - - ''
+  - - 000MPH000WD
+    - 100MPH000WD
+  - - 10moors
+  - - ''
+  batch:
+    flag: true
+    extension: false
+    content: C:\Program Files\ANSYS Inc\v182\aqwa\bin\winx64\aqwa.exe /nowind
+Analysis:
   basename: file_edit
-  edit_type: concatenate
-  concatenate_type: 2d_array
-  default:
-    log_level: DEBUG
-    config:
-      overwrite:
-        output: true
-  input:
-  - output_filename: ~
-    output_basename: D
-    output_dir: concatenate/dats
-    file_extension: dat
-    filename: ~
-    input_files:
-    - - concatenate/_0to9_static.deck
-    - - concatenate/_10_no_tug.deck
-    - - concatenate/_11_12.deck
-    - - concatenate/_13_000MPH000WD.deck
-      - concatenate/_13_100MPH000WD.deck
-    - - concatenate/_14_10moors.deck
-    - - concatenate/_15_.deck
-    input_file_labels:
-    - - ''
-    - - no_tug
-    - - ''
-    - - 000MPH000WD
-      - 100MPH000WD
-    - - 10moors
-    - - ''
-    batch:
-      flag: true
-      extension: false
-      content: C:\Program Files\ANSYS Inc\v182\aqwa\bin\winx64\aqwa.exe /nowind
-  Analysis:
-    basename: file_edit
-    analysis_root_folder: k:\github\assetutilities\tests\modules\file_edit
-    file_name: file_edit_concatenate_2d_array
-    file_name_for_overwrite: file_edit_concatenate_2d_array
-    result_folder: k:\github\assetutilities\tests\modules\file_edit\results
-    log_folder: k:\github\assetutilities\tests\modules\file_edit\logs
-    start_time: 2025-03-22 07:39:25.166169
-    cfg_array_file_names: ~
-    DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\file_edit\file_edit_concatenate_2d_array.yml
-    fe_folder: k:\github\assetutilities\tests\modules\file_edit\results
+  analysis_root_folder: K:\github\assetutilities\tests\modules\file_edit
+  file_name: file_edit_concatenate_2d_array
+  file_name_for_overwrite: file_edit_concatenate_2d_array
+  log_folder: K:\github\assetutilities\tests\modules\file_edit\logs
+  start_time: 2025-07-13 20:08:56.450175
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: K:\github\assetutilities\tests\modules\file_edit\file_edit_concatenate_2d_array.yml
+  result_folder: K:\github\assetutilities\tests\modules\file_edit\results
+  result_data_folder: K:\github\assetutilities\tests\modules\file_edit\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\file_edit\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\file_edit\results
