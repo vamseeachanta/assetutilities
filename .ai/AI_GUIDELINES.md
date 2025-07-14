@@ -1,3 +1,5 @@
+
+
 # AI Guidelines
 
 Please follow [AI Guidelines directory](https://github.com/vamseeachanta/pyproject-starter/tree/master/.ai) 
