@@ -42,11 +42,21 @@ class ZipFilestoDf:
 
             # check if file_list is empty
             if not file_list:
-                raise ValueError(f"The ZIP file '{zip_file_name_with_path}' is empty.")
+                raise ValueError(
+                    f"The ZIP file '{zip_file_name_with_path}' is empty."
+                )
 
             dataframe_dict = {}
             delimiter = ','
-            dataframe_dict = self.parse_zip_files(cfg,column_names, nrows, zf, file_list, dataframe_dict, delimiter)
+            dataframe_dict = self.parse_zip_files(
+                cfg,
+                column_names,
+                nrows,
+                zf,
+                file_list,
+                dataframe_dict,
+                delimiter
+            )
 
         return dataframe_dict
 

@@ -36,28 +36,47 @@ class ZipUtilities:
 
         input_file_directory = cfg['analysis']['input_directory']
         analysis_root_folder = cfg['Analysis']['analysis_root_folder']
-        test_flag, input_file_directory = is_dir_valid_func(input_file_directory, analysis_root_folder)
+        test_flag, input_file_directory = is_dir_valid_func(
+            input_file_directory,
+            analysis_root_folder
+        )
         input_file_extenstions = cfg['analysis']['filename']['extension']
         cfg[cfg['basename']] = []
         for stem in stem_list:
             files = []
             for file in os.listdir(input_file_directory):
                 for input_file_extension in input_file_extenstions:
-                    if file.__contains__(stem) and file.endswith(input_file_extension):
-                        file_path = os.path.join(input_file_directory, file)
+                    if (
+                        file.__contains__(stem)
+                        and file.endswith(input_file_extension)
+                    ):
+                        file_path = os.path.join(
+                            input_file_directory,
+                            file
+                        )
                         files.append(file_path)
 
             zip_file_path = self.zip_files(cfg, files, stem)
-            output_dict = {'stem': stem, 'zip_file_path': zip_file_path, 'files': files}
+            output_dict = {
+                'stem': stem,
+                'zip_file_path': zip_file_path,
+                'files': files
+            }
             cfg[cfg['basename']].append(output_dict)
 
     def zip_files(self, cfg, files, zip_stem_name):
         zip_name = f"{zip_stem_name}.zip"
         result_folder = cfg['Analysis']['result_folder']
-        zip_file_path = os.path.join(result_folder, zip_name)
+        zip_file_path = os.path.join(
+            result_folder,
+            zip_name
+        )
         with ZipFile(zip_file_path, 'w') as zip:
             for file in files:
-                zip.write(file, basename(file))
+                zip.write(
+                    file,
+                    basename(file)
+                )
 
         logger.info(f"Zip file: {zip_name} ... SUCCESS")
 
