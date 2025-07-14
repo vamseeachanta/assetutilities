@@ -339,29 +339,37 @@ class ConfigureApplicationInputs:
 
         cfg_argv_dict = {}
         if len(sys.argv) > 2:
-            try:
-                cfg_argv_dict_eval = eval(sys.argv[2])
-            except Exception as e:
-                print(sys.argv[2])
-                print(f"Error: {e}")
-                raise (
-                    ValueError(
-                        f"Check dictionary format provided in {sys.argv[2]} ... FAIL"
+            # Only eval if sys.argv[2] looks like a dict, skip pytest CLI args
+            arg2 = sys.argv[2]
+            if arg2.strip().startswith('{') and arg2.strip().endswith('}'):
+                try:
+                    cfg_argv_dict_eval = eval(arg2)
+                except Exception as e:
+                    print(arg2)
+                    print(f"Error: {e}")
+                    raise (
+                        ValueError(
+                            f"Check dictionary format provided in {arg2} "
+                            f"... FAIL"
+                        )
                     )
-                )
-            if isinstance(cfg_argv_dict_eval, dict):
-                cfg_argv_dict = cfg_argv_dict_eval
-            else:
-                print("Dictionary not provided in sys.argv[2]. sys.arg values are:")
-                print(sys.argv[2])
-                print("System argument values are:")
-                for item in sys.argv:
-                    print(f"item : {item}")
-                raise (
-                    ValueError(
-                        f"Check dictionary format provided in {sys.argv[2]} ... FAIL"
+                if isinstance(cfg_argv_dict_eval, dict):
+                    cfg_argv_dict = cfg_argv_dict_eval
+                else:
+                    print(
+                        "Dictionary not provided in sys.argv[2]. "
+                        "sys.arg values are:"
                     )
-                )
+                    print(arg2)
+                    print("System argument values are:")
+                    for item in sys.argv:
+                        print(f"item : {item}")
+                    raise (
+                        ValueError(
+                            f"Check dictionary format provided in {arg2} "
+                            f"... FAIL"
+                        )
+                    )
         if len(sys.argv) > 1:
             if not os.path.isfile(sys.argv[1]):
                 raise (
