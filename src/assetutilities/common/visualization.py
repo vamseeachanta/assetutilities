@@ -2,7 +2,6 @@ import logging
 
 
 class Visualization:
-
     def __init__(self, cfg=None):
         self.plot_data = {"data": [], "layout": {}}
         self.colors = self.get_colors()
@@ -56,7 +55,6 @@ class Visualization:
         pass
 
     def assign_simple_data_by_DataFrame_source(self):
-
         def get_x_data(df, column):
             data = []
             if column in df.columns.to_list():
@@ -106,7 +104,9 @@ class Visualization:
         def get_data_name(cfg):
             pass
 
-        def get_data_item(cfg, x_data, y_data, z_data, series_name, text_data=[]):
+        def get_data_item(cfg, x_data, y_data, z_data, series_name, text_data=None):
+            if text_data is None:
+                text_data = []
             cfg.update({"x": x_data, "y": y_data, "z": z_data, "name": series_name})
             if cfg.__contains__("text"):
                 cfg.update({"text": text_data})

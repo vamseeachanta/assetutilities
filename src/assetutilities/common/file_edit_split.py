@@ -1,18 +1,13 @@
 import os
-import itertools
-import shutil
 from pathlib import Path
 
-from assetutilities.common.utilities import is_file_valid_func
-from assetutilities.common.data import ReadData
-from assetutilities.common.data import SaveData
+from assetutilities.common.data import ReadData, SaveData
 
 rd = ReadData()
 save_data = SaveData()
 
 
 class FileSplit:
-
     def __init__(self) -> None:
         pass
 
@@ -74,6 +69,5 @@ class FileSplit:
         return line_number
 
     def get_data(self, cfg_data_format):
-
         data = rd.from_ascii_file_get_lines_as_string_arrays(cfg_data_format)
         return data

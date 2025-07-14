@@ -1,16 +1,10 @@
-def profrun(x,y):
-   import cProfile
-##   cProfile.run(x) # For printing the output in terminal
-   cProfile.run(x,filename=y)
+def profrun(x, y):
+    import cProfile
 
-   return
+    ##   cProfile.run(x) # For printing the output in terminal
+    cProfile.run(x, filename=y)
 
-
-
-
-
-
-
+    return
 
 
 ##   import pstats

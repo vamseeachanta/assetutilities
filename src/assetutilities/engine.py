@@ -12,9 +12,9 @@ from assetutilities.common.utilities import save_application_cfg
 from assetutilities.common.visualization_components import VisualizationComponents
 from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
+from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
 from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
-from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
 
 library_name = "assetutilities"
 
@@ -25,7 +25,6 @@ wwyaml = WorkingWithYAML()
 
 
 def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) -> dict:
-
     cfg_argv_dict = {}
     if cfg is None:
         inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
@@ -34,9 +33,9 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         if cfg is None:
             raise ValueError("cfg is None")
 
-    if 'basename' in cfg:
+    if "basename" in cfg:
         basename = cfg["basename"]
-    elif 'meta' in cfg:
+    elif "meta" in cfg:
         basename = cfg["meta"]["basename"]
     else:
         raise ValueError("basename not found in cfg")
@@ -45,7 +44,9 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
         fm = FileManagement()
         cfg_base = app_manager.configure(cfg, library_name, basename, cfg_argv_dict)
         cfg_base = fm.router(cfg_base)
-        result_folder_dict, cfg_base = app_manager.configure_result_folder(None, cfg_base)
+        result_folder_dict, cfg_base = app_manager.configure_result_folder(
+            None, cfg_base
+        )
     else:
         cfg_base = cfg
 
@@ -53,7 +54,10 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
 
     if basename in ["excel_utilities"]:
         # Reader imports
-        from assetutilities.modules.excel_utilities.excel_utilities import ExcelUtilities
+        from assetutilities.modules.excel_utilities.excel_utilities import (
+            ExcelUtilities,
+        )
+
         eu = ExcelUtilities()
         cfg_base = eu.excel_utility_router(cfg_base)
     elif basename in ["visualization"]:
@@ -67,6 +71,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     elif basename in ["gitpython"]:
         # Reader imports
         from assetutilities.tools.git.git_python_utilities import GitPythonUtilities
+
         gpu = GitPythonUtilities()
         gpu.router(cfg_base)
     elif basename in ["text_analytics"]:
@@ -94,12 +99,13 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
 
     elif basename == "reportgen":
         from assetutilities.common.reportgen import reportgen
+
         # init and run reportgen using config
         reportgen.run(cfg_base)
     elif basename == "zip_utilities":
         zu = ZipUtilities()
         cfg_base = zu.router(cfg_base)
-    
+
     elif basename == "csv_utilities":
         csv_utilities_router = CSVUtilitiesRouter()
         cfg_base = csv_utilities_router.router(cfg_base)

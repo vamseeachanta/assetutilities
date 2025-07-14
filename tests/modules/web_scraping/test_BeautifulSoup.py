@@ -1,4 +1,5 @@
 import os
+
 from src.assetutilities.engine import engine
 
 
@@ -10,6 +11,6 @@ def run_process(input_file):
 
 
 def test_run_process():
-    input_file = 'web_scraping_loopnet.yml'
+    input_file = "web_scraping_loopnet.yml"
     result = run_process(input_file)
     assert result is not None

@@ -1,10 +1,11 @@
 import json
 import os
-import pymssql
+from enum import Enum
+
 import cx_Oracle
 import pandas
 import pandas.io.sql as psql
-from enum import Enum
+import pymssql
 
 
 class ServerType(Enum):
@@ -22,7 +23,15 @@ class CipherData:
     userPassword = None
     chunksize = 1000
 
-    def __init__(self, serverType, serverName=None, databaseName=None, userName=None, userPassword=None, chunksize=1000):
+    def __init__(
+        self,
+        serverType,
+        serverName=None,
+        databaseName=None,
+        userName=None,
+        userPassword=None,
+        chunksize=1000,
+    ):
         if isinstance(serverType, ServerType):
             self.serverType = serverType
         elif isinstance(serverType, str):
@@ -41,24 +50,34 @@ class CipherData:
     @staticmethod
     def byName(name):
         # load parameters using name
-        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        with open(os.path.join(__location__, 'servers.json'), 'r') as f:
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__))
+        )
+        with open(os.path.join(__location__, "servers.json")) as f:
             servers = json.load(f)
             server = servers[name]
-            return CipherData(server["SQLType"], server["DBServerName"], server["DBName"], server["UserName"], server["Password"])
+            return CipherData(
+                server["SQLType"],
+                server["DBServerName"],
+                server["DBName"],
+                server["UserName"],
+                server["Password"],
+            )
 
     @property
     def connection(self):
         if self.__connection is None:
             if self.serverType is ServerType.MSSQL:
-                self.__connection = pymssql.connect(server=self.serverName,
-                                                    user=self.userName,
-                                                    password=self.userPassword,
-                                                    database=self.databaseName)
+                self.__connection = pymssql.connect(
+                    server=self.serverName,
+                    user=self.userName,
+                    password=self.userPassword,
+                    database=self.databaseName,
+                )
             elif self.serverType is ServerType.ORACLE:
-                self.__connection = cx_Oracle.connect(self.userName,
-                                                      self.userPassword,
-                                                      self.serverName)
+                self.__connection = cx_Oracle.connect(
+                    self.userName, self.userPassword, self.serverName
+                )
             else:
                 self.__connection = None
         return self.__connection
@@ -94,12 +113,12 @@ class CipherData:
         cursor.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'")
 
         def chunker(seq, size):
-            return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+            return (seq[pos : pos + size] for pos in range(0, len(seq), size))
 
         records = [str(tuple(row)) for row in dataframe.values]
 
         for batch in chunker(records, 1000):
-            rows = ','.join(batch)
+            rows = ",".join(batch)
             insert_rows = commitSQL + rows
             cursor.execute(insert_rows)
             connection.commit()

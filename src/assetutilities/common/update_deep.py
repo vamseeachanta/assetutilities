@@ -2,9 +2,8 @@ from collections.abc import Mapping
 
 
 class AttributeDict(dict):
-
     def __init__(self, *args, **kwargs):
-        super(AttributeDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__dict__ = self
 
 
@@ -24,7 +23,6 @@ def update_deep_dictionary(d, u):
 
 
 if __name__ == "__main__":
-
     pass
     # # update_deep_attribute_dictionary not working
     # example_dictionary = ({'employee': {'name': 'vamsee', 'age': 35, 'marks':{'science':10, 'math': 50}}})

@@ -3,14 +3,14 @@
 # Third party imports
 import sympy as sp
 
-y=sp.Symbol('y')
-f = sp.cos(y)+4*y+y**3
+y = sp.Symbol("y")
+f = sp.cos(y) + 4 * y + y**3
 print(f"Function is: {f}")
 
-x=sp.Symbol('x')
-sp.pprint((sp.sqrt(1/x), x), use_unicode=True)
+x = sp.Symbol("x")
+sp.pprint((sp.sqrt(1 / x), x), use_unicode=True)
 
-print(latex(sp.sqrt(1/x), x), use_unicode=False)
+print(latex(sp.sqrt(1 / x), x), use_unicode=False)
 
 df = sp.diff(f, y)
 print(f"Function differentiation is: {df}")

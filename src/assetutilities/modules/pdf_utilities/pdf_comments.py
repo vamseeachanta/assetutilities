@@ -1,7 +1,4 @@
 from typing import Dict, List
-import sys
-import urllib
-import os
 
 import fitz
 
@@ -13,12 +10,10 @@ from pdfannots import process_file
 
 
 class PDFComments:
-
     def __init__(self):
         pass
 
     def method_1(self, pdf_filename):
-
         document = poppler.document_new_from_file(pdf_filename, None)
         n_pages = document.get_n_pages()
         all_annots = 0
@@ -35,12 +30,7 @@ class PDFComments:
                     ):
                         all_annots += 1
                         print(
-                            "page: {0:3}, {1:10}, type: {2:10}, content: {3}".format(
-                                i + 1,
-                                annot_mapping.annot.get_modified(),
-                                annot_mapping.annot.get_annot_type().value_nick,
-                                annot_mapping.annot.get_contents(),
-                            )
+                            f"page: {i + 1:3}, {annot_mapping.annot.get_modified():10}, type: {annot_mapping.annot.get_annot_type().value_nick:10}, content: {annot_mapping.annot.get_contents()}"
                         )
 
         if all_annots > 0:
@@ -58,7 +48,7 @@ class PDFComments:
             ],
         }
         """
-        annots_dict = dict()
+        annots_dict = {}
         document = process_file(open(pdf_filename, "rb"))
         for page_idx in range(len(document.pages)):
             annots = document.pages[page_idx].annots

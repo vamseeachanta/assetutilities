@@ -4,7 +4,7 @@ import sys
 
 # Third party imports
 import colorama
-import deepdiff 
+import deepdiff
 
 # Reader imports
 from assetutilities.common.yml_utilities import ymlInput
@@ -17,14 +17,16 @@ colorama.init(autoreset=True)
 
 tu = TestUtilities()
 
+
 def run_process(input_file, expected_result):
     if input_file is not None and not os.path.isfile(input_file):
         input_file = os.path.join(os.path.dirname(__file__), input_file)
     cfg = engine(input_file)
 
-    obtained_result = cfg[cfg['basename']]['input_files'].copy()
-    assert not deepdiff.DeepDiff(obtained_result, expected_result, ignore_order=True), \
+    obtained_result = cfg[cfg["basename"]]["input_files"].copy()
+    assert not deepdiff.DeepDiff(obtained_result, expected_result, ignore_order=True), (
         f"Obtained result: {obtained_result} does not match expected result: {expected_result}"
+    )
 
     return cfg
 
@@ -33,9 +35,10 @@ def test_run_process():
     input_file = "test_file_management_file_size.yml"
 
     pytest_output_file = "results/test_file_management_file_size_pytest.yml"
-    pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)
+    pytest_output_file = tu.get_valid_pytest_output_file(
+        os.path.dirname(__file__), pytest_output_file
+    )
     expected_result = ymlInput(pytest_output_file, updateYml=None)
-
 
     if len(sys.argv) > 1:
         sys.argv.pop()

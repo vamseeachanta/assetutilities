@@ -34,35 +34,28 @@ push = false
 "src/assetutilities/__init__.py" = ["{version}"]
 "src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
 
-[tool.isort]
-profile = "black"
-import_heading_stdlib = "Standard library imports"
-import_heading_thirdparty = "Third party imports"
-import_heading_firstparty = "Reader imports"
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-line_length = 88
+[tool.ruff]
+line-length = 88
+target-version = "py38"
 
-[tool.mypy]
-strict = true
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = []
 
-[[tool.mypy.overrides]]
-module = "feedparser"
-ignore_missing_imports = true
+[tool.ruff.lint.isort]
+known-first-party = ["assetutilities"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
-[tool.black]
-exclude = '''
-/(
-    \.git
-  | \.mypy_cache
-  | \.tox
-  | venv
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | _dev_private
-)/
-'''
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

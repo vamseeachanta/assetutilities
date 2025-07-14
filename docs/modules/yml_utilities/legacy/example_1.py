@@ -1,8 +1,8 @@
 import sys
-import ruamel.yaml
-from ruamel.yaml.comments import CommentedMap as CM
-from ruamel.yaml.comments import Format, Comment
 
+import ruamel.yaml
+from ruamel.yaml.comments import Comment, Format
+from ruamel.yaml.comments import CommentedMap as CM
 
 yaml_str = """\
 # example YAML document
@@ -11,11 +11,14 @@ klm: Flying Blue
 xYz: the End                # for now
 """
 
+
 def fkey(s):
     return s.upper()
 
+
 def fval(s):
     return s.lower()
+
 
 def transform(data, fk, fv):
     d = CM()
@@ -36,6 +39,7 @@ def transform(data, fk, fv):
         assert len(ca.items) == 0
         ca._items = key_com  # the attribute, not the read-only property
     return d
+
 
 yaml = ruamel.yaml.YAML()
 data = yaml.load(yaml_str)

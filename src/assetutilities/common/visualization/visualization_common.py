@@ -1,22 +1,22 @@
 # Standard library imports
-import os
 import logging
-
+import os
 
 # Third party imports
 import matplotlib.pyplot as plt  # noqa
 import numpy as np
 import pandas as pd  # noqa
-from matplotlib.offsetbox import AnnotationBbox, OffsetImage
-from PIL import Image
 from colorama import Fore, Style
 from colorama import init as colorama_init
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from PIL import Image
 
 from assetutilities.common.utilities import is_file_valid_func
+
 colorama_init()
 
-class VisualizationCommon:
 
+class VisualizationCommon:
     def __init__(self):
         pass
 
@@ -55,14 +55,14 @@ class VisualizationCommon:
         if cfg.settings.__contains__("ylim"):
             ylim = cfg.settings.get("ylim", None)
             if ylim is not None:
-                if plt.__name__ == 'matplotlib.pyplot':
+                if plt.__name__ == "matplotlib.pyplot":
                     plt.ylim(ylim)
                 else:
                     plt.set_ylim(ylim)
         if cfg.settings.__contains__("xlim"):
             xlim = cfg.settings.get("xlim", None)
             if xlim is not None:
-                if plt.__name__ == 'matplotlib.pyplot':
+                if plt.__name__ == "matplotlib.pyplot":
                     plt.xlim(xlim)
                 else:
                     plt.set_xlim(xlim)
@@ -82,7 +82,6 @@ class VisualizationCommon:
             # plt = self.get_polar_plot_matplotlib(data_df, plt_settings, cfg_plt)
 
     def get_plt_with_arrows(self, plt, plt_settings):
-
         # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.arrow.html
         # Add arrows with direct data
         # Try inset_axes: https://matplotlib.org/2.0.2/examples/pylab_examples/axes_demo.html
@@ -97,7 +96,7 @@ class VisualizationCommon:
             r = arrow["r"]
             color = arrow["color"]
 
-            arr = plt.arrow(
+            plt.arrow(
                 theta[0] / 180.0 * np.pi,
                 r[0],
                 theta[1] / 180.0 * np.pi,
@@ -135,7 +134,7 @@ class VisualizationCommon:
             xy=(30, 5),  # theta, radius
             xytext=(0.05, 0.05),  # fraction, fraction
             textcoords="figure fraction",
-            arrowprops=dict(facecolor="black", shrink=0.05),
+            arrowprops={"facecolor": "black", "shrink": 0.05},
             horizontalalignment="left",
             verticalalignment="bottom",
         )
@@ -236,7 +235,6 @@ class VisualizationCommon:
         return colors
 
     def marker_settings(self, plt_settings):
-
         markerfacecolor = None
         markersize = None
         if plt_settings.__contains__("marker"):
@@ -257,94 +255,120 @@ class VisualizationCommon:
 
         return marker_settings
 
-    def add_image_to_polar_plot(self, cfg, plt_settings,plt_properties):
-        if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get("flag", False):
-
-            img_path = plt_settings['add_image']['image_path']
+    def add_image_to_polar_plot(self, cfg, plt_settings, plt_properties):
+        if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get(
+            "flag", False
+        ):
+            img_path = plt_settings["add_image"]["image_path"]
             analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
             file_is_valid, valid_file = is_file_valid_func(
                 img_path, analysis_root_folder
             )
             if not file_is_valid:
-                logging.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
-                logging.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
-                logging.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
-            
-            transparency = plt_settings['add_image']['transperancy']
-            r = plt_settings['add_image']['r']
-            theta = plt_settings['add_image']['theta_center']
-            
+                logging.error(
+                    FileNotFoundError(
+                        f"Invalid file name/path: {group_cfg['file_name']}"
+                    )
+                )
+                logging.error(
+                    f"Please check the file name/path in the input file: {group_cfg['file_name']}"
+                )
+                logging.error(
+                    f"Program {Fore.RED}continues to run ...{Style.RESET_ALL}"
+                )
+
+            transparency = plt_settings["add_image"]["transperancy"]
+            r = plt_settings["add_image"]["r"]
+            theta = plt_settings["add_image"]["theta_center"]
+
             img = Image.open(valid_file)
 
             im_array = np.array(img.convert("RGBA"))
-            im_array[:, :, 3] = (im_array[:, :, 3].astype(float) * transparency).astype(np.uint8)
-    
-            fig = plt_properties["fig"]
+            im_array[:, :, 3] = (im_array[:, :, 3].astype(float) * transparency).astype(
+                np.uint8
+            )
+
+            plt_properties["fig"]
             ax = plt_properties["ax"]
 
-            # theta_center = theta  
+            # theta_center = theta
             theta_center = np.radians(theta)
-            r_center = r 
+            r_center = r
             zoom_factor = 0.5
 
             image_box = OffsetImage(im_array, zoom=zoom_factor)
-    
-            ab = AnnotationBbox(image_box, (theta_center, r_center), frameon=False, xycoords='polar')
-            
-            ax.add_artist(ab)   
+
+            ab = AnnotationBbox(
+                image_box, (theta_center, r_center), frameon=False, xycoords="polar"
+            )
+
+            ax.add_artist(ab)
 
     def add_image_to_xy_plot(self, cfg, plt_settings):
         plt_properties = None
-        if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get("flag", False):
-            img_path = plt_settings['add_image']['image_path']
+        if "add_image" in cfg["settings"] and cfg["settings"]["add_image"].get(
+            "flag", False
+        ):
+            img_path = plt_settings["add_image"]["image_path"]
             analysis_root_folder = cfg["Analysis"]["analysis_root_folder"]
             file_is_valid, valid_file = is_file_valid_func(
                 img_path, analysis_root_folder
             )
             if not file_is_valid:
-                logging.error(FileNotFoundError(f'Invalid file name/path: {group_cfg["file_name"]}'))
-                logging.error(f'Please check the file name/path in the input file: {group_cfg["file_name"]}' )
-                logging.error(f'Program {Fore.RED}continues to run ...{Style.RESET_ALL}')
+                logging.error(
+                    FileNotFoundError(
+                        f"Invalid file name/path: {group_cfg['file_name']}"
+                    )
+                )
+                logging.error(
+                    f"Please check the file name/path in the input file: {group_cfg['file_name']}"
+                )
+                logging.error(
+                    f"Program {Fore.RED}continues to run ...{Style.RESET_ALL}"
+                )
 
-            transparency = plt_settings['add_image']['transperancy']
-            x = plt_settings['add_image']['x']
-            y = plt_settings['add_image']['y']
+            transparency = plt_settings["add_image"]["transperancy"]
+            x = plt_settings["add_image"]["x"]
+            y = plt_settings["add_image"]["y"]
             img = Image.open(valid_file)
 
             fig, ax = plt.subplots()
             # ax = plt_properties['ax']
-            
-            image_extent = [x['min'], x['max'], y['min'], y['max']]
-            # image_extent = [-2, 1, -2, 1] 
+
+            image_extent = [x["min"], x["max"], y["min"], y["max"]]
+            # image_extent = [-2, 1, -2, 1]
 
             # Add the image to the plot
             # ax.imshow(img, extent=image_extent, alpha=transparency, zorder=-1)
-            ax.imshow(img, aspect='auto', extent=image_extent, alpha=transparency, zorder=-1)
+            ax.imshow(
+                img, aspect="auto", extent=image_extent, alpha=transparency, zorder=-1
+            )
 
             plt_properties = {"fig": fig, "ax": ax, "plt": plt}
         else:
-            print("add_image data is not available")    
+            print("add_image data is not available")
 
         return plt_properties
 
     def get_plot_properties_for_df(self, cfg, df):
-
         plot_count_dict = self.get_plot_count_array_for_df(cfg)
         cfg["settings"]["color"] = self.get_plot_colors_for_df(plot_count_dict, cfg)
-        cfg["settings"]["linestyle"] = self.get_plot_linestyle_for_df(cfg, plot_count_dict)
-        cfg["settings"]["markerprops"] = self.get_plot_markerprops_for_df(cfg, plot_count_dict)
+        cfg["settings"]["linestyle"] = self.get_plot_linestyle_for_df(
+            cfg, plot_count_dict
+        )
+        cfg["settings"]["markerprops"] = self.get_plot_markerprops_for_df(
+            cfg, plot_count_dict
+        )
         cfg["settings"]["alpha"] = self.get_plot_alpha_for_df(cfg, plot_count_dict)
 
         return cfg
 
     def get_plot_count_array_for_df(self, cfg):
-
-        if 'xy' in cfg['settings']['type']:
+        if "xy" in cfg["settings"]["type"]:
             x_count_array = []
             y_count_array = []
             plot_count_array = []
             for group_cfg in cfg["data"]["groups"]:
-
                 if "columns" in group_cfg:
                     x_count = len(group_cfg["columns"]["x"])
                     y_count = len(group_cfg["columns"]["y"])
@@ -363,7 +387,7 @@ class VisualizationCommon:
                 "plot_count_array": plot_count_array,
             }
 
-        elif 'polar' in cfg['settings']['type']:
+        elif "polar" in cfg["settings"]["type"]:
             theta_count_array = []
             r_count_array = []
             plot_count_array = []
@@ -383,17 +407,16 @@ class VisualizationCommon:
             plot_count_dict = {
                 "theta_count_array": theta_count_array,
                 "r_count_array": r_count_array,
-                "plot_count_array": plot_count_array
-                }
+                "plot_count_array": plot_count_array,
+            }
 
         return plot_count_dict
 
     def get_plot_colors_for_df(self, plot_count_dict, cfg, key="color"):
-
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True
-        if 'pairs' in cfg['settings'] and not cfg['settings']['pairs']:
+        if "pairs" in cfg["settings"] and not cfg["settings"]["pairs"]:
             repeat_flag = False
 
         if repeat_flag:
@@ -407,12 +430,11 @@ class VisualizationCommon:
         return color_list
 
     def get_plot_linestyle_for_df(self, cfg, plot_count_dict, key="linestyle"):
-
         default_linestyle_list = ["-", "--", "-.", ":"]
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True
-        if 'pairs' in cfg['settings'] and not cfg['settings']['pairs']:
+        if "pairs" in cfg["settings"] and not cfg["settings"]["pairs"]:
             repeat_flag = False
 
         linestyle_list = []
@@ -425,12 +447,13 @@ class VisualizationCommon:
             for plot_count, linestyle_item in zip(
                 plot_count_array, default_linestyle_list
             ):
-                linestyle_list = linestyle_list + [default_linestyle_list[0]] * plot_count
+                linestyle_list = (
+                    linestyle_list + [default_linestyle_list[0]] * plot_count
+                )
 
         return linestyle_list
 
     def get_plot_markerprops_for_df(self, cfg, plot_count_dict, key="marker"):
-
         default_marker_list = [
             "o",
             "v",
@@ -452,7 +475,7 @@ class VisualizationCommon:
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True
-        if 'pairs' in cfg['settings'] and not cfg['settings']['pairs']:
+        if "pairs" in cfg["settings"] and not cfg["settings"]["pairs"]:
             repeat_flag = False
 
         marker_list = []
@@ -482,12 +505,11 @@ class VisualizationCommon:
         return markerprops_list
 
     def get_plot_alpha_for_df(self, cfg, plot_count_dict, key="alpha"):
-
         default_alpha_list = [round(1 - n * 0.05, 2) for n in range(0, 20)]
         plot_count_array = plot_count_dict["plot_count_array"]
 
         repeat_flag = True
-        if 'pairs' in cfg['settings'] and not cfg['settings']['pairs']:
+        if "pairs" in cfg["settings"] and not cfg["settings"]["pairs"]:
             repeat_flag = False
 
         alpha_list = []

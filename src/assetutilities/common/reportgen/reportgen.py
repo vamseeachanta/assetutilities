@@ -2,18 +2,24 @@
 Report generation functionality for Markdown and Word outputs.
 """
 
-from enum import Enum
-from typing import Dict, Any, Optional
 import logging
+from enum import Enum
+from typing import Any, Dict
 
 from .dom import DocumentDOM
-from .writers import ReportWriter, ReportWriterRegistry, DefaultMDWriter, DefaultDOCXWriter
-from .doris_writers import DorisMarkdownWriter
+from .writers import (
+    DefaultDOCXWriter,
+    DefaultMDWriter,
+    ReportWriter,
+    ReportWriterRegistry,
+)
+
 
 class ReportFormat(Enum):
     MARKDOWN = "md"
     WORD = "docx"
     PDF = "pdf"
+
 
 class ReportGenerator:
     def __init__(self):
@@ -25,9 +31,9 @@ class ReportGenerator:
     def initialize_from_config(self, config: Dict[str, Any]) -> None:
         """Initialize generator with config data"""
         self.dom.initialize_dom_from_config(config)
-        
+
         # Handle target report format
-        format_type = self.dom.report_details.get('target_report_type', 'md').lower()
+        format_type = self.dom.report_details.get("target_report_type", "md").lower()
         try:
             self.target_format = ReportFormat(format_type)
             logging.info(f"Set target format to: {self.target_format.value}")
@@ -36,16 +42,18 @@ class ReportGenerator:
             self.target_format = ReportFormat.MARKDOWN
 
         # Check if writer class specified
-        writer_class = self.dom.report_details.get('report_writer_class')
+        writer_class = self.dom.report_details.get("report_writer_class")
         if writer_class:
             self._initialize_writer(writer_class)
 
     def _initialize_writer(self, writer_class: str) -> None:
         """Initialize the specified writer implementation"""
         if not ReportWriter.validate_writer_class(writer_class):
-            logging.error(f"Invalid writer class {writer_class}, falling back to direct writing")
+            logging.error(
+                f"Invalid writer class {writer_class}, falling back to direct writing"
+            )
             return
-            
+
         try:
             writer_impl = ReportWriterRegistry.get_writer(writer_class)
             if writer_impl:
@@ -79,6 +87,7 @@ class ReportGenerator:
         # To be implemented
         logging.info("PDF format not yet implemented")
         pass
+
 
 def run(config: Dict[str, Any]) -> None:
     """Entry point called by engine.py"""

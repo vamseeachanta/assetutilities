@@ -3,13 +3,11 @@ import itertools
 import os
 import shutil
 
-
 # Reader imports
 from assetutilities.common.utilities import is_file_valid_func
 
 
 class FileConcatenate:
-
     def __init__(self) -> None:
         pass
 
@@ -26,7 +24,6 @@ class FileConcatenate:
         return cfg, batch_filename
 
     def concatenate_files_array(self, cfg):
-
         output_filename_array = []
         batch_filename_array = []
         for idx in range(0, len(cfg["input"])):
@@ -65,11 +62,16 @@ class FileConcatenate:
                 )
 
             output_filename_array.append(input_idx_output_filename_array)
-            batch_filename = self.prepare_custom_batch(cfg, input_set, idx, output_files)
-        
+            batch_filename = self.prepare_custom_batch(
+                cfg, input_set, idx, output_files
+            )
+
         batch_filename_array.append(batch_filename)
 
-        cfg[cfg['basename']] = {"output_filename": output_filename_array, 'batch_filename': batch_filename_array}
+        cfg[cfg["basename"]] = {
+            "output_filename": output_filename_array,
+            "batch_filename": batch_filename_array,
+        }
 
         return cfg, batch_filename
 
@@ -129,7 +131,9 @@ class FileConcatenate:
 
                 cfg = self.concatenate_one_set(cfg, file_array, output_filename_path)
 
-            batch_filename = self.prepare_custom_batch(cfg, input_set, input_set_idx, output_files)
+            batch_filename = self.prepare_custom_batch(
+                cfg, input_set, input_set_idx, output_files
+            )
 
         return cfg, batch_filename
 
@@ -137,7 +141,7 @@ class FileConcatenate:
         batch_cfg = input_set.get("batch", None)
         batch_filename = os.path.join(
             cfg["Analysis"]["analysis_root_folder"],
-            cfg["Analysis"]["file_name"] + '_' + str(idx) + ".bat",
+            cfg["Analysis"]["file_name"] + "_" + str(idx) + ".bat",
         )
         if batch_cfg is not None and batch_cfg["flag"]:
             with open(batch_filename, "w") as the_file:

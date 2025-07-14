@@ -1,4 +1,4 @@
-""" 
+"""
 https://towardsdatascience.com/how-to-create-pdf-reports-with-python-the-essential-guide-c08dd3ebf2ee
 https://github.com/jorisschellekens/borb-examples#22-steps-to-creating-a-pdf-using-borb
 fpdf, borb packages

@@ -1,6 +1,9 @@
 import os
+
 import pytest
+
 from src.assetutilities.engine import engine
+
 
 @pytest.mark.skip(reason="Only works in local drive")
 def test_word_utilties_search_string():
@@ -9,6 +12,8 @@ def test_word_utilties_search_string():
         input_file = os.path.join(os.path.dirname(__file__), input_file)
     result = engine(input_file)
     assert result is not None
+
+
 def test_word_utilties_search_string():
     # input_file = 'src/assetutlities/tests/test_data/word_utilities/word_utilities.yml'
     input_file = "word_utilities.yml"

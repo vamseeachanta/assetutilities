@@ -2,7 +2,6 @@ import git
 
 
 class GitPythonUtilities:
-
     def __init__(self) -> None:
         pass
 
