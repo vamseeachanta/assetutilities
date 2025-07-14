@@ -1,5 +1,4 @@
-# Standard library imports
-import logging
+from loguru import logger
 import os
 from os.path import basename
 from zipfile import ZipFile
@@ -60,7 +59,7 @@ class ZipUtilities:
             for file in files:
                 zip.write(file, basename(file))
 
-        logging.info(f"Zip file: {zip_name} ... SUCCESS")
+        logger.info(f"Zip file: {zip_name} ... SUCCESS")
 
         return zip_file_path
 

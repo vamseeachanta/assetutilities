@@ -1,5 +1,5 @@
 import os
-import logging
+from loguru import logger
 import excel2img
 import pandas as pd
 from openpyxl import load_workbook
@@ -121,19 +121,19 @@ class ExcelUtilities:
 
             # Copy the template file to the target file
             shutil.copy(template_file, target_file)
-            logging.debug(f"Template file copied to: {target_file}")
+            logger.debug(f"Template file copied to: {target_file}")
 
             csvs = group['csvs']
 
-            logging.info(f"For Excel file: {target_file}:")
+            logger.info(f"For Excel file: {target_file}:")
             for csv in csvs:
                 inputs_csv = csv['input']['filename']
                 is_file_valid, inputs_csv = is_file_valid_func(inputs_csv, analysis_root_folder)
                 if not is_file_valid:
-                    logging.debug(f"File {inputs_csv} not found. Skipping {target_file}")
-                    logging.debug(f"Skipping {target_file}  .. FAIL")
+                    logger.debug(f"File {inputs_csv} not found. Skipping {target_file}")
+                    logger.debug(f"Skipping {target_file}  .. FAIL")
                     if os.path.exists(target_file):
-                        logging.info(f"Removing {target_file} as it is not updated")
+                        logger.info(f"Removing {target_file} as it is not updated")
                         os.remove(target_file)
                 else:
                     df = pd.read_csv(inputs_csv)
@@ -142,7 +142,7 @@ class ExcelUtilities:
                     sheet_name = csv['target']['sheet_name']
                     wb_sheetnames = wb.sheetnames
                     if sheet_name not in wb_sheetnames:
-                        logging.info(f"Sheet {sheet_name} does not exist in {target_file}.")
+                        logger.info(f"Sheet {sheet_name} does not exist in {target_file}.")
                         wb.create_sheet(sheet_name)
                     worksheet = wb[sheet_name]
                     for row in worksheet['A1:BZ1000']:
@@ -153,4 +153,4 @@ class ExcelUtilities:
                     with pd.ExcelWriter(target_file, mode='a', engine='openpyxl', if_sheet_exists='overlay') as writer:
                         df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0, startcol=0)
 
-                    logging.info(f"   ... Copying data in {inputs_csv} to {worksheet}")
+                    logger.info(f"   ... Copying data in {inputs_csv} to {worksheet}")

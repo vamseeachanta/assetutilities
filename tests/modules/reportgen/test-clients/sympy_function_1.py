@@ -8,7 +8,7 @@ from typing import Dict, Any
 # Third party imports
 import sympy as sp
 import yaml
-import logging
+from loguru import logger
 from assetutilities.common.reportgen.reportgen import ReportGenerator 
 from assetutilities.common.reportgen.decorator import explain_function
 
@@ -59,7 +59,7 @@ brainfarts
 """
 
 def parse_args():
-    logging.info("Parsing command line arguments ...")
+    logger.info("Parsing command line arguments ...")
 
     parser = argparse.ArgumentParser(description='SymPy function calculator')
     parser.add_argument('config', help='Path to YAML configuration file')
@@ -91,10 +91,10 @@ def print_readable_dict(data: Dict[str, Any]) -> None:
 """
 def init_report_generator(config: Dict[str, Any]) -> None:    
     global _generator 
-    logging.info(f"start using reportgenerator")
+    logger.info(f"start using reportgenerator")
     _generator = ReportGenerator()
     _generator.initialize_from_config(config)
-    logging.info(f"Initialized reportgenerator using config")
+    logger.info(f"Initialized reportgenerator using config")
     print_readable_dict(config)
 
 def flush_generator() -> None:    
@@ -109,7 +109,7 @@ def define_function() -> tuple[sp.Expr, sp.Symbol]:
 @explain_function(purpose="Integration Function : ")
 def integrate_function(f: sp.Expr, y: sp.Symbol) -> tuple[sp.Expr, sp.Symbol]:
     i_f = sp.integrate(f, y)
-    logging.info(f"Function Integration is: {i_f}")
+    logger.info(f"Function Integration is: {i_f}")
     return i_f, y
 
 def main():
@@ -122,7 +122,7 @@ def main():
     init_report_generator(config)
     # end customization/additions for report generator
 
-    logging.info("Evaluating the integration of the function ...")
+    logger.info("Evaluating the integration of the function ...")
 
     # - [ ] #todo #11_siva #acma_consultation do i refactor this at some time ? think. 
     # - [ ] #todo #11_siva #acma_consultation clean this up later

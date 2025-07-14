@@ -1,7 +1,7 @@
 # Standard library imports
 import copy
 import datetime
-import logging
+from loguru import logger
 import os
 
 # Third party imports
@@ -37,7 +37,7 @@ class DataExploration:
         pass
 
     def router(self, cfg):
-        logging.info(f"Starting {cfg['basename']} application ...")
+        logger.info(f"Starting {cfg['basename']} application ...")
 
         cfg = self.get_cfg_with_master_data(cfg)
 
@@ -48,7 +48,7 @@ class DataExploration:
         elif cfg["type"]["df_basic_statistics"]["flag"]:
             self.get_df_array_with_basic_statistics(cfg)
         else:
-            logging.info("No data exploration type selected.")
+            logger.info("No data exploration type selected.")
 
         return cfg
 
@@ -163,7 +163,7 @@ class DataExploration:
         for i in range(0, len(column_df)):
             unique_columns = list(set(list(column_df.iloc[i])))
             if len(unique_columns) > 1:
-                logging.info(f"Column mismatch: {unique_columns}")
+                logger.info(f"Column mismatch: {unique_columns}")
                 column = ",".join(unique_columns)
             else:
                 column = unique_columns[0]
@@ -175,8 +175,8 @@ class DataExploration:
         df_columns = list(df.columns)
         df_column_data_types = []
         for column in df_columns:
-            logging.debug(f"Data type for '{column}' : {type(df[column].iloc[0])}")
-            logging.debug(f"First element for '{column}': {df[column].iloc[0]}")
+            logger.debug(f"Data type for '{column}' : {type(df[column].iloc[0])}")
+            logger.debug(f"First element for '{column}': {df[column].iloc[0]}")
 
             column_data_type = None
             if is_numeric_dtype(df[column]):
