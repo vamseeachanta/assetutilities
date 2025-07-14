@@ -1,36 +1,15 @@
-# Standard library imports
 import os
-
-# Third party imports
-import colorama
-
-# Reader imports
-from assetutilities.engine import engine
-from assetutilities.modules.test_utilities.test_utilities import TestUtilities
-
-colorama.init(autoreset=True)
-
-# Standard library imports
-tu = TestUtilities()
+from src.assetutilities.engine import engine
 
 
 def run_process(input_file):
     if input_file is not None and not os.path.isfile(input_file):
         input_file = os.path.join(os.path.dirname(__file__), input_file)
     cfg = engine(input_file)
-    # obtained_result = cfg[cfg['basename']]
-    # for item_index, item in enumerate(obtained_result):
-    #     assert(os.path.isfile(item['zip_file_path']))
     return cfg
 
 
 def test_run_process():
     input_file = "test_zip_files_to_df.yml"
-
-    # pytest_output_file = "results/test_zip_by_stem_pytest.yml"
-    # pytest_output_file = tu.get_valid_pytest_output_file(
-    #     os.path.dirname(__file__), pytest_output_file)
-    # expected_result = ymlInput(pytest_output_file, updateYml=None)
-
-
-    run_process(input_file)
+    result = run_process(input_file)
+    assert result is not None
