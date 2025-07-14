@@ -7,7 +7,7 @@ for all development work.
 - [Python programming](https://github.com/vamseeachanta/pyproject-starter/blob/master/.ai/code-guidance/AI_ASSISTANT-PYTHON-BASIC.md)
 
 
-## Directory Structure
+## Project Specific Directory Structure
 
 Follow strict vertical slice architecture
 

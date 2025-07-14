@@ -30,7 +30,7 @@ digitalmodel = { path = "../digitalmodel", develop = true }
 include-package-data = true
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["dev_tools/requirements.txt"]}
+dependencies = {file = ["scripts/requirements.txt"]}
 
 [tool.poetry.scripts]
 sample_calculation = "assetutilities:__main__"
