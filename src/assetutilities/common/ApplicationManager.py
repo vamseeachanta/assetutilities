@@ -326,12 +326,16 @@ class ConfigureApplicationInputs:
         
         """
 
+        # Allow pytest to pass extra arguments without raising error
         if len(sys.argv) > 1 and inputfile is not None:
-            raise (
-                Exception(
-                    "2 Input files provided via arguments & function. Please provide only 1 file ... FAIL"
+            # If running under pytest, ignore extra sys.argv
+            if not any('pytest' in arg for arg in sys.argv[0:2]):
+                raise (
+                    Exception(
+                        "2 Input files provided via arguments & function. "
+                        "Please provide only 1 file ... FAIL"
+                    )
                 )
-            )
 
         cfg_argv_dict = {}
         if len(sys.argv) > 2:
@@ -340,35 +344,43 @@ class ConfigureApplicationInputs:
             except Exception as e:
                 print(sys.argv[2])
                 print(f"Error: {e}")
-                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
-
-
+                raise (
+                    ValueError(
+                        f"Check dictionary format provided in {sys.argv[2]} ... FAIL"
+                    )
+                )
             if isinstance(cfg_argv_dict_eval, dict):
                 cfg_argv_dict = cfg_argv_dict_eval
             else:
-                print("Dictionary not provided in sys.argv[2]. sys.arg vaules are:")
+                print("Dictionary not provided in sys.argv[2]. sys.arg values are:")
                 print(sys.argv[2])
-
                 print("System argument values are:")
                 for item in sys.argv:
                     print(f"item : {item}")
-                raise (ValueError(f"Check dictionary format provided in {sys.argv[2]} ... FAIL"))
-
-
+                raise (
+                    ValueError(
+                        f"Check dictionary format provided in {sys.argv[2]} ... FAIL"
+                    )
+                )
         if len(sys.argv) > 1:
             if not os.path.isfile(sys.argv[1]):
-                raise (FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL"))
+                raise (
+                    FileNotFoundError(
+                        f"Input file {sys.argv[1]} not found ... FAIL"
+                    )
+                )
             else:
                 inputfile = sys.argv[1]
-
         if len(sys.argv) <= 1:
             if not os.path.isfile(inputfile):
-                raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
+                raise (
+                    FileNotFoundError(
+                        f"Input file {inputfile} not found ... FAIL"
+                    )
+                )
             else:
                 sys.argv.append(inputfile)
-
         return inputfile, cfg_argv_dict
-
 
     def save_cfg(self, cfg_base):
         output_dir = cfg_base.Analysis["analysis_root_folder"]
@@ -377,23 +389,33 @@ class ConfigureApplicationInputs:
         filename_path = os.path.join(output_dir, "results", filename)
         cfg_base = self.standardize_yml_data(cfg_base)
 
-        save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)
+        save_data.saveDataYaml(
+            cfg_base,
+            filename_path,
+            default_flow_style=False
+        )
         return cfg_base
     
     def standardize_yml_data(self, data):
         """
-        Recursively clean up the yml data structure to ensure readability and consistency.
+        Recursively clean up the yml data structure to ensure readability
+        and consistency.
         """
         if isinstance(data, dict):  # Process dictionaries
-            return {key: self.standardize_yml_data(value) for key, value in data.items()}
+            return {
+                key: self.standardize_yml_data(value)
+                for key, value in data.items()
+            }
         elif isinstance(data, list):  # Process lists
             return [self.standardize_yml_data(item) for item in data]
         elif isinstance(data, Path):  # Convert WindowsPath to string
             return str(data)
         elif isinstance(data, np.ndarray):  # Convert NumPy arrays to lists
             return data.tolist()
-        elif isinstance(data, (np.integer, np.int32, np.int64)):  # Convert NumPy int to Python int
+        elif isinstance(data, (np.integer, np.int32, np.int64)):
+            # Convert NumPy int to Python int
             return int(data)
-        elif isinstance(data, (np.float32, np.float64)):  # Convert NumPy float to Python float
+        elif isinstance(data, (np.float32, np.float64)):
+            # Convert NumPy float to Python float
             return float(data)
-        return data 
+        return data
