@@ -1,0 +1,34 @@
+basename: excel_utilities
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+task: custom_calculation
+files:
+- io: tests\data\custom_calculation_polynomial.xlsx
+  sheet_name: Sheet1
+  index_col: 0
+  skiprows: 71
+  skipfooter: 34
+custom_calculation:
+  output:
+  - io: tests\data\custom_calculation_polynomial.xlsx
+    sheet_name: Sheet1
+    index_col: 0
+    skiprows: 71
+    skipfooter: 34
+Analysis:
+  basename: excel_utilities
+  analysis_root_folder: K:\github\assetutilities\tests\modules\excel_utilities
+  file_name: excel_utilities_custom_calculation
+  file_name_for_overwrite: excel_utilities_custom_calculation
+  log_folder: K:\github\assetutilities\tests\modules\excel_utilities\logs
+  start_time: 2025-07-14 22:12:21.231211
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: excel_utilities_custom_calculation.yml
+  result_folder: K:\github\assetutilities\tests\modules\excel_utilities\results
+  result_data_folder: K:\github\assetutilities\tests\modules\excel_utilities\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\excel_utilities\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\excel_utilities\results
