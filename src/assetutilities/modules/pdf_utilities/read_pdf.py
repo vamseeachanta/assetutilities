@@ -1,10 +1,9 @@
 # import camelot
-import tabula
 import PyPDF2
+import tabula
 
 
 class ReadPDF:
-
     def __init__(self) -> None:
         pass
 
@@ -40,4 +39,4 @@ class ReadPDF:
 
     def from_pdf_PyPDF2(self, cfg, file_index=0):
         reader = PyPDF2.PdfReader(cfg["files"]["from_pdf"][file_index]["io"])
-        page = reader.pages[3]
+        reader.pages[3]

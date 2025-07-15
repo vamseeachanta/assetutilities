@@ -1,0 +1,33 @@
+basename: file_edit
+edit_type: concatenate
+concatenate_type: array
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+input:
+- output_filename: 06a_501_section2_def
+  output_dir: ~
+  filename: ~
+  add_blank_file_in_between: false
+  input_files: []
+Analysis:
+  basename: file_edit
+  analysis_root_folder: K:\github\assetutilities\tests\modules\file_edit
+  file_name: file_edit
+  file_name_for_overwrite: file_edit
+  log_folder: K:\github\assetutilities\tests\modules\file_edit\logs
+  start_time: 2025-07-14 22:12:26.390745
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: file_edit.yml
+  result_folder: K:\github\assetutilities\tests\modules\file_edit\results
+  result_data_folder: K:\github\assetutilities\tests\modules\file_edit\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\file_edit\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\file_edit\results
+file_edit:
+  output_filename:
+  - []
+  batch_filename:
+  - K:\github\assetutilities\tests\modules\file_edit\file_edit_0.bat

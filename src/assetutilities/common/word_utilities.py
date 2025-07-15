@@ -1,12 +1,8 @@
-from re import search
-
-import docx
-
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 import pandas as pd
-import os
+from docx import Document
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Pt
+
 
 class WordUtilities:
     def __init__(self):
@@ -29,23 +25,22 @@ class WordUtilities:
                 print(True)
 
         # Open the .docx file
-        #document = opendocx("A document.docx")
+        # document = opendocx("A document.docx")
 
         # Search returns true if found
 
     def csv_to_docx(self, cfg):
-        
-        input_csv = cfg['files']['file_name']
+        input_csv = cfg["files"]["file_name"]
 
         df = pd.read_csv(input_csv)
 
-        for col in df.select_dtypes(include=['float']).columns:
+        for col in df.select_dtypes(include=["float"]).columns:
             df[col] = df[col].round(2)
-            
+
         doc = Document()
 
         table = doc.add_table(rows=1, cols=len(df.columns))
-        table.style = 'Table Grid'
+        table.style = "Table Grid"
 
         hdr_cells = table.rows[0].cells
         for i, column_name in enumerate(df.columns):
@@ -55,7 +50,7 @@ class WordUtilities:
                 for run in paragraph.runs:
                     run.font.size = Pt(10)
 
-        for index, row in df.iterrows():
+        for _index, row in df.iterrows():
             row_cells = table.add_row().cells
             for i, cell in enumerate(row):
                 row_cells[i].text = str(cell)
@@ -66,5 +61,5 @@ class WordUtilities:
 
         output_docx = input_csv.replace(".csv", ".docx")
         doc.save(output_docx)
-        
-        print(f"CSV file has been converted to DOCX file ")
+
+        print("CSV file has been converted to DOCX file ")

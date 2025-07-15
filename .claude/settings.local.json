@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv tool run ruff check:*)",
+      "Bash(git add:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv pip install:*)",
+      "Bash(uv run:*)",
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(timeout:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": []
+  }
+}

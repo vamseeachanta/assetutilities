@@ -1,9 +1,10 @@
 import importlib.util
-
-import os
 import logging
+import os
 from pathlib import Path
+
 from webcolors import rgb_to_hex
+
 from assetutilities.common.data import SaveData
 
 save_data = SaveData()
@@ -22,6 +23,7 @@ def get_module_path(module=None):
     module_info = imp.find_module(module)
     module_path = module_info[1]
     return module_path
+
 
 # Determine if file is valid
 def is_dir_valid_func(dir, analysis_root_folder=None):
@@ -64,8 +66,8 @@ def is_file_valid_func(file_name, analysis_root_folder=None):
 
     return file_is_valid, file_name
 
-def get_repository_filename(cfg):
 
+def get_repository_filename(cfg):
     file_is_valid = True
     filename_with_repo_path = cfg["filename"]
     library_name = cfg["library_name"]
@@ -77,7 +79,7 @@ def get_repository_filename(cfg):
     if repository_path is not None:
         repo_path = repository_path
     else:
-        repo_path = os.path.join(lib_path, '..', '..')
+        repo_path = os.path.join(lib_path, "..", "..")
     if not os.path.isdir(repo_path):
         raise FileNotFoundError("Directory Not Found")
     filename_with_repo_path = os.path.join(repo_path, cfg["filename"])
@@ -87,8 +89,8 @@ def get_repository_filename(cfg):
 
     return file_is_valid, filename_with_repo_path
 
-def get_repository_filepath(cfg):
 
+def get_repository_filepath(cfg):
     dir_is_valid = True
     repo_filepath = cfg["filepath"]
     library_name = cfg["library_name"]
@@ -100,7 +102,7 @@ def get_repository_filepath(cfg):
     if repository_path is not None:
         repo_full_filepath = repository_path
     else:
-        repo_full_filepath = os.path.join(lib_path, '..', '..', repo_filepath)
+        repo_full_filepath = os.path.join(lib_path, "..", "..", repo_filepath)
     if not os.path.isdir(repo_full_filepath):
         raise FileNotFoundError("Directory Not Found")
 

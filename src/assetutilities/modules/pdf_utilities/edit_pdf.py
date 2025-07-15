@@ -2,7 +2,6 @@ import PyPDF2
 
 
 class EditPDF:
-
     def __init__(self) -> None:
         pass
 
@@ -21,12 +20,11 @@ class EditPDF:
             self.from_pdf_PyPDF2(cfg, file_index)
 
     def from_pdf_PyPDF2(self, cfg, file_index=None):
-
         file_name = cfg["files"][file_index]["io"]
         pages_groups = cfg["files"][file_index]["pages"]
 
         import os
-        
+
         file_path = os.path.join(os.getcwd(), file_name)
         pdf_reader = PyPDF2.PdfReader(file_path)
 

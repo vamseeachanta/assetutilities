@@ -1,62 +1,62 @@
-&id001 !!python/object/new:assetutilities.common.data.AttributeDict
-state: *id001
-dictitems:
+library: assetutlities
+basename: data_exploration
+type:
+  df_statistics:
+    flag: false
+    df_array: true
+    df: true
+  df_basic_statistics:
+    flag: true
+    add_to_df: true
+data:
+  type: csv
+  groups:
+  - columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST1
+    file_name: tests/modules/data_exploration/csv/test_1.csv
+  - columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST2
+    file_name: tests/modules/data_exploration/csv/test_2.csv
+master_settings:
+  groups:
+    columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST2
+    file_name: tests/modules/data_exploration/csv/test_2.csv
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+Analysis:
   basename: data_exploration
-  type:
-    df_statistics:
-      flag: false
-      df_array: true
-      df: true
-    df_basic_statistics:
-      flag: true
-      add_to_df: true
-  data:
-    type: csv
+  analysis_root_folder: K:\github\assetutilities\tests\modules\data_exploration
+  file_name: df_basic_statistics_add_to_df
+  file_name_for_overwrite: df_basic_statistics_add_to_df
+  log_folder: K:\github\assetutilities\tests\modules\data_exploration\logs
+  start_time: 2025-07-13 21:12:22.244417
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: K:\github\assetutilities\tests\modules\data_exploration\df_basic_statistics_add_to_df.yml
+  result_folder: K:\github\assetutilities\tests\modules\data_exploration\results
+  result_data_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\data_exploration\results
+data_exploration:
+  df_basic_statistics:
     groups:
-    - columns:
-        x:
-        - Heading
-        y:
-        - Cx
+    - data: K:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST1.csv
       label: FST1
-      file_name: tests/modules/data_exploration/csv/test_1.csv
-    - columns:
-        x:
-        - Heading
-        y:
-        - Cx
+    - data: K:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST2.csv
       label: FST2
-      file_name: tests/modules/data_exploration/csv/test_2.csv
-  master_settings:
-    groups:
-      columns:
-        x:
-        - Heading
-        y:
-        - Cx
-      label: FST2
-      file_name: tests/modules/data_exploration/csv/test_2.csv
-  default:
-    log_level: DEBUG
-    config:
-      overwrite:
-        output: true
-  Analysis:
-    basename: data_exploration
-    analysis_root_folder: k:\github\assetutilities\tests\modules\data_exploration
-    file_name: df_basic_statistics_add_to_df
-    file_name_for_overwrite: df_basic_statistics_add_to_df
-    result_folder: k:\github\assetutilities\tests\modules\data_exploration\results
-    log_folder: k:\github\assetutilities\tests\modules\data_exploration\logs
-    start_time: 2024-11-28 12:19:00.226131
-    cfg_array_file_names: ~
-    DefaultInputFile: ~
-    CustomInputFile: k:\github\assetutilities\tests\modules\data_exploration\df_basic_statistics_add_to_df.yml
-    fe_folder: k:\github\assetutilities\tests\modules\data_exploration\results
-  data_exploration:
-    df_basic_statistics:
-      groups:
-      - data: k:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST1.csv
-        label: FST1
-      - data: k:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST2.csv
-        label: FST2

@@ -9,4 +9,3 @@ def decoratorWithArgumentExample(func=None, *, kw1=None):
         return cfg
 
     return wrapper_decoratorWithArgumentExample
-

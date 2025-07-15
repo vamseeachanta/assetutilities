@@ -4,14 +4,13 @@ import yaml
 
 
 def ymlInput(defaultYml, updateYml):
-
-    with open(defaultYml, "r") as ymlfile:
+    with open(defaultYml) as ymlfile:
         cfg = yaml.safe_load(ymlfile)
 
-    if updateYml != None:
+    if updateYml is not None:
         #  Update values file
         try:
-            with open(updateYml, "r") as ymlfile:
+            with open(updateYml) as ymlfile:
                 cfgUpdateValues = yaml.safe_load(ymlfile)
             #  Convert to logs
             # print(cfgUpdateValues)

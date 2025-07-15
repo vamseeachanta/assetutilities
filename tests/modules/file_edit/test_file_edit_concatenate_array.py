@@ -1,18 +1,16 @@
 # TODO fix the code
-import pytest
-import deepdiff
 import os
 import sys
-import numpy as np
 
 from assetutilities.engine import engine
-from assetutilities.common.yml_utilities import ymlInput
 
 
-def run_file(input_file, expected_result={}):
+def run_file(input_file, expected_result=None):
+    if expected_result is None:
+        expected_result = {}
     if input_file is not None and not os.path.isfile(input_file):
         input_file = os.path.join(os.path.dirname(__file__), input_file)
-    cfg = engine(input_file)
+    engine(input_file)
 
     # obtained_result = cfg[cfg['basename']]['properties']
     # expected_result = expected_result[cfg['basename']]['properties'].copy()

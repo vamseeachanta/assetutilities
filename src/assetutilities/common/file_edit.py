@@ -1,4 +1,3 @@
-
 from assetutilities.common.file_edit_concatenate import FileConcatenate
 from assetutilities.common.file_edit_split import FileSplit
 from assetutilities.common.file_management import FileManagement
@@ -9,7 +8,6 @@ fe_s = FileSplit()
 
 
 class FileEdit:
-
     def __init__(self) -> None:
         pass
 

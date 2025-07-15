@@ -1,8 +1,8 @@
-'''
+"""
 https://python-mss.readthedocs.io/examples.html
 https://www.thepythoncode.com/article/make-screen-recorder-python
 https://datatofish.com/screenshot-python/
-'''
+"""
 
 import os
 import os.path
@@ -18,7 +18,7 @@ def on_exists(fname):
 
     if os.path.isfile(fname):
         newfile = fname + ".old"
-        print("{} -> {}".format(fname, newfile))
+        print(f"{fname} -> {newfile}")
         os.rename(fname, newfile)
 
 

@@ -3,8 +3,8 @@
 # Third party imports
 import sympy as sp
 
-y=sp.Symbol('y')
-f = y**3 + 4*y + sp.cos(y)
+y = sp.Symbol("y")
+f = y**3 + 4 * y + sp.cos(y)
 print(f"Function is: {f}")
 
 i_f = sp.integrate(f, y)

@@ -1,15 +1,16 @@
 # Standard library imports
-import os
 import logging
 import operator
+import os
 from datetime import datetime
 from functools import reduce
-from unittest import result
 from pathlib import Path
+from unittest import result
+
+import numpy as np
 
 # Third party imports
 import pandas as pd
-import numpy as np
 import yaml
 from colorama import init as colorama_init
 
@@ -17,12 +18,10 @@ colorama_init()
 
 
 class ReadFromExcel:
-
     def __init__(self) -> None:
         pass
 
     def from_xlsx(self, cfg, file_index=0):
-        cfg_template_single_xlsx = {"io": "data_manager/data/sample_data.xlsx"}
         # Third party imports
         import pandas as pd
 
@@ -49,26 +48,21 @@ class ReadFromExcel:
 
 
 class ReadFromCSV:
-
     def __init__(self) -> None:
         pass
 
     def to_df(self, cfg, file_index=0):
-        sample_cfg = {"io": "data_manager/data/sample_data.csv"}
 
-        df = pd.read_csv(cfg["io"], delimiter=cfg["delimiter"], delim_whitespace=True)
+        pd.read_csv(cfg["io"], delimiter=cfg["delimiter"], delim_whitespace=True)
 
         return result
 
 
 class ReadData:
-
     def df_filter_by_column_values(self, cfg, df, file_index=0):
-        cfg_template = {}
         if cfg.__contains__("files"):
             filter_dict = cfg["files"]["from_xlsx"][file_index]["filter"]
         else:
-            cfg_template = {"filter": None}
             filter_dict = cfg["filter"]
         if filter_dict is not None:
             for filter_index in range(0, len(filter_dict)):
@@ -80,7 +74,6 @@ class ReadData:
         return df
 
     def from_df_delete_unwanted_columns(self, df, dropped_column_array):
-        sample_input_dropped_columns = [3, 5]
         df.drop(df.columns[dropped_column_array], axis=1, inplace=True)
 
         return df
@@ -127,10 +120,7 @@ class ReadData:
         )
         if cfg.__contains__("column"):
             if cfg["column"].__contains__("drop_unwanted_columns"):
-                dropped_column_array = [
-                    column
-                    for column in range(len(cfg["column"]["names"]), len(df.columns))
-                ]
+                dropped_column_array = list(range(len(cfg["column"]["names"]), len(df.columns)))
                 df = self.from_df_delete_unwanted_columns(df, dropped_column_array)
             if cfg["column"].__contains__("names"):
                 df.columns = cfg["column"]["names"]
@@ -162,7 +152,7 @@ class ReadData:
         if EndRowNumber > sh.nrows:
             EndRowNumber = sh.nrows
         for rownum in range(StartRowNumber, EndRowNumber):
-            ReadData.append((sh.row_values(rownum)))
+            ReadData.append(sh.row_values(rownum))
 
         df = pd.DataFrame(ReadData)
 
@@ -194,7 +184,7 @@ class ReadData:
         # Third party imports
         import yaml
 
-        with open(data["io"], "r") as ymlfile:
+        with open(data["io"]) as ymlfile:
             data_as_dictionary = yaml.load(ymlfile, Loader=yaml.Loader)
 
         return data_as_dictionary
@@ -256,13 +246,6 @@ class ReadData:
         pass
 
     def from_ascii_file_get_line_number_containing_keywords(self, cfg):
-        sample_data_1 = {
-            "io": "data_manager\\data\\shear7\\lid_02_cp01_2500ft_WT0750_064pcf.out",
-            "line": {
-                "key_words": ["5. Fundamental natural frequency"],
-                "transform": {"scale": 1, "shift": 0},
-            },
-        }
 
         all_lines_as_strings = self.from_ascii_file_get_lines_as_string_arrays(cfg)
         keyword_line_numbers = self.get_array_rows_containing_keywords(
@@ -271,7 +254,9 @@ class ReadData:
 
         return keyword_line_numbers
 
-    def get_array_rows_containing_keywords(self, array, key_words, cfg={}):
+    def get_array_rows_containing_keywords(self, array, key_words, cfg=None):
+        if cfg is None:
+            cfg = {}
         keyword_line_numbers = []
         for rownum in range(0, len(array)):
             if any(keyword in array[rownum] for keyword in key_words):
@@ -292,17 +277,6 @@ class ReadData:
         return keyword_line_numbers
 
     def from_ascii_file_get_value(self, cfg):
-        sample_cfg_format_1 = {"io": "data_manager/data/orcaflex/common.mds"}
-        sample_cfg_format_2 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": None,
-        }
-        sample_cfg_format_3 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": 10,
-        }
 
         from_string = FromString()
         line_text = self.from_ascii_file_get_lines_as_string_arrays(cfg)
@@ -317,24 +291,6 @@ class ReadData:
         # Third party imports
         import pandas as pd
 
-        sample_cfg_format_1 = {"io": "data_manager/data/orcaflex/common.mds"}
-        sample_cfg_format_2 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "DataFrame": True,
-        }
-        sample_cfg_format_2 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": None,
-            "DataFrame": True,
-        }  # Get only 1 line
-        sample_cfg_format_3 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": 10,
-            "DataFrame": True,
-        }
 
         all_lines_as_strings = self.from_ascii_file_get_lines_as_string_arrays(cfg)
         all_lines_float_objects = []
@@ -369,25 +325,6 @@ class ReadData:
         return result
 
     def from_ascii_file_get_lines_as_string_arrays(self, cfg):
-        sample_cfg_format_1 = {"io": "data_manager/data/orcaflex/common.mds"}
-        sample_cfg_format_2 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": None,
-        }
-        sample_cfg_format_2 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-        }  # Get till end of lines
-        sample_cfg_format_3 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "start_line": 5,
-            "end_line": 10,
-        }
-        sample_cfg_format_3 = {
-            "io": "data_manager/data/orcaflex/common.mds",
-            "lines_from_end": 2,
-        }
 
         all_lines = []
         if isinstance(cfg["io"], list):
@@ -397,32 +334,30 @@ class ReadData:
             etl_components = ETL_components(cfg=None)
             cfg["io"] = etl_components.convert_text_list_to_combined_text(cfg["io"])
 
-        with open(cfg["io"], "r") as f:
+        with open(cfg["io"]) as f:
             for line in f:
                 all_lines.append(line)
 
         start_line = 1
         end_line = len(all_lines)
 
-    
         if "lines_from_end" in cfg:
             end_line = len(all_lines)
             start_line = end_line - cfg["lines_from_end"]
-        
+
         if isinstance(cfg.get("start_line"), (list, tuple)):
-            start_line = cfg["start_line"][0] 
+            start_line = cfg["start_line"][0]
         else:
             start_line = cfg.get("start_line", 1)
 
         if isinstance(cfg.get("end_line"), (list, tuple)):
-            end_line = cfg["end_line"][0]  
+            end_line = cfg["end_line"][0]
         else:
             end_line = cfg.get("end_line", len(all_lines))
-    
+
         start_line = int(start_line) if start_line is not None else 1
         end_line = int(end_line) if end_line is not None else len(all_lines)
 
-    
         start_line = max(start_line, 1)
         end_line = min(end_line, len(all_lines))
 
@@ -436,11 +371,9 @@ class ReadData:
     def get_file_list_from_folder(
         self, folder_with_file_type, with_path=True, with_extension=True
     ):
-        folder_with_file_type_example = "Q:/projects/Mole/log_files/*.log"
 
         # Standard library imports
         import glob
-        import os
 
         file_list = []
         for file in glob.glob(folder_with_file_type):
@@ -463,17 +396,14 @@ class ReadData:
 
 
 class GetData:
-
     def download_file_from_url(self, cfg):
         # Standard library imports
-        import os
         import time
-        from pathlib import Path
 
         # Third party imports
         import wget
 
-        cfg_temp = {
+        {
             "url": "https://www.data.bsee.gov/Well/Files/APIRawData.zip",
             "download_to": os.path.abspath(Path("../data_manager/data/bsee")),
         }
@@ -485,20 +415,17 @@ class GetData:
             os.remove(filename)
 
         start_time = time.perf_counter()
-        print("Dowloading file: {}".format(filename))
+        print(f"Dowloading file: {filename}")
         wget.download(url, out=filename)
         end_time = time.perf_counter()
-        print("Downloading file: {} .... COMPLETE".format(filename))
+        print(f"Downloading file: {filename} .... COMPLETE")
         print(
-            "Time Taken to download: {} .... COMPLETE".format(
-                (end_time - start_time).__round__(3)
-            )
+            f"Time Taken to download: {(end_time - start_time).__round__(3)} .... COMPLETE"
         )
         return {"filename": filename, "result": True}
 
 
 class FromString:
-
     def using_regex(self, ref_text, string):
         # Standard library imports
         import re
@@ -532,18 +459,6 @@ class FromString:
         return new_string
 
     def get_value_by_delimiter(self, cfg):
-        cfg_sample_1 = {
-            "text": "          97        2001",
-            "delimiter": " ",
-            "column": 2,
-            "data_type": "float",
-        }
-        cfg_sample_2 = {
-            "text": "0.017300(Hz)",
-            "delimiter": "(",
-            "column": 1,
-            "data_type": "float",
-        }
 
         if cfg["delimiter"] == " ":
             result = cfg["text"].split()[cfg["column"] - 1]
@@ -562,7 +477,6 @@ class FromString:
 
 
 class SaveData:
-
     def saveDataJson(self, data, fileName):
         # Standard library imports
         import json
@@ -577,14 +491,14 @@ class SaveData:
         if default_flow_style is None:
             with open(fileName + ".yml", "w") as f:
                 yaml.dump(data, f)
-        
-        
+
         elif default_flow_style == "NonAlias":
             with open(fileName + ".yml", "w") as f:
                 yaml.dump(data, f, Dumper=noalias_dumper)
         elif default_flow_style == "ruamel":
             # Third party imports
             from ruamel.yaml import ruamel
+
             with open(fileName + ".yml", "w") as f:
                 ruamel.yaml.dump(data, f)
         elif default_flow_style == "round_trip_dump":
@@ -627,10 +541,10 @@ class SaveData:
 
         try:
             # WorkSheet = wb.get_sheet_by_name(data['SheetName'])
-            WorkSheet = wb[data["SheetName"]]
+            wb[data["SheetName"]]
         except:
             wb.create_sheet(data["SheetName"])
-            WorkSheet = wb[data["SheetName"]]
+            wb[data["SheetName"]]
 
         df.to_excel(writer, data["SheetName"])
         writer.save()
@@ -655,10 +569,10 @@ class SaveData:
 
         try:
             # WorkSheet = wb.get_sheet_by_name(data['SheetName'])
-            WorkSheet = wb[data["SheetName"]]
+            wb[data["SheetName"]]
         except:
             wb.create_sheet(data["SheetName"])
-            WorkSheet = wb[data["SheetName"]]
+            wb[data["SheetName"]]
 
             #  For xlsxwriter
             # WorkSheet = wb.add_worksheet(data['SheetName'])
@@ -699,7 +613,7 @@ class SaveData:
         # cfg_example = {'template_file_name': file_name, 'sheetname': sheetname, 'saved_file_name': file_name, 'if_sheet_exists': 'replace', 'df': df, 'index': False}
 
         template_file_name = cfg["template_file_name"]
-        saved_file_name = cfg["saved_file_name"]
+        cfg["saved_file_name"]
         sheetname = cfg["sheetname"]
         df = cfg["df"]
         if_sheet_exists = cfg.get("if_sheet_exists", "replace")
@@ -761,19 +675,21 @@ class SaveData:
         row_height=0.625,
         font_size=14,
         header_color="#40466e",
-        row_colors=["#f1f1f2", "w"],
+        row_colors=None,
         edge_color="w",
-        bbox=[0, 0, 1, 1],
+        bbox=None,
         header_columns=0,
         ax=None,
         **kwargs,
     ):
-
         # Third party imports
         import matplotlib.pyplot as plt
-        import numpy as np
         import six
 
+        if bbox is None:
+            bbox = [0, 0, 1, 1]
+        if row_colors is None:
+            row_colors = ["#f1f1f2", "w"]
         self.plt = plt
 
         if ax is None:
@@ -805,19 +721,18 @@ class SaveData:
         f.close()
 
     def WriteOrcaFlexYMLFile(self, Files, output_filename):
-        print('Write file: "{0}" .... '.format(output_filename))
+        print(f'Write file: "{output_filename}" .... ')
         with open(output_filename, "w") as f:
             for file in Files:
                 if isinstance(file, str):
-                    with open(file, "r") as infile:
+                    with open(file) as infile:
                         f.write(infile.read())
                 else:
                     yaml.dump(file, f)
-        print('Write file: "{0}" .... COMPLETE'.format(output_filename))
+        print(f'Write file: "{output_filename}" .... COMPLETE')
 
 
 class DefineData:
-
     def empty_data_frame(self, columns=None):
         # Third party imports
         import pandas as pd
@@ -836,9 +751,8 @@ class DefineData:
 
 
 class AttributeDict(dict):
-
     def __init__(self, *args, **kwargs):
-        super(AttributeDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__dict__ = self
 
 
@@ -861,7 +775,6 @@ class objdict(dict):
 
 
 class DateTimeUtility:
-
     def last_day_of_month(self, any_day):
         # Standard library imports
         import datetime
@@ -873,7 +786,6 @@ class DateTimeUtility:
 
 
 class Transform:
-
     def numpy_interp(
         self,
     ):
@@ -881,7 +793,6 @@ class Transform:
         pass
 
     def gis_deg_to_distance(self, df, cfg):
-        cfg_sample = {"Longitude": "BOT_LONG", "Latitude": "BOT_LAT", "label": "BOT"}
         # Third party imports
         import utm
 
@@ -961,7 +872,9 @@ class Transform:
 
         return df_transposed
 
-    def dataframe_to_dict(self, df, cfg={}):
+    def dataframe_to_dict(self, df, cfg=None):
+        if cfg is None:
+            cfg = {}
         json_dict = {}
         if df is not None:
             # Standard library imports
@@ -988,13 +901,14 @@ class Transform:
 
         return df.copy()
 
-    def dataframe_to_json(self, df, cfg={}):
+    def dataframe_to_json(self, df, cfg=None):
         # Third party imports
         import pandas as pd
 
+        if cfg is None:
+            cfg = {}
         json_string = ""
         if df is not None:
-
             orient = cfg.get("orient", "records")
             index = cfg.get("index", True)
             if index:
@@ -1019,11 +933,6 @@ class Transform:
         return df
 
     def transform_list_to_unique_list(self, cfg):
-        cfg_temp = {
-            "list": ["001", "001", "002"],
-            "transform_character": "trailing_alphabet",
-            "result": ["001", "001a", "002"],
-        }
         old_list = cfg["list"]
         old_list.reverse()
         new_list = old_list.copy()
@@ -1077,7 +986,9 @@ class Transform:
                 df_transposed.columns = transpose_df_columns
         return df_transposed
 
-    def dataframe_to_html(self, df=None, cfg_settings={}):
+    def dataframe_to_html(self, df=None, cfg_settings=None):
+        if cfg_settings is None:
+            cfg_settings = {}
         if df is None:
             # Third party imports
             import pandas as pd
@@ -1108,7 +1019,6 @@ class Transform:
             html = html.replace("<thead>", thead)
             return html
         else:
-
             for column in cfg_settings["json_transformation"]["columns"]:
                 json_array = []
                 for df_row in range(0, len(df)):
@@ -1152,8 +1062,8 @@ class Transform:
 
         return transformed_df
 
-class TransformData:
 
+class TransformData:
     def __init__(self):
         pass
 
@@ -1162,8 +1072,6 @@ class TransformData:
         calculate_function(cfg)
 
     def linear(self, cfg):
-        cfg_example1 = {"scale": 1, "shift": 3, "data": [1, 2, 3, 4], "type": "linear"}
-        cfg_example2 = {"scale": 1, "shift": 3, "data": 1, "type": "linear"}
 
         scale = cfg["scale"]
         shift = cfg["shift"]
@@ -1176,7 +1084,6 @@ class TransformData:
 
 
 class TransferDataFromExcelToWord:
-
     def __init__(self):
         pass
 
@@ -1227,7 +1134,6 @@ if __name__ == "__main__":
 
 
 class PandasChainedAssignent:
-
     def __init__(self, chained=None):
         acceptable = [None, "warn", "raise"]
         assert chained in acceptable, "chained must be in " + str(acceptable)
@@ -1294,7 +1200,6 @@ class CopyAndPasteFiles:
 
 
 class NumberFormat:
-
     def __init__(self):
         pass
 

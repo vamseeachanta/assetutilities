@@ -1,0 +1,54 @@
+basename: file_edit
+edit_type: concatenate
+concatenate_type: array
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+input:
+- output_filename: NULl
+  input_file_labels:
+  - 09moors
+  - 10moors
+  output_basename: no_load
+  output_dir: ~
+  file_extension: dat
+  filename: ~
+  input_files:
+  - - concatenate/_0to9_static.deck
+    - concatenate/_10_no_tug.deck
+    - concatenate/_11_12.deck
+    - concatenate/_13_000MPH000WD.deck
+    - concatenate/_14_09moors.deck
+    - concatenate/_15_.deck
+  - - concatenate/_0to9_static.deck
+    - concatenate/_10_no_tug.deck
+    - concatenate/_11_12.deck
+    - concatenate/_13_000MPH000WD.deck
+    - concatenate/_14_10moors.deck
+    - concatenate/_15_.deck
+  batch:
+    flag: true
+    extension: false
+    content: C:\Program Files\ANSYS Inc\v182\aqwa\bin\winx64\aqwa.exe /nowind
+Analysis:
+  basename: file_edit
+  analysis_root_folder: K:\github\assetutilities\tests\modules\file_edit
+  file_name: file_edit_concatenate_array
+  file_name_for_overwrite: file_edit_concatenate_array
+  log_folder: K:\github\assetutilities\tests\modules\file_edit\logs
+  start_time: 2025-07-14 22:12:36.209255
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: file_edit_concatenate_array.yml
+  result_folder: K:\github\assetutilities\tests\modules\file_edit\results
+  result_data_folder: K:\github\assetutilities\tests\modules\file_edit\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\file_edit\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\file_edit\results
+file_edit:
+  output_filename:
+  - - no_load_09moors
+    - no_load_10moors
+  batch_filename:
+  - K:\github\assetutilities\tests\modules\file_edit\file_edit_concatenate_array_0.bat

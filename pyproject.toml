@@ -1,44 +1,23 @@
-[tool.poetry]
+[project]
 name = "assetutilities"
 version = "0.0.7"
 description = "utilities for general use"
+authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
+license = {text = "MIT"}
 readme = "README.md"
-authors = ["Vamsee Achanta <vamsee.achanta@aceengineer.com>"]
-license = "MIT"
-packages = [
-    { include = "assetutilities", from = "src" }
-]
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-]
-keywords = ['package', 'library', 'module']
+requires-python = ">=3.8"
 
-[tool.poetry.group.dev.dependencies]
-black = "*"
-bumpver = "*"
-isort = "*"
-pytest = "*"
-build = "*"
-twine = "*"
-
-[tool.poetry.group.local.dependencies]
-digitalmodel = { path = "../digitalmodel", develop = true }
-
-[tool.setuptools]
+[setuptools]
 include-package-data = true
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["dev_tools/requirements.txt"]}
+[setuptools.dynamic]
+dependencies = {file = ["scripts/requirements.txt"]}
 
-[tool.poetry.scripts]
-sample_calculation = "assetutilities:__main__"
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry.urls]
-repository = "https://github.com/vamseeachanta/assetutilities"
-documentation = "https://github.com/vamseeachanta/assetutilities/blob/main/README.md"
-
+[tool]
 [tool.bumpver]
 current_version = "0.0.7"
 version_pattern = "MAJOR.MINOR.PATCH"
@@ -55,39 +34,28 @@ push = false
 "src/assetutilities/__init__.py" = ["{version}"]
 "src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
 
-[tool.isort]
-profile = "black"
-import_heading_stdlib = "Standard library imports"
-import_heading_thirdparty = "Third party imports"
-import_heading_firstparty = "Reader imports"
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-line_length = 88
+[tool.ruff]
+line-length = 88
+target-version = "py38"
 
-[tool.mypy]
-strict = true
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = []
 
-[[tool.mypy.overrides]]
-module = "feedparser"
-ignore_missing_imports = true
+[tool.ruff.lint.isort]
+known-first-party = ["assetutilities"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-exclude = '''
-/(
-    \.git
-  | \.mypy_cache
-  | \.tox
-  | venv
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | _dev_private
-)/
-'''
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

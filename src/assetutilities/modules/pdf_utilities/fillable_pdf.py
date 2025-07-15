@@ -1,15 +1,14 @@
-""" 
+"""
 https://github.com/jorisschellekens/borb-examples#22-steps-to-creating-a-pdf-using-borb
 
 
 https://stackabuse.com/creating-a-form-in-a-pdf-document-in-python-with-borb/
 """
 
-from borb.pdf import Document
-from borb.pdf import Page
-from borb.pdf.pdf import PDF
+from borb.pdf import Document, Page
 from borb.pdf.canvas.layout.page_layout.multi_column_layout import SingleColumnLayout
 from borb.pdf.canvas.layout.page_layout.page_layout import PageLayout
+from borb.pdf.pdf import PDF
 
 # Create empty Document
 pdf = Document()
@@ -24,13 +23,14 @@ pdf.add_page(page)
 layout: PageLayout = SingleColumnLayout(page)
 
 # New import(s)
+from decimal import Decimal
+
+from borb.pdf.canvas.color.color import HexColor
+from borb.pdf.canvas.layout.forms.drop_down_list import DropDownList
+from borb.pdf.canvas.layout.forms.text_field import TextField
+from borb.pdf.canvas.layout.layout_element import Alignment
 from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable
 from borb.pdf.canvas.layout.text.paragraph import Paragraph
-from borb.pdf.canvas.layout.forms.text_field import TextField
-from borb.pdf.canvas.color.color import HexColor
-from decimal import Decimal
-from borb.pdf.canvas.layout.layout_element import Alignment
-from borb.pdf.canvas.layout.forms.drop_down_list import DropDownList
 
 # Let's start by adding a heading
 layout.add(Paragraph("Patient Information:", font="Helvetica-Bold"))
@@ -96,9 +96,9 @@ layout.add(Paragraph("Data Protection Policy", font="Helvetica-Bold"))
 layout.add(
     Paragraph(
         """
-    ** Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+    ** Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
     Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     """,
         font="Helvetica-Oblique",
@@ -107,13 +107,12 @@ layout.add(
 
 # New import(s)
 import typing
-from borb.pdf.canvas.geometry.rectangle import Rectangle
-from borb.pdf.page.page_size import PageSize
-from borb.pdf.canvas.line_art.line_art_factory import LineArtFactory
 
 # from borb.pdf.canvas.layout.image.shape import Shape
 from borb.pdf import ConnectedShape
-from borb.pdf import X11Color
+from borb.pdf.canvas.geometry.rectangle import Rectangle
+from borb.pdf.canvas.line_art.line_art_factory import LineArtFactory
+from borb.pdf.page.page_size import PageSize
 
 ps: typing.Tuple[Decimal, Decimal] = PageSize.A4_PORTRAIT.value
 r: Rectangle = Rectangle(Decimal(0), Decimal(32), ps[0], Decimal(8))

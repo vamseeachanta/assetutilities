@@ -1,5 +1,4 @@
 class Visualization:
-
     def __init__(self, plt_settings=None):
         # matplotlib.use('Agg')
         # Third party imports
@@ -12,7 +11,7 @@ class Visualization:
         self.current_ax = None
         self.cfg_mult = None
         self.fig_suptitle_flag = False
-        if plt_settings != None:
+        if plt_settings is not None:
             self.plt_settings = plt_settings
             self.set_plot_size_orientation()
 
@@ -85,7 +84,6 @@ class Visualization:
         import matplotlib.pyplot as plt
 
         self.plt = plt
-        plot_type = "from_df_array"
 
         for df_index in range(0, len(df_array)):
             if len(df_array[df_index]) > 0:
@@ -93,8 +91,7 @@ class Visualization:
                 self.from_df_columns(df_array[df_index], plt_settings)
 
     def from_df_columns(self, df, plt_settings=None):
-        sample_plt_settings = {}
-        if plt_settings == None:
+        if plt_settings is None:
             plt_settings = self.plt_settings
         else:
             self.plt_settings = plt_settings
@@ -195,7 +192,7 @@ class Visualization:
                         self.plot_object.xticks(ind + width / 2, x)
 
         if len(plt_settings["y"]) == 1 and len(plt_settings["x"]) > 1:
-            for column_index in range(0, len((plt_settings["x"]))):
+            for column_index in range(0, len(plt_settings["x"])):
                 if not plt_settings.__contains__("plt_kind"):
                     self.plot_object.plot(
                         df[plt_settings["x"][column_index]],
@@ -272,7 +269,7 @@ class Visualization:
         self.plt = plt
         self.plt_settings = plt_settings
 
-        if self.plt_settings["marker"] != None:
+        if self.plt_settings["marker"] is not None:
             df.plot(
                 kind=self.plt_settings["plt_kind"],
                 marker=self.plt_settings["marker"]["type"],
@@ -282,7 +279,7 @@ class Visualization:
         else:
             df.plot(kind=self.plt_settings["plt_kind"], rot=0)
 
-        if self.plt_settings["ylim"] != None:
+        if self.plt_settings["ylim"] is not None:
             self.plt.ylim(self.plt_settings["ylim"])
 
         self.add_x_y_scale_formats()
@@ -299,13 +296,13 @@ class Visualization:
 
     def add_x_y_lim_formats(self):
         if self.plt_settings.__contains__("ylim"):
-            if self.plt_settings["ylim"] != None:
+            if self.plt_settings["ylim"] is not None:
                 if self.cfg_mult is None:
                     self.plot_object.ylim(self.plt_settings["ylim"])
                 else:
                     self.plot_object.set_ylim(self.plt_settings["ylim"])
         if self.plt_settings.__contains__("xlim"):
-            if self.plt_settings["xlim"] != None:
+            if self.plt_settings["xlim"] is not None:
                 if self.cfg_mult is None:
                     self.plot_object.xlim(self.plt_settings["xlim"])
                 else:
@@ -374,8 +371,7 @@ class Visualization:
         # self.plt.close()
 
     def add_title_and_axis_labels(self, plt_settings=None):
-        sample_plt_settings = {}
-        if plt_settings == None:
+        if plt_settings is None:
             plt_settings = self.plt_settings
         else:
             self.plt_settings = plt_settings
@@ -413,17 +409,13 @@ class Visualization:
         try:
             ax = self.plot_object.axes()
             if max(ax.get_yticks().tolist()) < 0.001:
-                ax.set_yticklabels(
-                    ["{:.1e}".format(item) for item in ax.get_yticks().tolist()]
-                )
+                ax.set_yticklabels([f"{item:.1e}" for item in ax.get_yticks().tolist()])
         except:
             print("Axis not formatted")
         try:
             ax = self.plot_object.axes()
             if max(ax.get_xticks().tolist()) < 0.001:
-                ax.set_xticklabels(
-                    ["{:.1e}".format(item) for item in ax.get_xticks().tolist()]
-                )
+                ax.set_xticklabels([f"{item:.1e}" for item in ax.get_xticks().tolist()])
         except:
             print("Axis not formatted")
 
@@ -512,7 +504,7 @@ class Visualization:
                     try:
                         self.plot_object.locator_params(nbins=10, axis="x")
                     except Exception as e:
-                        print("Error encountered while autoformat : {}".format(e))
+                        print(f"Error encountered while autoformat : {e}")
 
     def add_text_fields(self):
         if self.plt_settings.__contains__("text_fields"):
@@ -549,7 +541,7 @@ class Visualization:
                 label_column = df[annotate_label_column]
             for xa, ya, label in zip(x, y, label_column):
                 if annotate_label_column is None:
-                    label = "({:.1f}, {:.1f})".format(xa, ya)
+                    label = f"({xa:.1f}, {ya:.1f})"
 
                 self.plt.annotate(
                     label,  # this is the text
@@ -686,7 +678,7 @@ class Visualization:
                 + cfg["RangeGraph"][RangeGraphIndex]["FileName"]
             )
 
-            if cfg["RangeGraph"][RangeGraphIndex]["axhline"] != None:
+            if cfg["RangeGraph"][RangeGraphIndex]["axhline"] is not None:
                 self.plt.axhline(
                     y=cfg["RangeGraph"][RangeGraphIndex]["axhline"],
                     color="r",
@@ -705,7 +697,7 @@ class Visualization:
             self.plt.savefig(FileName, dpi=800)
             self.plt.close()
 
-        print("Saved {0} Range Graphs".format(len(cfg["RangeGraph"])))
+        print("Saved {} Range Graphs".format(len(cfg["RangeGraph"])))
 
     def example_group_bar_plot1_gist(self):
         # Third party imports

@@ -1,17 +1,17 @@
+import inspect
 import logging
 import os
 import sys
-import inspect
 
 from loguru import logger
 
-def set_logging(cfg):
 
+def set_logging(cfg):
     log_level = cfg["default"]["log_level"].upper()
     logNumericLevel = getattr(logging, log_level)
 
     if not isinstance(logNumericLevel, int):
-        raise ValueError("Invalid log level: %s" % cfg["default"]["log_level"])
+        raise ValueError("Invalid log level: {}".format(cfg["default"]["log_level"]))
 
     # Create log directory if not existing
     if not os.path.exists(cfg["Analysis"]["log_folder"]):
@@ -40,15 +40,20 @@ def set_logging(cfg):
 
     config = {
         "handlers": [
-            {"sink": sys.stdout, "format": "{time} - {name} - {level} - {message}", 'level': log_level},
-            {"sink": logfilename, "serialize": True, 'level': log_level},
+            {
+                "sink": sys.stdout,
+                "format": "{time} - {name} - {level} - {message}",
+                "level": log_level,
+            },
+            {"sink": logfilename, "serialize": True, "level": log_level},
         ],
         # "extra": {"user": "someone"},
-        }
+    }
     logger.configure(**config)
     logger.add(PropagateHandler())
 
     return cfg
+
 
 class InterceptHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
@@ -69,10 +74,11 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 class PropagateHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         logging.getLogger(record.name).handle(record)
-

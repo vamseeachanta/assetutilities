@@ -1,17 +1,17 @@
 # Standard library imports
 import copy
 import datetime
-import logging
 import os
 
 # Third party imports
 import pandas as pd
+from loguru import logger
+from pandas.api.types import is_numeric_dtype, is_string_dtype
 
 # Reader imports
 from assetutilities.common.data import ReadData
 from assetutilities.common.data_management import DataManagement
 from assetutilities.common.update_deep import update_deep_dictionary
-from pandas.api.types import is_numeric_dtype, is_string_dtype
 
 read_data = ReadData()
 dm = DataManagement()
@@ -37,7 +37,7 @@ class DataExploration:
         pass
 
     def router(self, cfg):
-        logging.info(f"Starting {cfg['basename']} application ...")
+        logger.info(f"Starting {cfg['basename']} application ...")
 
         cfg = self.get_cfg_with_master_data(cfg)
 
@@ -48,7 +48,7 @@ class DataExploration:
         elif cfg["type"]["df_basic_statistics"]["flag"]:
             self.get_df_array_with_basic_statistics(cfg)
         else:
-            logging.info("No data exploration type selected.")
+            logger.info("No data exploration type selected.")
 
         return cfg
 
@@ -99,7 +99,9 @@ class DataExploration:
         for df_item in df_array:
             label = next(iter(df_item.keys()))
             df = df_item.get(label, pd.DataFrame())
-            df_statistics = self.get_df_with_basic_statistics(cfg_df_basic_statistics, df)
+            df_statistics = self.get_df_with_basic_statistics(
+                cfg_df_basic_statistics, df
+            )
             filename = os.path.join(
                 cfg["Analysis"]["result_folder"],
                 cfg["Analysis"]["file_name"] + "_" + label + ".csv",
@@ -107,9 +109,11 @@ class DataExploration:
 
             df_statistics.to_csv(filename, index=False)
 
-            basic_statistic_array.append({'data': filename, 'label': label})
+            basic_statistic_array.append({"data": filename, "label": label})
 
-        cfg[cfg['basename']] = {'df_basic_statistics': {'groups': basic_statistic_array}}
+        cfg[cfg["basename"]] = {
+            "df_basic_statistics": {"groups": basic_statistic_array}
+        }
 
     def get_df_with_basic_statistics(self, cfg_df_basic_statistics, df):
         df_column_data_types = self.get_inferred_df_data_types(df)
@@ -123,7 +127,6 @@ class DataExploration:
         df_col_stdev_list = []
 
         for column_index, column in enumerate(df_columns):
-            df_column = column
             data_type = df_column_data_types[column_index]
             if data_type == "datetime":
                 df[column] = pd.to_datetime(df[column])
@@ -148,8 +151,8 @@ class DataExploration:
         df_statistics.loc["max"] = df_col_max_list
         df_statistics.loc["mean"] = df_col_mean_list
         df_statistics.loc["stdev"] = df_col_stdev_list
-        
-        df_statistics['statistic'] = df_statistics.index
+
+        df_statistics["statistic"] = df_statistics.index
 
         if cfg_df_basic_statistics is not None and cfg_df_basic_statistics["add_to_df"]:
             df = pd.concat([df, df_statistics])
@@ -161,9 +164,9 @@ class DataExploration:
         column_df = df_statistics_summary["column"]
         df_statistics_summary_columns = []
         for i in range(0, len(column_df)):
-            unique_columns = list(set(list(column_df.iloc[i])))
+            unique_columns = list(set(column_df.iloc[i]))
             if len(unique_columns) > 1:
-                logging.info(f"Column mismatch: {unique_columns}")
+                logger.info(f"Column mismatch: {unique_columns}")
                 column = ",".join(unique_columns)
             else:
                 column = unique_columns[0]
@@ -175,8 +178,8 @@ class DataExploration:
         df_columns = list(df.columns)
         df_column_data_types = []
         for column in df_columns:
-            logging.debug(f"Data type for '{column}' : {type(df[column].iloc[0])}")
-            logging.debug(f"First element for '{column}': {df[column].iloc[0]}")
+            logger.debug(f"Data type for '{column}' : {type(df[column].iloc[0])}")
+            logger.debug(f"First element for '{column}': {df[column].iloc[0]}")
 
             column_data_type = None
             if is_numeric_dtype(df[column]):
@@ -187,7 +190,7 @@ class DataExploration:
 
             if column_data_type == "string":
                 try:
-                    abc = pd.to_datetime(df[column].iloc[0])
+                    pd.to_datetime(df[column].iloc[0])
                     column_data_type = "datetime"
                 except:
                     pass
