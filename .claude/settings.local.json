@@ -18,7 +18,11 @@
       "Bash(git pull:*)",
       "Bash(git gc:*)",
       "Bash(grep:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(uv build:*)",
+      "Bash(uv tool run twine check:*)",
+      "Bash(uv tool run twine upload:*)",
+      "Bash(uv publish:*)"
     ],
     "deny": []
   }
