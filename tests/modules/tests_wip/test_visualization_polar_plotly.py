@@ -1,5 +1,5 @@
 import os
-from src.assetutilities.engine import engine
+from assetutilities.engine import engine
 
 
 def run_visualization_polar(input_file):
@@ -13,9 +13,6 @@ def test_visualization_polar():
     input_file = "test_data/visualization/visualization_polar_plotly.yml"
     result = run_visualization_polar(input_file)
     assert result is not None
-        sys.argv.pop()
-
-    run_visualization_polar(input_file, expected_result)
 
 
 # test_visualization_polar()

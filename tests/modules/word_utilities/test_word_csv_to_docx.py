@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from src.assetutilities.engine import engine
+from assetutilities.engine import engine
 
 
 @pytest.mark.skip(reason="Only works in local drive")

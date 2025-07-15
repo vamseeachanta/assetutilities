@@ -1,6 +1,6 @@
 import os
 
-from src.assetutilities.engine import engine
+from assetutilities.engine import engine
 
 
 def run_visualization_polar(input_file):

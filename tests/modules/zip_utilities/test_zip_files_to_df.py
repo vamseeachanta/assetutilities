@@ -1,6 +1,6 @@
 import os
 
-from src.assetutilities.engine import engine
+from assetutilities.engine import engine
 
 
 def run_process(input_file):
