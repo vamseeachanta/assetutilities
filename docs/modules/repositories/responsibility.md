@@ -103,7 +103,7 @@ flowchart TD
 ### Complete Repository Overview
 
 ```mermaid
-graph TD
+graph LR
     %% Collaborative repositories (Multi-author)
     subgraph Collaborative ["`🤝 **Collaborative Repositories**`"]
         AU["`**assetutilities**
