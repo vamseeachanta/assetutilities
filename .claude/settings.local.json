@@ -1,31 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(uv tool run ruff check:*)",
-      "Bash(git add:*)",
-      "Bash(uv run pytest:*)",
-      "Bash(uv pip install:*)",
-      "Bash(uv run:*)",
-      "Bash(find:*)",
-      "Bash(python:*)",
-      "Bash(ls:*)",
-      "Bash(timeout:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git remote:*)",
-      "Bash(git branch:*)",
-      "Bash(git checkout:*)",
-      "Bash(git pull:*)",
-      "Bash(git gc:*)",
-      "Bash(grep:*)",
-      "Bash(git tag:*)",
-      "Bash(uv build:*)",
-      "Bash(uv tool run twine check:*)",
-      "Bash(uv tool run twine upload:*)",
-      "Bash(uv publish:*)",
-      "Bash(mkdir:*)"
-      "Bash(uv venv:*)",
-      "Bash(uv sync:*)"
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
