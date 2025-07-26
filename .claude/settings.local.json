@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(mkdir:*)",
+      "Bash(git checkout:*)",
+      "Bash(chmod:*)",
+      "Bash(python -m pytest tests/bash-setup/ -v)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
