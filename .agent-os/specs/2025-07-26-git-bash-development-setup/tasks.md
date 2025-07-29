@@ -15,7 +15,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.5 Verify all core structure tests pass
 
 - [ ] 2. Implement Git Bash Configuration Management
-  - [ ] 2.1 Write tests for .bashrc modification and backup
+  - [x] 2.1 Write tests for .bashrc modification and backup
   - [ ] 2.2 Create automatic project configuration loading mechanism
   - [ ] 2.3 Implement safe .bashrc modification with backup
   - [ ] 2.4 Add project-specific override functionality
