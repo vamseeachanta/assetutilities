@@ -1,0 +1,21 @@
+- Utilize a framework with gaurdrails and best practices. An example is below:
+  - https://github.com/vamseeachanta/assetutilities/blob/main/.agent-os/specs/2025-07-29-agent-os-integration/spec.md
+  - Add universal work principles to all future specs. This is where you can do so. 
+- Use simplelest AI tool to learn how to use the AI:
+  - A autocomplete to code generating Copilot journey over last 5 years has been crucial for AI upskilling.
+- Make below AI assets AI friendly and portable (across systems, users, and teams):
+  - prompts
+    - https://github.com/vamseeachanta/assetutilities/blob/main/.agent-os/specs/2025-07-29-agent-os-integration/spec.md#executive-summary
+  - general or program specific input files in ascii formats
+    - md (the new all in one format), yaml, json, csv, etc. For example, my fea files are yaml (OrcaFlex) or text based (ANSYS).
+    - Ensure compatibility across different platforms, tools, users (team mates, AI agents, personas etc.).
+  - Bash scripts applicable to any OS
+   - rather than powershell or dos commands.
+- Let AI be the fisherman not the fish:
+  - Only use prompt curation. 
+    - Even better use your voice (and minor keyboard).
+    - You can do your chores while AI does the work.
+  - AI should go from prompt -> plan -> tasks -> code -> output -> tests -> documentation -> feedback loop.
+  - Ensure continuous improvement through regular feedback and iteration
+- Follow a repository/project structure and enforce with spartan discipline across your teams:
+  - Use a standard structure for all AI projects to ensure consistency, ease of navigation, future use etc..
