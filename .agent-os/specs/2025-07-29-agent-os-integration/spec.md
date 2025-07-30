@@ -8,7 +8,7 @@
 
 **Prompt for Future Reuse:**
 ```
-Set up Agent OS for this repository with comprehensive team collaboration features. Execute the following implementation with logical task dependency ordering:
+Set up buildermethods Agent OS (https://github.com/buildermethods/agent-os) for this repository with comprehensive team collaboration features. Execute the following implementation with logical task dependency ordering:
 
 TASK DEPENDENCY ORDERING STANDARD:
 - All implementation tasks must follow logical dependency ordering where prior tasks are always applicable (if logical) to subsequent tasks
