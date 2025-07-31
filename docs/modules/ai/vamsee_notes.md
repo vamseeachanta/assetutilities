@@ -1,13 +1,24 @@
 - Utilize a framework with gaurdrails and best practices. An example is below:
   - https://github.com/vamseeachanta/assetutilities/blob/main/.agent-os/specs/2025-07-29-agent-os-integration/spec.md
-  - Add universal work principles to all future specs. This is where you can do so. 
-- Use simplelest AI tool to learn how to use the AI:
+  - Add universal work principles to all future specs. See the prompt in link above
+  -  Agent guidance:
+    -  The biggest swiss knife is "iterate". An powerful example planning workflow is below
+      -  add "prompt for future use" to spec. 
+      -  Edit the prompt in the spec document 
+      -  iterate on the updated spec
+      -  Do the iterations in the planning stage (spec document) so the rest of the process can be delegated to AI agents (general-purpose or subject-matter-expert agents).
+      -  Leave the choice of the agents to the AI. If they are not chosen right, edit sub-agents responsibility appropriately using additional prompts
+    -  Provide clear instructions for AI interactions.
+    -  Define expected outcomes for each task.
+- Use simplest AI tool to learn how to use the AI:
   - A autocomplete to code generating Copilot journey over last 5 years has been crucial for AI upskilling.
 - Make below AI assets AI friendly and portable (across systems, users, and teams):
   - prompts
     - https://github.com/vamseeachanta/assetutilities/blob/main/.agent-os/specs/2025-07-29-agent-os-integration/spec.md#executive-summary
   - general or program specific input files in ascii formats
-    - md (the new all in one format), yaml, json, csv, etc. For example, my fea files are yaml (OrcaFlex) or text based (ANSYS).
+    - md (the new all in one format)
+    - Other formats yaml, json, csv, etc. For example, my fea files are yaml (OrcaFlex) or text based (ANSYS).
+    - mermaid flowcharts to interchange between text and flowcharts with an AI agent.
     - Ensure compatibility across different platforms, tools, users (team mates, AI agents, personas etc.).
   - Bash scripts applicable to any OS
    - rather than powershell or dos commands.
