@@ -13,12 +13,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.3 Define standard comparison framework and criteria for evaluating tools
   - [x] 1.4 Create comparison tables template with consistent structure
 
-- [ ] 2. **Research Single Computer Parallelization Methods**
-  - [ ] 2.1 Research Python multiprocessing module capabilities and limitations
-  - [ ] 2.2 Investigate concurrent.futures for high-level parallel processing
-  - [ ] 2.3 Document threading module and asyncio for I/O-bound tasks
-  - [ ] 2.4 Research joblib for NumPy/pandas-optimized parallel processing
-  - [ ] 2.5 Create single-computer-parallelization.md with findings and examples
+- [x] 2. **Research Single Computer Parallelization Methods**
+  - [x] 2.1 Research Python multiprocessing module capabilities and limitations
+  - [x] 2.2 Investigate concurrent.futures for high-level parallel processing
+  - [x] 2.3 Document threading module and asyncio for I/O-bound tasks
+  - [x] 2.4 Research joblib for NumPy/pandas-optimized parallel processing
+  - [x] 2.5 Create single-computer-parallelization.md with findings and examples
 
 - [ ] 3. **Research Distributed Computing Frameworks**
   - [ ] 3.1 Deep dive into Ray from Anyscale architecture and capabilities
