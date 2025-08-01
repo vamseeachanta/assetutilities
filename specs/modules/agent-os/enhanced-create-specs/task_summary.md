@@ -44,8 +44,10 @@ assetutilities/
 │   └── enhanced_create_specs_workflow.md # Complete enhanced workflow
 ├── docs/modules/agent-os/
 │   └── enhanced-create-specs-integration.md # Setup and usage guide
-└── tests/modules/agent-os/enhanced-create-specs/
-    └── [directory structure created]
+└── tests/modules/agent-os/
+    ├── [long-term test utilities and shared data]
+    └── enhanced-create-specs/
+        └── [ad-hoc, spec-specific test scripts]
 ```
 
 ### Existing Files Modified

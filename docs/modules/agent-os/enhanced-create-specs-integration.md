@@ -187,13 +187,16 @@ repository/
 │       └── tests.md             # Complete test coverage plan
 ├── docs/modules/<module_name>/
 │   ├── index.md                 # Module documentation index
-│   └── [module-specific docs]
+│   └── [long-term module documentation]
 ├── src/modules/<module_name>/
-│   └── [implementation files]
-├── tests/modules/<module_name>/<spec_name>/
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
+│   └── [long-term, reusable codebase scripts and utilities]
+├── tests/modules/
+│   ├── <module_name>/
+│   │   └── [long-term, reusable test utilities and data]
+│   └── <module_name>/<spec_name>/
+│       ├── unit/              # Ad-hoc, spec-specific tests
+│       ├── integration/       # Ad-hoc, spec-specific tests
+│       └── e2e/              # Ad-hoc, spec-specific tests
 └── .agent-os/
     ├── context/
     │   ├── project_context.yml
@@ -201,6 +204,17 @@ repository/
     ├── cross-repo-config.yml
     └── cache/
 ```
+
+### Directory Organization Purpose
+
+**Long-Term Module Assets (Independent of specific specs):**
+- **`src/modules/<module_name>/`** - Reusable codebase scripts, utilities, and core functionality
+- **`docs/modules/<module_name>/`** - Persistent module documentation and guides  
+- **`tests/modules/<module_name>/`** - Shared test utilities, fixtures, and long-term test data
+
+**Spec-Specific Assets (Tied to individual specs):**
+- **`specs/modules/<module_name>/<spec_name>/`** - Individual spec documentation and requirements
+- **`tests/modules/<module_name>/<spec_name>/`** - Ad-hoc test scripts specific to the spec implementation
 
 ## Enhanced Features
 
