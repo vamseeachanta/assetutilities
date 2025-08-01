@@ -153,12 +153,22 @@ repositories:
 - **Mermaid CLI:** For diagram generation and validation
 - **YAML Parser:** For configuration file management
 - **Jinja2 Templates:** For dynamic document generation
+- **UV Tool:** Python package and project management, testing, debugging, and deployment
+
+### Python Project Management with UV
+- **UV Installation:** Fast Python package installer and resolver
+- **Environment Management:** Virtual environment creation and management
+- **Dependency Resolution:** Lock file generation and dependency management
+- **Testing Integration:** Streamlined test execution with pytest
+- **Development Tools:** Integrated debugging and development server capabilities
+- **Deployment Support:** Production-ready package building and distribution
 
 ### Justification
 - **Git Submodules:** Industry standard for cross-repository code sharing
 - **Mermaid:** De facto standard for markdown-based diagrams
 - **YAML:** Human-readable configuration format
 - **Jinja2:** Flexible templating for document generation
+- **UV Tool:** Modern Python tooling for faster, more reliable package management and development workflows
 
 ## Performance Considerations
 

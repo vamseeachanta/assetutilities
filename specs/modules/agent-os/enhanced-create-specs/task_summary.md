@@ -76,7 +76,15 @@ None - All new module structure
 4. Generate enhanced documentation with mermaid diagrams
 5. Establish cross-repository references
 6. Setup AI persistence at all levels
+7. Configure UV tool integration for Python projects
+8. Initialize development environment with proper tooling
 ```
+
+### UV Tool Integration
+- **Python Project Detection:** Automatically identifies Python-based specifications using module type and keyword analysis
+- **Environment Setup:** Creates UV virtual environments with appropriate Python versions and dependencies
+- **Development Workflow:** Integrates pytest testing, black formatting, ruff linting, and debugging tools
+- **Package Management:** Provides complete dependency resolution and package building capabilities
 
 ### Integration Patterns
 - **Cross-Repository Reference Pattern:** `@github:assetutilities/src/modules/agent-os/enhanced-create-specs/`
