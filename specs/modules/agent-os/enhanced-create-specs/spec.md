@@ -114,7 +114,11 @@ graph TD
 ## Spec Scope
 
 1. **Enhanced Spec Creation Workflow** - Upgrade existing create-spec.md with module organization, executive summaries, mermaid diagrams, and prompt summaries
-2. **Module-Based Repository Organization** - Implement specs/modules/<module_name>/<spec_name>/ structure with corresponding docs/, src/, and tests/ organization
+2. **Module-Based Repository Organization** - Implement specs/modules/<module_name>/<spec_name>/ structure with corresponding organization:
+   - **docs/modules/<module_name>/** - Long-term module documentation
+   - **src/modules/<module_name>/** - Long-term, reusable codebase scripts and utilities  
+   - **tests/modules/<module_name>/** - Long-term, reusable test utilities and data
+   - **tests/modules/<module_name>/<spec_name>/** - Ad-hoc, spec-specific test scripts
 3. **Task Summary System** - Create task_summary.md template and completion workflow for implementation tracking
 4. **Cross-Repository Sub-Agent System** - Enable referencing of assetutilities sub-agents from other repositories
 5. **Multi-Level AI Persistence** - Implement system, user, and repository level persistence for AI agent context
