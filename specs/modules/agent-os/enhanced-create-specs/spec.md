@@ -119,9 +119,16 @@ graph TD
    - **src/modules/<module_name>/** - Long-term, reusable codebase scripts and utilities  
    - **tests/modules/<module_name>/** - Long-term, reusable test utilities and data
    - **tests/modules/<module_name>/<spec_name>/** - Ad-hoc, spec-specific test scripts
+   - **agents/modules/<module_name>/** - Long-term, reusable agents for repository-specific functionality
 3. **Task Summary System** - Create task_summary.md template and completion workflow for implementation tracking
 4. **Cross-Repository Sub-Agent System** - Enable referencing of assetutilities sub-agents from other repositories
 5. **Multi-Level AI Persistence** - Implement system, user, and repository level persistence for AI agent context
+6. **Repository-Specific Sub-Agents** - Create specialized sub-agents for each repository in the ecosystem (17 repositories total):
+   - **Engineering & Analysis Repositories:** aceengineer-website, aceengineercode, digitalmodel, energy, rock-oil-field, saipem
+   - **Project Management Repositories:** acma-projects, client_projects, investments, teamresumes
+   - **Infrastructure & Utilities:** assethold, assetutilities, pyproject-starter, worldenergydata
+   - **AI & Development:** ai-native-traditional-eng
+   - **Documentation Repositories:** frontierdeepwater, OGManufacturing
 
 ## Out of Scope
 
