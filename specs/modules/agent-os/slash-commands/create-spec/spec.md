@@ -84,7 +84,7 @@ workflow_refresh:
     dependency_updates: true
     documentation_changes: true
     repository_changes: true
-    check_interval: 15m
+    check_interval: 1w  # Weekly check interval
     
   update:
     auto_apply: true
