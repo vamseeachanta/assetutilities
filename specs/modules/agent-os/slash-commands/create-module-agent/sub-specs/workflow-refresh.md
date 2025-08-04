@@ -325,7 +325,7 @@ class EnhancedCreateSpecCommand:
         config = {
             "refresh_triggers": [
                 {"type": "file_change", "paths": ["src/", "specs/"]},
-                {"type": "time_interval", "interval": "1h"},
+                {"type": "time_interval", "interval": "1w"},  # Weekly interval
                 {"type": "execution_complete"},
                 {"type": "manual_trigger"}
             ],
@@ -354,7 +354,7 @@ workflow_refresh:
     check_dependencies: true
     check_documentation: true
     check_repositories: true
-    interval: 15m  # Check interval
+    interval: 1w  # Check interval (1 week)
     
   update:
     auto_update: true
