@@ -21,6 +21,8 @@
 
 **Reuse Notes:** This prompt can be iterated by updating the module categories, adding new sub-agent types, or enhancing the cross-repository referencing mechanism while maintaining the core module-based organization approach.
 
+**Prompt Evolution:** The prompt summary section should be updated as users provide additional prompts and fine-tuning during spec development, creating a living record of requirement refinements and clarifications that can inform future similar specs.
+
 ## Executive Summary
 
 ### Purpose
@@ -110,6 +112,7 @@ graph TD
 4. Enhanced spec documentation generated with visual diagrams
 5. Task summary template prepared for implementation phase
 6. Cross-repository references established for reusability
+7. Prompt summary updated iteratively as user provides additional context and fine-tuning
 
 ## Spec Scope
 
@@ -129,6 +132,7 @@ graph TD
    - **Infrastructure & Utilities:** assethold, assetutilities, pyproject-starter, worldenergydata
    - **AI & Development:** ai-native-traditional-eng
    - **Documentation Repositories:** frontierdeepwater, OGManufacturing
+7. **Prompt Evolution Tracking** - Capture and maintain iterative prompt refinements as users provide additional context and fine-tuning, enabling prompt reuse and continuous improvement across similar specs
 
 ## Out of Scope
 
@@ -166,3 +170,4 @@ graph LR
 1. **Enhanced create-specs workflow** - Fully functional enhanced spec creation with all requested features
 2. **Cross-repository referencing system** - Working system for sharing sub-agents across repositories
 3. **Multi-level AI persistence** - Implemented persistence at system, user, and repository levels
+4. **Prompt evolution tracking** - Living documentation of prompt refinements and user-provided fine-tuning for continuous improvement
