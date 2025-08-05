@@ -18,13 +18,32 @@ assetutilities/
 └── tests/modules/         # Module tests
 ```
 
+## Available Modules
+
+### agent-os
+**Status:** Active Development  
+**Purpose:** Enhanced workflow automation and specification management  
+**Documentation:** [agent-os Module](agent-os/README.md)  
+**Key Features:**
+- Enhanced spec creation with prompt summaries and executive summaries
+- Template customization system with multiple variants
+- Cross-repository integration and reference management
+- AI persistence system with multi-level context
+
+### Additional Modules
+- **authentication**: User authentication and authorization systems
+- **multiprocessing**: Parallel processing and distributed computing research
+- **visualization**: Data visualization and reporting utilities
+- **file-management**: Advanced file operations and batch processing
+- **git-utilities**: Version control automation and repository management
+
 ## Cross-Repository Integration
 
 This repository is integrated with the AssetUtilities hub for shared components:
 
 ```yaml
 # Reference shared components
-@github:assetutilities/src/modules/agent-os/enhanced-create-specs/
+@assetutilities:src/modules/agent-os/enhanced-create-specs/
 ```
 
 ## Creating New Specs

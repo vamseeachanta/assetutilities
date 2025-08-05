@@ -1,0 +1,246 @@
+# Workflow Automation Sub-Agent Configuration
+# Module: agent-os
+# Sub-Agent: workflow-automation
+# Created: 2025-08-05
+# Purpose: Enhanced Create-Specs workflow automation and template generation
+
+metadata:
+  name: "workflow-automation"
+  version: "1.0.0" 
+  module: "agent-os"
+  description: "Sub-agent for automating Agent OS workflow enhancements and spec creation"
+  created: "2025-08-05"
+  last_updated: "2025-08-05"
+  maintainer: "Enhanced Create-Specs System"
+
+capabilities:
+  - enhanced_spec_creation
+  - template_customization
+  - cross_repository_integration
+  - ai_persistence_management
+  - documentation_generation
+  - workflow_orchestration
+
+configuration:
+  # Template System Configuration
+  template_system:
+    default_variant: "enhanced"
+    template_directory: "src/modules/agent-os/enhanced-create-specs/templates/"
+    custom_sections_enabled: true
+    cross_reference_validation: true
+    quality_threshold: 0.8
+    
+  # Cross-Repository Integration
+  cross_repository:
+    enabled: true
+    hub_repository: "assetutilities"
+    supported_repositories:
+      - "aceengineer-website"
+      - "aceengineercode" 
+      - "digitalmodel"
+      - "energy"
+      - "rock-oil-field"
+      - "saipem"
+      - "acma-projects"
+      - "client_projects"
+      - "investments"
+      - "teamresumes"
+      - "assethold"
+      - "pyproject-starter"
+      - "worldenergydata"
+      - "ai-native-traditional-eng"
+      - "frontierdeepwater"
+      - "OGManufacturing"
+    reference_patterns:
+      internal: "@(specs|src|docs|tests)/.*"
+      cross_repo: "@\\w+:.*"
+      external: "https?://.*"
+      
+  # AI Persistence Configuration
+  ai_persistence:
+    enabled: true
+    levels:
+      - system
+      - user
+      - repository
+      - session
+    storage_backend: "file_system"
+    context_retention_days: 30
+    
+  # Documentation Standards
+  documentation:
+    required_sections:
+      - "header"
+      - "overview"
+      - "scope"
+      - "deliverables"
+    enhanced_sections:
+      - "prompt_summary"
+      - "executive_summary"
+      - "system_overview"
+      - "user_stories"
+      - "module_dependencies"
+      - "navigation"
+    conditional_sections:
+      - "api_spec"
+      - "database_schema"
+      - "tests"
+    mermaid_diagrams: true
+    cross_references: true
+    
+  # Quality Assurance
+  quality_assurance:
+    validation_enabled: true
+    completeness_requirement: 0.8
+    readability_requirement: 0.7
+    compliance_requirement: 0.9
+    test_coverage_requirement: 0.8
+
+# Sub-Agent Specific Settings
+sub_agent_settings:
+  workflow_automation:
+    auto_generate_tasks: true
+    task_granularity: "detailed"
+    progress_tracking: true
+    notification_system: true
+    rollback_capability: true
+    
+    # Workflow Steps Configuration
+    workflow_steps:
+      spec_creation:
+        - "validate_requirements"
+        - "select_template_variant" 
+        - "customize_template"
+        - "generate_documentation"
+        - "validate_quality"
+        - "create_cross_references"
+        - "generate_tasks"
+        
+      task_execution:
+        - "analyze_context"
+        - "plan_implementation"
+        - "execute_development"
+        - "run_tests"
+        - "update_documentation"
+        - "commit_changes"
+        - "create_pull_request"
+        
+    # Integration Points
+    integrations:
+      git_workflows:
+        enabled: true
+        auto_branch_creation: true
+        commit_message_format: "conventional"
+        pr_template_enabled: true
+        
+      testing_framework:
+        enabled: true
+        test_runner: "pytest"
+        coverage_reporting: true
+        quality_gates: true
+        
+      documentation_system:
+        enabled: true
+        auto_update_index: true
+        cross_reference_validation: true
+        broken_link_detection: true
+
+# Usage Patterns and Examples
+usage_patterns:
+  enhanced_spec_creation:
+    trigger: "/create-specs"
+    parameters:
+      - "spec_name"
+      - "module_name"
+      - "variant"
+      - "custom_sections"
+    example: "/create-specs user-authentication auth-module enhanced --sections prompt_summary,executive_summary"
+    
+  template_customization:
+    trigger: "/customize-template"
+    parameters:
+      - "variant_name"
+      - "customizations"
+    example: "/customize-template enhanced --add-section custom_requirements --exclude out_of_scope"
+    
+  cross_repo_integration:
+    trigger: "/setup-cross-repo"
+    parameters:
+      - "target_repository"
+      - "integration_type"
+    example: "/setup-cross-repo aceengineer shared-agents"
+
+# Performance and Monitoring
+performance:
+  max_concurrent_operations: 5
+  timeout_seconds: 300
+  memory_limit_mb: 512
+  
+monitoring:
+  enabled: true
+  metrics:
+    - "spec_creation_time"
+    - "template_rendering_time"
+    - "validation_success_rate"
+    - "cross_reference_accuracy"
+    - "user_satisfaction_score"
+  alerts:
+    - "high_error_rate"
+    - "performance_degradation"
+    - "validation_failures"
+
+# Security and Compliance
+security:
+  input_validation: true
+  output_sanitization: true
+  access_controls:
+    - "repository_access"
+    - "template_modification"
+    - "cross_repo_operations"
+  audit_logging: true
+  
+compliance:
+  standards:
+    - "organization_templates"
+    - "code_quality_gates"
+    - "documentation_requirements" 
+    - "security_practices"
+  validation_required: true
+  approval_workflow: false  # Can be enabled for enterprise environments
+
+# Extensibility and Customization
+extensibility:
+  plugin_system: true
+  custom_validators: true
+  template_inheritance: true
+  hook_system: true
+  
+  # Available Hooks
+  hooks:
+    pre_spec_creation: []
+    post_spec_creation: []
+    pre_template_render: []
+    post_template_render: []
+    pre_validation: []
+    post_validation: []
+    pre_task_generation: []
+    post_task_generation: []
+
+# Version History and Migration
+version_history:
+  "1.0.0":
+    release_date: "2025-08-05"
+    changes:
+      - "Initial workflow-automation sub-agent configuration"
+      - "Enhanced spec creation workflow"
+      - "Template customization system"
+      - "Cross-repository integration"
+      - "AI persistence management"
+    migration_required: false
+
+# Support and Documentation
+support:
+  documentation_url: "@docs/modules/agent-os/workflow-automation/"
+  examples_url: "@docs/modules/agent-os/examples/"
+  troubleshooting_url: "@docs/modules/agent-os/troubleshooting/"
+  contact: "agent-os-team@organization.com"

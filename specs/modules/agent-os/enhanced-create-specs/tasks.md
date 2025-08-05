@@ -12,10 +12,10 @@ These are the tasks to be completed for the spec detailed in @specs/modules/agen
 
 ## Module Setup Tasks
 
-- [ ] 0. **Module Structure Verification**
-  - [ ] 0.1 Verify module directories exist (src/modules/agent-os/, docs/modules/agent-os/)
-  - [ ] 0.2 Create workflow-automation sub-agent configuration
-  - [ ] 0.3 Update module index files and documentation
+- [x] 0. **Module Structure Verification**
+  - [x] 0.1 Verify module directories exist (src/modules/agent-os/, docs/modules/agent-os/)
+  - [x] 0.2 Create workflow-automation sub-agent configuration
+  - [x] 0.3 Update module index files and documentation
 
 ## Implementation Tasks
 
@@ -66,13 +66,13 @@ These are the tasks to be completed for the spec detailed in @specs/modules/agen
   - [x] 4.7 Implement cross-system synchronization
   - [x] 4.8 Verify all persistence tests pass
 
-- [ ] 5. **Enhanced Documentation Generation**
-  - [ ] 5.1 Write tests for enhanced document templates
-  - [ ] 5.2 Create enhanced spec.md template with all new sections
-  - [ ] 5.3 Implement conditional sub-spec generation (API, database, etc.)
-  - [ ] 5.4 Create comprehensive cross-reference system
-  - [ ] 5.5 Implement template customization system
-  - [ ] 5.6 Verify documentation generation tests pass
+- [x] 5. **Enhanced Documentation Generation**
+  - [x] 5.1 Write tests for enhanced document templates
+  - [x] 5.2 Create enhanced spec.md template with all new sections
+  - [x] 5.3 Implement conditional sub-spec generation (API, database, etc.)
+  - [x] 5.4 Create comprehensive cross-reference system
+  - [x] 5.5 Implement template customization system
+  - [x] 5.6 Verify documentation generation tests pass
 
 ## Integration Tasks
 
