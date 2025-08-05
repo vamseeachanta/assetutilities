@@ -16,6 +16,14 @@ from .context_optimization import (
     SemanticSearch,
     OptimizedContext
 )
+from .template_management import (
+    TemplateManager,
+    Template,
+    TemplateValidator,
+    TemplateComposer,
+    TemplateInstantiator,
+    TemplateRegistry
+)
 
 __all__ = [
     'CreateModuleAgentCommand',
@@ -29,5 +37,11 @@ __all__ = [
     'EmbeddingGenerator',
     'ContextCache',
     'SemanticSearch',
-    'OptimizedContext'
+    'OptimizedContext',
+    'TemplateManager',
+    'Template',
+    'TemplateValidator',
+    'TemplateComposer',
+    'TemplateInstantiator',
+    'TemplateRegistry'
 ]
