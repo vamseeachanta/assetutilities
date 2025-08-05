@@ -76,12 +76,12 @@ These are the tasks to be completed for the spec detailed in @specs/modules/agen
 
 ## Integration Tasks
 
-- [ ] 6. **AssetUtilities Hub Integration**
-  - [ ] 6.1 Write integration tests for assetutilities hub functionality
-  - [ ] 6.2 Create shared sub-agent registry in assetutilities
-  - [ ] 6.3 Implement hub repository structure for shared components
-  - [ ] 6.4 Create setup scripts for cross-repository configuration
-  - [ ] 6.5 Verify assetutilities integration tests pass
+- [x] 6. **AssetUtilities Hub Integration**
+  - [x] 6.1 Write integration tests for assetutilities hub functionality
+  - [x] 6.2 Create shared sub-agent registry in assetutilities
+  - [x] 6.3 Implement hub repository structure for shared components
+  - [x] 6.4 Create setup scripts for cross-repository configuration
+  - [x] 6.5 Verify assetutilities integration tests pass
 
 - [ ] 7. **Agent OS Framework Integration**
   - [ ] 7.1 Write tests for Agent OS framework compatibility

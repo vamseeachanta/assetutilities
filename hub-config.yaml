@@ -1,0 +1,527 @@
+# AssetUtilities Hub Configuration
+# Version: 1.0.0
+# Created: 2025-08-05
+# Purpose: Central configuration for AssetUtilities as a hub repository
+
+metadata:
+  name: "assetutilities"
+  type: "hub_repository"
+  version: "1.0.0"
+  created: "2025-08-05"
+  last_updated: "2025-08-05T10:00:00Z"
+  maintainer: "AssetUtilities Hub Team"
+  description: "Central hub repository for shared components, sub-agents, and cross-repository integration"
+
+# Hub Repository Configuration
+hub_configuration:
+  repository_name: "assetutilities"
+  repository_url: "https://github.com/user/assetutilities"
+  hub_type: "centralized"
+  
+  # Supported Repository Ecosystem
+  supported_repositories:
+    engineering:
+      - name: "aceengineer-website"
+        type: "web_application"
+        primary_modules: ["visualization", "authentication"]
+        integration_level: "full"
+        
+      - name: "aceengineercode"
+        type: "analysis_tools"
+        primary_modules: ["agent-os", "file-management", "git-utilities"]
+        integration_level: "full"
+        
+      - name: "digitalmodel"
+        type: "simulation_framework"
+        primary_modules: ["visualization", "file-management"]
+        integration_level: "partial"
+        
+      - name: "energy"
+        type: "energy_analysis"
+        primary_modules: ["visualization", "file-management"]
+        integration_level: "partial"
+        
+      - name: "rock-oil-field"
+        type: "geological_analysis"
+        primary_modules: ["visualization", "file-management"]
+        integration_level: "partial"
+        
+      - name: "saipem"
+        type: "industrial_analysis"
+        primary_modules: ["visualization", "file-management"]
+        integration_level: "partial"
+    
+    project_management:
+      - name: "acma-projects"
+        type: "project_tracking"
+        primary_modules: ["agent-os", "authentication", "git-utilities"]
+        integration_level: "full"
+        
+      - name: "client_projects"
+        type: "client_management"
+        primary_modules: ["agent-os", "authentication", "file-management"]
+        integration_level: "full"
+        
+      - name: "investments"
+        type: "financial_tracking"
+        primary_modules: ["visualization", "authentication"]
+        integration_level: "partial"
+        
+      - name: "teamresumes"
+        type: "hr_management"
+        primary_modules: ["authentication", "file-management"]
+        integration_level: "partial"
+    
+    infrastructure:
+      - name: "assethold"
+        type: "asset_management"
+        primary_modules: ["file-management", "authentication"]
+        integration_level: "partial"
+        
+      - name: "pyproject-starter"
+        type: "project_template"
+        primary_modules: ["agent-os", "git-utilities"]
+        integration_level: "full"
+        
+      - name: "worldenergydata"
+        type: "data_repository"
+        primary_modules: ["file-management", "visualization"]
+        integration_level: "partial"
+    
+    development:
+      - name: "ai-native-traditional-eng"
+        type: "ai_development"
+        primary_modules: ["agent-os", "git-utilities"]
+        integration_level: "full"
+    
+    documentation:
+      - name: "frontierdeepwater"
+        type: "technical_documentation"
+        primary_modules: ["agent-os", "file-management"]
+        integration_level: "partial"
+        
+      - name: "OGManufacturing"
+        type: "manufacturing_docs"
+        primary_modules: ["agent-os", "file-management"]
+        integration_level: "partial"
+
+# Shared Module Configuration
+shared_modules:
+  agent-os:
+    version: "1.0.0"
+    path: "src/modules/agent-os/"
+    status: "active"
+    description: "Enhanced workflow automation and specification management"
+    
+    shared_components:
+      - path: "enhanced-create-specs/enhanced_documentation_generator.py"
+        description: "Core documentation generation with enhanced templates"
+        dependencies: []
+        
+      - path: "enhanced-create-specs/cross_reference_manager.py"
+        description: "Cross-reference validation and management system"
+        dependencies: []
+        
+      - path: "enhanced-create-specs/template_customization_system.py"
+        description: "Template customization with variants and user preferences"
+        dependencies: []
+        
+      - path: "enhanced-create-specs/templates/enhanced-spec-template.md"
+        description: "Enhanced specification template with all sections"
+        dependencies: []
+    
+    sub_agents:
+      - "workflow-automation"
+    
+    compatibility:
+      min_python_version: "3.8"
+      supported_platforms: ["linux", "windows", "macos"]
+      
+  file-management:
+    version: "0.9.0"
+    path: "src/modules/file-management/"
+    status: "beta"
+    description: "Advanced file operations and batch processing utilities"
+    
+    shared_components:
+      - path: "automation/batch_processor.py"
+        description: "Batch file processing with progress tracking"
+        dependencies: []
+        
+      - path: "automation/file_organizer.py"
+        description: "Automated file organization and categorization"
+        dependencies: []
+        
+      - path: "automation/filter_engine.py"
+        description: "Pattern-based file filtering and selection"
+        dependencies: []
+    
+    sub_agents:
+      - "file-management-automation"
+      
+  visualization:
+    version: "0.8.5"
+    path: "src/modules/visualization/"
+    status: "beta"
+    description: "Data visualization and automated reporting utilities"
+    
+    shared_components:
+      - path: "automation/chart_generator.py"
+        description: "Automatic chart generation with type detection"
+        dependencies: ["file-management"]
+        
+      - path: "automation/dashboard_builder.py"
+        description: "Interactive dashboard creation and management"
+        dependencies: ["file-management"]
+        
+      - path: "automation/export_manager.py"
+        description: "Multi-format visualization export system"
+        dependencies: []
+    
+    sub_agents:
+      - "visualization-automation"
+      
+  authentication:
+    version: "1.1.0"
+    path: "src/modules/authentication/"
+    status: "active"
+    description: "User authentication and security management system"
+    
+    shared_components:
+      - path: "system/auth_manager.py"
+        description: "Core authentication and user management"
+        dependencies: []
+        
+      - path: "system/rbac_system.py"
+        description: "Role-based access control implementation"
+        dependencies: ["auth_manager.py"]
+        
+      - path: "system/session_handler.py"
+        description: "Secure session management and validation"
+        dependencies: ["auth_manager.py"]
+    
+    sub_agents:
+      - "auth-system"
+      
+  git-utilities:
+    version: "1.0.0"
+    path: "src/modules/git-utilities/"
+    status: "active"
+    description: "Git workflow automation and repository management"
+    
+    shared_components:
+      - path: "automation/branch_manager.py"
+        description: "Automated branch creation and management"
+        dependencies: []
+        
+      - path: "automation/commit_automation.py"
+        description: "Intelligent commit message generation and automation"
+        dependencies: []
+        
+      - path: "automation/pr_manager.py"
+        description: "Pull request creation and management automation"
+        dependencies: ["branch_manager.py"]
+    
+    sub_agents:
+      - "git-workflow-automation"
+
+# Integration Configuration
+integration_configuration:
+  
+  # Cross-Repository Reference Patterns
+  reference_patterns:
+    internal: "@(specs|src|docs|tests)/.*"
+    cross_repo: "@\\w+:.*"
+    external: "https?://.*"
+    hub_component: "@assetutilities:src/modules/.*"
+    hub_agent: "@assetutilities:agents/registry/.*"
+  
+  # Supported Integration Types
+  integration_types:
+    full:
+      description: "Complete integration with all hub modules and sub-agents"
+      includes:
+        - "Shared component access"
+        - "Sub-agent registry access"
+        - "Cross-reference validation"
+        - "Version compatibility checking"
+        - "Automatic updates and synchronization"
+      
+    partial:
+      description: "Limited integration with specific modules only"
+      includes:
+        - "Selected shared component access"
+        - "Basic cross-reference support"
+        - "Manual version management"
+      
+    minimal:
+      description: "Basic integration for reference and documentation only"
+      includes:
+        - "Reference documentation access"
+        - "Basic cross-reference patterns"
+  
+  # Version Compatibility Matrix
+  version_compatibility:
+    hub_version: "1.0.0"
+    
+    module_compatibility:
+      "agent-os":
+        min_version: "1.0.0"
+        max_version: "1.x.x"
+        breaking_changes: []
+        
+      "file-management":
+        min_version: "0.9.0"
+        max_version: "0.x.x"
+        breaking_changes: []
+        
+      "visualization":
+        min_version: "0.8.5"
+        max_version: "0.x.x"
+        breaking_changes: []
+        
+      "authentication":
+        min_version: "1.1.0"
+        max_version: "1.x.x"
+        breaking_changes: []
+        
+      "git-utilities":
+        min_version: "1.0.0"
+        max_version: "1.x.x"
+        breaking_changes: []
+  
+  # Dependency Management
+  dependency_resolution:
+    strategy: "explicit"
+    conflict_resolution: "hub_priority"
+    version_constraints_enforced: true
+    circular_dependency_detection: true
+
+# Hub Services and APIs
+hub_services:
+  
+  # Component Discovery Service
+  component_discovery:
+    enabled: true
+    endpoint: "/api/v1/components"
+    description: "Discover available shared components and their capabilities"
+    
+    operations:
+      - "list_modules"
+      - "list_components"
+      - "get_component_info"
+      - "check_compatibility"
+      - "resolve_dependencies"
+  
+  # Sub-Agent Registry Service
+  sub_agent_registry:
+    enabled: true
+    endpoint: "/api/v1/sub-agents"
+    description: "Access and manage sub-agent registry"
+    
+    operations:
+      - "list_sub_agents"
+      - "get_sub_agent_config"
+      - "check_compatibility"
+      - "validate_configuration"
+  
+  # Cross-Reference Validation Service
+  cross_reference_validation:
+    enabled: true
+    endpoint: "/api/v1/references"
+    description: "Validate and resolve cross-repository references"
+    
+    operations:
+      - "validate_reference"
+      - "resolve_reference"
+      - "check_accessibility"
+      - "generate_report"
+  
+  # Version Management Service
+  version_management:
+    enabled: true
+    endpoint: "/api/v1/versions"
+    description: "Manage component versions and compatibility"
+    
+    operations:
+      - "check_version_compatibility"
+      - "list_available_versions"
+      - "get_migration_path"
+      - "validate_dependencies"
+
+# Repository Setup and Configuration
+repository_setup:
+  
+  # Required Directory Structure
+  required_directories:
+    - "src/modules/"
+    - "agents/registry/"
+    - "docs/modules/"
+    - "tests/modules/"
+    - ".agent-os/"
+  
+  # Required Configuration Files
+  required_files:
+    - path: "hub-config.yaml"
+      description: "Main hub configuration file"
+      
+    - path: "agents/registry/sub-agents.yaml"
+      description: "Sub-agent registry with all available agents"
+      
+    - path: ".agent-os/hub-context.yaml"
+      description: "Hub-specific AI context and patterns"
+  
+  # Client Repository Setup Template
+  client_setup_template: |
+    # Client Repository Configuration Template
+    # Place this in .agent-os/cross-repo-config.yaml
+    
+    hub_repository: "assetutilities"
+    hub_path: "/path/to/assetutilities"
+    hub_url: "https://github.com/user/assetutilities"
+    
+    # Integration Configuration
+    integration_type: "full"  # full, partial, minimal
+    
+    # Shared Components
+    shared_components:
+      - "agent-os/enhanced-create-specs/enhanced_documentation_generator.py"
+      - "file-management/automation/batch_processor.py"
+    
+    # Sub-Agents
+    sub_agents:
+      - "workflow-automation"
+      - "file-management-automation"
+    
+    # Version Requirements
+    version_requirements:
+      hub: ">=1.0.0"
+      agent-os: ">=1.0.0"
+      file-management: ">=0.9.0"
+    
+    # Local Overrides
+    local_overrides:
+      template_variant: "enhanced"
+      organization_standards: true
+    
+    # Cache Configuration
+    cache_config:
+      enabled: true
+      max_age_hours: 24
+      auto_refresh: true
+
+# Quality Assurance and Monitoring
+quality_assurance:
+  
+  # Testing Requirements
+  testing:
+    unit_tests_required: true
+    integration_tests_required: true
+    cross_repo_tests_required: true
+    minimum_coverage: 80
+    
+    test_categories:
+      - "Component functionality tests"
+      - "Cross-repository integration tests"
+      - "Version compatibility tests"
+      - "Performance and scalability tests"
+      - "Security and access control tests"
+  
+  # Documentation Standards
+  documentation:
+    api_documentation_required: true
+    user_guides_required: true
+    integration_examples_required: true
+    troubleshooting_guides_required: true
+    
+    documentation_locations:
+      - "docs/modules/"
+      - "docs/integration/"
+      - "docs/api/"
+      - "examples/"
+  
+  # Monitoring and Analytics
+  monitoring:
+    usage_analytics: true
+    performance_monitoring: true
+    error_tracking: true
+    version_adoption_tracking: true
+    
+    metrics_collection:
+      - "Component usage frequency"
+      - "Sub-agent activation rates"
+      - "Cross-reference validation results"
+      - "Integration success rates"
+      - "Performance benchmarks"
+  
+  # Security and Compliance
+  security:
+    access_control_enforced: true
+    secure_communication_required: true
+    audit_logging_enabled: true
+    vulnerability_scanning: true
+    
+    compliance_frameworks:
+      - "OWASP security guidelines"
+      - "Industry standard encryption"
+      - "Privacy and data protection"
+      - "Open source license compliance"
+
+# Support and Maintenance
+support:
+  
+  # Documentation Resources
+  documentation:
+    main_docs: "docs/"
+    api_reference: "docs/api/"
+    integration_guides: "docs/integration/"
+    troubleshooting: "docs/troubleshooting/"
+    examples: "examples/"
+  
+  # Community and Support
+  community:
+    issue_tracker: "https://github.com/user/assetutilities/issues"
+    discussions: "https://github.com/user/assetutilities/discussions"
+    documentation_wiki: "https://github.com/user/assetutilities/wiki"
+    
+  # Contact Information
+  contacts:
+    hub_team: "hub-team@assetutilities.org"
+    technical_support: "support@assetutilities.org"
+    security_issues: "security@assetutilities.org"
+  
+  # Contribution Guidelines
+  contribution:
+    contributing_guide: "CONTRIBUTING.md"
+    code_of_conduct: "CODE_OF_CONDUCT.md"
+    development_setup: "docs/development/setup.md"
+    architecture_guide: "docs/architecture/"
+
+# Future Roadmap and Evolution
+roadmap:
+  
+  current_version: "1.0.0"
+  
+  planned_versions:
+    "1.1.0":
+      planned_release: "2025-09-15"
+      features:
+        - "Enhanced monitoring and analytics"
+        - "Improved cross-repository synchronization"
+        - "Advanced security features"
+        - "Performance optimizations"
+      
+    "1.2.0":
+      planned_release: "2025-12-15"
+      features:
+        - "Plugin and extension system"
+        - "Advanced workflow orchestration"
+        - "Multi-hub federation support"
+        - "Enhanced AI integration features"
+  
+  # Evolution Strategy
+  evolution_strategy:
+    backward_compatibility: "maintained for major versions"
+    deprecation_policy: "6 months notice for breaking changes"
+    migration_support: "automated migration tools provided"
+    community_feedback: "integrated into planning process"
