@@ -8,6 +8,14 @@ from .documentation_integration import (
     DocumentationProcessor,
     MarkdownParser
 )
+from .context_optimization import (
+    ContextProcessor,
+    DocumentChunker,
+    EmbeddingGenerator,
+    ContextCache,
+    SemanticSearch,
+    OptimizedContext
+)
 
 __all__ = [
     'CreateModuleAgentCommand',
@@ -15,5 +23,11 @@ __all__ = [
     'ExternalDocumentationLinker', 
     'ReferenceManager',
     'DocumentationProcessor',
-    'MarkdownParser'
+    'MarkdownParser',
+    'ContextProcessor',
+    'DocumentChunker',
+    'EmbeddingGenerator',
+    'ContextCache',
+    'SemanticSearch',
+    'OptimizedContext'
 ]
