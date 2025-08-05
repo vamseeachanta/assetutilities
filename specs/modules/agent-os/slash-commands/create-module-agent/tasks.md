@@ -16,14 +16,14 @@ These are the tasks to be completed for the spec detailed in @specs/modules/agen
   - [x] 1.6 Add validation for module names and options
   - [x] 1.7 Verify all infrastructure tests pass
 
-- [ ] 2. Documentation Integration System
-  - [ ] 2.1 Write tests for documentation scanner and linker
-  - [ ] 2.2 Create repository documentation scanner module
-  - [ ] 2.3 Implement internal.md generator from repo docs
-  - [ ] 2.4 Build references.yaml generator for repo references
-  - [ ] 2.5 Create external documentation linker
-  - [ ] 2.6 Implement web_sources.yaml manager
-  - [ ] 2.7 Verify all documentation integration tests pass
+- [x] 2. Documentation Integration System
+  - [x] 2.1 Write tests for documentation scanner and linker
+  - [x] 2.2 Create repository documentation scanner module
+  - [x] 2.3 Implement internal.md generator from repo docs
+  - [x] 2.4 Build references.yaml generator for repo references
+  - [x] 2.5 Create external documentation linker
+  - [x] 2.6 Implement web_sources.yaml manager
+  - [x] 2.7 Verify all documentation integration tests pass
 
 - [ ] 3. Context Optimization Engine
   - [ ] 3.1 Write tests for context processing and caching
