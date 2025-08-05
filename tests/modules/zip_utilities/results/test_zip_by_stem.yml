@@ -5,6 +5,12 @@ default:
   config:
     overwrite:
       output: true
+parallel_processing:
+  enabled: true
+  max_workers: 30
+  timeout_per_file: 3600
+  save_error_reports: false
+  progress_reporting: true
 analysis_settings:
   flag: true
   by: ~
@@ -21,8 +27,8 @@ file_management:
       not_contains: []
   input_files:
     yml:
-    - K:\github\assetutilities\tests\modules\zip_utilities\yml\FST2F_FST1F_LWL_000deg.yml
-    - K:\github\assetutilities\tests\modules\zip_utilities\yml\FST2L_FST1L_HWL_345deg.yml
+    - yml\FST2F_FST1F_LWL_000deg.yml
+    - yml\FST2L_FST1L_HWL_345deg.yml
 meta:
   library: assetutlities
   basename: zip_utilities
@@ -36,17 +42,17 @@ analysis:
     - csv
 Analysis:
   basename: zip_utilities
-  analysis_root_folder: K:\github\assetutilities\tests\modules\zip_utilities
+  analysis_root_folder: D:\github\assetutilities\tests\modules\zip_utilities
   file_name: test_zip_by_stem
   file_name_for_overwrite: test_zip_by_stem
-  log_folder: K:\github\assetutilities\tests\modules\zip_utilities\logs
-  start_time: 2025-07-13 21:13:24.770066
+  log_folder: D:\github\assetutilities\tests\modules\zip_utilities\logs
+  start_time: 2025-08-05 15:16:47.231051
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: K:\github\assetutilities\tests\modules\zip_utilities\test_zip_by_stem.yml
-  result_folder: K:\github\assetutilities\tests\modules\zip_utilities\zip
-  result_data_folder: K:\github\assetutilities\tests\modules\zip_utilities\zip\Data
-  result_plot_folder: K:\github\assetutilities\tests\modules\zip_utilities\zip\Plot
-  fe_folder: K:\github\assetutilities\tests\modules\zip_utilities\results
-  file_management_input_directory: K:\github\assetutilities\tests\modules\zip_utilities\yml
-  file_management_output_directory: K:\github\assetutilities\tests\modules\zip_utilities\zip
+  CustomInputFile: D:\github\assetutilities\tests\modules\zip_utilities\test_zip_by_stem.yml
+  result_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip
+  result_data_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip\Data
+  result_plot_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip\Plot
+  fe_folder: D:\github\assetutilities\tests\modules\zip_utilities\results
+  file_management_input_directory: yml
+  file_management_output_directory: zip

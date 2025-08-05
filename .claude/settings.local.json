@@ -20,7 +20,25 @@
       "Bash(git cherry-pick:*)",
       "Bash(gh pr merge:*)",
       "Bash(afplay:*)",
-      "Bash(python -m pytest tests/modules/agent-os/enhanced-create-specs/unit/test_enhanced_documentation_templates.py -v)"
+      "Bash(python -m pytest tests/modules/agent-os/enhanced-create-specs/unit/test_enhanced_documentation_templates.py -v)",
+      "Bash(python -m pytest tests/modules/zip_utilities/test_zip_by_stem.py -v)",
+      "Bash(python:*)",
+      "Bash(uv:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(\"%USERPROFILE%\\.uv\\envs\\assetutilities-global\\Scripts\\python.exe\" -m pip install -e .)",
+      "Bash(\"/c/Users/ansystech/.uv/envs/assetutilities-global/Scripts/python.exe\" -m pip install -e .)",
+      "Bash(\"/c/Users/ansystech/.uv/envs/assetutilities-global/Scripts/python\" simple_test.py)",
+      "Bash(cmd /c:*)",
+      "Bash(cp:*)",
+      "Bash(echo $USERPROFILE)",
+      "Bash(\"/c/Users/ansystech/.uv/envs/assetutilities-global/Scripts/python.exe\" -m pytest \"D:\\1522\\ctr7\\orcaflex\\rev_a08\\postproc\\au_wlng_wsp_zip_fsts_test.py\" -v)",
+      "Bash(\"/c/Users/ansystech/.uv/envs/assetutilities-global/Scripts/python.exe\" \"D:\\1522\\ctr7\\orcaflex\\rev_a08\\postproc\\au_wlng_wsp_zip_fsts_test.py\")",
+      "Bash(/d/github/assetutilities/.venv/Scripts/python -m assetutilities au_wlng_wsp_zip.yml \"{''meta'': {''label'': ''03c_0100yr_l015_hwl''}, ''file_management'': {''input_directory'': ''../03c_100yr'', ''output_directory'': ''../output/zip/03c_100yr''}}\")",
+      "Bash(/d/github/assetutilities/.venv/Scripts/python -c \"import sys; print(''VEnv Python version:'', sys.version)\")",
+      "Bash(/d/github/assetutilities/.venv/Scripts/pip list)",
+      "Bash(/d/github/assetutilities/.venv/Scripts/python -m pip list)",
+      "Bash(.venv/Scripts/python:*)"
     ],
     "deny": []
   }

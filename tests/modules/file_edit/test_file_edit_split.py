@@ -1,5 +1,7 @@
 # TODO fix the code
 import os
+
+from test_utils import get_test_file_path
 import sys
 
 from assetutilities.engine import engine
@@ -9,7 +11,7 @@ def run_file(input_file, expected_result=None):
     if expected_result is None:
         expected_result = {}
     if input_file is not None and not os.path.isfile(input_file):
-        input_file = os.path.join(os.path.dirname(__file__), input_file)
+        input_file = get_test_file_path(input_file, os.path.dirname(__file__))
     engine(input_file)
 
     # obtained_result = cfg[cfg['basename']]['properties']
@@ -23,7 +25,7 @@ def run_file(input_file, expected_result=None):
 
 def get_valid_pytest_output_file(pytest_output_file):
     if pytest_output_file is not None and not os.path.isfile(pytest_output_file):
-        pytest_output_file = os.path.join(os.path.dirname(__file__), pytest_output_file)
+        pytest_output_file = get_test_file_path(pytest_output_file, os.path.dirname(__file__))
     return pytest_output_file
 
 

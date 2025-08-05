@@ -1,5 +1,7 @@
 # Standard library imports
 import os
+
+from test_utils import get_test_file_path
 import sys
 
 # Third party imports
@@ -20,7 +22,7 @@ tu = TestUtilities()
 
 def run_process(input_file, expected_result):
     if input_file is not None and not os.path.isfile(input_file):
-        input_file = os.path.join(os.path.dirname(__file__), input_file)
+        input_file = get_test_file_path(input_file, os.path.dirname(__file__))
     cfg = engine(input_file)
 
     obtained_result = cfg[cfg["basename"]]["input_files"].copy()

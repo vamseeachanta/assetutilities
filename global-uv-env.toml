@@ -1,11 +1,14 @@
+# Global UV Environment Configuration for AssetUtilities
+# This file enables sharing the AssetUtilities environment across multiple repositories
+# Usage: Copy this file to other repos and run: uv sync --config-file global-uv-env.toml
+
 [project]
-name = "assetutilities"
+name = "assetutilities-global"
 version = "0.0.8"
-description = "utilities for general use"
-authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
-license = {text = "MIT"}
-readme = "README.md"
+description = "Global AssetUtilities environment for cross-repository usage"
 requires-python = ">=3.9"
+
+# Complete dependency set from AssetUtilities for global use
 dependencies = [
     "pyyaml",
     "numpy",
@@ -39,44 +42,26 @@ dependencies = [
     "fake_headers",
     "undetected-chromedriver",
     "parsel",
-]
-
-[project.optional-dependencies]
-dev = [
+    # Development tools for cross-repo development
     "build",
     "twine",
     "bumpver",
     "pytest",
     "ruff",
+    # Additional utilities commonly needed across repos
+    "requests",
+    "click",
+    "rich",
+    "typer",
 ]
-
-[setuptools]
-include-package-data = true
 
 [build-system]
 requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool]
-[tool.bumpver]
-current_version = "0.0.8"
-version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "bump version {old_version} -> {new_version}"
-commit = true
-tag = true
-push = false
-
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-    'version = "{version}"',
-]
-"src/assetutilities/__init__.py" = ["{version}"]
-"src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
-
 [tool.ruff]
 line-length = 88
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [
@@ -89,10 +74,6 @@ select = [
     "UP",   # pyupgrade
 ]
 ignore = []
-
-[tool.ruff.lint.isort]
-known-first-party = ["assetutilities"]
-section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.ruff.format]
 quote-style = "double"

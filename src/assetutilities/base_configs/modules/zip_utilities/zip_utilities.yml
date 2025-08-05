@@ -7,6 +7,14 @@ default:
     overwrite:
       output: True
 
+# Parallel processing configuration for high-performance zip operations
+parallel_processing:
+  enabled: true
+  max_workers: 30
+  timeout_per_file: 3600
+  save_error_reports: false
+  progress_reporting: true
+
 analysis_settings:
   flag: True
   by: NULL
