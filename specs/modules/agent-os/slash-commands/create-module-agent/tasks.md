@@ -43,29 +43,29 @@ These are the tasks to be completed for the spec detailed in @specs/modules/agen
   - [x] 4.6 Add template validation logic
   - [x] 4.7 Verify all template management tests pass
 
-- [ ] 5. Enhanced Specs Integration
-  - [ ] 5.1 Write tests for workflow integration
-  - [ ] 5.2 Create enhanced_specs.yaml configuration
-  - [ ] 5.3 Implement connection to create-specs workflow
-  - [ ] 5.4 Build workflow refresh integration hooks
-  - [ ] 5.5 Add cross-repository reference support
-  - [ ] 5.6 Implement prompt evolution tracking
-  - [ ] 5.7 Verify all integration tests pass
+- [x] 5. Enhanced Specs Integration
+  - [x] 5.1 Write tests for workflow integration
+  - [x] 5.2 Create enhanced_specs.yaml configuration
+  - [x] 5.3 Implement connection to create-specs workflow
+  - [x] 5.4 Build workflow refresh integration hooks
+  - [x] 5.5 Add cross-repository reference support
+  - [x] 5.6 Implement prompt evolution tracking
+  - [x] 5.7 Verify all integration tests pass
 
-- [ ] 6. Command Line Interface
-  - [ ] 6.1 Write tests for CLI functionality
-  - [ ] 6.2 Create main command entry point
-  - [ ] 6.3 Implement interactive mode for missing options
-  - [ ] 6.4 Add progress indicators and logging
-  - [ ] 6.5 Create help documentation
-  - [ ] 6.6 Add error handling and recovery
-  - [ ] 6.7 Verify all CLI tests pass
+- [x] 6. Command Line Interface
+  - [x] 6.1 Write tests for CLI functionality
+  - [x] 6.2 Create main command entry point
+  - [x] 6.3 Implement interactive mode for missing options
+  - [x] 6.4 Add progress indicators and logging
+  - [x] 6.5 Create help documentation
+  - [x] 6.6 Add error handling and recovery
+  - [x] 6.7 Verify all CLI tests pass
 
-- [ ] 7. Testing and Documentation
-  - [ ] 7.1 Write comprehensive integration tests
-  - [ ] 7.2 Create end-to-end test scenarios
-  - [ ] 7.3 Test with multiple agent types
-  - [ ] 7.4 Validate cross-repository functionality
-  - [ ] 7.5 Write user documentation
-  - [ ] 7.6 Create developer API documentation
-  - [ ] 7.7 Verify 90%+ test coverage achieved
+- [x] 7. Testing and Documentation
+  - [x] 7.1 Write comprehensive integration tests
+  - [x] 7.2 Create end-to-end test scenarios
+  - [x] 7.3 Test with multiple agent types
+  - [x] 7.4 Validate cross-repository functionality
+  - [x] 7.5 Write user documentation
+  - [x] 7.6 Create developer API documentation
+  - [x] 7.7 Verify 90%+ test coverage achieved

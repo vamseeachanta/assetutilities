@@ -24,6 +24,22 @@ from .template_management import (
     TemplateInstantiator,
     TemplateRegistry
 )
+from .specs_integration import (
+    SpecsIntegrationManager,
+    WorkflowHook,
+    PromptEvolutionTracker,
+    CrossRepositoryReferencer,
+    EnhancedSpecsConfig,
+    WorkflowRefresher
+)
+from .cli import (
+    CLIManager,
+    InteractiveMode,
+    ProgressIndicator,
+    HelpSystem,
+    ErrorHandler,
+    CommandLineInterface
+)
 
 __all__ = [
     'CreateModuleAgentCommand',
@@ -43,5 +59,17 @@ __all__ = [
     'TemplateValidator',
     'TemplateComposer',
     'TemplateInstantiator',
-    'TemplateRegistry'
+    'TemplateRegistry',
+    'SpecsIntegrationManager',
+    'WorkflowHook',
+    'PromptEvolutionTracker',
+    'CrossRepositoryReferencer',
+    'EnhancedSpecsConfig',
+    'WorkflowRefresher',
+    'CLIManager',
+    'InteractiveMode',
+    'ProgressIndicator',
+    'HelpSystem',
+    'ErrorHandler',
+    'CommandLineInterface'
 ]
