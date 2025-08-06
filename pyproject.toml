@@ -5,13 +5,53 @@ description = "utilities for general use"
 authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
+dependencies = [
+    "pyyaml",
+    "numpy",
+    "pandas",
+    "plotly",
+    "matplotlib",
+    "chardet",
+    "python-certifi-win32",
+    "webcolors",
+    "xlsxwriter",
+    "plantuml",
+    "deepdiff",
+    "pandoc",
+    "wkhtmltopdf",
+    "python-docx",
+    "scrapy==2.12",
+    "bs4",
+    "gitpython==3.1.31",
+    "excel2img; sys_platform == 'win32'",
+    "PyPDF2",
+    "tabula",
+    "sympy>=1.13.3",
+    "utm",
+    "ruamel.yaml",
+    "jinja2",
+    "openpyxl",
+    "crochet",
+    "loguru",
+    "playwright",
+    "selenium",
+    "fake_headers",
+    "undetected-chromedriver",
+    "parsel",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "bumpver",
+    "pytest",
+    "ruff",
+]
 
 [setuptools]
 include-package-data = true
-
-[setuptools.dynamic]
-dependencies = {file = ["scripts/requirements.txt"]}
 
 [build-system]
 requires = ["setuptools>=61.0.0", "wheel"]
