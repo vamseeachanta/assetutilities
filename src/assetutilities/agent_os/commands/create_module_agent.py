@@ -278,7 +278,7 @@ class CreateModuleAgentCommand:
             self._create_default_templates(agent_dir, parsed_args.type)
             
             # Create workflow integration
-            self._create_workflow_integration(agent_dir)
+            self._create_workflow_integration(agent_dir, parsed_args.module_name, parsed_args.repos)
             
             return CommandResult(
                 success=True,
@@ -357,9 +357,26 @@ You are a specialized AI agent for {{module_name}} with expertise in {{domain}}.
         with open(prompt_path, 'w') as f:
             f.write(prompt_template)
     
-    def _create_workflow_integration(self, agent_dir: Path) -> None:
-        """Create workflow integration configuration."""
-        workflow_config = {
+    def _create_workflow_integration(self, agent_dir: Path, module_name: str = None, repos: List[str] = None) -> None:
+        """Create enhanced workflow integration configuration."""
+        from ..integration.enhanced_specs import EnhancedSpecsIntegration
+        
+        # Use enhanced specs integration
+        integration = EnhancedSpecsIntegration(agent_dir)
+        
+        # Get module name from agent directory if not provided
+        if module_name is None:
+            module_name = agent_dir.name
+        
+        # Default repos if not provided
+        if repos is None:
+            repos = []
+        
+        # Create complete integration configuration
+        integration_config = integration.integrate(module_name, repos)
+        
+        # Also create the original simplified config for backward compatibility
+        simplified_config = {
             "enhanced_specs": {
                 "integration": True,
                 "auto_update": True,
@@ -376,15 +393,36 @@ You are a specialized AI agent for {{module_name}} with expertise in {{domain}}.
             }
         }
         
+        # Save simplified config for backward compatibility
         workflow_path = agent_dir / "workflows" / "enhanced_specs.yaml"
+        workflow_path.parent.mkdir(parents=True, exist_ok=True)
         with open(workflow_path, 'w') as f:
-            yaml.dump(workflow_config, f, default_flow_style=False, indent=2)
+            yaml.dump(simplified_config, f, default_flow_style=False, indent=2)
+        
+        # Save complete integration config
+        full_config_path = agent_dir / "workflows" / "enhanced_specs_full.yaml"
+        with open(full_config_path, 'w') as f:
+            yaml.dump(integration_config, f, default_flow_style=False, indent=2)
 
 
 def main():
     """Main entry point for command line usage."""
     import sys
+    from ..cli.main import main_cli
     
+    # If called directly, use the enhanced CLI
+    if len(sys.argv) == 1:
+        # No arguments, show help or start interactive
+        from ..cli.interactive import InteractiveMode
+        interactive = InteractiveMode()
+        
+        if interactive.get_yes_no("Start interactive mode?", default=True):
+            return main_cli()
+        else:
+            print("Usage: create_module_agent <module_name> [options]")
+            return 1
+    
+    # Legacy support - execute command directly
     command = CreateModuleAgentCommand()
     result = command.execute(sys.argv)
     
