@@ -7,15 +7,15 @@
 - **Decision History:** @.agent-os/product/decisions.md
 
 ### Development Standards
-- **Code Style:** @~/.agent-os/standards/code-style.md
-- **Best Practices:** @~/.agent-os/standards/best-practices.md
+- **Code Style:** @.agent-os/standards/code-style.md
+- **Best Practices:** @.agent-os/standards/best-practices.md
 
 ### Project Management
 - **Active Specs:** @.agent-os/specs/ and @specs/modules/
 - **Enhanced Spec Planning:** Use `@.agent-os/instructions/enhanced-create-spec.md`
 - **Enhanced Tasks Execution:** Use `@.agent-os/instructions/enhanced-execute-tasks.md`
-- **Traditional Spec Planning:** Use `@~/.agent-os/instructions/create-spec.md`
-- **Traditional Tasks Execution:** Use `@~/.agent-os/instructions/execute-tasks.md`
+- **Traditional Spec Planning:** Use `@.agent-os/instructions/create-spec.md`
+- **Traditional Tasks Execution:** Use `@.agent-os/instructions/execute-tasks.md`
 
 ## Workflow Instructions
 
@@ -23,8 +23,8 @@ When asked to work on this codebase:
 
 1. **First**, check @.agent-os/product/roadmap.md for current priorities
 2. **Then**, follow the appropriate instruction file:
-   - For new features: @.agent-os/instructions/enhanced-create-spec.md (enhanced) or @~/.agent-os/instructions/create-spec.md (traditional)
-   - For tasks execution: @.agent-os/instructions/enhanced-execute-tasks.md (enhanced) or @~/.agent-os/instructions/execute-tasks.md (traditional)
+   - For new features: @.agent-os/instructions/enhanced-create-spec.md (enhanced) or @.agent-os/instructions/create-spec.md (traditional)
+   - For tasks execution: @.agent-os/instructions/enhanced-execute-tasks.md (enhanced) or @.agent-os/instructions/execute-tasks.md (traditional)
 3. **Always**, adhere to the standards in the files listed above
 
 ## Enhanced Features Available
@@ -58,3 +58,20 @@ This project supports enhanced Agent OS workflows including:
 - Product-specific files in `.agent-os/product/` override any global standards
 - User's specific instructions override (or amend) instructions found in `.agent-os/specs/...`
 - Always adhere to established patterns, code style, and best practices documented above.
+
+## Self-Contained Agent OS
+
+This repository includes a complete, self-contained Agent OS framework. All slash commands work immediately after `git clone` with no additional setup required.
+
+### Available Slash Commands
+- `/create-spec <spec-name>` - Create detailed specification documents
+- `/execute-tasks <tasks-file>` - Execute tasks from specification
+- `/create-module-agent <agent-name>` - Create specialized AI agents
+
+### Local Agent OS Structure
+- **Standards**: @.agent-os/standards/ (code style, best practices)
+- **Instructions**: @.agent-os/instructions/ (workflow guidance)
+- **Product Context**: @.agent-os/product/ (mission, roadmap, decisions)
+- **Specifications**: @.agent-os/specs/ (feature specifications and tasks)
+
+All references are local to this repository - no external dependencies required.
