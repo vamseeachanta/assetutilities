@@ -15,9 +15,19 @@ parallel_processing:
   save_error_reports: false
   progress_reporting: true
 
+analysis:
+  flag: True
+  type: zip_by_stem
+  by: stem
+  input_directory: NULL
+
+  filename:
+    extension: []
+
 analysis_settings:
   flag: True
-  by: NULL
+  type: zip_by_stem
+  by: stem
 
 file_management:
   flag: True
