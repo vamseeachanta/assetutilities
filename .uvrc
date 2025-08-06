@@ -1,0 +1,17 @@
+# UV Configuration File for AssetUtilities
+# This file configures UV behavior for the project
+
+# Link mode for better performance on same filesystem
+UV_LINK_MODE=copy
+
+# Cache directory (optional - UV will use default if not set)
+# UV_CACHE_DIR=.uv-cache
+
+# Always use managed Python versions
+UV_MANAGED_PYTHON=true
+
+# Enable progress reporting
+UV_NO_PROGRESS=false
+
+# Default index URL (PyPI)
+UV_DEFAULT_INDEX=https://pypi.org/simple/

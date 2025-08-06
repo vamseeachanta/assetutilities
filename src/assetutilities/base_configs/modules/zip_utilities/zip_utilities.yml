@@ -1,0 +1,42 @@
+library: assetutlities
+basename: zip_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+# Parallel processing configuration for high-performance zip operations
+parallel_processing:
+  enabled: true
+  max_workers: 30
+  timeout_per_file: 3600
+  save_error_reports: false
+  progress_reporting: true
+
+analysis:
+  flag: True
+  type: zip_by_stem
+  by: stem
+  input_directory: NULL
+
+  filename:
+    extension: []
+
+analysis_settings:
+  flag: True
+  type: zip_by_stem
+  by: stem
+
+file_management:
+  flag: True
+  input_directory: NULL
+  output_directory: NULL
+
+  filename:
+    extension: []
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

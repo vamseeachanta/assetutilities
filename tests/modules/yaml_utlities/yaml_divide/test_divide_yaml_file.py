@@ -1,0 +1,32 @@
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+
+from assetutilities.engine import engine
+from test_utils import get_test_file_path
+
+
+def run_process(input_file):
+    # Use the common test utility for proper path resolution
+    input_file = get_test_file_path(input_file, os.path.dirname(__file__))
+    result = engine(input_file)
+    return result
+
+
+def test_run_process():
+    input_file = "divide_yaml_file.yml"
+    result = run_process(input_file)
+    assert result is not None
+    input_file = "divide_yaml_file_by_primary_key.yml"
+
+    # pytest_output_file = "results/divide_yaml_file_by_primary_key_pytest.yml"
+    # pytest_output_file = tu.get_valid_pytest_output_file(os.path.dirname(__file__), pytest_output_file)
+    # expected_result = ymlInput(pytest_output_file, updateYml=None)
+
+    if len(sys.argv) > 1:
+        sys.argv.pop()
+
+    run_process(input_file, expected_result={})
+
+
+test_run_process()
