@@ -59,6 +59,29 @@ This project supports enhanced Agent OS workflows including:
 - User's specific instructions override (or amend) instructions found in `.agent-os/specs/...`
 - Always adhere to established patterns, code style, and best practices documented above.
 
+
+### Enhanced Create-Spec Command
+
+This repository includes an enhanced create-spec command with advanced features:
+
+```bash
+# Enhanced spec with executive summaries and diagrams
+python create-spec-enhanced.py feature-name module-name enhanced
+
+# Research-focused specification
+python create-spec-enhanced.py research-topic research
+
+# Quick minimal specification
+python create-spec-enhanced.py quick-fix minimal
+```
+
+Features:
+- Executive summaries for stakeholders
+- Mermaid architecture diagrams
+- Module-based organization
+- Multiple spec variants (enhanced, research, minimal)
+- Comprehensive task breakdowns with effort estimates
+
 ## Self-Contained Agent OS
 
 This repository includes a complete, self-contained Agent OS framework. All slash commands work immediately after `git clone` with no additional setup required.
