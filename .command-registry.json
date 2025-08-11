@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-11T12:00:00",
+  "repository": "assetutilities",
+  "commands": {
+    "/modernize-deps": {
+      "description": "Modernize dependency management and unify requirements into pyproject.toml",
+      "source": ".agent-os/commands/modernize_deps.py",
+      "type": "python",
+      "category": "dependency-management",
+      "requirements": ["python>=3.9", "uv"],
+      "options": {
+        "--target-dir": "Directory containing repositories (default: current)",
+        "--parallel": "Number of parallel workers (default: 5)",
+        "--no-backup": "Skip creating backups",
+        "--repos": "Specific repositories to process",
+        "--dry-run": "Show what would be done without making changes"
+      },
+      "examples": [
+        "./slash_commands.py /modernize-deps",
+        "./slash_commands.py /modernize-deps --parallel=10",
+        "./slash_commands.py /modernize-deps --repos repo1 repo2",
+        "./slash_commands.py /modernize-deps --dry-run"
+      ]
+    },
+    "/propagate-commands": {
+      "description": "Distribute slash commands from this repository to all others",
+      "source": ".agent-os/commands/propagate_commands.py",
+      "type": "python",
+      "category": "command-management",
+      "requirements": ["python>=3.9"],
+      "options": {
+        "--source": "Source repository (default: current directory)",
+        "--target-dir": "Directory containing target repositories",
+        "--commands": "Specific commands to propagate",
+        "--parallel": "Number of parallel workers (default: 5)",
+        "--force": "Force overwrite existing files",
+        "--dry-run": "Show what would be done",
+        "--repos": "Specific repositories to target"
+      },
+      "examples": [
+        "./slash_commands.py /propagate-commands",
+        "./slash_commands.py /propagate-commands --commands /modernize-deps",
+        "./slash_commands.py /propagate-commands --target-dir /mnt/github/github",
+        "./slash_commands.py /propagate-commands --force --parallel=10"
+      ]
+    },
+    "/organize-structure": {
+      "description": "Enforce module-based project organization and clean up root directory",
+      "source": ".agent-os/commands/organize_structure.py",
+      "type": "python",
+      "category": "project-organization",
+      "requirements": ["python>=3.9"],
+      "options": {
+        "--target-dir": "Directory containing repositories (default: current)",
+        "--repos": "Specific repositories to organize",
+        "--dry-run": "Show what would be done without making changes",
+        "--force": "Force overwrite existing files",
+        "--parallel": "Number of parallel workers (default: 1)"
+      },
+      "examples": [
+        "./slash_commands.py /organize-structure",
+        "./slash_commands.py /organize-structure --dry-run",
+        "./slash_commands.py /organize-structure --target-dir /mnt/github/github",
+        "./slash_commands.py /organize-structure --force --parallel=5"
+      ]
+    }
+  },
+  "categories": {
+    "dependency-management": "Commands for managing project dependencies",
+    "command-management": "Commands for managing slash commands across repositories",
+    "project-organization": "Commands for enforcing module-based project structure"
+  }
+}
