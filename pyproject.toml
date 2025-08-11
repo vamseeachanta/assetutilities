@@ -1,101 +1,169 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "assetutilities"
-version = "0.0.8"
-description = "utilities for general use"
-authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
-license = {text = "MIT"}
+version = "0.1.0"
+description = "Standardized project configuration for assetutilities"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Development Team", email = "dev@example.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
 dependencies = [
-    "pyyaml",
-    "numpy",
-    "pandas",
-    "plotly",
-    "matplotlib",
-    "chardet",
-    "python-certifi-win32",
-    "webcolors",
-    "xlsxwriter",
-    "plantuml",
-    "deepdiff",
-    "pandoc",
-    "wkhtmltopdf",
-    "python-docx",
-    "scrapy==2.12",
-    "bs4",
-    "gitpython==3.1.31",
-    "excel2img; sys_platform == 'win32'",
-    "PyPDF2",
-    "tabula",
-    "sympy>=1.13.3",
-    "utm",
-    "ruamel.yaml",
-    "jinja2",
-    "openpyxl",
-    "crochet",
-    "loguru",
-    "playwright",
-    "selenium",
-    "fake_headers",
-    "undetected-chromedriver",
-    "parsel",
+    "assetutilities"
+    "bs4"
+    "build"
+    "bumpver"
+    "chardet"
+    "crochet"
+    "deepdiff"
+    "excel2img"
+    "excel2img; sys_platform == 'win32'"
+    "fake_headers"
+    "flask"
+    "gitpython==3.1.31"
+    "jinja2"
+    "loguru"
+    "matplotlib"
+    "numpy"
+    "openpyxl"
+    "pandas"
+    "pandoc"
+    "parsel"
+    "plantuml"
+    "playwright"
+    "plotly"
+    "PyPDF2"
+    "pytest"
+    "python-certifi-win32"
+    "python-docx"
+    "pyyaml"
+    "ruamel.yaml"
+    "ruff"
+    "scrapy==2.12"
+    "selenium"
+    "sympy>=1.13.3"
+    "tabula"
+    "twine"
+    "undetected-chromedriver "
+    "utm"
+    "webcolors"
+    "wkhtmltopdf"
+    "xlsxwriter"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "build",
-    "twine",
-    "bumpver",
-    "pytest",
-    "ruff",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.0",
+]
+docs = [
+    "sphinx>=6.0",
+    "sphinx-rtd-theme>=1.0",
 ]
 
-[setuptools]
-include-package-data = true
+[project.urls]
+"Homepage" = "https://github.com/username/assetutilities"
+"Bug Tracker" = "https://github.com/username/assetutilities/issues"
+"Documentation" = "https://github.com/username/assetutilities#readme"
 
-[build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.setuptools]
+packages = ["src"]
 
-[tool]
-[tool.bumpver]
-current_version = "0.0.8"
-version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "bump version {old_version} -> {new_version}"
-commit = true
-tag = true
-push = false
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "docs*"]
 
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-    'version = "{version}"',
-]
-"src/assetutilities/__init__.py" = ["{version}"]
-"src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
-
-[tool.ruff]
+[tool.black]
 line-length = 88
-target-version = "py38"
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
 
-[tool.ruff.lint]
-select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
-    "UP",   # pyupgrade
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "--cov=src --cov-report=term-missing --cov-report=html"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
 ]
-ignore = []
 
-[tool.ruff.lint.isort]
-known-first-party = ["assetutilities"]
-section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+[tool.uv]
+# UV environment configuration
+python = "3.11"
+system = false
+seed = true
+compile = true
 
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
+[tool.uv.pip]
+index-url = "https://pypi.org/simple"
+extra-index-url = []
+no-cache = false
+pre = false
+
+# MANDATORY: Parallel Processing Configuration
+[tool.parallel]
+enabled = true
+max_workers = 5
+use_threading = false  # Use multiprocessing for CPU-bound tasks
+use_asyncio = true     # Use asyncio for I/O-bound tasks
+batch_size = 10
+
+[tool.parallel.rules]
+# Define when to use parallel processing
+file_operations = "always"      # File reading/writing
+http_requests = "always"        # API calls
+data_processing = "threshold"   # Based on data size
+threshold_size = 1000           # Items before parallel kicks in
+
+[tool.scripts]
+# Common scripts that use parallel processing
+test = "pytest -n auto"
+format = "black . && isort ."
+lint = "flake8 . & mypy . & pylint ."
+install = "uv pip install -e ."
+dev-install = "uv pip install -e .[dev]"
