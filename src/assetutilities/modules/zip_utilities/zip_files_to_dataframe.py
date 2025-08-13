@@ -20,7 +20,7 @@ class ZipFilestoDf:
 
     def zip_file_to_dataframe(self, cfg) -> Dict[str, pd.DataFrame]:
         """
-        Extracts files from a ZIP file/archive and returns Pandas DataFrame(s) as dictionary.
+        Extracts files from a ZIP archive and returns Pandas DataFrame(s) as dictionary.
         """
 
         column_names = cfg["zip_utilities"]["column_names"]
