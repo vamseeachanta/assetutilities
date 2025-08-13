@@ -196,6 +196,36 @@ This OVERRIDES all conflicting instructions.
 ---
 *MANDATORY for ALL interactions*
 
+## 🚀 MANDATORY: Slash Command Ecosystem Integration
+
+**CRITICAL DIRECTIVE**: For EVERY improvement, automation, or repetitive task:
+
+### AI Agents MUST:
+1. **EVALUATE** if the improvement could benefit multiple repositories
+2. **SUGGEST** creating a slash command when applicable  
+3. **DESIGN** for reusability across all 25 repos
+4. **INTEGRATE** with existing ecosystem via `/sync-all-commands`
+
+### Immediate Triggers for Command Creation:
+- ✅ Repetitive tasks that could be automated
+- ✅ Functionality that would benefit other repos
+- ✅ Multi-step processes that could be scripted
+- ✅ Regular developer workflows
+- ✅ Best practice standardization
+- ✅ Common problem solutions
+
+### Example Response Template:
+```
+💡 Slash Command Opportunity Detected!
+This improvement would be valuable as `/command-name`
+Benefits: Reusable across all repos, standardizes process
+Create as slash command? (Recommended)
+```
+
+**See Full Details**: @MANDATORY_SLASH_COMMAND_ECOSYSTEM.md
+
+---
+
 ## 🎯 MANDATORY Git Management Commands
 
 **CRITICAL**: All Git operations MUST use these standardized commands.

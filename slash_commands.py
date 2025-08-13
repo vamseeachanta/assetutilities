@@ -42,7 +42,10 @@ def list_available_commands():
     
     commands = {
         "/modernize-deps": "Modernize dependency management across repositories",
-        "/propagate-commands": "Distribute slash commands to other repositories"
+        "/propagate-commands": "Distribute slash commands to other repositories",
+        "/git-trunk-flow": "Complete git workflow with trunk-based development best practices",
+        "/sync-all-commands": "Bidirectional sync of slash commands from all repos to master",
+        "/install-ecosystem-awareness": "Add slash command suggestions to all AI agents"
     }
     
     # Load command registry if exists
