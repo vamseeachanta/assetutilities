@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+"""
+Universal Slash Command Runner for Claude CLI
+This wrapper makes all slash commands easily accessible from any directory.
+Simply type: slash <command> [args]
+"""
+
+import sys
+import os
+import subprocess
+import json
+from pathlib import Path
+from typing import Optional, List, Dict
+
+class SlashRunner:
+    """Universal runner for slash commands across all repositories."""
+    
+    def __init__(self):
+        self.current_dir = Path.cwd()
+        self.workspace = Path("/mnt/github/github")
+        self.master_repo = self.workspace / "assetutilities"
+        
+    def find_command(self, command: str) -> Optional[Path]:
+        """Find a command file in order of precedence."""
+        # Normalize command name
+        if not command.startswith('/'):
+            command = '/' + command
+        
+        module_name = command.lstrip('/').replace('-', '_') + '.py'
+        
+        # Search order:
+        # 1. Current repository's .agent-os/commands
+        # 2. Current repository's .git-commands
+        # 3. AssetUtilities master repository
+        # 4. Any parent directory up to workspace
+        
+        search_paths = []
+        
+        # Current repo
+        current_repo = self.find_repo_root(self.current_dir)
+        if current_repo:
+            search_paths.append(current_repo / ".agent-os/commands" / module_name)
+            search_paths.append(current_repo / ".git-commands" / module_name)
+        
+        # Master repo
+        if self.master_repo.exists():
+            search_paths.append(self.master_repo / ".agent-os/commands" / module_name)
+        
+        # Check each path
+        for path in search_paths:
+            if path.exists():
+                return path
+        
+        return None
+    
+    def find_repo_root(self, start_path: Path) -> Optional[Path]:
+        """Find the repository root from a given path."""
+        current = start_path
+        while current != current.parent:
+            if (current / ".git").exists():
+                return current
+            current = current.parent
+        return None
+    
+    def find_wrapper(self, repo_path: Path) -> Optional[Path]:
+        """Find the slash_commands.py wrapper in a repository."""
+        wrapper = repo_path / "slash_commands.py"
+        if wrapper.exists():
+            return wrapper
+        
+        # Check alternative locations
+        alt_wrapper = repo_path / ".agent-os" / "slash_commands.py"
+        if alt_wrapper.exists():
+            return alt_wrapper
+        
+        return None
+    
+    def run_command(self, command: str, args: List[str]) -> int:
+        """Execute a slash command."""
+        # Special case: built-in commands
+        if command in ['--help', '-h', 'help']:
+            self.show_help()
+            return 0
+        
+        if command in ['--list', '-l', 'list']:
+            self.list_commands()
+            return 0
+        
+        if command in ['--search', 'search']:
+            # Redirect to search-commands
+            return self.run_command('/search-commands', args)
+        
+        # Find command
+        command_path = self.find_command(command)
+        if not command_path:
+            print(f"❌ Command '{command}' not found!")
+            print("\n💡 Try:")
+            print("  slash --list        # List all available commands")
+            print("  slash --search git  # Search for git-related commands")
+            return 1
+        
+        # Find the repo containing the command
+        repo_root = self.find_repo_root(command_path)
+        if not repo_root:
+            repo_root = self.master_repo
+        
+        # Try to use wrapper if available
+        wrapper = self.find_wrapper(repo_root)
+        if wrapper:
+            # Use the wrapper
+            cmd = [sys.executable, str(wrapper), command] + args
+            
+            # Change to repo directory for execution
+            original_dir = os.getcwd()
+            try:
+                os.chdir(str(repo_root))
+                result = subprocess.run(cmd)
+                return result.returncode
+            finally:
+                os.chdir(original_dir)
+        else:
+            # Direct execution
+            cmd = [sys.executable, str(command_path)] + args
+            result = subprocess.run(cmd)
+            return result.returncode
+    
+    def list_commands(self):
+        """List all available commands."""
+        print("📋 Available Slash Commands")
+        print("=" * 60)
+        
+        commands = set()
+        
+        # Scan current repo
+        current_repo = self.find_repo_root(self.current_dir)
+        if current_repo:
+            for cmd_dir in [".agent-os/commands", ".git-commands"]:
+                dir_path = current_repo / cmd_dir
+                if dir_path.exists():
+                    for py_file in dir_path.glob("*.py"):
+                        if py_file.name != "__init__.py":
+                            cmd_name = "/" + py_file.stem.replace("_", "-")
+                            commands.add((cmd_name, "local"))
+        
+        # Scan master repo
+        if self.master_repo.exists():
+            cmd_dir = self.master_repo / ".agent-os/commands"
+            if cmd_dir.exists():
+                for py_file in cmd_dir.glob("*.py"):
+                    if py_file.name != "__init__.py":
+                        cmd_name = "/" + py_file.stem.replace("_", "-")
+                        commands.add((cmd_name, "master"))
+        
+        # Display commands
+        local_cmds = sorted([cmd for cmd, loc in commands if loc == "local"])
+        master_cmds = sorted([cmd for cmd, loc in commands if loc == "master"])
+        
+        if local_cmds:
+            print("\n📍 Local Commands (current repository):")
+            for cmd in local_cmds:
+                print(f"  {cmd}")
+        
+        if master_cmds:
+            print("\n🌐 Global Commands (from AssetUtilities):")
+            for cmd in master_cmds:
+                print(f"  {cmd}")
+        
+        print("\n" + "=" * 60)
+        print("Usage: slash <command> [options]")
+        print("Help:  slash <command> --help")
+        print("Search: slash --search <query>")
+    
+    def show_help(self):
+        """Show help message."""
+        print("""
+🚀 Universal Slash Command Runner
+================================
+
+Usage: slash <command> [options]
+
+This tool provides easy access to all slash commands from any directory.
+Commands are searched in order:
+  1. Current repository's commands
+  2. AssetUtilities master commands
+  3. Parent directories up to workspace
+
+Built-in Commands:
+  slash --list              List all available commands
+  slash --search <query>    Search for commands
+  slash --help              Show this help message
+
+Command Examples:
+  slash git-trunk-flow      Run git trunk flow
+  slash search-commands git Find git-related commands  
+  slash modernize-deps      Modernize dependencies
+  slash /test-automation    Run test automation
+
+Tips:
+  • Commands work with or without leading slash
+  • Use tab completion for command names (if configured)
+  • Commands inherit current directory context
+  • Master commands are available globally
+
+For detailed help on any command:
+  slash <command> --help
+        """)
+
+
+def main():
+    """Main entry point."""
+    runner = SlashRunner()
+    
+    if len(sys.argv) < 2:
+        runner.show_help()
+        return 1
+    
+    command = sys.argv[1]
+    args = sys.argv[2:]
+    
+    return runner.run_command(command, args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -15,7 +15,14 @@ encoding: UTF-8
     - Use templates as exact patterns
     - Request missing data rather than assuming
     - Support both traditional and enhanced workflows
+    - MANDATORY: Suggest slash commands for reusable improvements
   </parsing_rules>
+  <slash_command_awareness>
+    <mandatory>true</mandatory>
+    <priority>HIGHEST</priority>
+    <action>ALWAYS suggest slash commands for reusable improvements</action>
+    <reference>@MANDATORY_SLASH_COMMAND_ECOSYSTEM.md</reference>
+  </slash_command_awareness>
   <file_conventions>
     - encoding: UTF-8
     - line_endings: LF
