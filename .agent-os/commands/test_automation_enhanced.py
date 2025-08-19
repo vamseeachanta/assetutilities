@@ -29,7 +29,6 @@ Usage:
 """
 
 import sys
-import os
 import argparse
 import json
 import yaml
@@ -39,13 +38,11 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import hashlib
 import sqlite3
 import re
 import ast
-import textwrap
 
 # Arrange-Act-Assert Pattern Enforcer
 class AAAPatternEnforcer:
@@ -172,7 +169,6 @@ def test_{test_name}():
         # Parse function to understand parameters and return type
         params = self._extract_function_params(function_code)
         
-        test_name = f"test_{function_name}"
         
         arrange_code = self._generate_arrange_section(function_name, params, produces_output)
         act_code = self._generate_act_section(function_name, params, produces_output)
@@ -363,7 +359,7 @@ class AAATestGenerator:
             "from pathlib import Path",
             "from unittest.mock import Mock, patch, MagicMock",
             "",
-            f"# Import functions to test",
+            "# Import functions to test",
             f"from {source_file.stem} import {', '.join(functions.keys())}"
         ]
         
@@ -659,7 +655,7 @@ class IntelligentTestRunner:
     
     def _build_test_command(self, test_file: Path, coverage: bool) -> List[str]:
         """Build test command based on repository configuration."""
-        runner = self.adapter.config.get('runner', 'pytest')
+        self.adapter.config.get('runner', 'pytest')
         
         if self.adapter.repo_type == 'python':
             if coverage:
@@ -1378,7 +1374,7 @@ Generated: {summary['generated_at']}
         else:
             md += "No failures detected! 🎉\n"
         
-        md += f"\n## Risk Assessment\n\n"
+        md += "\n## Risk Assessment\n\n"
         risk = summary['risk_assessment']
         risk_emoji = {'HIGH': '🔴', 'MEDIUM': '🟡', 'LOW': '🟢'}.get(risk['risk_level'], '⚪')
         md += f"**Risk Level:** {risk['risk_level']} {risk_emoji}\n"
@@ -1891,7 +1887,7 @@ class TestAutomationEnhanced:
             module_summary_gen = ModuleTestSummary(self.adapter)
             module_summaries = module_summary_gen.generate_module_summaries(results, analyses)
             print(f"   Generated summaries for {len(module_summaries)} modules")
-            print(f"   Module refactor guide saved to: test_summaries/module_refactor_guide.md")
+            print("   Module refactor guide saved to: test_summaries/module_refactor_guide.md")
         
         print("\n📊 Generating report...")
         report_path = self.reporter.generate_report(
@@ -1948,7 +1944,6 @@ class TestAutomationEnhanced:
         # Check coverage tool
         if self.adapter.repo_type == 'python':
             try:
-                import pytest_cov
                 checks['coverage_available'] = True
             except:
                 pass
@@ -2043,7 +2038,7 @@ class TestAutomationEnhanced:
         # For this simplified version, we'll just indicate where summaries would be saved
         # In a full implementation, we'd parse the JSON and regenerate summaries
         
-        module_summary_gen = ModuleTestSummary(self.adapter)
+        ModuleTestSummary(self.adapter)
         
         # Since we don't have the raw TestResult objects, we'll need to run tests
         # or save them during test execution for later use
@@ -2177,7 +2172,7 @@ def main():
             sys.exit(1)
         
         summary = result.get('summary', {})
-        print(f"\n📊 AAA Pattern Validation Results:")
+        print("\n📊 AAA Pattern Validation Results:")
         print(f"   Total Files: {summary.get('total_files', 0)}")
         print(f"   Total Tests: {summary.get('total_tests', 0)}")
         print(f"   AAA Compliant: {summary.get('aaa_compliant', 0)}")

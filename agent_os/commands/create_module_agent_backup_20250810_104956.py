@@ -9,7 +9,6 @@ This module implements the enhanced /create-module-agent slash command with:
 
 import re
 import yaml
-import json
 import hashlib
 from datetime import datetime
 from pathlib import Path

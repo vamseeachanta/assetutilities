@@ -10,7 +10,7 @@ import yaml
 import requests
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from bs4 import BeautifulSoup
 

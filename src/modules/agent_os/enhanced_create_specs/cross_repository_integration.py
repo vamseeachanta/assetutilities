@@ -17,13 +17,9 @@ import yaml
 import hashlib
 import subprocess
 import pathlib
-from typing import Dict, List, Optional, Tuple, Any, Set
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Optional, Any, Set
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-import requests
-from urllib.parse import urlparse
-import tempfile
-import shutil
 import logging
 
 logger = logging.getLogger(__name__)

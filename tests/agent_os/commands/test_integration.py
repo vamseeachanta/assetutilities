@@ -4,9 +4,7 @@ import pytest
 import tempfile
 import shutil
 import yaml
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 from assetutilities.agent_os.commands import (
     CreateModuleAgentCommand,
@@ -703,8 +701,6 @@ class TestCoverageValidation:
         from assetutilities.agent_os.commands import (
             CreateModuleAgentCommand,
             TemplateManager,
-            SpecsIntegrationManager,
-            CLIManager,
             ContextProcessor,
             DocumentationProcessor
         )

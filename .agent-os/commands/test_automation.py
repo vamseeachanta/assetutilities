@@ -22,9 +22,6 @@ import subprocess
 import argparse
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-import json
-import time
-from datetime import datetime
 
 # Add current directory to Python path for module imports
 current_dir = Path(__file__).parent.parent.parent
@@ -429,7 +426,7 @@ Examples:
         """Fallback implementation for run-all command."""
         test_dir = compatibility['test_directory'] or 'tests'
         
-        print(f"🧪 Running all tests using fallback method...")
+        print("🧪 Running all tests using fallback method...")
         print(f"   Test directory: {test_dir}")
         
         # Build pytest command

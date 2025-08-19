@@ -1,9 +1,8 @@
 """Integration tests for CLI functionality."""
 
-import pytest
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from io import StringIO
 import sys
 
@@ -48,7 +47,7 @@ class TestCLIIntegration:
         sys.stdout = captured_output = StringIO()
         
         try:
-            result = self.cli.run(['--help'])
+            self.cli.run(['--help'])
             output = captured_output.getvalue()
             
             assert "Agent OS Command Line Interface" in output
@@ -69,7 +68,7 @@ class TestCLIIntegration:
         sys.stdout = captured_output = StringIO()
         
         try:
-            result = self.cli.run(['create-module-agent', '--help'])
+            self.cli.run(['create-module-agent', '--help'])
             output = captured_output.getvalue()
             
             assert "Create a new module agent" in output

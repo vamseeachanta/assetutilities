@@ -14,7 +14,6 @@ import sys
 import os
 from pathlib import Path
 import subprocess
-import argparse
 
 # Configuration - Update this path if AssetUtilities is in a different location
 ASSETUTILITIES_PATH = "/mnt/github/github/assetutilities"
@@ -72,7 +71,7 @@ def main():
     # Check if slash_commands.py exists
     slash_cmd_path = assetutils_path / "slash_commands.py"
     if not slash_cmd_path.exists():
-        print(f"❌ slash_commands.py not found in AssetUtilities")
+        print("❌ slash_commands.py not found in AssetUtilities")
         return 1
     
     # Special handling for certain commands

@@ -4,12 +4,10 @@ Progress Tracking System for Enhanced Execute-Tasks
 Provides real-time progress display and document updates
 """
 
-import os
 import yaml
-import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from enum import Enum
 
 class TaskStatus(Enum):
@@ -98,7 +96,7 @@ class ProgressTracker:
         
         # Current task
         if in_progress:
-            print(f"\n🔄 Current Task:")
+            print("\n🔄 Current Task:")
             for task in in_progress:
                 print(f"  [ ] {task['id']}. {task['name']}")
                 if 'subtasks' in task:
@@ -153,7 +151,7 @@ class ProgressTracker:
     def update_subtask_progress(self, task_id: str, subtask_id: str, 
                                status: TaskStatus, duration: int = 0):
         """Update subtask progress and display"""
-        print(f"\n🎯 Subtask Progress Update:")
+        print("\n🎯 Subtask Progress Update:")
         print(f"  {'✅' if status == TaskStatus.COMPLETED else '🔄'} {subtask_id} " +
               f"[{duration} min]" if duration else "")
         
@@ -317,7 +315,7 @@ class ProgressTracker:
         print("\n" + "🎉" * 20)
         print("   SESSION COMPLETED SUCCESSFULLY!   ")
         print("🎉" * 20)
-        print(f"\nFinal Statistics:")
+        print("\nFinal Statistics:")
         print(f"  ✅ Tasks Completed: {completed}/{total}")
         print(f"  ⏱️ Total Time: {timedelta(seconds=self.session['metrics']['total_time'])}")
         print(f"  📊 Efficiency Score: {self.session['metrics']['efficiency_score']:.1f}/10")
