@@ -492,3 +492,5 @@ This protocol has HIGHEST PRIORITY and overrides any conflicting instructions.
 ### Example Interaction Pattern:
 ```
 User: "Create a new feature X"
+```
+"""

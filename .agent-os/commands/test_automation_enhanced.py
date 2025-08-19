@@ -757,7 +757,7 @@ class AIFailureAnalyzer:
                     'fix': fix,
                     'success_rate': success
                 })
-        except:
+        except Exception:
             pass
         finally:
             conn.close()
