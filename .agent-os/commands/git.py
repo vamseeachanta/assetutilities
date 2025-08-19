@@ -23,12 +23,10 @@ import sys
 import argparse
 import subprocess
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import List, Dict, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
 from datetime import datetime
 import shutil
-import time
 
 class UnifiedGitCommand:
     """Unified handler for all git operations."""
@@ -154,7 +152,7 @@ class UnifiedGitCommand:
         
         # Summary
         clean_repos = sum(1 for r in results.values() if r.get('clean', False))
-        print(f"\n📈 Summary:")
+        print("\n📈 Summary:")
         print(f"   Total repos: {len(self.all_repos)}")
         print(f"   Clean repos: {clean_repos}")
         print(f"   Repos with changes: {len(self.all_repos) - clean_repos}")
@@ -343,7 +341,7 @@ class UnifiedGitCommand:
                             capture_output=True, check=True
                         )
                         print(f"   Deleted merged branch: {branch}")
-                    except:
+                    except Exception:
                         pass  # Branch not fully merged, skip
                         
         except Exception:
@@ -388,9 +386,9 @@ class UnifiedGitCommand:
                 print(f"⬆️  Pushing to origin/{branch}...")
                 subprocess.run(["git", "push", "origin", branch], check=True)
                 
-                print(f"✅ Changes committed and pushed successfully")
+                print("✅ Changes committed and pushed successfully")
             else:
-                print(f"✅ Changes committed locally")
+                print("✅ Changes committed locally")
             
             return {'status': 'success', 'message': message}
             
@@ -441,7 +439,7 @@ class UnifiedGitCommand:
                             check=True, capture_output=True
                         )
                         cleaned.append(f"branch: {branch}")
-                    except:
+                    except Exception:
                         pass
             
             # Clean remote tracking branches

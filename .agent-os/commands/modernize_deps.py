@@ -7,7 +7,6 @@ across Python repositories by consolidating requirements into pyproject.toml,
 setting up uv environment configuration, and enabling parallel processing.
 """
 
-import os
 import sys
 import json
 import shutil
