@@ -4,15 +4,12 @@ Comprehensive Git Management System with Slash Commands
 MANDATORY for all repositories in the folder
 """
 
-import os
-import sys
 import subprocess
 import argparse
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 import concurrent.futures
-import json
 
 # Configuration
 MAX_PARALLEL_REPOS = 5  # Process 5 repos at a time
@@ -154,7 +151,7 @@ class GitManager:
         
         # Create PR using gh CLI
         pr_title = title or DEFAULT_PR_TITLE
-        pr_body = body or f"""## Summary
+        pr_body = body or """## Summary
 Automated synchronization and standardization of repository.
 
 ### Changes
@@ -396,7 +393,7 @@ class SlashCommands:
         
         # First commit all changes
         print("Step 1: Committing changes...")
-        commit_results = self.manager.process_all_repos("commit")
+        self.manager.process_all_repos("commit")
         
         # Then create PRs
         print("Step 2: Creating pull requests...")

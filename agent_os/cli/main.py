@@ -6,7 +6,7 @@ Provides a unified command line interface for all Agent OS functionality.
 import sys
 import argparse
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
 from agent_os.commands.create_module_agent import CreateModuleAgentCommand
 from .interactive import InteractiveMode

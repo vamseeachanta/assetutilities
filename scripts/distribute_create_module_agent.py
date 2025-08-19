@@ -53,7 +53,7 @@ def main():
         print(f"\n⚠️  Distribution completed with {len(results['failed'])} failures.")
         return 1
     else:
-        print(f"\n🎉 Distribution completed successfully!")
+        print("\n🎉 Distribution completed successfully!")
         return 0
 
 

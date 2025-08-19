@@ -14,8 +14,6 @@ Usage:
 import os
 import sys
 import argparse
-import subprocess
-import json
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -23,8 +21,7 @@ from dataclasses import dataclass, asdict
 
 from cross_repository_integration import (
     CrossRepositoryManager,
-    GitSubmoduleIntegration,
-    ParsedReference
+    GitSubmoduleIntegration
 )
 
 
@@ -232,11 +229,11 @@ class GitSubmoduleSetupManager:
         
         # Initialize all submodules
         if results['submodules_added']:
-            print(f"\n🔄 Initializing submodules...")
+            print("\n🔄 Initializing submodules...")
             init_result = self.git_integration.initialize_submodules()
             
             if init_result['success']:
-                print(f"✓ Successfully initialized all submodules")
+                print("✓ Successfully initialized all submodules")
             else:
                 print(f"⚠ Warning: Submodule initialization had issues: {init_result['error']}")
                 results['errors'].append(f"Initialization warning: {init_result['error']}")
@@ -442,7 +439,7 @@ def print_status_summary(status: Dict[str, Any]):
     print(f"Cross-repo ready: {'✓ Yes' if status['cross_repo_ready'] else '✗ No'}")
     print(f"Ready submodules: {status.get('ready_submodules', 0)}/{status.get('total_enabled_submodules', 0)}")
     
-    print(f"\n📦 SUBMODULES:")
+    print("\n📦 SUBMODULES:")
     for name, info in status.get('submodules', {}).items():
         status_icon = "✓" if info['exists'] and info['status'] == 'up-to-date' else "⚠" if info['exists'] else "✗"
         enabled_text = "" if info['enabled'] else " (disabled)"
@@ -453,7 +450,7 @@ def print_status_summary(status: Dict[str, Any]):
                 print(f"    Commit: {info['commit'][:8]}")
     
     if status.get('recommendations'):
-        print(f"\n💡 RECOMMENDATIONS:")
+        print("\n💡 RECOMMENDATIONS:")
         for i, rec in enumerate(status['recommendations'], 1):
             print(f"  {i}. {rec}")
 
@@ -517,11 +514,11 @@ def main():
             results = manager.setup_submodules()
             
             if results['success']:
-                print(f"\n✅ Setup completed successfully!")
+                print("\n✅ Setup completed successfully!")
                 print(f"   Added: {len(results['submodules_added'])} submodules")
                 print(f"   Skipped: {len(results['skipped'])} submodules")
             else:
-                print(f"\n⚠ Setup completed with errors:")
+                print("\n⚠ Setup completed with errors:")
                 print(f"   Added: {len(results['submodules_added'])} submodules")
                 print(f"   Failed: {len(results['submodules_failed'])} submodules")
                 print(f"   Skipped: {len(results['skipped'])} submodules")
@@ -534,9 +531,9 @@ def main():
             results = manager.update_submodules()
             
             if results['success']:
-                print(f"\n✅ Update completed successfully!")
+                print("\n✅ Update completed successfully!")
             else:
-                print(f"\n⚠ Update completed with errors:")
+                print("\n⚠ Update completed with errors:")
             
             print(f"   Updated: {len(results['updated'])} submodules")
             print(f"   Failed: {len(results['failed'])} submodules")
@@ -547,9 +544,9 @@ def main():
             results = manager.test_cross_repo_references()
             
             if results['success']:
-                print(f"\n✅ All tests passed!")
+                print("\n✅ All tests passed!")
             else:
-                print(f"\n⚠ Some tests failed:")
+                print("\n⚠ Some tests failed:")
             
             print(f"   Tests run: {results['tests_run']}")
             print(f"   Passed: {results['tests_passed']}")

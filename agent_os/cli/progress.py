@@ -176,14 +176,14 @@ class TaskProgress:
         completed = len(self.completed_tasks)
         failed = len(self.failed_tasks)
         
-        print(f"\n📊 Task Summary:")
+        print("\n📊 Task Summary:")
         print(f"   Total tasks: {total}")
         print(f"   ✅ Completed: {completed}")
         print(f"   ❌ Failed: {failed}")
         print(f"   ⏳ Pending: {total - completed - failed}")
         
         if failed > 0:
-            print(f"\n❌ Failed tasks:")
+            print("\n❌ Failed tasks:")
             for task_index in self.failed_tasks:
                 print(f"   - {self.tasks[task_index]}")
 

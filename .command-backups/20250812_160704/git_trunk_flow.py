@@ -17,11 +17,9 @@ import os
 import sys
 import subprocess
 import re
-import json
 import tempfile
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
-from datetime import datetime
+from typing import List, Optional
 
 class GitTrunkFlow:
     """Manages trunk-based development workflow with best practices."""
@@ -107,7 +105,7 @@ class GitTrunkFlow:
             self.cleanup_redundant_files()
             
             # Step 3: Apply best practices
-            changes = self.apply_best_practices()
+            self.apply_best_practices()
             
             # Step 4: Security scan
             self.security_scan()
@@ -158,7 +156,7 @@ class GitTrunkFlow:
             print(f"📝 Currently on {self.current_branch} branch.")
             branch_name = self.create_feature_branch()
             print(f"✅ Created short-lived feature branch: {branch_name}")
-            print(f"   (Best practice: max 2-3 days lifespan)")
+            print("   (Best practice: max 2-3 days lifespan)")
         
         # Fetch latest changes
         print("📥 Fetching latest changes from remote...")
@@ -260,7 +258,7 @@ class GitTrunkFlow:
             print("     (Best practice: Automated testing on every commit)")
         
         if changes_made:
-            print(f"\n📝 Changes to be committed (best practices applied):")
+            print("\n📝 Changes to be committed (best practices applied):")
             for change in changes_made:
                 print(f"    ✅ {change}")
         else:

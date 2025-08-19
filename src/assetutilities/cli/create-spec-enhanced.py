@@ -5,7 +5,6 @@ Includes prompt summaries, executive summaries, and mermaid diagrams.
 """
 
 import sys
-import os
 from datetime import datetime
 from pathlib import Path
 

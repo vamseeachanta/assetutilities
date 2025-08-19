@@ -15,14 +15,12 @@ Created: 2025-08-05
 Module: agent-os/enhanced-create-specs
 """
 
-import os
 import json
 import yaml
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union, Callable
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field, asdict
 from enum import Enum
-import re
 from copy import deepcopy
 import logging
 
@@ -624,7 +622,7 @@ class TemplateCustomizer:
         }
         
         sections = customized_template["sections"]
-        context = customized_template["context"]
+        customized_template["context"]
         
         # Check required sections
         required_sections = [

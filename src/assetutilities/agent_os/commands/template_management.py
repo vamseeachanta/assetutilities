@@ -6,10 +6,9 @@ customizing AI agents with predefined patterns, prompts, and capabilities.
 
 import re
 import yaml
-import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
-from dataclasses import dataclass, field, asdict
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass, field
 from urllib.parse import urlparse
 from datetime import datetime
 

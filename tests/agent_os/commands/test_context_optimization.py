@@ -1,12 +1,10 @@
 """Tests for context optimization engine."""
 
-import pytest
 import tempfile
 import shutil
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+from datetime import datetime
 import numpy as np
 
 from assetutilities.agent_os.commands.context_optimization import (
@@ -378,7 +376,7 @@ class TestSemanticSearch:
         mock_faiss.IndexFlatL2.return_value = mock_index
         
         with patch('assetutilities.agent_os.commands.context_optimization.FAISS_AVAILABLE', True):
-            search = SemanticSearch(self.mock_embeddings, self.mock_documents)
+            SemanticSearch(self.mock_embeddings, self.mock_documents)
         
             mock_faiss.IndexFlatL2.assert_called_once_with(3)  # 3 dimensions
             mock_index.add.assert_called_once()

@@ -9,10 +9,9 @@ import os
 import sys
 import subprocess
 import re
-import json
 import tempfile
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
+from typing import Optional
 from datetime import datetime
 
 class GitTrunkFlow:
@@ -211,7 +210,7 @@ class GitTrunkFlow:
             changes_made.append("Created pre-commit hook")
         
         if changes_made:
-            print(f"\n📝 Changes to be committed:")
+            print("\n📝 Changes to be committed:")
             for change in changes_made:
                 print(f"    ✅ {change}")
         else:

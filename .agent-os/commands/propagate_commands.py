@@ -7,18 +7,14 @@ to all other repositories in a directory, ensuring consistent tooling
 across your entire codebase.
 """
 
-import os
 import sys
 import json
 import shutil
-import subprocess
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional, Set
+from typing import List, Dict, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import tempfile
 import logging
 from datetime import datetime
-import hashlib
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -291,7 +287,7 @@ if __name__ == "__main__":
             try:
                 with open(registry_file, 'r') as f:
                     existing_registry = json.load(f)
-            except:
+            except Exception:
                 pass
         
         # Build new registry
@@ -498,7 +494,7 @@ def main(source: Optional[str] = None, target_dir: str = ".",
             if k in commands
         }
     
-    logger.info(f"📋 Commands to propagate:")
+    logger.info("📋 Commands to propagate:")
     for cmd_name in discovered_commands:
         logger.info(f"  • {cmd_name}")
     
@@ -583,7 +579,7 @@ def main(source: Optional[str] = None, target_dir: str = ".",
         len(r.get("commands_installed", [])) for r in results
     )
     
-    logger.info(f"\n📈 Statistics:")
+    logger.info("\n📈 Statistics:")
     logger.info(f"  • Commands propagated: {len(discovered_commands)}")
     logger.info(f"  • Total installations: {total_commands_installed}")
     logger.info(f"  • Time: {datetime.now().strftime('%H:%M:%S')}")
