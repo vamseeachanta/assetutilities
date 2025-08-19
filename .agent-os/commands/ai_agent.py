@@ -12,12 +12,11 @@ Usage:
     /ai-agent info [agent-name]        # Get agent details
 """
 
-import os
-import sys
 import yaml
 import argparse
+import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 from dataclasses import dataclass
 
 @dataclass
@@ -132,14 +131,13 @@ class AIAgentManager:
         
         # Check for recent git commits
         try:
-            import subprocess
             result = subprocess.run(
                 ["git", "log", "-1", "--pretty=%B"],
                 capture_output=True, text=True
             )
             if result.returncode == 0:
                 context_parts.append(result.stdout.strip())
-        except:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
             pass
         
         return " ".join(context_parts) if context_parts else "general development"
