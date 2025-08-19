@@ -5,12 +5,10 @@ Automatically assigns agents to tasks and creates specialist agents as needed
 Maintains free agents for cost reduction
 """
 
-import os
 import yaml
-import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from enum import Enum
 
 class AgentType(Enum):
@@ -413,7 +411,6 @@ class TaskAgentAssigner:
         """
         lines = tasks_content.split('\n')
         updated_lines = []
-        current_task = None
         
         for line in lines:
             # Check if this is a task line
@@ -426,7 +423,7 @@ class TaskAgentAssigner:
                 match = re.match(task_pattern, line.strip())
                 
                 if match:
-                    task_num = match.group(1)
+                    match.group(1)
                     task_desc = match.group(2).strip()
                     time_est = match.group(3) or "1 hour"
                     
@@ -524,10 +521,10 @@ class TaskAgentAssigner:
         )
         
         if free_agent_count > 0:
-            summary += f"\n### Cost Optimization\n"
+            summary += "\n### Cost Optimization\n"
             summary += f"- **Free Agents Used**: {free_agent_count}\n"
             summary += f"- **Estimated Savings**: ~{free_agent_count * 10}% reduction in compute costs\n"
-            summary += f"- **Next Refresh**: Weekly (automatic)\n"
+            summary += "- **Next Refresh**: Weekly (automatic)\n"
         
         summary += """
 ### Agent Creation Policy

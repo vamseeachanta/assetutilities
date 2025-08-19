@@ -2,17 +2,12 @@
 Modernize Dependencies Module - Consolidate and modernize dependency management
 """
 
-import os
-import sys
 import json
 import shutil
-import subprocess
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Tuple
 import tempfile
 import logging
-from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -190,7 +185,7 @@ class DependencyModernizer:
         content = self._dict_to_toml(config)
         pyproject_path.write_text(content)
         self.report["files_created"].append("pyproject.toml")
-        logger.info(f"  ✅ Created/Updated pyproject.toml")
+        logger.info("  ✅ Created/Updated pyproject.toml")
     
     def _dict_to_toml(self, data: dict) -> str:
         """Convert dictionary to TOML format (simplified)."""
@@ -330,14 +325,14 @@ jobs = 4
         
         uv_toml_path.write_text(content)
         self.report["files_created"].append("uv.toml")
-        logger.info(f"  ✅ Created uv.toml")
+        logger.info("  ✅ Created uv.toml")
     
     def create_python_version(self):
         """Create .python-version file."""
         version_file = self.repo_path / ".python-version"
         version_file.write_text("3.11\n")
         self.report["files_created"].append(".python-version")
-        logger.info(f"  ✅ Created .python-version")
+        logger.info("  ✅ Created .python-version")
     
     def create_setup_script(self):
         """Create setup_uv_env.sh script."""
@@ -380,7 +375,7 @@ echo "Setup complete! Activate the environment with: source .venv/bin/activate"
         script_path.write_text(content)
         script_path.chmod(0o755)
         self.report["files_created"].append("setup_uv_env.sh")
-        logger.info(f"  ✅ Created setup_uv_env.sh")
+        logger.info("  ✅ Created setup_uv_env.sh")
     
     def update_requirements_txt(self):
         """Update requirements.txt to reference pyproject.toml."""
@@ -400,7 +395,7 @@ echo "Setup complete! Activate the environment with: source .venv/bin/activate"
 """
         
         req_file.write_text(content)
-        logger.info(f"  ✅ Updated requirements.txt to reference pyproject.toml")
+        logger.info("  ✅ Updated requirements.txt to reference pyproject.toml")
     
     def cleanup_redundant_files(self):
         """Remove redundant requirements files."""

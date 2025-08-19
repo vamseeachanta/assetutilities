@@ -5,7 +5,7 @@ This module optimizes context loading and caching for better agent performance.
 
 import json
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 
 class ContextOptimizer:

@@ -5,7 +5,6 @@ import sys
 import json
 from pathlib import Path
 import tempfile
-import shutil
 
 def test_module_import():
     """Test that the module can be imported."""

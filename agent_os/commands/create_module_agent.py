@@ -7,19 +7,16 @@ Implements mandatory principles:
 Plus v2.0 features: RAG optimization, context engineering, memory management
 """
 
-import os
 import sys
 import yaml
-import shutil
 import hashlib
 import argparse
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional
 from enum import Enum
 import json
 import re
-import time
 
 class AgentMode(Enum):
     """Agent operation modes"""
@@ -485,7 +482,7 @@ class PhasedDocumentProcessor:
                 score += 0.2
             elif days_old < 90:
                 score += 0.1
-        except:
+        except Exception:
             pass
         
         return min(max(score, 0.0), 1.0)
@@ -1589,7 +1586,7 @@ python create_module_agent.py {self.module_name} --mode update --health-check
         print(f"   Location: {self.agent_path}")
         print(f"   Type: {agent_type}")
         print(f"   Specialization: {specialization.value}")
-        print(f"   Features: Phased processing, modular management, plus all v2.0 capabilities")
+        print("   Features: Phased processing, modular management, plus all v2.0 capabilities")
     
     def refresh_agent(self):
         """Refresh agent knowledge using modular management"""
@@ -1598,7 +1595,7 @@ python create_module_agent.py {self.module_name} --mode update --health-check
         # Use modular manager for refresh
         results = self.modular_manager.refresh_agent(self.module_name)
         
-        print(f"   ✓ Refresh complete")
+        print("   ✓ Refresh complete")
         print(f"   Specs processed: {results['specs_processed']}")
         print(f"   Status: {results['status']}")
         
@@ -1816,7 +1813,7 @@ def main():
                     results = generator.doc_manager.process_documents_phased(
                         documents, args.module_name
                     )
-                    print(f"\n✅ Phased processing complete")
+                    print("\n✅ Phased processing complete")
                     print(f"   Integration rate: {results['integration']['integration_metrics']['integration_rate']:.1%}")
                 else:
                     print("Processing documents without phased approach...")
@@ -1838,7 +1835,7 @@ def main():
                     try:
                         category = DocumentCategory(args.list_docs)
                         print(generator.doc_manager.list_documentation(category))
-                    except:
+                    except Exception:
                         print(generator.doc_manager.list_documentation())
                 else:
                     print(generator.doc_manager.list_documentation())
@@ -1850,7 +1847,7 @@ def main():
         elif mode == AgentMode.REFRESH:
             # Refresh agent
             results = generator.refresh_agent()
-            print(f"\n✅ Agent refreshed successfully")
+            print("\n✅ Agent refreshed successfully")
     
     except ValueError as e:
         print(f"❌ Error: {str(e)}", file=sys.stderr)

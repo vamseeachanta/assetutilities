@@ -7,12 +7,10 @@ moving scripts from root to appropriate module locations and enforcing
 best practices for project organization.
 """
 
-import os
 import sys
 import shutil
-import json
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional, Set
+from typing import List, Dict, Optional
 import logging
 from datetime import datetime
 import re
@@ -134,7 +132,7 @@ class ProjectOrganizer:
                     data = tomli.load(f)
                     if "project" in data and "name" in data["project"]:
                         return data["project"]["name"].replace("-", "_")
-            except:
+            except Exception:
                 pass
         
         # Try setup.py
@@ -240,7 +238,6 @@ class ProjectOrganizer:
     
     def categorize_file(self, file_path: Path) -> str:
         """Determine the appropriate category/location for a file."""
-        file_name = file_path.name.lower()
         file_stem = file_path.stem.lower()
         
         # Check against category patterns
@@ -266,7 +263,7 @@ class ProjectOrganizer:
                 if file_stem in ['example', 'demo', 'sample']:
                     return 'docs'
                 
-            except:
+            except Exception:
                 pass
         
         # Default categorization by extension
@@ -394,14 +391,14 @@ class ProjectOrganizer:
             "## Import Examples",
             "",
             "```python",
-            f"# Import from main package",
-            f"from {self.package_name}.core import processor",
-            f"from {self.package_name}.utils import helpers",
-            f"from {self.package_name}.cli import main",
+            "# Import from main package",
+            "from {}.core import processor".format(self.package_name),
+            "from {}.utils import helpers".format(self.package_name),
+            "from {}.cli import main".format(self.package_name),
             "",
-            f"# Import from modules",
-            f"from {self.package_name}.modules.web import scraper",
-            f"from {self.package_name}.devtools import modernize_deps",
+            "# Import from modules",
+            "from {}.modules.web import scraper".format(self.package_name),
+            "from {}.devtools import modernize_deps".format(self.package_name),
             "```",
             "",
             "## Best Practices",

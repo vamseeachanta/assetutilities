@@ -5,16 +5,11 @@ Continuously enhances agents with common and variation context
 Agents improve with every project and task accomplished
 """
 
-import os
 import yaml
-import json
-import hashlib
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
-import pickle
-import numpy as np
 
 class ContextType(Enum):
     """Types of context for agent learning"""
@@ -674,7 +669,7 @@ class ExecuteTasksEnhancement:
         # Add warnings
         if recommendations["warnings"]:
             task_info["warnings"] = recommendations["warnings"]
-            print(f"⚠️ Warnings from past experience:")
+            print("⚠️ Warnings from past experience:")
             for warning in recommendations["warnings"]:
                 print(f"   - {warning}")
         
@@ -687,7 +682,7 @@ class ExecuteTasksEnhancement:
         Process completed task for learning
         Called after task execution
         """
-        print(f"\n📖 Processing task for agent learning...")
+        print("\n📖 Processing task for agent learning...")
         
         # Extract context from completed task
         common_context, variation_context = self.learning_system.extract_task_context(task_info)

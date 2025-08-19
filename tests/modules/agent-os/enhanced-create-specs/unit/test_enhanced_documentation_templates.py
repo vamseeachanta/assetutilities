@@ -15,14 +15,8 @@ Module: agent-os/enhanced-create-specs
 """
 
 import pytest
-import os
 import tempfile
 import shutil
-from pathlib import Path
-from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
-import yaml
-import json
 
 # Mock imports for the enhanced documentation system
 try:
@@ -123,7 +117,7 @@ class TestEnhancedSpecTemplate:
     
     def test_enhanced_spec_md_generation(self):
         """Test generation of enhanced spec.md with all required sections."""
-        generator = EnhancedDocumentationGenerator()
+        EnhancedDocumentationGenerator()
         
         # Mock the template generation
         expected_sections = [
@@ -186,7 +180,7 @@ class TestEnhancedSpecTemplate:
     
     def test_mermaid_diagram_integration(self):
         """Test mermaid diagram generation and integration."""
-        mermaid_generator = MermaidDiagramGenerator()
+        MermaidDiagramGenerator()
         
         diagram_config = self.test_spec_data["mermaid_diagram"]
         
@@ -235,7 +229,7 @@ class TestConditionalSubSpecGeneration:
         }
         
         # Test that technical spec is generated when requirements exist
-        assert spec_requirements["has_technical_requirements"] == True
+        assert spec_requirements["has_technical_requirements"]
     
     def test_api_spec_conditional_generation(self):
         """Test API specification conditional generation."""
@@ -435,8 +429,8 @@ class TestTemplateCustomizationSystem:
         
         # Test variant configurations
         enhanced_config = variants["enhanced"]
-        assert enhanced_config["includes_mermaid"] == True
-        assert enhanced_config["includes_executive_summary"] == True
+        assert enhanced_config["includes_mermaid"]
+        assert enhanced_config["includes_executive_summary"]
         assert "prompt_summary" in enhanced_config["sections"]
     
     def test_customizable_field_validation(self):
@@ -471,7 +465,7 @@ class TestTemplateCustomizationSystem:
         merged_template = {**base_template, **enhanced_override}
         
         assert merged_template["format"] == "markdown"  # Inherited
-        assert merged_template["includes_mermaid"] == True  # Overridden
+        assert merged_template["includes_mermaid"]  # Overridden
         assert "prompt_summary" in merged_template["sections"]  # Added
     
     def test_conditional_section_rendering(self):

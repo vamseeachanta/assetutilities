@@ -3,7 +3,6 @@
 Provides an interactive command-line interface with enhanced user experience.
 """
 
-import sys
 from typing import Optional, List, Dict, Any
 
 

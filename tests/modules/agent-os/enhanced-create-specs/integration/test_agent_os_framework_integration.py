@@ -16,14 +16,10 @@ Test Type: Integration
 """
 
 import pytest
-import os
 import tempfile
 import shutil
 import yaml
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, List, Any
 
 
 class TestAgentOSCompatibility:

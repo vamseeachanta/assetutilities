@@ -16,16 +16,10 @@ Usage:
 
 import os
 import asyncio
-from pathlib import Path
 
 # Import AI persistence components
 from ai_persistence_system import (
     ContextHierarchyManager,
-    SystemLevelManager,
-    UserLevelManager,
-    RepositoryLevelManager,
-    SessionLevelManager,
-    ContextMerger,
     CrossSystemSynchronizer,
     PersistenceConfig
 )
@@ -61,7 +55,7 @@ async def main():
     print("\n2️⃣ System-Level AI Standards...")
     
     system_standards = hierarchy_manager.system_manager.load_system_standards()
-    print(f"✓ System standards loaded")
+    print("✓ System standards loaded")
     print(f"   Code style: {system_standards.get('ai_behaviors', {}).get('code_style', 'unknown')}")
     print(f"   Security first: {system_standards.get('ai_behaviors', {}).get('security_first', False)}")
     print(f"   Documentation required: {system_standards.get('ai_behaviors', {}).get('documentation_required', False)}")
@@ -84,7 +78,7 @@ async def main():
     hierarchy_manager.user_manager.save_user_preferences(user_preferences)
     
     loaded_prefs = hierarchy_manager.user_manager.load_user_preferences()
-    print(f"✓ User preferences saved and loaded")
+    print("✓ User preferences saved and loaded")
     print(f"   Communication style: {loaded_prefs.get('communication_style', 'unknown')}")
     print(f"   Expertise level: {loaded_prefs.get('expertise_level', 'unknown')}")
     print(f"   Preferred languages: {len(loaded_prefs.get('preferred_languages', []))}")
@@ -97,7 +91,7 @@ async def main():
     team_conventions = hierarchy_manager.repo_manager.load_team_conventions()
     domain_knowledge = hierarchy_manager.repo_manager.load_domain_knowledge()
     
-    print(f"✓ Repository context loaded")
+    print("✓ Repository context loaded")
     print(f"   Project type: {project_patterns.get('architecture_patterns', {}).get('type', 'unknown')}")
     print(f"   Primary language: {project_patterns.get('architecture_patterns', {}).get('primary_language', 'unknown')}")
     print(f"   Business domain: {domain_knowledge.get('business_domain', 'unknown')}")
@@ -132,7 +126,7 @@ async def main():
     })
     
     session_context = hierarchy_manager.session_manager.get_current_context()
-    print(f"✓ Session context updated")
+    print("✓ Session context updated")
     print(f"   Conversation entries: {len(session_context['conversation_history'])}")
     print(f"   Recent decisions: {len(session_context['recent_decisions'])}")
     print(f"   Active tasks: {len(session_context['active_tasks'])}")
@@ -142,7 +136,7 @@ async def main():
     
     merged_context = await hierarchy_manager.get_merged_context()
     
-    print(f"✓ Context merged from all levels")
+    print("✓ Context merged from all levels")
     print(f"   System level: {'✓' if merged_context.get('system') else '✗'}")
     print(f"   User level: {'✓' if merged_context.get('user') else '✗'}")
     print(f"   Repository level: {'✓' if merged_context.get('repository') else '✗'}")
@@ -243,7 +237,7 @@ async def main():
     
     conflicts = synchronizer.detect_pattern_conflicts(system_context, user_context, repo_context)
     
-    print(f"✓ Conflict detection completed")
+    print("✓ Conflict detection completed")
     print(f"   Conflicts found: {len(conflicts)}")
     for conflict in conflicts:
         print(f"   - {conflict['setting']}: {conflict['resolution']}")
@@ -262,17 +256,17 @@ async def main():
     print("   • Conflict detection and resolution")
     print("   • YAML-based human-readable storage")
     
-    print(f"\n🎨 CONTEXT STORAGE LOCATIONS:")
-    print(f"   • System: ~/.agent-os/system/ (global standards)")
-    print(f"   • User: ~/.agent-os/user/ (personal preferences)")
-    print(f"   • Repository: .agent-os/context/ (team knowledge)")
-    print(f"   • Session: Memory (conversation state)")
+    print("\n🎨 CONTEXT STORAGE LOCATIONS:")
+    print("   • System: ~/.agent-os/system/ (global standards)")
+    print("   • User: ~/.agent-os/user/ (personal preferences)")
+    print("   • Repository: .agent-os/context/ (team knowledge)")
+    print("   • Session: Memory (conversation state)")
     
-    print(f"\n🔄 CONTEXT HIERARCHY:")
-    print(f"   Session > Repository > User > System")
-    print(f"   (Higher levels override lower levels)")
+    print("\n🔄 CONTEXT HIERARCHY:")
+    print("   Session > Repository > User > System")
+    print("   (Higher levels override lower levels)")
     
-    print(f"\n📈 BENEFITS DELIVERED:")
+    print("\n📈 BENEFITS DELIVERED:")
     print("   • Consistent AI behavior across all repositories")
     print("   • Team knowledge preservation and sharing")
     print("   • Personal learning accumulation")

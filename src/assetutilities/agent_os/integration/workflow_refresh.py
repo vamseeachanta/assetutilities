@@ -6,7 +6,7 @@ This module manages continuous workflow refresh and learning capabilities.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 
 class WorkflowRefreshManager:

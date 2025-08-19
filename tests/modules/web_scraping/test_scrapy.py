@@ -1,5 +1,4 @@
 import os
-import sys
 from assetutilities.engine import engine
 
 

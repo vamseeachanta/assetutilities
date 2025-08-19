@@ -1,12 +1,10 @@
 """Web Resource Manager for Module Agents."""
 
-import json
 import yaml
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 from dataclasses import dataclass
-import hashlib
 
 @dataclass
 class WebResource:

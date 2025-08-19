@@ -5,7 +5,6 @@ This script can be copied to any repository to test access to AssetUtilities.
 """
 
 import sys
-import os
 
 def test_global_environment():
     """Test the global AssetUtilities environment functionality."""
@@ -92,7 +91,7 @@ def test_global_environment():
             print(f"❌ {dep_name}: Missing")
     
     # Test 9: Environment information
-    print(f"\nPython Information:")
+    print("\nPython Information:")
     print(f"   Python version: {sys.version}")
     print(f"   Python executable: {sys.executable}")
     print(f"   Python path: {sys.path[0]}")

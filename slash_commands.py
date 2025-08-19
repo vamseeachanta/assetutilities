@@ -5,10 +5,8 @@ Provides a unified interface for all custom slash commands.
 """
 
 import sys
-import os
 from pathlib import Path
 import importlib.util
-import argparse
 
 # Add command directory to path
 COMMAND_DIR = Path(__file__).parent / ".agent-os/commands"
@@ -115,7 +113,7 @@ def main():
         if hasattr(module, 'main'):
             # Pass remaining arguments to the command
             # Reconstruct sys.argv for the module
-            original_argv = sys.argv.copy()
+            sys.argv.copy()
             sys.argv = [command] + sys.argv[2:]
             
             try:

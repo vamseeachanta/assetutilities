@@ -1,11 +1,9 @@
 """Tests for template management system."""
 
-import pytest
 import tempfile
 import shutil
 import yaml
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
 
 from assetutilities.agent_os.commands.template_management import (
     TemplateManager,

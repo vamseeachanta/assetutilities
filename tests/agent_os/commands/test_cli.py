@@ -3,9 +3,8 @@
 import pytest
 import tempfile
 import shutil
-import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch
 from io import StringIO
 
 from assetutilities.agent_os.commands.cli import (

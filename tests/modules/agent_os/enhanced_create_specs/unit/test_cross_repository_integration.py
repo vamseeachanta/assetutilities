@@ -13,12 +13,10 @@ Tests the cross-repository sub-agent system including:
 import pytest
 import asyncio
 import os
-import json
 import tempfile
 import shutil
-from unittest.mock import Mock, patch, MagicMock, AsyncMock, mock_open
+from unittest.mock import Mock, patch, mock_open
 from pathlib import Path
-from datetime import datetime, timedelta
 
 # Import the modules we'll be testing
 import sys
@@ -31,7 +29,6 @@ from cross_repository_integration import (
     VersionCompatibilityChecker,
     ComponentCacheManager,
     OfflineFallbackManager,
-    ParsedReference,
     ResolutionResult
 )
 
@@ -47,8 +44,8 @@ class TestCrossRepositoryManager:
         """Test initialization with default configuration"""
         assert self.cross_repo_manager.hub_repository == 'assetutilities'
         assert self.cross_repo_manager.default_branch == 'main'
-        assert self.cross_repo_manager.cache_enabled == True
-        assert self.cross_repo_manager.security_enabled == True
+        assert self.cross_repo_manager.cache_enabled
+        assert self.cross_repo_manager.security_enabled
     
     def test_initialization_with_custom_options(self):
         """Test initialization with custom configuration"""
@@ -63,8 +60,8 @@ class TestCrossRepositoryManager:
         
         assert manager.hub_repository == 'custom-hub'
         assert manager.default_branch == 'develop'
-        assert manager.cache_enabled == False
-        assert manager.security_enabled == False
+        assert not manager.cache_enabled
+        assert not manager.security_enabled
         assert manager.allowed_repositories == ['repo1', 'repo2']
     
     def test_parse_reference_valid(self):
@@ -73,7 +70,7 @@ class TestCrossRepositoryManager:
         
         parsed = self.cross_repo_manager.parse_reference(reference)
         
-        assert parsed.valid == True
+        assert parsed.valid
         assert parsed.type == 'github'
         assert parsed.repository == 'assetutilities'
         assert parsed.path == 'src/modules/agent-os/enhanced-create-specs/workflow.md'
@@ -86,7 +83,7 @@ class TestCrossRepositoryManager:
         
         parsed = self.cross_repo_manager.parse_reference(reference)
         
-        assert parsed.valid == True
+        assert parsed.valid
         assert parsed.repository == 'assetutilities'
         assert parsed.branch == 'develop'
         assert parsed.path == 'src/modules/agent-os/workflow.md'
@@ -107,7 +104,7 @@ class TestCrossRepositoryManager:
         
         for ref in invalid_references:
             parsed = self.cross_repo_manager.parse_reference(ref)
-            assert parsed.valid == False
+            assert not parsed.valid
             assert parsed.error is not None
     
     def test_parse_reference_security_validation(self):
@@ -117,7 +114,7 @@ class TestCrossRepositoryManager:
         
         parsed = self.cross_repo_manager.parse_reference(reference)
         
-        assert parsed.valid == False
+        assert not parsed.valid
         assert 'not in allowed list' in parsed.error
     
     def test_validate_reference(self):
@@ -125,8 +122,8 @@ class TestCrossRepositoryManager:
         valid_reference = '@github:assetutilities/src/workflow.md'
         invalid_reference = 'invalid-reference'
         
-        assert self.cross_repo_manager.validate_reference(valid_reference) == True
-        assert self.cross_repo_manager.validate_reference(invalid_reference) == False
+        assert self.cross_repo_manager.validate_reference(valid_reference)
+        assert not self.cross_repo_manager.validate_reference(invalid_reference)
     
     @pytest.mark.asyncio
     async def test_resolve_reference_success(self):
@@ -136,7 +133,7 @@ class TestCrossRepositoryManager:
         with patch('os.path.exists', return_value=True):
             result = await self.cross_repo_manager.resolve_reference(reference)
             
-            assert result.success == True
+            assert result.success
             assert result.local_path is not None
             assert 'assetutilities' in result.local_path
             assert 'workflow.md' in result.local_path
@@ -149,7 +146,7 @@ class TestCrossRepositoryManager:
         with patch('os.path.exists', return_value=False):
             result = await self.cross_repo_manager.resolve_reference(reference)
             
-            assert result.success == False
+            assert not result.success
             assert 'File not found' in result.error
     
     @pytest.mark.asyncio
@@ -159,7 +156,7 @@ class TestCrossRepositoryManager:
         
         result = await self.cross_repo_manager.resolve_reference(invalid_reference)
         
-        assert result.success == False
+        assert not result.success
         assert result.error is not None
     
     def test_find_all_references(self):
@@ -216,7 +213,7 @@ class TestGitSubmoduleIntegration:
         
         with patch('subprocess.run', return_value=mock_result):
             exists = self.git_integration.check_submodule_exists('assetutilities')
-            assert exists == True
+            assert exists
     
     def test_check_submodule_exists_false(self):
         """Test checking if submodule exists - doesn't exist"""
@@ -225,13 +222,13 @@ class TestGitSubmoduleIntegration:
         
         with patch('subprocess.run', return_value=mock_result):
             exists = self.git_integration.check_submodule_exists('assetutilities')
-            assert exists == False
+            assert not exists
     
     def test_check_submodule_exists_command_failure(self):
         """Test checking submodule when git command fails"""
         with patch('subprocess.run', side_effect=Exception('Git error')):
             exists = self.git_integration.check_submodule_exists('assetutilities')
-            assert exists == False
+            assert not exists
     
     def test_add_submodule_success(self):
         """Test successful submodule addition"""
@@ -244,7 +241,7 @@ class TestGitSubmoduleIntegration:
         with patch('subprocess.run') as mock_run:
             result = self.git_integration.add_submodule(config)
             
-            assert result['success'] == True
+            assert result['success']
             assert 'added successfully' in result['message']
             mock_run.assert_called_once()
     
@@ -261,7 +258,7 @@ class TestGitSubmoduleIntegration:
         with patch('subprocess.run', side_effect=mock_error):
             result = self.git_integration.add_submodule(config)
             
-            assert result['success'] == False
+            assert not result['success']
             assert 'Failed to add submodule' in result['message']
     
     def test_update_submodule_success(self):
@@ -269,7 +266,7 @@ class TestGitSubmoduleIntegration:
         with patch('subprocess.run') as mock_run:
             result = self.git_integration.update_submodule('assetutilities')
             
-            assert result['success'] == True
+            assert result['success']
             assert 'updated successfully' in result['message']
             mock_run.assert_called_once()
     
@@ -278,7 +275,7 @@ class TestGitSubmoduleIntegration:
         with patch('subprocess.run') as mock_run:
             result = self.git_integration.initialize_submodules()
             
-            assert result['success'] == True
+            assert result['success']
             assert 'initialized successfully' in result['message']
             assert mock_run.call_count == 2  # init and update calls
     
@@ -325,7 +322,7 @@ class TestReferenceResolver:
         """Test initialization with default values"""
         assert self.reference_resolver.cache == {}
         assert self.reference_resolver.max_cache_size == 100
-        assert self.reference_resolver.cache_enabled == True
+        assert self.reference_resolver.cache_enabled
     
     @pytest.mark.asyncio
     async def test_resolve_reference_success(self):
@@ -344,7 +341,7 @@ class TestReferenceResolver:
             
             result = await self.reference_resolver.resolve_reference(reference)
             
-            assert result['success'] == True
+            assert result['success']
             assert result['content'] == mock_content
             assert result['resolved_path'] == '/path/to/workflow.md'
     
@@ -377,7 +374,7 @@ workflow:
                 format='yaml'
             )
             
-            assert result['success'] == True
+            assert result['success']
             assert result['parsed_content']['workflow']['name'] == 'enhanced-create-specs'
     
     @pytest.mark.asyncio
@@ -400,8 +397,8 @@ workflow:
             # Second resolution should use cache
             result = await self.reference_resolver.resolve_reference(reference, use_cache=True)
             
-            assert result['success'] == True
-            assert result.get('from_cache') == True
+            assert result['success']
+            assert result.get('from_cache')
     
     @pytest.mark.asyncio
     async def test_resolve_nested_references(self):
@@ -433,7 +430,7 @@ workflow:
                 resolve_nested=True
             )
             
-            assert result['success'] == True
+            assert result['success']
             assert 'Nested template content' in result['resolved_content']
     
     @pytest.mark.asyncio
@@ -468,7 +465,7 @@ workflow:
                 max_depth=5
             )
             
-            assert result['success'] == False
+            assert not result['success']
             assert 'Circular reference detected' in result['error']
 
 
@@ -491,7 +488,7 @@ class TestVersionCompatibilityChecker:
         for version, expected in test_cases:
             parsed = self.version_checker.parse_version(version)
             
-            assert parsed['valid'] == True
+            assert parsed['valid']
             assert parsed['major'] == expected['major']
             assert parsed['minor'] == expected['minor']
             assert parsed['patch'] == expected['patch']
@@ -512,7 +509,7 @@ class TestVersionCompatibilityChecker:
         
         for version in invalid_versions:
             parsed = self.version_checker.parse_version(version)
-            assert parsed['valid'] == False
+            assert not parsed['valid']
     
     def test_compare_versions(self):
         """Test version comparison logic"""
@@ -541,20 +538,20 @@ class TestVersionCompatibilityChecker:
         }
         
         # Test compatible versions
-        assert self.version_checker.is_compatible('enhanced-create-specs', '1.5.0', compatibility_rules) == True
-        assert self.version_checker.is_compatible('enhanced-create-specs', '1.9.9', compatibility_rules) == True
+        assert self.version_checker.is_compatible('enhanced-create-specs', '1.5.0', compatibility_rules)
+        assert self.version_checker.is_compatible('enhanced-create-specs', '1.9.9', compatibility_rules)
         
         # Test incompatible versions
-        assert self.version_checker.is_compatible('enhanced-create-specs', '0.9.0', compatibility_rules) == False  # Below min
-        assert self.version_checker.is_compatible('enhanced-create-specs', '2.1.0', compatibility_rules) == False  # Above max
-        assert self.version_checker.is_compatible('enhanced-create-specs', '1.2.3', compatibility_rules) == False  # Explicitly incompatible
+        assert not self.version_checker.is_compatible('enhanced-create-specs', '0.9.0', compatibility_rules)  # Below min
+        assert not self.version_checker.is_compatible('enhanced-create-specs', '2.1.0', compatibility_rules)  # Above max
+        assert not self.version_checker.is_compatible('enhanced-create-specs', '1.2.3', compatibility_rules)  # Explicitly incompatible
     
     def test_is_compatible_no_rules(self):
         """Test compatibility when no rules exist for component"""
         compatibility_rules = {}
         
         # Should return True when no rules exist
-        assert self.version_checker.is_compatible('unknown-component', '1.0.0', compatibility_rules) == True
+        assert self.version_checker.is_compatible('unknown-component', '1.0.0', compatibility_rules)
 
 
 class TestComponentCacheManager:
@@ -585,7 +582,7 @@ class TestComponentCacheManager:
         
         result = await self.cache_manager.cache_component(component)
         
-        assert result['cached'] == True
+        assert result['cached']
         assert result['cache_key'] is not None
         assert result['error'] is None
         
@@ -609,16 +606,16 @@ class TestComponentCacheManager:
         # Then retrieve it
         result = await self.cache_manager.get_cached_component(cache_key)
         
-        assert result['found'] == True
+        assert result['found']
         assert result['content'] == 'workflow content'
-        assert result['expired'] == False
+        assert not result['expired']
     
     @pytest.mark.asyncio
     async def test_get_cached_component_not_found(self):
         """Test cached component retrieval when not found"""
         result = await self.cache_manager.get_cached_component('nonexistent-key')
         
-        assert result['found'] == False
+        assert not result['found']
         assert result['content'] is None
     
     @pytest.mark.asyncio
@@ -644,8 +641,8 @@ class TestComponentCacheManager:
         
         result = await short_ttl_manager.get_cached_component(cache_key)
         
-        assert result['found'] == False
-        assert result['expired'] == True
+        assert not result['found']
+        assert result['expired']
     
     def test_generate_cache_key_consistency(self):
         """Test cache key generation consistency"""
@@ -684,13 +681,13 @@ class TestOfflineFallbackManager:
             mock_run.return_value = None  # Successful ping
             
             is_offline = self.fallback_manager.check_offline_mode()
-            assert is_offline == False
+            assert not is_offline
     
     def test_check_offline_mode_offline(self):
         """Test offline mode detection when offline"""
         with patch('subprocess.run', side_effect=Exception('Network unreachable')):
             is_offline = self.fallback_manager.check_offline_mode()
-            assert is_offline == True
+            assert is_offline
     
     @pytest.mark.asyncio
     async def test_create_and_get_fallback_entry(self):
@@ -705,7 +702,7 @@ class TestOfflineFallbackManager:
         # Retrieve fallback content
         result = await self.fallback_manager.get_fallback_content(reference)
         
-        assert result['success'] == True
+        assert result['success']
         assert result['content'] == content
         assert result['source'] == 'fallback'
         assert result['metadata'] == metadata
@@ -717,7 +714,7 @@ class TestOfflineFallbackManager:
         
         result = await self.fallback_manager.get_fallback_content(reference)
         
-        assert result['success'] == False
+        assert not result['success']
         assert 'No fallback content available' in result['error']
     
     @pytest.mark.asyncio
@@ -730,7 +727,7 @@ class TestOfflineFallbackManager:
             use_default_template=True
         )
         
-        assert result['success'] == True
+        assert result['success']
         assert result['content'].startswith('# Default Template')
         assert result['source'] == 'default-template'
     
@@ -782,17 +779,17 @@ class TestIntegrationScenarios:
                 'path': 'src/external/assetutilities'
             })
             
-            assert submodule_result['success'] == True
+            assert submodule_result['success']
             
             # Step 2: Resolve reference
             resolve_result = await self.reference_resolver.resolve_reference(reference)
             
-            assert resolve_result['success'] == True
+            assert resolve_result['success']
             assert resolve_result['content'] == 'resolved content'
             
             # Step 3: Validate reference
             is_valid = self.cross_repo_manager.validate_reference(reference)
-            assert is_valid == True
+            assert is_valid
     
     @pytest.mark.asyncio
     async def test_offline_workflow_with_fallback(self):
@@ -811,12 +808,12 @@ class TestIntegrationScenarios:
         with patch('subprocess.run', side_effect=Exception('Network unreachable')):
             # Check offline mode
             is_offline = self.fallback_manager.check_offline_mode()
-            assert is_offline == True
+            assert is_offline
             
             # Get fallback content
             fallback_result = await self.fallback_manager.get_fallback_content(reference)
             
-            assert fallback_result['success'] == True
+            assert fallback_result['success']
             assert fallback_result['content'] == fallback_content
             assert fallback_result['source'] == 'fallback'
     
@@ -838,7 +835,7 @@ class TestIntegrationScenarios:
             '1.5.0', 
             compatibility_rules
         )
-        assert is_compatible == True
+        assert is_compatible
         
         # Test incompatible version
         is_incompatible = version_checker.is_compatible(
@@ -846,7 +843,7 @@ class TestIntegrationScenarios:
             '2.5.0', 
             compatibility_rules
         )
-        assert is_incompatible == False
+        assert not is_incompatible
 
 
 if __name__ == '__main__':

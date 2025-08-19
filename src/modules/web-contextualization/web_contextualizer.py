@@ -3,7 +3,6 @@
 import json
 import yaml
 import hashlib
-import mimetypes
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
@@ -361,7 +360,7 @@ class WebContextualizer:
                 if resource.status == "error":
                     report.append(f"  - Error: {resource.error_message}")
                 if resource.indexed:
-                    report.append(f"  - Indexed: Yes")
+                    report.append("  - Indexed: Yes")
                 if resource.last_fetched:
                     report.append(f"  - Last Updated: {resource.last_fetched}")
         

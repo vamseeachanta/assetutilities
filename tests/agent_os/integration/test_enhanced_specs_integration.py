@@ -1,14 +1,12 @@
 """Integration tests for enhanced specs functionality."""
 
-import pytest
 import tempfile
 import yaml
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from assetutilities.agent_os.integration.enhanced_specs import (
-    EnhancedSpecsIntegration,
-    EnhancedSpecsConfig
+    EnhancedSpecsIntegration
 )
 from assetutilities.agent_os.integration.prompt_evolution import PromptEvolutionTracker
 from assetutilities.agent_os.commands.create_module_agent import CreateModuleAgentCommand

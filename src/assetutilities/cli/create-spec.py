@@ -5,7 +5,6 @@ Works immediately after git clone with no external dependencies.
 """
 
 import sys
-import os
 from datetime import datetime
 from pathlib import Path
 

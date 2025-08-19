@@ -42,7 +42,7 @@ class TestSetupScript:
         
         # Test detection script (will be implemented)
         result = self._run_detection_check()
-        assert result == True, "Should detect valid AssetUtilities project"
+        assert result, "Should detect valid AssetUtilities project"
     
     def test_git_repository_validation(self):
         """Test that script validates Git repository existence."""
@@ -52,7 +52,7 @@ class TestSetupScript:
         os.chdir(non_git_dir)
         
         result = self._run_detection_check()
-        assert result == False, "Should not detect non-git directory as valid project"
+        assert not result, "Should not detect non-git directory as valid project"
     
     def test_backup_creation(self):
         """Test that existing .bashrc files are backed up safely."""

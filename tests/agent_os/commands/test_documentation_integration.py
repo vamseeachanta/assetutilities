@@ -1,10 +1,9 @@
 """Tests for documentation integration system."""
 
-import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import patch
 
 from assetutilities.agent_os.commands.documentation_integration import (
     RepositoryDocumentationScanner,

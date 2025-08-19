@@ -4,7 +4,6 @@ Local Slash Commands for Git Operations
 Available in this repository
 """
 
-import os
 import sys
 import subprocess
 from pathlib import Path
@@ -65,7 +64,7 @@ class LocalGitCommands:
         success, output = self.run_command(cmd)
         
         if success:
-            print(f"✅ Changes committed successfully!")
+            print("✅ Changes committed successfully!")
         else:
             print(f"❌ Commit failed: {output}")
         
@@ -223,7 +222,6 @@ Examples:
 
 def main():
     """Main entry point"""
-    import sys
     
     commands = LocalGitCommands()
     

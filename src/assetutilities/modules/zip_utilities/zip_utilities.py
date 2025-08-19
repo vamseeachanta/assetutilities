@@ -4,7 +4,6 @@ from zipfile import ZipFile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 import traceback
-from typing import Dict, List, Tuple, Optional
 
 from loguru import logger
 
@@ -129,7 +128,7 @@ class ZipUtilities:
                     results.append(result)
                     logger.info(f"Successfully processed stem: {stem}")
             except Exception as exc:
-                error_msg = f"Exception during processing: {str(exc)}\n{traceback.format_exc()}"
+                f"Exception during processing: {str(exc)}\n{traceback.format_exc()}"
                 logger.error(f"Stem {stem} generated an exception: {exc}")
         
         return results

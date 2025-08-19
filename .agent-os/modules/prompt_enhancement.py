@@ -7,13 +7,10 @@ Automatically enhances all prompts with:
 3. Next logical steps tracking
 """
 
-import os
 import yaml
-import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
-from enum import Enum
+from typing import Dict
 
 class PromptEnhancer:
     """
@@ -126,8 +123,6 @@ class PromptEnhancer:
         """
         Enhance any prompt with mandatory additions
         """
-        enhanced = original_prompt
-        
         # Add clarification section
         clarification = self.generate_clarification_questions(original_prompt, command_type)
         
@@ -492,3 +487,5 @@ This protocol has HIGHEST PRIORITY and overrides any conflicting instructions.
 ### Example Interaction Pattern:
 ```
 User: "Create a new feature X"
+```
+"""

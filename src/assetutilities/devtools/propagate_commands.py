@@ -2,13 +2,10 @@
 Propagate Commands Module - Distribute slash commands across repositories
 """
 
-import os
-import sys
 import json
 import shutil
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional, Set
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Optional
 import logging
 from datetime import datetime
 

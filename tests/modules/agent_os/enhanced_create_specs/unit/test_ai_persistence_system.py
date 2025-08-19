@@ -11,16 +11,10 @@ Tests the AI persistence system including:
 """
 
 import pytest
-import asyncio
-import os
-import json
 import yaml
 import tempfile
 import shutil
-from unittest.mock import Mock, patch, MagicMock, mock_open
 from pathlib import Path
-from datetime import datetime, timedelta
-from dataclasses import asdict
 
 # Import the modules we'll be testing
 import sys
@@ -32,7 +26,6 @@ from ai_persistence_system import (
     RepositoryLevelManager,
     SessionLevelManager,
     ContextHierarchyManager,
-    AIContextData,
     PersistenceConfig,
     ContextMerger,
     CrossSystemSynchronizer
@@ -55,7 +48,7 @@ class TestSystemLevelManager:
         """Test system manager initialization"""
         assert self.system_manager.system_dir == self.temp_dir
         assert isinstance(self.system_manager.config, PersistenceConfig)
-        assert self.system_manager.enabled == True
+        assert self.system_manager.enabled
     
     def test_load_system_standards(self):
         """Test loading system-wide AI standards"""
@@ -79,7 +72,7 @@ class TestSystemLevelManager:
         loaded_standards = self.system_manager.load_system_standards()
         
         assert loaded_standards['ai_behaviors']['code_style'] == 'pythonic'
-        assert loaded_standards['ai_behaviors']['security_first'] == True
+        assert loaded_standards['ai_behaviors']['security_first']
         assert loaded_standards['global_policies']['max_file_size'] == '10MB'
     
     def test_load_system_standards_missing_file(self):
@@ -102,7 +95,7 @@ class TestSystemLevelManager:
         
         result = self.system_manager.save_system_standards(standards)
         
-        assert result == True
+        assert result
         
         # Verify file was created
         standards_file = Path(self.temp_dir) / 'ai-behaviors.yml'
@@ -169,7 +162,7 @@ class TestUserLevelManager:
         
         result = self.user_manager.save_learning_history(learning_history)
         
-        assert result == True
+        assert result
         
         # Verify file was created
         history_file = Path(self.temp_dir) / 'learning-history.yml'
@@ -193,7 +186,7 @@ class TestUserLevelManager:
         
         result = self.user_manager.update_skill_profile(skill_updates)
         
-        assert result == True
+        assert result
         
         # Load and verify updated profile
         updated_profile = self.user_manager.load_skill_profile()
@@ -276,7 +269,7 @@ class TestRepositoryLevelManager:
         
         result = self.repo_manager.save_team_conventions(conventions)
         
-        assert result == True
+        assert result
         
         # Verify file was created
         conventions_file = Path(self.temp_dir) / '.agent-os' / 'context' / 'team-conventions.yml'
@@ -308,7 +301,7 @@ class TestRepositoryLevelManager:
         
         result = self.repo_manager.save_domain_knowledge(domain_knowledge)
         
-        assert result == True
+        assert result
         
         # Verify content was saved correctly
         knowledge_file = Path(self.temp_dir) / '.agent-os' / 'context' / 'domain-knowledge.yml'
@@ -338,7 +331,7 @@ class TestRepositoryLevelManager:
         
         result = self.repo_manager.log_decision(decision)
         
-        assert result == True
+        assert result
         
         # Verify decision file was created
         decisions_dir = Path(self.temp_dir) / '.agent-os' / 'context' / 'decisions'
@@ -543,7 +536,7 @@ class TestContextHierarchyManager:
         
         result = self.hierarchy_manager.save_context_to_repository(context_data)
         
-        assert result == True
+        assert result
         
         # Verify context was saved in repository
         context_file = Path(self.temp_dirs['repo']) / '.agent-os' / 'context' / 'ai-context.yml'
@@ -677,7 +670,7 @@ class TestCrossSystemSynchronizer:
         
         result = await self.synchronizer.sync_learned_patterns(learned_patterns)
         
-        assert result['success'] == True
+        assert result['success']
         assert result['patterns_synced'] > 0
     
     @pytest.mark.asyncio
@@ -704,7 +697,7 @@ class TestCrossSystemSynchronizer:
         
         result = await self.synchronizer.propagate_successful_pattern(pattern)
         
-        assert result['success'] == True
+        assert result['success']
         assert result['propagation_level'] in ['user', 'system']
     
     def test_detect_pattern_conflicts(self):
@@ -775,7 +768,7 @@ class TestIntegrationScenarios:
         }
         
         result = self.hierarchy_manager.system_manager.save_system_standards(system_standards)
-        assert result == True
+        assert result
         
         # 2. Set user preferences
         user_preferences = {
@@ -785,7 +778,7 @@ class TestIntegrationScenarios:
         }
         
         result = self.hierarchy_manager.user_manager.save_user_preferences(user_preferences)
-        assert result == True
+        assert result
         
         # 3. Establish project context
         project_patterns = {
@@ -797,7 +790,7 @@ class TestIntegrationScenarios:
         }
         
         result = self.hierarchy_manager.repo_manager.save_project_patterns(project_patterns)
-        assert result == True
+        assert result
         
         # 4. Start development session
         session_context = {
@@ -827,7 +820,7 @@ class TestIntegrationScenarios:
         }
         
         result = self.hierarchy_manager.repo_manager.log_decision(decision)
-        assert result == True
+        assert result
         
         # 7. Record learning from successful implementation
         learning_entry = {
@@ -848,7 +841,7 @@ class TestIntegrationScenarios:
         current_history.setdefault('successful_patterns', []).append(learning_entry)
         
         result = self.hierarchy_manager.user_manager.save_learning_history(current_history)
-        assert result == True
+        assert result
         
         # 8. Verify persistence across restart
         new_hierarchy_manager = ContextHierarchyManager(

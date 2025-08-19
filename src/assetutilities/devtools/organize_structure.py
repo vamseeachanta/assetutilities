@@ -6,12 +6,9 @@ This module provides functionality to organize Python projects into a clean,
 module-based structure following best practices.
 """
 
-import os
-import sys
 import shutil
-import json
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional, Set
+from typing import List, Dict, Optional
 import logging
 from datetime import datetime
 import re
@@ -246,7 +243,7 @@ class ProjectOrganizer:
     
     def categorize_file(self, file_path: Path) -> str:
         """Determine the appropriate category/location for a file."""
-        file_name = file_path.name.lower()
+        file_path.name.lower()
         file_stem = file_path.stem.lower()
         
         # Check against category patterns
@@ -400,12 +397,12 @@ class ProjectOrganizer:
             "## Import Examples",
             "",
             "```python",
-            f"# Import from main package",
+            "# Import from main package",
             f"from {self.package_name}.core import processor",
             f"from {self.package_name}.utils import helpers",
             f"from {self.package_name}.cli import main",
             "",
-            f"# Import from modules",
+            "# Import from modules",
             f"from {self.package_name}.modules.web import scraper",
             f"from {self.package_name}.devtools import modernize_deps",
             "```",
