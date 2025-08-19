@@ -29,14 +29,11 @@ import argparse
 import hashlib
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict
-import subprocess
 from concurrent.futures import ThreadPoolExecutor
-import requests
 from urllib.parse import quote
-import time
 
 @dataclass
 class DataContext:
@@ -1017,7 +1014,7 @@ def main():
         
         # Display summary
         summary = result['summary']
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"   Total size: {summary['total_size_mb']:.2f} MB")
         print(f"   Data types: {len(summary['data_types'])} types")
         print(f"   Module assignments: {len(summary.get('module_assignments', {}))} modules")
