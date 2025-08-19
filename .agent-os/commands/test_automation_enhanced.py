@@ -941,7 +941,7 @@ sys.modules['{missing_module}'] = MagicMock()
         if missing_file.is_absolute():
             try:
                 missing_file = missing_file.relative_to(self.adapter.repo_root)
-            except:
+            except Exception:
                 pass
         
         full_path = self.adapter.repo_root / missing_file
@@ -1938,14 +1938,14 @@ class TestAutomationEnhanced:
                     check=True
                 )
                 checks['runner_available'] = True
-            except:
+            except Exception:
                 pass
         
         # Check coverage tool
         if self.adapter.repo_type == 'python':
             try:
                 checks['coverage_available'] = True
-            except:
+            except Exception:
                 pass
         
         return checks
