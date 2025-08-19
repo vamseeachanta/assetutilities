@@ -4,9 +4,7 @@ Standalone script to propagate slash commands from AssetUtilities to other repos
 This script can be run from any directory.
 """
 
-import os
 import sys
-import shutil
 from pathlib import Path
 
 # Add the assetutilities commands directory to Python path

@@ -2,7 +2,6 @@
 """Final test of the global AssetUtilities environment."""
 
 import os
-import sys
 import subprocess
 
 def test_global_environment():

@@ -9,9 +9,7 @@ Usage:
     python cross_repo_demo.py
 """
 
-import os
 import asyncio
-from pathlib import Path
 
 # Import cross-repository components
 from cross_repository_integration import (
@@ -35,7 +33,7 @@ async def main():
     print("\n1️⃣ Initializing cross-repository managers...")
     
     cross_repo_manager = CrossRepositoryManager()
-    git_integration = GitSubmoduleIntegration()
+    GitSubmoduleIntegration()
     reference_resolver = ReferenceResolver()
     version_checker = VersionCompatibilityChecker()
     cache_manager = ComponentCacheManager()
@@ -197,14 +195,14 @@ async def main():
     print("   • Security validation and path traversal protection")
     print("   • Comprehensive error handling and logging")
     
-    print(f"\n🎯 CROSS-REPOSITORY PATTERN:")
-    print(f"   @github:assetutilities/src/modules/agent-os/enhanced-create-specs/")
+    print("\n🎯 CROSS-REPOSITORY PATTERN:")
+    print("   @github:assetutilities/src/modules/agent-os/enhanced-create-specs/")
     
-    print(f"\n⚙️ SETUP COMMAND:")
-    print(f"   python git_submodule_setup.py --setup")
+    print("\n⚙️ SETUP COMMAND:")
+    print("   python git_submodule_setup.py --setup")
     
-    print(f"\n📊 STATUS COMMAND:")
-    print(f"   python git_submodule_setup.py --status")
+    print("\n📊 STATUS COMMAND:")
+    print("   python git_submodule_setup.py --status")
     
     print("\n🚀 Ready for cross-repository development!")
 

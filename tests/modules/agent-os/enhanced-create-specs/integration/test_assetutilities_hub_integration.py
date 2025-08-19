@@ -17,15 +17,11 @@ Test Type: Integration
 """
 
 import pytest
-import os
 import tempfile
 import shutil
 import json
 import yaml
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import subprocess
-from typing import Dict, List, Any
 
 # Test configuration
 TEST_HUB_CONFIG = {
@@ -407,12 +403,10 @@ class WorkflowAutomation:
         shared_component_path = "src/modules/agent-os/enhanced-create-specs/workflow_automation.py"
         
         # Repository A access
-        repo_a_reference = f"@assetutilities:{shared_component_path}"
         resolved_a = self.hub_path / shared_component_path
         assert resolved_a.exists()
         
         # Repository B access
-        repo_b_reference = f"@assetutilities:{shared_component_path}"
         resolved_b = self.hub_path / shared_component_path
         assert resolved_b.exists()
         

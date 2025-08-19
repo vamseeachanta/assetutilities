@@ -17,20 +17,14 @@ Created: 2025-08-05
 Version: 1.0.0
 """
 
-import os
-import json
 import yaml
 import argparse
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
-import subprocess
-import shutil
 from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
-import urllib.request
-import urllib.error
 
 
 class IntegrationType(Enum):
@@ -278,7 +272,7 @@ class CrossRepoSetup:
     
     def interactive_configuration(self) -> IntegrationConfiguration:
         """Interactive configuration with user input."""
-        print(f"\\n=== AssetUtilities Hub Integration Setup ===")
+        print("\\n=== AssetUtilities Hub Integration Setup ===")
         print(f"Hub: {self.hub_config.name} v{self.hub_config.version}")
         print(f"Repository: {self.client_repo_path.name}")
         print(f"Detected Type: {self.repository_type.value}")
@@ -633,7 +627,7 @@ class CrossRepoSetup:
         with open(examples_file, 'w') as f:
             f.write(examples)
         
-        self.logger.info(f"✅ Cross-repository integration setup completed successfully!")
+        self.logger.info("✅ Cross-repository integration setup completed successfully!")
         self.logger.info(f"Configuration saved to: {self.client_repo_path}/.agent-os/")
         self.logger.info(f"Usage examples: {examples_file}")
         

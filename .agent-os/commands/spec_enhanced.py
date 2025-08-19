@@ -6,16 +6,12 @@ Integrates Claude Code Templates and AITmpl best practices
 for intelligent spec creation with template selection.
 """
 
-import os
 import sys
-import json
 import yaml
 import argparse
-import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from datetime import datetime
-import requests
 from dataclasses import dataclass
 
 @dataclass
@@ -276,7 +272,7 @@ class EnhancedSpecCommand:
                         if 0 <= idx < len(templates):
                             selected_template = templates[idx]
                             print(f"\n✅ Selected: {selected_template.name}")
-                except:
+                except Exception:
                     pass
         
         # Create spec directory
@@ -306,7 +302,7 @@ class EnhancedSpecCommand:
             if template_content:
                 template_file = spec_dir / "template_reference.md"
                 template_file.write_text(template_content)
-                print(f"   📄 Template reference saved")
+                print("   📄 Template reference saved")
         
         # Create sub-specs directory
         sub_specs_dir = spec_dir / "sub-specs"
@@ -324,7 +320,7 @@ class EnhancedSpecCommand:
         print("  3. Use '/task execute' to implement")
         
         if selected_template:
-            print(f"\n💡 Template Integration:")
+            print("\n💡 Template Integration:")
             print(f"  - Template: {selected_template.name}")
             print(f"  - Source: {selected_template.source}")
             print(f"  - Reference: {spec_dir}/template_reference.md")

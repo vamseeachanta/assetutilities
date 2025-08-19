@@ -8,10 +8,8 @@ import argparse
 import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
 
 from .modernize_deps import (
-    DependencyModernizer,
     modernize_repository,
     find_python_repositories
 )
@@ -20,7 +18,6 @@ from .propagate_commands import (
     find_repositories
 )
 from .organize_structure import (
-    ProjectOrganizer,
     organize_repository
 )
 
@@ -209,7 +206,7 @@ def cmd_propagate_commands(args):
             if k in args.commands
         }
     
-    logger.info(f"📋 Commands to propagate:")
+    logger.info("📋 Commands to propagate:")
     for cmd_name in discovered_commands:
         logger.info(f"  • {cmd_name}")
     

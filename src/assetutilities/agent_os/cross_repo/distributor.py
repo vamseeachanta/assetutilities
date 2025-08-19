@@ -3,11 +3,9 @@
 Distributes Agent OS commands to multiple repositories in the ecosystem.
 """
 
-import os
 import shutil
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import yaml
+from typing import List, Dict, Any
 
 
 class CrossRepoDistributor:

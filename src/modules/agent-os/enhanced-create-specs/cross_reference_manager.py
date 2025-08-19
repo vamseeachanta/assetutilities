@@ -18,16 +18,11 @@ Module: agent-os/enhanced-create-specs
 import os
 import re
 import json
-import yaml
 import requests
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-from urllib.parse import urlparse
-import asyncio
-import aiohttp
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 
 
@@ -407,7 +402,7 @@ class CrossReferenceValidator:
         
         # Validate each reference
         for i, reference in enumerate(references):
-            ref_id = f"{source_file}#{i}" if source_file else str(i)
+            f"{source_file}#{i}" if source_file else str(i)
             
             # Check cache first
             cache_key = f"{reference.original}#{reference.type.value}"
@@ -844,4 +839,4 @@ if __name__ == "__main__":
     
     print(f"Scanned {results['scanned_files']} files")
     print(f"Found {results['total_references']} references")
-    print(f"Report saved to cross_reference_report.md")
+    print("Report saved to cross_reference_report.md")

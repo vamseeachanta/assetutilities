@@ -5,10 +5,8 @@ Works immediately after git clone with no external dependencies.
 """
 
 import sys
-import os
 import re
 from pathlib import Path
-from datetime import datetime
 
 def find_tasks_file(tasks_reference):
     """Find and validate tasks file."""
@@ -124,9 +122,9 @@ def main():
         tasks = parse_tasks(tasks_file)
         show_task_status(tasks)
         
-        print(f"\n💡 Use your preferred development environment to work on the tasks.")
+        print("\n💡 Use your preferred development environment to work on the tasks.")
         print(f"💡 Update {tasks_file} manually to mark tasks complete: [ ] → [x]")
-        print(f"💡 Follow the coding standards in .agent-os/standards/")
+        print("💡 Follow the coding standards in .agent-os/standards/")
         
         return 0
         

@@ -263,7 +263,6 @@ class ResourceFetcher:
     
     def clean_cache(self, max_age_days: int = 30, max_size_mb: int = 500):
         """Clean old cache files."""
-        from datetime import timedelta
         
         now = datetime.now()
         total_size = 0

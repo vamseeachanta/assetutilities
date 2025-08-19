@@ -1,12 +1,11 @@
 """Tests for enhanced specs integration system."""
 
-import pytest
 import tempfile
 import shutil
 import yaml
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import patch
 from datetime import datetime
 
 from assetutilities.agent_os.commands.specs_integration import (
