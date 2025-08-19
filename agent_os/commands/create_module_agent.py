@@ -482,7 +482,7 @@ class PhasedDocumentProcessor:
                 score += 0.2
             elif days_old < 90:
                 score += 0.1
-        except:
+        except Exception:
             pass
         
         return min(max(score, 0.0), 1.0)
@@ -1835,7 +1835,7 @@ def main():
                     try:
                         category = DocumentCategory(args.list_docs)
                         print(generator.doc_manager.list_documentation(category))
-                    except:
+                    except Exception:
                         print(generator.doc_manager.list_documentation())
                 else:
                     print(generator.doc_manager.list_documentation())
