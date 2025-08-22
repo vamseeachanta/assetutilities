@@ -6,6 +6,7 @@ Replaces: execute-tasks, execute-tasks-enhanced
 """
 
 import sys
+import os
 import subprocess
 import argparse
 from pathlib import Path
@@ -29,13 +30,13 @@ class UnifiedTaskCommand:
                 # Ensure UV environment exists
                 success, msg = self.uv_manager.ensure_uv_environment()
                 if success:
-                    print("✅ Using UV environment")
+                    print(f"✅ Using UV environment")
                     # Get UV Python executable
                     uv_python = self.uv_manager.get_python_executable()
                     if uv_python:
                         self.python_exe = str(uv_python)
                 else:
-                    print("ℹ️  UV not configured, using system Python")
+                    print(f"ℹ️  UV not configured, using system Python")
             except Exception as e:
                 print(f"ℹ️  UV manager not available: {e}")
                 self.uv_manager = None

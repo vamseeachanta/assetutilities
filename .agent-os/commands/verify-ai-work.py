@@ -8,12 +8,15 @@ MANDATORY: Must be executed in repository spec folders only.
 Reports are saved to verification_report/ subdirectory.
 """
 
+import os
 import sys
 import json
 import time
+import textwrap
+import subprocess
 from pathlib import Path
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 import argparse
 from dataclasses import dataclass, asdict
 from enum import Enum
@@ -63,7 +66,7 @@ class VerificationStep:
         for i, instruction in enumerate(self.instructions, 1):
             simple += f"  {i}. {instruction}\n"
         
-        simple += "\n✨ What should happen:\n"
+        simple += f"\n✨ What should happen:\n"
         simple += f"  {self.expected_outcome}\n"
         
         return simple
