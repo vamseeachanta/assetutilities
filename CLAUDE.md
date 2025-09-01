@@ -291,3 +291,13 @@ All multi-repo operations use MANDATORY parallel processing:
 
 ---
 *Git management is MANDATORY for all repositories*
+
+
+## 📚 Complete Slash Command Reference
+
+For the COMPLETE list of all available slash commands across the ecosystem, see:
+- Master List: @/mnt/github/github/SLASH_COMMAND_MASTER_LIST.md
+- Registry: @/mnt/github/github/.SLASH_COMMAND_ECOSYSTEM/
+
+Total Available Commands: 38
+Last Updated: 2025-08-22T15:56:48.322695

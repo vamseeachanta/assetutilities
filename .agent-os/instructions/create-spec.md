@@ -2,7 +2,7 @@
 description: Spec Creation Rules for Agent OS
 globs:
 alwaysApply: false
-version: 1.2
+version: 1.3
 encoding: UTF-8
 ---
 
@@ -159,7 +159,7 @@ This traditional workflow remains fully supported and is the default for backwar
     ASK numbered_questions
     WAIT for_user_response
   ELSE:
-    PROCEED to_date_determination
+    PROCEED to_spec_folder_creation
 </decision_tree>
 
 <question_template>
@@ -178,81 +178,18 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="4" name="date_determination">
+<step number="4" name="spec_folder_creation">
 
-### Step 4: Date Determination
-
-<step_metadata>
-  <purpose>Ensure accurate date for folder naming</purpose>
-  <priority>high</priority>
-  <creates>temporary file for timestamp</creates>
-</step_metadata>
-
-<date_determination_process>
-  <primary_method>
-    <name>File System Timestamp</name>
-    <process>
-      1. CREATE directory if not exists: .agent-os/specs/
-      2. CREATE temporary file: .agent-os/specs/.date-check
-      3. READ file creation timestamp from filesystem
-      4. EXTRACT date in YYYY-MM-DD format
-      5. DELETE temporary file
-      6. STORE date in variable for folder naming
-    </process>
-  </primary_method>
-
-  <fallback_method>
-    <trigger>if file system method fails</trigger>
-    <name>User Confirmation</name>
-    <process>
-      1. STATE: "I need to confirm today's date for the spec folder"
-      2. ASK: "What is today's date? (YYYY-MM-DD format)"
-      3. WAIT for user response
-      4. VALIDATE format matches YYYY-MM-DD
-      5. STORE date for folder naming
-    </process>
-  </fallback_method>
-</date_determination_process>
-
-<validation>
-  <format_check>^\d{4}-\d{2}-\d{2}$</format_check>
-  <reasonableness_check>
-    - year: 2024-2030
-    - month: 01-12
-    - day: 01-31
-  </reasonableness_check>
-</validation>
-
-<error_handling>
-  IF date_invalid:
-    USE fallback_method
-  IF both_methods_fail:
-    ERROR "Unable to determine current date"
-</error_handling>
-
-<instructions>
-  ACTION: Determine accurate date using file system
-  FALLBACK: Ask user if file system method fails
-  VALIDATE: Ensure YYYY-MM-DD format
-  STORE: Date for immediate use in next step
-</instructions>
-
-</step>
-
-<step number="5" name="spec_folder_creation">
-
-### Step 5: Spec Folder Creation
+### Step 4: Spec Folder Creation
 
 <step_metadata>
   <creates>
-    - directory: .agent-os/specs/YYYY-MM-DD-spec-name/
+    - directory: .agent-os/specs/spec-name/
   </creates>
-  <uses>date from step 4</uses>
 </step_metadata>
 
 <folder_naming>
-  <format>YYYY-MM-DD-spec-name</format>
-  <date>use stored date from step 4</date>
+  <format>spec-name</format>
   <name_constraints>
     - max_words: 5
     - style: kebab-case
@@ -261,13 +198,13 @@ This traditional workflow remains fully supported and is the default for backwar
 </folder_naming>
 
 <example_names>
-  - 2025-03-15-password-reset-flow
-  - 2025-03-16-user-profile-dashboard
-  - 2025-03-17-api-rate-limiting
+  - password-reset-flow
+  - user-profile-dashboard
+  - api-rate-limiting
 </example_names>
 
 <instructions>
-  ACTION: Create spec folder using stored date
+  ACTION: Create spec folder
   FORMAT: Use kebab-case for spec name
   LIMIT: Maximum 5 words in name
   VERIFY: Folder created successfully
@@ -275,13 +212,13 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="6" name="create_spec_md">
+<step number="5" name="create_spec_md">
 
-### Step 6: Create spec.md
+### Step 5: Create spec.md
 
 <step_metadata>
   <creates>
-    - file: .agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    - file: .agent-os/specs/spec-name/spec.md
   </creates>
 </step_metadata>
 
@@ -379,9 +316,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="7" name="create_technical_spec">
+<step number="6" name="create_technical_spec">
 
-### Step 7: Create Technical Specification
+### Step 6: Create Technical Specification
 
 <step_metadata>
   <creates>
@@ -394,7 +331,7 @@ This traditional workflow remains fully supported and is the default for backwar
   <header>
     # Technical Specification
 
-    This is the technical specification for the spec detailed in @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    This is the technical specification for the spec detailed in @.agent-os/specs/spec-name/spec.md
 
     > Created: [CURRENT_DATE]
     > Version: 1.0.0
@@ -452,9 +389,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="8" name="create_database_schema">
+<step number="7" name="create_database_schema">
 
-### Step 8: Create Database Schema (Conditional)
+### Step 7: Create Database Schema (Conditional)
 
 <step_metadata>
   <creates>
@@ -474,7 +411,7 @@ This traditional workflow remains fully supported and is the default for backwar
   <header>
     # Database Schema
 
-    This is the database schema implementation for the spec detailed in @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    This is the database schema implementation for the spec detailed in @.agent-os/specs/spec-name/spec.md
 
     > Created: [CURRENT_DATE]
     > Version: 1.0.0
@@ -508,9 +445,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="9" name="create_api_spec">
+<step number="8" name="create_api_spec">
 
-### Step 9: Create API Specification (Conditional)
+### Step 8: Create API Specification (Conditional)
 
 <step_metadata>
   <creates>
@@ -530,7 +467,7 @@ This traditional workflow remains fully supported and is the default for backwar
   <header>
     # API Specification
 
-    This is the API specification for the spec detailed in @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    This is the API specification for the spec detailed in @.agent-os/specs/spec-name/spec.md
 
     > Created: [CURRENT_DATE]
     > Version: 1.0.0
@@ -574,9 +511,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="10" name="create_tests_spec">
+<step number="9" name="create_tests_spec">
 
-### Step 10: Create Tests Specification
+### Step 9: Create Tests Specification
 
 <step_metadata>
   <creates>
@@ -588,7 +525,7 @@ This traditional workflow remains fully supported and is the default for backwar
   <header>
     # Tests Specification
 
-    This is the tests coverage details for the spec detailed in @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    This is the tests coverage details for the spec detailed in @.agent-os/specs/spec-name/spec.md
 
     > Created: [CURRENT_DATE]
     > Version: 1.0.0
@@ -645,9 +582,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="11" name="user_review">
+<step number="10" name="user_review">
 
-### Step 11: User Review
+### Step 10: User Review
 
 <step_metadata>
   <action>request user review</action>
@@ -660,8 +597,8 @@ This traditional workflow remains fully supported and is the default for backwar
 <review_request>
   I've created the spec documentation:
 
-  - Spec Requirements: @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
-  - Technical Spec: @.agent-os/specs/YYYY-MM-DD-spec-name/sub-specs/technical-spec.md
+  - Spec Requirements: @.agent-os/specs/spec-name/spec.md
+  - Technical Spec: @.agent-os/specs/spec-name/sub-specs/technical-spec.md
   [LIST_OTHER_CREATED_SPECS]
 
   Please review and let me know if any changes are needed before I create the task breakdown.
@@ -675,22 +612,22 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="12" name="create_tasks">
+<step number="11" name="create_tasks">
 
-### Step 12: Create tasks.md
+### Step 11: Create tasks.md
 
 <step_metadata>
   <creates>
     - file: tasks.md
   </creates>
-  <depends_on>user approval from step 11</depends_on>
+  <depends_on>user approval from step 10</depends_on>
 </step_metadata>
 
 <file_template>
   <header>
     # Spec Tasks
 
-    These are the tasks to be completed for the spec detailed in @.agent-os/specs/YYYY-MM-DD-spec-name/spec.md
+    These are the tasks to be completed for the spec detailed in @.agent-os/specs/spec-name/spec.md
 
     > Created: [CURRENT_DATE]
     > Status: Ready for Implementation
@@ -740,9 +677,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="13" name="update_cross_references">
+<step number="12" name="update_cross_references">
 
-### Step 13: Documentation Cross-References
+### Step 12: Documentation Cross-References
 
 <step_metadata>
   <updates>
@@ -754,11 +691,11 @@ This traditional workflow remains fully supported and is the default for backwar
 <reference_template>
   ## Spec Documentation
 
-  - Tasks: @.agent-os/specs/YYYY-MM-DD-spec-name/tasks.md
-  - Technical Specification: @.agent-os/specs/YYYY-MM-DD-spec-name/sub-specs/technical-spec.md
-  - API Specification: @.agent-os/specs/YYYY-MM-DD-spec-name/sub-specs/api-spec.md
-  - Database Schema: @.agent-os/specs/YYYY-MM-DD-spec-name/sub-specs/database-schema.md
-  - Tests Specification: @.agent-os/specs/YYYY-MM-DD-spec-name/sub-specs/tests.md
+  - Tasks: @.agent-os/specs/spec-name/tasks.md
+  - Technical Specification: @.agent-os/specs/spec-name/sub-specs/technical-spec.md
+  - API Specification: @.agent-os/specs/spec-name/sub-specs/api-spec.md
+  - Database Schema: @.agent-os/specs/spec-name/sub-specs/database-schema.md
+  - Tests Specification: @.agent-os/specs/spec-name/sub-specs/tests.md
 </reference_template>
 
 <reference_format>
@@ -775,9 +712,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="14" name="decision_documentation">
+<step number="13" name="decision_documentation">
 
-### Step 14: Decision Documentation
+### Step 13: Decision Documentation
 
 <step_metadata>
   <evaluates>strategic impact</evaluates>
@@ -814,7 +751,7 @@ This traditional workflow remains fully supported and is the default for backwar
   **ID:** DEC-[NEXT_NUMBER]
   **Status:** Accepted
   **Category:** [technical/product/business/process]
-  **Related Spec:** @.agent-os/specs/YYYY-MM-DD-spec-name/
+  **Related Spec:** @.agent-os/specs/spec-name/
 
   ### Decision
 
@@ -842,9 +779,9 @@ This traditional workflow remains fully supported and is the default for backwar
 
 </step>
 
-<step number="15" name="execution_readiness">
+<step number="14" name="execution_readiness">
 
-### Step 15: Execution Readiness Check
+### Step 14: Execution Readiness Check
 
 <step_metadata>
   <evaluates>readiness to begin implementation</evaluates>
@@ -912,8 +849,7 @@ This traditional workflow remains fully supported and is the default for backwar
 
 <final_checklist>
   <verify>
-    - [ ] Accurate date determined via file system
-    - [ ] Spec folder created with correct date prefix
+    - [ ] Spec folder created with descriptive name
     - [ ] spec.md contains all required sections
     - [ ] All applicable sub-specs created
     - [ ] User approved documentation
