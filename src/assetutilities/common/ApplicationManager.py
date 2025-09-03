@@ -282,9 +282,17 @@ class ConfigureApplicationInputs:
             if result_sub_folder_cfg is not None:
                 result_sub_folder = result_sub_folder_cfg
 
-        result_folder = os.path.join(analysis_root_folder, result_sub_folder)
+        # Properly resolve relative paths from config directory
+        if os.path.isabs(result_sub_folder):
+            result_folder = result_sub_folder
+        else:
+            # Use Path for better path handling with relative paths
+            config_dir = Path(analysis_root_folder)
+            result_path = (config_dir / result_sub_folder).resolve()
+            result_folder = str(result_path)
+        
         if not os.path.exists(result_folder):
-            os.mkdir(result_folder)
+            os.makedirs(result_folder, exist_ok=True)
 
         result_data_folder = os.path.join(result_folder, "Data")
         if not os.path.exists(result_data_folder):
@@ -329,63 +337,16 @@ class ConfigureApplicationInputs:
         """
         Validate inputs for following run methods:
         - module (i.e. python -m digitalmodel input.yml "{'key':'value'}")
+        - module with CLI args (i.e. python -m digitalmodel input.yml --key subkey=value)
         - from python file (i.e. test_*.py)
         - from function call (i.e. engine(inputfile))
 
         """
-
-        # Allow pytest to pass extra arguments without raising error
-        if len(sys.argv) > 1 and inputfile is not None:
-            # If running under pytest, ignore extra sys.argv
-            if not any("pytest" in arg for arg in sys.argv[0:2]):
-                raise (
-                    Exception(
-                        "2 Input files provided via arguments & function. "
-                        "Please provide only 1 file ... FAIL"
-                    )
-                )
-
-        cfg_argv_dict = {}
-        if len(sys.argv) > 2:
-            # Only eval if sys.argv[2] looks like a dict, skip pytest CLI args
-            arg2 = sys.argv[2]
-            if arg2.strip().startswith("{") and arg2.strip().endswith("}"):
-                try:
-                    cfg_argv_dict_eval = eval(arg2)
-                except Exception as e:
-                    print(arg2)
-                    print(f"Error: {e}")
-                    raise (
-                        ValueError(
-                            f"Check dictionary format provided in {arg2} ... FAIL"
-                        )
-                    )
-                if isinstance(cfg_argv_dict_eval, dict):
-                    cfg_argv_dict = cfg_argv_dict_eval
-                else:
-                    print("Dictionary not provided in sys.argv[2]. sys.arg values are:")
-                    print(arg2)
-                    print("System argument values are:")
-                    for item in sys.argv:
-                        print(f"item : {item}")
-                    raise (
-                        ValueError(
-                            f"Check dictionary format provided in {arg2} ... FAIL"
-                        )
-                    )
-        if len(sys.argv) > 1:
-            if not os.path.isfile(sys.argv[1]):
-                raise (
-                    FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL")
-                )
-            else:
-                inputfile = sys.argv[1]
-        if len(sys.argv) <= 1:
-            if not os.path.isfile(inputfile):
-                raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
-            else:
-                sys.argv.append(inputfile)
-        return inputfile, cfg_argv_dict
+        # Import the cli_parser here to use the hybrid parser
+        from assetutilities.common.cli_parser import parse_hybrid_arguments
+        
+        # Use the new hybrid parser that handles both old and new formats
+        return parse_hybrid_arguments(inputfile)
 
     def save_cfg(self, cfg_base):
         output_dir = cfg_base.Analysis["analysis_root_folder"]
