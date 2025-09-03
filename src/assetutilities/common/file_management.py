@@ -1,5 +1,6 @@
 import os
 import pathlib
+from assetutilities.common.path_resolver import PathResolver
 
 from assetutilities.common.utilities import is_dir_valid_func
 

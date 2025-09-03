@@ -1,10 +1,11 @@
-# Standard library imports
 import datetime
 import functools
 import os
 import pkgutil
 import sys
 from pathlib import Path
+from assetutilities.common.path_resolver import PathResolver
+# Standard library imports
 
 import numpy as np
 
@@ -306,7 +307,13 @@ class ConfigureApplicationInputs:
             "result_folder": result_folder,
             "result_data_folder": result_data_folder,
             "result_plot_folder": result_plot_folder,
+            # Preserve config tracking if available
         }
+        # Add config path tracking if present in cfg_with_fm
+        if cfg_with_fm and "_config_dir_path" in cfg_with_fm:
+            result_folder_dict["_config_dir_path"] = cfg_with_fm["_config_dir_path"]
+        if cfg_with_fm and "_config_file_path" in cfg_with_fm:
+            result_folder_dict["_config_file_path"] = cfg_with_fm["_config_file_path"]
 
         if len(cfg_with_fm) != 0:
             cfg_with_fm["Analysis"] = update_deep_dictionary(
