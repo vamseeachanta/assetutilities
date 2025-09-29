@@ -153,8 +153,15 @@ __pycache__/
 .coverage
 htmlcov/
 
-# UV
+# Poetry (deprecated - migrated to UV)
+poetry.lock.bak
+.venv-poetry/
+
+# UV Package Manager (primary dependency manager)
 .venv/
+uv.lock
+.uv-cache/
+.uv-venv/
 
 # Claude Flow generated files
 .claude/settings.local.json

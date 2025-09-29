@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "assetutilities"
 version = "0.1.0"
 description = "Standardized project configuration for assetutilities"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Development Team", email = "dev@example.com"}
@@ -17,71 +17,82 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
+# Dependencies migrated to UV - see uv.toml for dependency management
 dependencies = [
-    "bs4",
-    "build",
-    "bumpver",
-    "chardet",
-    "crochet",
-    "deepdiff",
-    "excel2img",
-    "excel2img; sys_platform=='win32'",
-    "fake_headers",
-    "flask",
-    "gitpython==3.1.31",
-    "jinja2",
-    "loguru",
-    "matplotlib",
-    "numpy",
-    "openpyxl",
-    "pandas",
-    "pandoc",
-    "parsel",
-    "plantuml",
-    "playwright",
-    "plotly",
-    "PyPDF2",
-    "pytest",
-    "python-certifi-win32",
-    "python-docx",
-    "pyyaml",
-    "ruamel.yaml",
-    "ruff",
-    "scrapy==2.12",
-    "selenium",
+    "beautifulsoup4>=4.12.0",
+    "build>=1.0.0",
+    "bumpver>=2023.1129",
+    "chardet>=5.2.0",
+    "crochet>=2.1.1",
+    "deepdiff>=6.7.0",
+    "excel2img>=1.4; sys_platform=='win32'",
+    "fake-headers>=1.0.2",
+    "flask>=3.0.0",
+    "gitpython>=3.1.40",
+    "jinja2>=3.1.0",
+    "loguru>=0.7.0",
+    "matplotlib>=3.8.0",
+    "numpy>=1.24.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.1.0",
+    "pandoc>=2.3",
+    "parsel>=1.8.0",
+    "plantuml>=0.3.0",
+    "playwright>=1.40.0",
+    "plotly>=5.17.0",
+    "pypdf2>=3.0.1",
+    "pytest>=7.4.0",
+    # "python-certifi-win32>=1.6.0; sys_platform=='win32'",  # Temporarily disabled due to pywin32 conflict
+    "python-docx>=1.1.0",
+    "pyyaml>=6.0.1",
+    "ruamel.yaml>=0.18.0",
+    "ruff>=0.1.8",
+    "scrapy>=2.12.0",
+    "selenium>=4.15.0",
     "sympy>=1.13.3",
-    "tabula",
-    "twine",
-    "undetected-chromedriver",
-    "utm",
-    "webcolors",
-    "wkhtmltopdf",
-    "xlsxwriter"
+    "tabula-py>=2.8.0",
+    "twine>=4.0.2",
+    "undetected-chromedriver>=3.5.4",
+    "utm>=0.7.0",
+    "webcolors>=1.13",
+    "wkhtmltopdf>=0.2",
+    "xlsxwriter>=3.1.0"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "black>=23.0",
-    "flake8>=6.0",
-    "mypy>=1.0",
-    "pre-commit>=3.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "black>=23.11.0",
+    "ruff>=0.1.8",
+    "mypy>=1.7.0",
+    "pre-commit>=3.6.0",
+    "ipython>=8.17.0",
+    "jupyter>=1.0.0",
 ]
 test = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "pytest-mock>=3.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "coverage>=7.3.0",
 ]
 docs = [
-    "sphinx>=6.0",
-    "sphinx-rtd-theme>=1.0",
+    "sphinx>=7.2.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "myst-parser>=2.0.0",
+]
+performance = [
+    "numba>=0.58.0",
+    "cython>=3.0.0",
 ]
 
 [project.urls]
@@ -133,18 +144,39 @@ exclude_lines = [
     "raise NotImplementedError",
 ]
 
+# UV Configuration - Modern Python package manager
 [tool.uv]
-# UV environment configuration
-python-version = "3.11"
-system = false
-seed = true
-compile = true
+managed = true
+environments = ["python_version >= '3.9'"]
 
-[tool.uv.pip]
-index-url = "https://pypi.org/simple"
-extra-index-url = []
-no-cache = false
-pre = false
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "black>=23.11.0",
+    "ruff>=0.1.8",
+    "mypy>=1.7.0",
+    "pre-commit>=3.6.0",
+    "ipython>=8.17.0",
+    "jupyter>=1.0.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "coverage>=7.3.0",
+]
+docs = [
+    "sphinx>=7.2.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "myst-parser>=2.0.0",
+]
+
+[tool.uv.sources]
+# Add custom sources if needed for private packages
 
 # MANDATORY: Parallel Processing Configuration
 [tool.parallel]
@@ -160,11 +192,3 @@ file_operations = "always"      # File reading/writing
 http_requests = "always"        # API calls
 data_processing = "threshold"   # Based on data size
 threshold_size = 1000           # Items before parallel kicks in
-
-[tool.scripts]
-# Common scripts that use parallel processing
-test = "pytest -n auto"
-format = "black . && isort ."
-lint = "flake8 . & mypy . & pylint ."
-install = "uv pip install -e ."
-dev-install = "uv pip install -e .[dev]"
