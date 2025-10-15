@@ -138,15 +138,22 @@ class ConfigureApplicationInputs:
         return cfg
 
     def get_custom_file(self, run_dict=None):
+        # Detect if running under pytest
+        is_pytest = any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
+        
         try:
-            if sys.argv[1] is not None:
+            # Only use sys.argv[1] if NOT running under pytest
+            if not is_pytest and len(sys.argv) > 1 and sys.argv[1] is not None:
                 self.customYaml = sys.argv[1]
+            else:
+                self.customYaml = None
         except:
             self.customYaml = None
-            print(
-                "No update values file is provided. Running program default values "
-                f"from {self.ApplicationInputFile}"
-            )
+            if not is_pytest:
+                print(
+                    "No update values file is provided. Running program default values "
+                    f"from {self.ApplicationInputFile}"
+                )
 
         if run_dict is not None:
             self.customYaml = None
