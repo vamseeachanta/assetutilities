@@ -50,7 +50,7 @@ Successfully diagnosed, fixed, and documented major issues in the AssetUtilities
 - Provides `config_file` fixture for tests requiring configuration files
 **Impact**: Resolved fixture errors and enabled module imports across all test subdirectories
 
-### Documentation (3 files created)
+### Documentation (4 files created)
 
 #### 4. `docs/TEST_BASELINE_2025.md` (NEW)
 **Purpose**: Comprehensive baseline report
@@ -75,6 +75,15 @@ Successfully diagnosed, fixed, and documented major issues in the AssetUtilities
 - Coverage improvements detailed
 - Recommendations for future work
 - Reproduction commands
+
+#### 7. `docs/YAML_ARCHITECTURE_ISSUE.md` (NEW) ⭐
+**Purpose**: Architectural issue documentation
+**Content**:
+- Mermaid flowcharts showing config double-load problem
+- Sequence diagrams illustrating the issue
+- Two resolution options with detailed analysis
+- Recommendation matrix and trigger conditions
+- Implementation plans for future resolution
 
 ---
 
@@ -150,10 +159,12 @@ Successfully diagnosed, fixed, and documented major issues in the AssetUtilities
 ## Remaining Work (Documented)
 
 ### High Priority (20 tests)
-1. **YAML Configuration Merging** (10 tests)
+1. **YAML Configuration Architecture Issue** (10 tests) - 📋 **See: `YAML_ARCHITECTURE_ISSUE.md`**
    - CSV utilities: missing 'encoding' key
    - Visualization: KeyError in config structure
    - Web scraping: config merging problems
+   - **Status:** Documented with flowcharts, trigger conditions, and resolution options
+   - **Recommendation:** Defer until triggered (see doc for conditions)
 
 2. **Missing Test Data Files** (3 tests)
    - PDF files for read_pdf tests
