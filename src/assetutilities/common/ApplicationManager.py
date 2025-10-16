@@ -98,9 +98,9 @@ class ConfigureApplicationInputs:
     def __init__(self):
         pass
 
-    def configure(self, run_dict, library_name, basename, cfg_argv_dict):
+    def configure(self, run_dict, library_name, basename, cfg_argv_dict, inputfile=None):
         cfg = self.unify_application_and_default_and_custom_yamls(
-            run_dict, library_name, basename, cfg_argv_dict
+            run_dict, library_name, basename, cfg_argv_dict, inputfile
         )
         cfg = self.get_application_configuration_parameters(run_dict, basename, cfg)
         cfg = self.configure_overwrite_filenames(cfg)
@@ -112,13 +112,13 @@ class ConfigureApplicationInputs:
         return cfg
 
     def unify_application_and_default_and_custom_yamls(
-        self, run_dict, library_name, basename, cfg_argv_dict
+        self, run_dict, library_name, basename, cfg_argv_dict, inputfile=None
     ):
         application_input_file_path = os.path.join(
             os.getcwd(), "src", library_name, "tests", "test_data", basename + ".yml"
         )
         self.ApplicationInputFile = application_input_file_path
-        self.get_custom_file()
+        self.get_custom_file(run_dict, inputfile)
         if not os.path.isfile(self.ApplicationInputFile):
             try:
                 filename = os.path.join(
@@ -137,13 +137,16 @@ class ConfigureApplicationInputs:
 
         return cfg
 
-    def get_custom_file(self, run_dict=None):
+    def get_custom_file(self, run_dict=None, inputfile=None):
         # Detect if running under pytest
         is_pytest = any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
         
         try:
-            # Only use sys.argv[1] if NOT running under pytest
-            if not is_pytest and len(sys.argv) > 1 and sys.argv[1] is not None:
+            # During pytest, use the inputfile parameter if provided
+            if is_pytest and inputfile is not None:
+                self.customYaml = inputfile
+            # Otherwise, only use sys.argv[1] if NOT running under pytest
+            elif not is_pytest and len(sys.argv) > 1 and sys.argv[1] is not None:
                 self.customYaml = sys.argv[1]
             else:
                 self.customYaml = None
