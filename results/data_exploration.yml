@@ -1,0 +1,52 @@
+library: assetutlities
+basename: data_exploration
+type:
+  df_statistics:
+    flag: true
+    df_array: true
+    df: true
+data:
+  type: csv
+  groups:
+  - columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST1
+    file_name: tests/modules/data_exploration/csv/test_1.csv
+  - columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST2
+    file_name: tests/modules/data_exploration/csv/test_2.csv
+master_settings:
+  groups:
+    columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    label: FST2
+    file_name: tests/modules/data_exploration/csv/test_2.csv
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+Analysis:
+  basename: data_exploration
+  analysis_root_folder: D:\workspace-hub\assetutilities
+  file_name: data_exploration
+  file_name_for_overwrite: data_exploration
+  log_folder: D:\workspace-hub\assetutilities\logs
+  start_time: 2025-10-15 19:35:08.181246
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: ~
+  result_folder: D:\workspace-hub\assetutilities\results
+  result_data_folder: D:\workspace-hub\assetutilities\results\Data
+  result_plot_folder: D:\workspace-hub\assetutilities\results\Plot
+  fe_folder: D:\workspace-hub\assetutilities\results
