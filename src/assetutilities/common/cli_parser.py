@@ -109,21 +109,27 @@ def parse_hybrid_arguments(inputfile: Optional[str] = None) -> Tuple[str, Dict[s
     """
     import os
     
+    # Detect if running under pytest
+    is_pytest = any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
+    
     # Handle input file
     if len(sys.argv) > 1:
         if inputfile is not None:
-            # If running under pytest, ignore extra sys.argv
-            if not any("pytest" in arg for arg in sys.argv[0:2]):
+            # If running under pytest, skip sys.argv processing since inputfile is provided
+            if is_pytest:
+                pass  # Use the provided inputfile, ignore sys.argv
+            else:
                 raise Exception(
                     "2 Input files provided via arguments & function. "
                     "Please provide only 1 file ... FAIL"
                 )
-        
-        # Check if first argument is a file
-        if os.path.isfile(sys.argv[1]):
-            inputfile = sys.argv[1]
-        elif not sys.argv[1].startswith('--'):
-            raise FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL")
+        elif not is_pytest:
+            # Only use sys.argv[1] when NOT running under pytest
+            # Check if first argument is a file
+            if os.path.isfile(sys.argv[1]):
+                inputfile = sys.argv[1]
+            elif not sys.argv[1].startswith('--'):
+                raise FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL")
     
     # Parse configuration arguments
     cfg_argv_dict = {}
