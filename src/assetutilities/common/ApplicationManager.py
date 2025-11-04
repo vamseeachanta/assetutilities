@@ -158,9 +158,11 @@ class ConfigureApplicationInputs:
                     f"from {self.ApplicationInputFile}"
                 )
 
+        # Only override customYaml if run_dict has CustomInputs
         if run_dict is not None:
-            self.customYaml = None
             self.CustomInputs = run_dict.get("CustomInputs", None)
+            if self.CustomInputs is not None:
+                self.customYaml = None
         else:
             self.CustomInputs = None
 
