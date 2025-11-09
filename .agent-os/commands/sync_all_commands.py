@@ -5,13 +5,15 @@ Collects slash commands from all repositories and syncs them to the master direc
 Also identifies new commands and can distribute updates.
 """
 
+import os
 import sys
 import json
 import shutil
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Tuple, Optional, Set
 from datetime import datetime
+import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import difflib
 import argparse

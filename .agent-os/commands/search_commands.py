@@ -4,9 +4,11 @@ Search Commands - Easy discovery and exploration of slash commands
 Provides intelligent search, filtering, and detailed help for all commands.
 """
 
+import os
 import sys
 import json
 import re
+import ast
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
@@ -137,7 +139,7 @@ class CommandSearcher:
             
             return info
             
-        except Exception:
+        except Exception as e:
             return None
     
     def search(self, query: str = "", filters: Dict = None) -> List[Tuple[str, Dict]]:
@@ -264,7 +266,7 @@ class CommandSearcher:
                         print(f"   {line}")
                 else:
                     print("   Run with --help for detailed options")
-            except Exception:
+            except:
                 print("   Run with --help for detailed options")
         
         print("\n🚀 Usage:")

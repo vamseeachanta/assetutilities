@@ -17,14 +17,16 @@ IMPORTANT ENVIRONMENT NOTES:
 """
 
 import sys
+import os
 import re
 import subprocess
+import json
 import concurrent.futures
 from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import threading
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 import argparse
 
 class EnhancedTaskExecutor:
@@ -110,7 +112,7 @@ class EnhancedTaskExecutor:
         if total_minutes == 0:
             try:
                 total_minutes = int(time_str)
-            except Exception:
+            except:
                 total_minutes = 30  # Default fallback
         
         return total_minutes
@@ -235,11 +237,11 @@ class EnhancedTaskExecutor:
         
         print("\n⏱️  TIME ESTIMATION")
         print("=" * 60)
-        print("📊 Task Analysis:")
+        print(f"📊 Task Analysis:")
         print(f"  • Parallel tasks: {estimate['parallel_tasks']} (can run simultaneously)")
         print(f"  • Sequential tasks: {estimate['sequential_tasks']} (must run in order)")
         print(f"  • Parallel efficiency: {estimate['efficiency_ratio']:.1%}")
-        print("\n⏰ Estimated Completion Time:")
+        print(f"\n⏰ Estimated Completion Time:")
         print(f"  • Total time: {estimate['human_readable']}")
         print(f"  • With {self.max_workers} parallel workers")
         print(f"  • Sequential portion: {self._format_time(estimate['sequential_minutes'])}")
@@ -251,7 +253,7 @@ class EnhancedTaskExecutor:
         print(f"📅 Date: {finish_time.strftime('%Y-%m-%d')}")
         
         # Provide recommendations
-        print("\n💡 Recommendations:")
+        print(f"\n💡 Recommendations:")
         if estimate['total_minutes'] < 30:
             print("  ✅ Tasks will complete quickly - you can wait")
         elif estimate['total_minutes'] < 120:
@@ -377,9 +379,9 @@ class EnhancedTaskExecutor:
         
         self.progress['total'] = len(pending_tasks)
         
-        print("\n🚀 PARALLEL EXECUTION ENGINE")
+        print(f"\n🚀 PARALLEL EXECUTION ENGINE")
         print("=" * 60)
-        print("📊 Execution Strategy:")
+        print(f"📊 Execution Strategy:")
         print(f"  • {len(parallel_tasks)} tasks running in parallel")
         print(f"  • {len(sequential_tasks)} tasks running sequentially")
         print(f"  • Using {self.max_workers} worker threads")
@@ -461,7 +463,7 @@ class EnhancedTaskExecutor:
         if test_results:
             parallel_tests = sum(1 for r in test_results 
                                if r.get('test_verification', {}).get('parallel_execution'))
-            print("🧪 Test Execution:")
+            print(f"🧪 Test Execution:")
             print(f"  • {len(test_results)} test suites executed")
             print(f"  • {parallel_tests} ran in parallel")
             
@@ -474,7 +476,7 @@ class EnhancedTaskExecutor:
         completed = len([r for r in results if r['status'] == 'completed'])
         failed = len([r for r in results if r['status'] == 'error'])
         
-        print("\n📈 Execution Summary:")
+        print(f"\n📈 Execution Summary:")
         print(f"  • Total tasks: {len(results)}")
         print(f"  • Completed: {completed}")
         print(f"  • Failed: {failed}")
@@ -675,7 +677,7 @@ ENVIRONMENT NOTES:
             sys.exit(1)
         
         # Display task overview
-        print("\n📋 TASK EXECUTION PLANNER")
+        print(f"\n📋 TASK EXECUTION PLANNER")
         print("=" * 60)
         print(f"📁 Tasks file: {tasks_file}")
         print(f"📊 Total tasks: {len(tasks)}")
@@ -718,7 +720,7 @@ ENVIRONMENT NOTES:
             print("\n📝 Updated tasks.md with completion status")
         
         # Final summary
-        print("\n🎯 EXECUTION COMPLETE")
+        print(f"\n🎯 EXECUTION COMPLETE")
         print("=" * 60)
         print(f"⏱️  Actual execution time: {executor._format_time(int(results['execution_time'] / 60))}")
         print(f"📊 Tasks completed: {results['completed']}/{results['total_tasks']}")

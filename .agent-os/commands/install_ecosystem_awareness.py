@@ -4,9 +4,11 @@ Install Ecosystem Awareness - Add slash command suggestions to all repos
 This command updates all CLAUDE.md files to include mandatory ecosystem awareness.
 """
 
+import os
 import sys
 from pathlib import Path
 from typing import List, Dict, Tuple
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class EcosystemAwarenessInstaller:
@@ -276,7 +278,7 @@ def main():
     print()
     
     installer = EcosystemAwarenessInstaller(workspace)
-    installer.install_all(dry_run=args.dry_run)
+    results = installer.install_all(dry_run=args.dry_run)
     
     print("\n✨ Ecosystem awareness installation complete!")
     print("\nAll AI agents will now suggest creating slash commands")

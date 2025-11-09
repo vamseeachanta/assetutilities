@@ -16,6 +16,7 @@ Key Features:
 import os
 import sys
 import subprocess
+import json
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -52,7 +53,7 @@ class UVEnvironmentManager:
             )
             if result.returncode == 0:
                 return Path(result.stdout.strip())
-        except Exception:
+        except:
             pass
         
         return None
@@ -93,7 +94,7 @@ class UVEnvironmentManager:
                         text=True
                     )
                     env_info['python_version'] = result.stdout.strip()
-                except Exception:
+                except:
                     pass
         
         # Check for pyproject.toml

@@ -8,6 +8,7 @@ import os
 import subprocess
 import argparse
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import shutil
 
 class UnifiedAgentCommand:
