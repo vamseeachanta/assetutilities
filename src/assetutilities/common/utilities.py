@@ -28,20 +28,38 @@ def get_module_path(module=None):
 # Determine if file is valid
 def is_dir_valid_func(dir, analysis_root_folder=None):
     dir_is_valid = True
-    if not os.path.isdir(dir):
-        file_name_cwd = os.path.join(os.getcwd(), dir)
-        if os.path.isdir(file_name_cwd):
-            dir = file_name_cwd
-        elif analysis_root_folder is not None:
-            file_name_analysis_root = os.path.join(analysis_root_folder, dir)
-            if os.path.isdir(file_name_analysis_root):
-                dir = file_name_analysis_root
+    
+    # MODIFIED: Always check analysis_root_folder FIRST when provided
+    # This ensures config-relative paths take priority over CWD-relative paths
+    if analysis_root_folder is not None and not os.path.isabs(dir):
+        # For relative paths, try analysis_root_folder first
+        file_name_analysis_root = os.path.join(analysis_root_folder, dir)
+        if os.path.isdir(file_name_analysis_root):
+            dir = file_name_analysis_root
+            return dir_is_valid, dir
+    
+    # Check if directory exists as-is (absolute path or relative to CWD)
+    if os.path.isdir(dir):
+        # Convert to absolute path for consistency
+        dir = os.path.abspath(dir)
+    else:
+        # Directory doesn't exist as-is, try other locations
+        if analysis_root_folder is not None and os.path.isabs(dir):
+            # Absolute path that doesn't exist - no fallback
+            dir_is_valid = False
+            logging.error(f"Directory not found: {dir}")
+        else:
+            # Try CWD for relative paths
+            file_name_cwd = os.path.join(os.getcwd(), dir)
+            if os.path.isdir(file_name_cwd):
+                dir = file_name_cwd
             else:
                 dir_is_valid = False
-                logging.error(f"File not found: {dir}")
-        else:
-            dir_is_valid = False
-            logging.error(f"File not found: {dir}")
+                if analysis_root_folder is not None:
+                    file_name_analysis_root = os.path.join(analysis_root_folder, dir)
+                    logging.error(f"Directory not found: {dir} (checked analysis_root: {file_name_analysis_root} and cwd: {file_name_cwd})")
+                else:
+                    logging.error(f"Directory not found: {dir}")
 
     return dir_is_valid, dir
 
@@ -49,20 +67,38 @@ def is_dir_valid_func(dir, analysis_root_folder=None):
 # Determine if file is valid
 def is_file_valid_func(file_name, analysis_root_folder=None):
     file_is_valid = True
-    if not os.path.isfile(file_name):
-        file_name_cwd = os.path.join(os.getcwd(), file_name)
-        if os.path.isfile(file_name_cwd):
-            file_name = file_name_cwd
-        elif analysis_root_folder is not None:
-            file_name_analysis_root = os.path.join(analysis_root_folder, file_name)
-            if os.path.isfile(file_name_analysis_root):
-                file_name = file_name_analysis_root
-            else:
-                file_is_valid = False
-                logging.error(f"File not found: {file_name}")
-        else:
+    
+    # MODIFIED: Always check analysis_root_folder FIRST when provided
+    # This ensures config-relative paths take priority over CWD-relative paths
+    if analysis_root_folder is not None and not os.path.isabs(file_name):
+        # For relative paths, try analysis_root_folder first
+        file_name_analysis_root = os.path.join(analysis_root_folder, file_name)
+        if os.path.isfile(file_name_analysis_root):
+            file_name = file_name_analysis_root
+            return file_is_valid, file_name
+    
+    # Check if file exists as-is (absolute path or relative to CWD)
+    if os.path.isfile(file_name):
+        # Convert to absolute path for consistency
+        file_name = os.path.abspath(file_name)
+    else:
+        # File doesn't exist as-is, try other locations
+        if analysis_root_folder is not None and os.path.isabs(file_name):
+            # Absolute path that doesn't exist - no fallback
             file_is_valid = False
             logging.error(f"File not found: {file_name}")
+        else:
+            # Try CWD for relative paths
+            file_name_cwd = os.path.join(os.getcwd(), file_name)
+            if os.path.isfile(file_name_cwd):
+                file_name = file_name_cwd
+            else:
+                file_is_valid = False
+                if analysis_root_folder is not None:
+                    file_name_analysis_root = os.path.join(analysis_root_folder, file_name)
+                    logging.error(f"File not found: {file_name} (checked analysis_root: {file_name_analysis_root} and cwd: {file_name_cwd})")
+                else:
+                    logging.error(f"File not found: {file_name}")
 
     return file_is_valid, file_name
 

@@ -1,10 +1,11 @@
-# Standard library imports
 import datetime
 import functools
 import os
 import pkgutil
 import sys
 from pathlib import Path
+from assetutilities.common.path_resolver import PathResolver
+# Standard library imports
 
 import numpy as np
 
@@ -97,9 +98,9 @@ class ConfigureApplicationInputs:
     def __init__(self):
         pass
 
-    def configure(self, run_dict, library_name, basename, cfg_argv_dict):
+    def configure(self, run_dict, library_name, basename, cfg_argv_dict, inputfile=None):
         cfg = self.unify_application_and_default_and_custom_yamls(
-            run_dict, library_name, basename, cfg_argv_dict
+            run_dict, library_name, basename, cfg_argv_dict, inputfile
         )
         cfg = self.get_application_configuration_parameters(run_dict, basename, cfg)
         cfg = self.configure_overwrite_filenames(cfg)
@@ -111,13 +112,13 @@ class ConfigureApplicationInputs:
         return cfg
 
     def unify_application_and_default_and_custom_yamls(
-        self, run_dict, library_name, basename, cfg_argv_dict
+        self, run_dict, library_name, basename, cfg_argv_dict, inputfile=None
     ):
         application_input_file_path = os.path.join(
             os.getcwd(), "src", library_name, "tests", "test_data", basename + ".yml"
         )
         self.ApplicationInputFile = application_input_file_path
-        self.get_custom_file()
+        self.get_custom_file(run_dict, inputfile)
         if not os.path.isfile(self.ApplicationInputFile):
             try:
                 filename = os.path.join(
@@ -136,16 +137,26 @@ class ConfigureApplicationInputs:
 
         return cfg
 
-    def get_custom_file(self, run_dict=None):
+    def get_custom_file(self, run_dict=None, inputfile=None):
+        # Detect if running under pytest
+        is_pytest = any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
+        
         try:
-            if sys.argv[1] is not None:
+            # During pytest, use the inputfile parameter if provided
+            if is_pytest and inputfile is not None:
+                self.customYaml = inputfile
+            # Otherwise, only use sys.argv[1] if NOT running under pytest
+            elif not is_pytest and len(sys.argv) > 1 and sys.argv[1] is not None:
                 self.customYaml = sys.argv[1]
+            else:
+                self.customYaml = None
         except:
             self.customYaml = None
-            print(
-                "No update values file is provided. Running program default values "
-                f"from {self.ApplicationInputFile}"
-            )
+            if not is_pytest:
+                print(
+                    "No update values file is provided. Running program default values "
+                    f"from {self.ApplicationInputFile}"
+                )
 
         if run_dict is not None:
             self.customYaml = None
@@ -282,9 +293,17 @@ class ConfigureApplicationInputs:
             if result_sub_folder_cfg is not None:
                 result_sub_folder = result_sub_folder_cfg
 
-        result_folder = os.path.join(analysis_root_folder, result_sub_folder)
+        # Properly resolve relative paths from config directory
+        if os.path.isabs(result_sub_folder):
+            result_folder = result_sub_folder
+        else:
+            # Use Path for better path handling with relative paths
+            config_dir = Path(analysis_root_folder)
+            result_path = (config_dir / result_sub_folder).resolve()
+            result_folder = str(result_path)
+        
         if not os.path.exists(result_folder):
-            os.mkdir(result_folder)
+            os.makedirs(result_folder, exist_ok=True)
 
         result_data_folder = os.path.join(result_folder, "Data")
         if not os.path.exists(result_data_folder):
@@ -298,7 +317,13 @@ class ConfigureApplicationInputs:
             "result_folder": result_folder,
             "result_data_folder": result_data_folder,
             "result_plot_folder": result_plot_folder,
+            # Preserve config tracking if available
         }
+        # Add config path tracking if present in cfg_with_fm
+        if cfg_with_fm and "_config_dir_path" in cfg_with_fm:
+            result_folder_dict["_config_dir_path"] = cfg_with_fm["_config_dir_path"]
+        if cfg_with_fm and "_config_file_path" in cfg_with_fm:
+            result_folder_dict["_config_file_path"] = cfg_with_fm["_config_file_path"]
 
         if len(cfg_with_fm) != 0:
             cfg_with_fm["Analysis"] = update_deep_dictionary(
@@ -329,63 +354,16 @@ class ConfigureApplicationInputs:
         """
         Validate inputs for following run methods:
         - module (i.e. python -m digitalmodel input.yml "{'key':'value'}")
+        - module with CLI args (i.e. python -m digitalmodel input.yml --key subkey=value)
         - from python file (i.e. test_*.py)
         - from function call (i.e. engine(inputfile))
 
         """
-
-        # Allow pytest to pass extra arguments without raising error
-        if len(sys.argv) > 1 and inputfile is not None:
-            # If running under pytest, ignore extra sys.argv
-            if not any("pytest" in arg for arg in sys.argv[0:2]):
-                raise (
-                    Exception(
-                        "2 Input files provided via arguments & function. "
-                        "Please provide only 1 file ... FAIL"
-                    )
-                )
-
-        cfg_argv_dict = {}
-        if len(sys.argv) > 2:
-            # Only eval if sys.argv[2] looks like a dict, skip pytest CLI args
-            arg2 = sys.argv[2]
-            if arg2.strip().startswith("{") and arg2.strip().endswith("}"):
-                try:
-                    cfg_argv_dict_eval = eval(arg2)
-                except Exception as e:
-                    print(arg2)
-                    print(f"Error: {e}")
-                    raise (
-                        ValueError(
-                            f"Check dictionary format provided in {arg2} ... FAIL"
-                        )
-                    )
-                if isinstance(cfg_argv_dict_eval, dict):
-                    cfg_argv_dict = cfg_argv_dict_eval
-                else:
-                    print("Dictionary not provided in sys.argv[2]. sys.arg values are:")
-                    print(arg2)
-                    print("System argument values are:")
-                    for item in sys.argv:
-                        print(f"item : {item}")
-                    raise (
-                        ValueError(
-                            f"Check dictionary format provided in {arg2} ... FAIL"
-                        )
-                    )
-        if len(sys.argv) > 1:
-            if not os.path.isfile(sys.argv[1]):
-                raise (
-                    FileNotFoundError(f"Input file {sys.argv[1]} not found ... FAIL")
-                )
-            else:
-                inputfile = sys.argv[1]
-        if len(sys.argv) <= 1:
-            if not os.path.isfile(inputfile):
-                raise (FileNotFoundError(f"Input file {inputfile} not found ... FAIL"))
-            else:
-                sys.argv.append(inputfile)
-        return inputfile, cfg_argv_dict
+        # Import the cli_parser here to use the hybrid parser
+        from assetutilities.common.cli_parser import parse_hybrid_arguments
+        
+        # Use the new hybrid parser that handles both old and new formats
+        return parse_hybrid_arguments(inputfile)
 
     def save_cfg(self, cfg_base):
         output_dir = cfg_base.Analysis["analysis_root_folder"]
