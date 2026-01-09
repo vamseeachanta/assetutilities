@@ -726,3 +726,22 @@ When rules overlap:
 - **YAGNI** - simple solutions over complex ones
 - **Batch all operations** - parallel execution is mandatory
 - **Push back on bad ideas** - honest feedback is required
+
+## Automated Model Selection
+
+**Quick Start:**
+```bash
+./scripts/monitoring/suggest_model.sh <repo-name> "<task description>"
+```
+
+**Example:**
+```bash
+./scripts/monitoring/suggest_model.sh digitalmodel "Implement user authentication"
+```
+
+**Check usage:**
+```bash
+./scripts/monitoring/check_claude_usage.sh today
+```
+
+**Full documentation:** See workspace-hub docs/AI_MODEL_SELECTION_AUTOMATION.md
