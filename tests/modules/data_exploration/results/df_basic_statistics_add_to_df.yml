@@ -39,24 +39,25 @@ default:
   config:
     overwrite:
       output: true
+cov-report=term-missing: true
 Analysis:
   basename: data_exploration
-  analysis_root_folder: K:\github\assetutilities\tests\modules\data_exploration
+  analysis_root_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration
   file_name: df_basic_statistics_add_to_df
   file_name_for_overwrite: df_basic_statistics_add_to_df
-  log_folder: K:\github\assetutilities\tests\modules\data_exploration\logs
-  start_time: 2025-07-13 21:12:22.244417
+  log_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/logs
+  start_time: 2026-01-14 01:25:13.070775
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: K:\github\assetutilities\tests\modules\data_exploration\df_basic_statistics_add_to_df.yml
-  result_folder: K:\github\assetutilities\tests\modules\data_exploration\results
-  result_data_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Data
-  result_plot_folder: K:\github\assetutilities\tests\modules\data_exploration\results\Plot
-  fe_folder: K:\github\assetutilities\tests\modules\data_exploration\results
+  CustomInputFile: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/df_basic_statistics_add_to_df.yml
+  result_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results
+  result_data_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/Data
+  result_plot_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/Plot
+  fe_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results
 data_exploration:
   df_basic_statistics:
     groups:
-    - data: K:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST1.csv
+    - data: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/df_basic_statistics_add_to_df_FST1.csv
       label: FST1
-    - data: K:\github\assetutilities\tests\modules\data_exploration\results\df_basic_statistics_add_to_df_FST2.csv
+    - data: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/df_basic_statistics_add_to_df_FST2.csv
       label: FST2

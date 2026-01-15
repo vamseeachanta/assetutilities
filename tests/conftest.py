@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-"""
-Pytest configuration helpers for AssetUtilities.
-
-This file normalizes import paths so tests can load modules that live under the
-``src`` and ``src/modules`` trees, and skips Windows or OrcaFlex specific
-scenarios when they are executed on incompatible platforms.
-"""
+# ABOUTME: Pytest configuration for AssetUtilities test discovery
+# ABOUTME: Handles import paths and platform-specific test skipping
 
 from __future__ import annotations
 
@@ -32,8 +26,9 @@ def _extend_sys_path() -> None:
     project_root = Path(__file__).resolve().parent.parent
     src_dir = project_root / "src"
     modules_dir = src_dir / "modules"
+    tests_dir = Path(__file__).parent
 
-    candidate_paths: list[Path] = [project_root, src_dir]
+    candidate_paths: list[Path] = [project_root, src_dir, tests_dir]
 
     if modules_dir.exists():
         candidate_paths.append(modules_dir)
@@ -96,26 +91,10 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             item.add_marker(
                 pytest.mark.skip(reason="Test depends on OrcaFlex tooling not available in CI"),
             )
-=======
-# ABOUTME: Pytest configuration file that adds tests directory to Python path
-# ABOUTME: This enables all test files to import test_utils module
-
-import sys
-import pytest
-from pathlib import Path
-
-# Add tests directory to Python path so test_utils can be imported from subdirectories
-tests_dir = Path(__file__).parent
-if str(tests_dir) not in sys.path:
-    sys.path.insert(0, str(tests_dir))
 
 
 @pytest.fixture
 def config_file():
-    """
-    Fixture providing a test configuration file path.
-    Returns the path to a test YAML configuration file.
-    """
-    # Return a generic test config file path that can be overridden by tests
+    """Fixture providing a test configuration file path."""
+    tests_dir = Path(__file__).parent
     return str(tests_dir / "test_config.yml")
->>>>>>> 87c2d3d25a267ba3796cb25f3cf033364ff0a980

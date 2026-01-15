@@ -4,13 +4,14 @@ default:
   config:
     overwrite:
       output: true
-web_scrape_engine: scrapy
+web_scrape_engine: bs4
 settings_master:
   save_csv: true
   url: https://www.data.bsee.gov/Well/APD/Default.aspx
 input:
 - label: well_data_1
   input_box:
+    label: ASPxFormLayout1$ASPxTextBoxAPI
     value: 608164024500
 form_data:
   first_request:
@@ -22,22 +23,18 @@ form_data:
     __EVENTARGUMENT: Click
 scrape_data:
   flag: true
-  source: BSEE
-input_settings:
-  save_csv: true
-  url: https://www.data.bsee.gov/Well/APD/Default.aspx
-  output_dir: src\assetutilities\tests\test_data\web_scraping\results\Data
+  source: loopnet
 cov-report=term-missing: true
 Analysis:
   basename: web_scraping
   analysis_root_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping
-  file_name: web_scraping_scrapy
-  file_name_for_overwrite: web_scraping_scrapy
+  file_name: web_scraping_loopnet
+  file_name_for_overwrite: web_scraping_loopnet
   log_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/logs
-  start_time: 2026-01-14 01:24:59.932140
+  start_time: 2026-01-14 01:24:59.703517
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/web_scraping_scrapy.yml
+  CustomInputFile: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/web_scraping_loopnet.yml
   result_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/results
   result_data_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/results/Data
   result_plot_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/web_scraping/results/Plot
