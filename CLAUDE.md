@@ -7,6 +7,14 @@
 
 ---
 
+## Plan Mode Convention (MANDATORY)
+When using plan mode, save plan files to: `specs/modules/<module>/`
+- `<module>` = relevant module name (e.g., common, yaml, data, visualization)
+- Example: `specs/modules/yaml/config-parser-plan.md`
+- Example: `specs/modules/data/dataframe-utils-plan.md`
+
+---
+
 ## 🚨 CROSS-REVIEW POLICY (MANDATORY)
 
 **ALL work performed by Claude Code or Google Gemini MUST be reviewed by OpenAI Codex.**
