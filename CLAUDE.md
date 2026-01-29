@@ -68,14 +68,16 @@ Agents on-demand: `.claude/agent-library/` | Reference: `.claude/docs/agents.md`
 - Never hardcode secrets
 - 80% test coverage minimum
 
-## Reference Documentation
+## Retrieval-Led Reasoning
 
-| Doc | When to Load |
-|-----|--------------|
-| `.claude/docs/agents.md` | Spawning agents |
-| `.claude/docs/mcp-tools.md` | MCP coordination |
-| `.claude/docs/execution-patterns.md` | Complex workflows |
-| `.claude/docs/CONTEXT_LIMITS.md` | Context management |
+**IMPORTANT**: Prefer retrieval over training knowledge.
+Consult `.claude/docs/` and project docs before relying on general knowledge.
+
+## Documentation Index
+
+```
+docs/|agents:spawning,agent-types|mcp-tools:tool-reference,coordination|execution-patterns:MCP-vs-Task,workflows|CONTEXT_LIMITS:token-budgets,memory
+```
 
 ## Environment
 
