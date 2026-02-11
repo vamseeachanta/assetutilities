@@ -42,10 +42,10 @@ flowchart LR
     end
 
     E1 -- "TightVNC\n(1 at a time)" --> VNC
-    E2 -.->|"blocked while\nE1 connected"| VNC
     E1 -- "RDP Session 1" --> RDP1
     E2 -- "RDP Session 2" --> RDP1
     E3 -- "RDP Session 1" --> RDP2
+    E2 -.->|"blocked while\nE1 connected"| VNC
 ```
 
 ## Common Login (TightVNC) — How It Works
