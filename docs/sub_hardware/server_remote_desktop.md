@@ -33,7 +33,7 @@ flowchart LR
     end
 
     subgraph "Common Login - TightVNC"
-        VNC[ACMA-ANSYS03\nOrcaFlex Workstation]
+        VNC[ACMA-ANSYS05\nOrcaFlex Workstation]
     end
 
     subgraph "Simultaneous Login - RDP"
@@ -57,7 +57,7 @@ flowchart LR
 - Only one software license consumed at a time
 - No privacy — everyone sees the same screen
 
-> Use for: OrcaFlex (single-seat license on ACMA-ANSYS03)
+> Use for: OrcaFlex (single-seat license on ACMA-ANSYS05)
 
 ## Simultaneous Login (Windows Server RDP) — How It Works
 
@@ -94,7 +94,7 @@ A: Technically yes, but not recommended. RDP creates a new session and may not s
 
 | Machine | Access Method | Purpose |
 |---------|---------------|---------|
-| ACMA-ANSYS03 | TightVNC | OrcaFlex (single-seat license) |
+| ACMA-ANSYS05 | TightVNC | OrcaFlex (single-seat license) |
 | ACMA-ANSYS01 | RDP | ANSYS workstation |
 | ACMA-ANSYS02 | RDP | ANSYS workstation |
 | ACMA-ANSYS04 | RDP | ANSYS workstation |
