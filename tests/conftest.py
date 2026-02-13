@@ -25,10 +25,15 @@ def _unique_paths(paths: Iterable[Path]) -> list[Path]:
 def _extend_sys_path() -> None:
     project_root = Path(__file__).resolve().parent.parent
     src_dir = project_root / "src"
+    assetutilities_modules_dir = src_dir / "assetutilities" / "modules"
     modules_dir = src_dir / "modules"
     tests_dir = Path(__file__).parent
 
     candidate_paths: list[Path] = [project_root, src_dir, tests_dir]
+
+    # Add both module directories if they exist
+    if assetutilities_modules_dir.exists():
+        candidate_paths.append(assetutilities_modules_dir)
 
     if modules_dir.exists():
         candidate_paths.append(modules_dir)
