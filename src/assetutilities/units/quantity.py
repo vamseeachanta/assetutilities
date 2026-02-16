@@ -10,6 +10,8 @@ from typing import Any, Optional
 
 import numpy as np
 
+import pint
+
 from assetutilities.units.registry import get_registry
 
 
@@ -143,20 +145,36 @@ class TrackedQuantity:
             return other._quantity
         return other
 
-    def __add__(self, other: Any) -> TrackedQuantity:
+    def _arithmetic_op(
+        self, other: Any, operation: str, op_func: Any
+    ) -> TrackedQuantity:
+        """Execute an arithmetic operation with engineering-friendly error handling."""
+        try:
+            result_qty = op_func(self._quantity, self._other_qty(other))
+        except pint.errors.DimensionalityError as e:
+            from assetutilities.units.exceptions import UnitMismatchError
+
+            other_units = (
+                other.units if isinstance(other, TrackedQuantity) else other
+            )
+            raise UnitMismatchError.from_dimensions(
+                operation=operation,
+                left_unit=self.units,
+                right_unit=other_units,
+                original_error=e,
+            ) from e
         return self._from_pint(
-            self._quantity + self._other_qty(other),
-            "add",
-            self._provenance,
-            self._other_prov(other),
+            result_qty, operation, self._provenance, self._other_prov(other)
+        )
+
+    def __add__(self, other: Any) -> TrackedQuantity:
+        return self._arithmetic_op(
+            other, "add", lambda a, b: a + b
         )
 
     def __sub__(self, other: Any) -> TrackedQuantity:
-        return self._from_pint(
-            self._quantity - self._other_qty(other),
-            "subtract",
-            self._provenance,
-            self._other_prov(other),
+        return self._arithmetic_op(
+            other, "subtract", lambda a, b: a - b
         )
 
     def __mul__(self, other: Any) -> TrackedQuantity:

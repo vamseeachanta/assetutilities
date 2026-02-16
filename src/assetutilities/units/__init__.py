@@ -8,6 +8,8 @@ TrackedQuantity for unit-aware values with full provenance history, and
 CalculationAuditLog for aggregating audit trails across calculations.
 """
 
+from assetutilities.units.exceptions import UnitMismatchError
+from assetutilities.units.policy import UnitSystemPolicy
 from assetutilities.units.quantity import ProvenanceEntry, TrackedQuantity
 from assetutilities.units.registry import get_registry
 from assetutilities.units.traceability import CalculationAuditLog
@@ -17,6 +19,8 @@ __all__ = [
     "TrackedQuantity",
     "ProvenanceEntry",
     "CalculationAuditLog",
+    "UnitMismatchError",
+    "UnitSystemPolicy",
 ]
 
 # Lazy import for computation module (Phase 2)

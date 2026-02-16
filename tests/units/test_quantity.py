@@ -2,8 +2,7 @@
 # ABOUTME: Verifies creation, conversion, arithmetic, and serialization.
 
 import pytest
-import pint
-
+from assetutilities.units.exceptions import UnitMismatchError
 from assetutilities.units.quantity import ProvenanceEntry, TrackedQuantity
 
 
@@ -53,7 +52,7 @@ class TestTrackedQuantityArithmetic:
     def test_add_incompatible_raises(self):
         a = TrackedQuantity(1.0, "Pa", source="a")
         b = TrackedQuantity(1.0, "meter", source="b")
-        with pytest.raises(pint.errors.DimensionalityError):
+        with pytest.raises(UnitMismatchError):
             a + b
 
     def test_subtract_compatible(self):
