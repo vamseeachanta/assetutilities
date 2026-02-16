@@ -4,20 +4,80 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from assetutilities.units.quantity import TrackedQuantity
 from assetutilities.units.traceability import CalculationAuditLog
 
 
+@dataclass
+class FormatTemplate:
+    """Per-quantity-type formatting rules.
+
+    Parameters
+    ----------
+    precision:
+        Number of significant digits or decimal places.
+    notation:
+        ``"fixed"`` for standard decimal, ``"scientific"`` for exponential.
+    suffix:
+        Optional string appended after the unit (e.g. ``" (abs)"``).
+    """
+
+    precision: int = 4
+    notation: str = "fixed"
+    suffix: str = ""
+
+
 class UnitFormatter:
     """Formats TrackedQuantity values for display and exports audit trails."""
+
+    def __init__(self) -> None:
+        self._templates: dict[str, FormatTemplate] = {}
+
+    def register_template(
+        self, quantity_type: str, template: FormatTemplate
+    ) -> None:
+        """Register a format template for a quantity type.
+
+        Parameters
+        ----------
+        quantity_type:
+            Dimension name to match (e.g. ``"pressure"``, ``"length"``).
+        template:
+            Formatting rules to apply for this quantity type.
+        """
+        self._templates[quantity_type] = template
+
+    def _resolve_template(
+        self,
+        tracked_quantity: TrackedQuantity,
+        template: Optional[FormatTemplate],
+    ) -> FormatTemplate:
+        """Resolve which template to use for formatting."""
+        if template is not None:
+            return template
+
+        dimensionality = str(tracked_quantity._quantity.dimensionality)
+        for qty_type, registered in self._templates.items():
+            if qty_type in dimensionality:
+                return registered
+
+        # Check unit string for registered quantity types
+        unit_str = str(tracked_quantity.units)
+        for qty_type, registered in self._templates.items():
+            if qty_type in unit_str:
+                return registered
+
+        return FormatTemplate()
 
     def format_quantity(
         self,
         tracked_quantity: TrackedQuantity,
         target_unit: Optional[str] = None,
         precision: int = 4,
+        template: Optional[FormatTemplate] = None,
     ) -> str:
         """Format a TrackedQuantity as a human-readable string.
 
@@ -28,7 +88,9 @@ class UnitFormatter:
         target_unit:
             If provided, convert to this unit before formatting.
         precision:
-            Number of decimal places (default 4).
+            Number of decimal places (default 4). Overridden by *template*.
+        template:
+            If provided, uses the template's precision, notation, and suffix.
 
         Returns
         -------
@@ -37,9 +99,16 @@ class UnitFormatter:
         if target_unit is not None:
             tracked_quantity = tracked_quantity.to(target_unit)
 
+        tmpl = self._resolve_template(tracked_quantity, template)
         magnitude = tracked_quantity.magnitude
         units = tracked_quantity.units
-        return f"{magnitude:.{precision}f} {units}"
+
+        if tmpl.notation == "scientific":
+            fmt_spec = f".{tmpl.precision}e"
+        else:
+            fmt_spec = f".{tmpl.precision}f"
+
+        return f"{magnitude:{fmt_spec}} {units}{tmpl.suffix}"
 
     def format_with_provenance(
         self,

@@ -61,6 +61,41 @@ class CalculationAuditLog:
         """Serialize the full audit log to a JSON string."""
         return json.dumps(self.to_dict(), indent=2)
 
+    @property
+    def input_names(self) -> list[str]:
+        """List of recorded input names."""
+        return list(self._inputs.keys())
+
+    @property
+    def output_names(self) -> list[str]:
+        """List of recorded output names."""
+        return list(self._outputs.keys())
+
+    def filter_inputs(self, unit: str) -> dict[str, TrackedQuantity]:
+        """Return inputs whose unit string matches *unit*."""
+        return {
+            name: tq
+            for name, tq in self._inputs.items()
+            if str(tq.units) == str(tq._quantity.units.__class__(unit))
+        }
+
+    def filter_outputs(self, unit: str) -> dict[str, TrackedQuantity]:
+        """Return outputs whose unit string matches *unit*."""
+        return {
+            name: tq
+            for name, tq in self._outputs.items()
+            if str(tq.units) == str(tq._quantity.units.__class__(unit))
+        }
+
+    def to_csv(self) -> str:
+        """Export inputs and outputs as a CSV string."""
+        lines = ["role,name,magnitude,unit"]
+        for name, tq in self._inputs.items():
+            lines.append(f"input,{name},{tq.magnitude},{tq.units}")
+        for name, tq in self._outputs.items():
+            lines.append(f"output,{name},{tq.magnitude},{tq.units}")
+        return "\n".join(lines)
+
     def summary(self) -> str:
         """Return a human-readable summary of the audit log."""
         lines = ["Calculation Audit Log"]
