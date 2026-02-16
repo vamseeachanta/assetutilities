@@ -82,6 +82,51 @@ class TrackedQuantity:
         """Full provenance history."""
         return list(self._provenance)
 
+    @property
+    def dimensions(self) -> str:
+        """Human-readable dimensionality string (e.g. '[length]', '[mass] / [time] ** 2')."""
+        return str(self._quantity.dimensionality)
+
+    def is_compatible(self, other: Any) -> bool:
+        """Check if this quantity is dimensionally compatible with *other*.
+
+        *other* can be a TrackedQuantity or a unit string (e.g. ``"ft"``).
+        """
+        if isinstance(other, str):
+            ureg = get_registry()
+            other_qty = ureg.Quantity(1, other)
+        elif isinstance(other, TrackedQuantity):
+            other_qty = other._quantity
+        else:
+            other_qty = other
+        return self._quantity.is_compatible_with(other_qty)
+
+    def check_dimensions(self, expected: str) -> None:
+        """Assert dimensional compatibility; raise ``ValueError`` on mismatch.
+
+        *expected* can be a dimensionality string (e.g. ``"[length]"``) or a
+        unit string (e.g. ``"ft"``).
+        """
+        ureg = get_registry()
+        # Try as a dimensionality string first (contains '[')
+        if "[" in expected:
+            actual = str(self._quantity.dimensionality)
+            if actual != expected:
+                raise ValueError(
+                    f"Dimension mismatch: quantity has {actual}, "
+                    f"expected {expected}"
+                )
+        else:
+            # Treat as a unit string
+            ref_qty = ureg.Quantity(1, expected)
+            if not self._quantity.is_compatible_with(ref_qty):
+                actual = str(self._quantity.dimensionality)
+                expected_dim = str(ref_qty.dimensionality)
+                raise ValueError(
+                    f"Dimension mismatch: quantity has {actual}, "
+                    f"expected {expected_dim} (unit '{expected}')"
+                )
+
     def to(self, unit: str) -> TrackedQuantity:
         """Convert to a different unit and record the conversion."""
         from_unit = str(self._quantity.units)
