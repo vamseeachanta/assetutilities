@@ -48,7 +48,7 @@ claude-flow verify dashboard --export
 
 Default threshold: **0.95** (95% accuracy required)
 
-Configure in `.claude-flow/config.json`:
+Configure in `.claude/settings.json`:
 ```json
 {
   "verification": {

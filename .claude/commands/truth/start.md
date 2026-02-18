@@ -119,7 +119,7 @@ claude-flow truth --format json | \
 
 ## Configuration
 
-Set truth display preferences in `.claude-flow/config.json`:
+Set truth display preferences in `.claude/settings.json`:
 
 ```json
 {
@@ -130,7 +130,7 @@ Set truth display preferences in `.claude-flow/config.json`:
     "criticalThreshold": 0.75,
     "autoExport": {
       "enabled": true,
-      "path": ".claude-flow/metrics/truth-daily.json"
+      "path": ".claude/metrics/truth-daily.json"
     }
   }
 }
