@@ -1,9 +1,8 @@
 # Claude Code Configuration - Workspace Hub
 
-> **Configuration Structure**: This file contains three complementary rule sets that work together
+> **Configuration Structure**: This file contains two complementary rule sets that work together
 > - **Part 1**: Core software engineering principles and collaboration guidelines
 > - **Part 2**: AI orchestration, SPARC methodology, and agent coordination
-> - **Part 3**: Project-specific context (Agent OS, product documentation)
 
 ---
 
@@ -254,7 +253,7 @@ YOU MUST follow this debugging framework for ANY technical issue:
 - ✅ **Automatically selects the best AI agent** for each task type
 - ✅ **Runs gate-pass reviews** at critical SPARC checkpoints
 - ✅ **Updates agent capabilities daily** to stay current
-- ✅ **Integrates factory.ai, claude-flow, spec-kit, and agent-os**
+- ✅ **Integrates factory.ai, claude-flow, and spec-kit**
 
 ### Quick Start
 
@@ -568,43 +567,6 @@ Message 4: Write "file.js"
 
 ---
 
-# PART 3: PROJECT-SPECIFIC CONTEXT (AGENT OS)
-
-## Agent OS Documentation
-
-### Product Context
-- **Mission & Vision:** @.agent-os/product/mission.md
-- **Technical Architecture:** @.agent-os/product/tech-stack.md
-- **Development Roadmap:** @.agent-os/product/roadmap.md
-- **Decision History:** @.agent-os/product/decisions.md
-
-### Development Standards
-- **Code Style:** @~/.agent-os/standards/code-style.md
-- **Best Practices:** @~/.agent-os/standards/best-practices.md
-
-### Project Management
-- **Active Specs:** @.agent-os/specs/
-- **Spec Planning:** Use `@~/.agent-os/instructions/create-spec.md`
-- **Tasks Execution:** Use `@~/.agent-os/instructions/execute-tasks.md`
-
-## Workflow Instructions
-
-When asked to work on this codebase:
-
-1. **First**, check @.agent-os/product/roadmap.md for current priorities
-2. **Then**, follow the appropriate instruction file:
-   - For new features: @~/.agent-os/instructions/create-spec.md
-   - For tasks execution: @~/.agent-os/instructions/execute-tasks.md
-3. **Always**, adhere to the standards in the files listed above
-
-## Important Notes
-
-- Product-specific files in `.agent-os/product/` override any global standards
-- User's specific instructions override (or amend) instructions found in `.agent-os/specs/...`
-- Always adhere to established patterns, code style, and best practices documented above
-
----
-
 # RULE INTEGRATION NOTES
 
 ## How These Parts Work Together
@@ -621,11 +583,6 @@ When asked to work on this codebase:
 - SPARC methodology for feature development
 - File organization and reporting standards
 
-**Part 3 (Project Context)** defines WHAT to build:
-- Product mission and technical architecture
-- Development roadmap and priorities
-- Project-specific standards and workflows
-
 ## Rule Precedence
 
 When rules overlap:
@@ -633,7 +590,6 @@ When rules overlap:
 2. **TDD Requirement**: MANDATORY from Part 1, applied during Part 2's SPARC Refinement phase
 3. **Code Quality**: Part 1 standards for naming, comments, structure
 4. **Orchestration**: Part 2 patterns for agent coordination and file organization
-5. **Project-Specific**: Part 3 standards override defaults when explicitly defined
 
 ## Remember
 
