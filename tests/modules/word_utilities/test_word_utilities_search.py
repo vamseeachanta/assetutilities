@@ -31,6 +31,3 @@ def test_word_utilties_search_string():
         sys.argv.pop()
 
     run_word_utilties_search_string(input_file, expected_result)
-
-
-test_word_utilties_search_string()

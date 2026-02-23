@@ -11,6 +11,9 @@ import yaml
 from pathlib import Path
 from loguru import logger
 
+import pytest
+pytest.importorskip("xlsxwriter")
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 

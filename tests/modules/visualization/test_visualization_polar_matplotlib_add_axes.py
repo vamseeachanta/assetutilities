@@ -18,6 +18,3 @@ def test_visualization_polar():
     input_file = "visualization_polar_matplotlib_add_axes.yml"
     result = run_visualization_polar(input_file)
     assert result is not None
-
-
-test_visualization_polar()

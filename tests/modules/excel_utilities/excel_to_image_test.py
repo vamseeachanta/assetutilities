@@ -1,8 +1,12 @@
 # Standard library imports
 import os
+import sys
+
+import pytest
+
+pytest.importorskip("xlsxwriter")
 
 from test_utils import get_test_file_path
-import sys
 
 # Reader imports
 from assetutilities.engine import engine
@@ -43,6 +47,3 @@ def test_run_process():
         sys.argv.pop()
 
     run_process(input_file, expected_result={})
-
-
-test_run_process()

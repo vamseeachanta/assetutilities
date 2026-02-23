@@ -40,6 +40,3 @@ def test_run_process():
         sys.argv.pop()
 
     run_process(input_file, expected_result={})
-
-
-test_run_process()

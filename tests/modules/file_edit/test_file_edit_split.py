@@ -41,6 +41,3 @@ def test_file_run():
         sys.argv.pop()
 
     run_file(input_file, expected_result)
-
-
-test_file_run()

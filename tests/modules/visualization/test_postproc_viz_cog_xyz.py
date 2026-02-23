@@ -20,6 +20,3 @@ def test_visualization_polar():
     assert result is not None
 
     run_visualization_polar(input_file, expected_result)
-
-
-test_visualization_polar()
