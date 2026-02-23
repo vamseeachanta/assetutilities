@@ -8,8 +8,8 @@ type:
 data:
   type: file_management
   groups:
-  - file_name: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_1.csv
-  - file_name: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_2.csv
+  - file_name: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_1.csv
+  - file_name: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_2.csv
 master_settings:
   groups:
     columns:
@@ -35,22 +35,22 @@ file_management:
       not_contains: []
   input_files:
     csv:
-    - /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_1.csv
-    - /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_2.csv
-cov-report=term-missing: true
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_1.csv
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_2.csv
+no-header: -q
 Analysis:
   basename: data_exploration
-  analysis_root_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration
   file_name: df_statistics_file_management
   file_name_for_overwrite: df_statistics_file_management
-  log_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/logs
-  start_time: 2026-01-14 01:24:58.826792
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/logs
+  start_time: 2026-02-13 15:20:40.499235
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/df_statistics_file_management.yml
-  result_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results
-  result_data_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/Data
-  result_plot_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results/Plot
-  fe_folder: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results
-  file_management_input_directory: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/csv
-  file_management_output_directory: /mnt/github/workspace-hub/assetutilities/tests/modules/data_exploration/results
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/df_statistics_file_management.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/results
+  file_management_input_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv
+  file_management_output_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/results

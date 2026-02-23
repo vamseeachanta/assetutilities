@@ -5,9 +5,23 @@ default:
   config:
     overwrite:
       output: true
+parallel_processing:
+  enabled: true
+  max_workers: 30
+  timeout_per_file: 3600
+  save_error_reports: false
+  progress_reporting: true
+analysis:
+  flag: true
+  type: zip_by_stem
+  by: stem
+  input_directory: ~
+  filename:
+    extension: []
 analysis_settings:
   flag: true
-  by: ~
+  type: zip_by_stem
+  by: stem
 file_management:
   flag: true
   input_directory: ~
@@ -27,19 +41,28 @@ zip_utilities:
   technique: zip_files_to_df
   input_directory: tests\modules\zip_utilities\zip
   column_names: []
+override-ini=addopts=: true
+ignore=tests/modules/excel_utilities: true
+ignore=tests/modules/file_edit: true
+ignore=tests/modules/file_management: true
+ignore=tests/modules/visualization: true
+ignore=tests/modules/word_utilities: true
+ignore=tests/modules/yaml_utlities: true
+ignore=tests/modules/agent_os/enhanced_create_specs/unit: true
+tb=short: -q
 Analysis:
   basename: zip_utilities
-  analysis_root_folder: K:\github\assetutilities\tests\modules\zip_utilities
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities
   file_name: test_zip_files_to_df
   file_name_for_overwrite: test_zip_files_to_df
-  log_folder: K:\github\assetutilities\tests\modules\zip_utilities\logs
-  start_time: 2025-07-14 22:10:31.268138
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/logs
+  start_time: 2026-02-13 15:16:32.959667
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: test_zip_files_to_df.yml
-  result_folder: K:\github\assetutilities\tests\modules\zip_utilities\results
-  result_data_folder: K:\github\assetutilities\tests\modules\zip_utilities\results\Data
-  result_plot_folder: K:\github\assetutilities\tests\modules\zip_utilities\results\Plot
-  fe_folder: K:\github\assetutilities\tests\modules\zip_utilities\results
-  file_management_input_directory: K:\github\assetutilities\tests\modules\zip_utilities
-  file_management_output_directory: K:\github\assetutilities\tests\modules\zip_utilities\results
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/test_zip_files_to_df.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results
+  file_management_input_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities
+  file_management_output_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results

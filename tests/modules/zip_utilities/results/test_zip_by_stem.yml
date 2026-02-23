@@ -11,9 +11,18 @@ parallel_processing:
   timeout_per_file: 3600
   save_error_reports: false
   progress_reporting: true
+analysis:
+  flag: true
+  type: zip_by_stem
+  by: stem
+  input_directory: csv
+  filename:
+    extension:
+    - csv
 analysis_settings:
   flag: true
-  by: ~
+  type: zip_by_stem
+  by: stem
 file_management:
   flag: true
   input_directory: yml
@@ -27,32 +36,57 @@ file_management:
       not_contains: []
   input_files:
     yml:
-    - yml\FST2F_FST1F_LWL_000deg.yml
-    - yml\FST2L_FST1L_HWL_345deg.yml
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/yml/FST2F_FST1F_LWL_000deg.yml
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/yml/FST2L_FST1L_HWL_345deg.yml
 meta:
   library: assetutlities
   basename: zip_utilities
-analysis:
-  flag: true
-  type: zip_by_stem
-  by: stem
-  input_directory: csv
-  filename:
-    extension:
-    - csv
+override-ini=addopts=: true
+ignore=tests/modules/excel_utilities: true
+ignore=tests/modules/file_edit: true
+ignore=tests/modules/file_management: true
+ignore=tests/modules/visualization: true
+ignore=tests/modules/word_utilities: true
+ignore=tests/modules/yaml_utlities: true
+ignore=tests/modules/agent_os/enhanced_create_specs/unit: true
+tb=short: -q
 Analysis:
   basename: zip_utilities
-  analysis_root_folder: D:\github\assetutilities\tests\modules\zip_utilities
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities
   file_name: test_zip_by_stem
   file_name_for_overwrite: test_zip_by_stem
-  log_folder: D:\github\assetutilities\tests\modules\zip_utilities\logs
-  start_time: 2025-08-05 16:25:57.040094
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/logs
+  start_time: 2026-02-13 15:16:32.399233
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: test_zip_by_stem.yml
-  result_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip
-  result_data_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip\Data
-  result_plot_folder: D:\github\assetutilities\tests\modules\zip_utilities\zip\Plot
-  fe_folder: D:\github\assetutilities\tests\modules\zip_utilities\results
-  file_management_input_directory: yml
-  file_management_output_directory: zip
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/test_zip_by_stem.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/results
+  file_management_input_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/yml
+  file_management_output_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip
+zip_utilities:
+- stem: FST2F_FST1F_LWL_000deg
+  zip_file_path: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip/FST2F_FST1F_LWL_000deg.zip
+  files:
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Jacket1.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Jacket2.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Jacket3.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Jacket4.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut1.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut2.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut3.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut4.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut5.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut6.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut7.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2F_FST1F_LWL_000deg_Strut8.csv
+  error: ~
+- stem: FST2L_FST1L_HWL_345deg
+  zip_file_path: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/zip/FST2L_FST1L_HWL_345deg.zip
+  files:
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2L_FST1L_HWL_345deg_Jacket1.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2L_FST1L_HWL_345deg_Jacket2.csv
+  - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/csv/FST2L_FST1L_HWL_345deg_Jacket3.csv
+  error: ~
