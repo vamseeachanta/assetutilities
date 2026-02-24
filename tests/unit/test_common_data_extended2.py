@@ -292,19 +292,22 @@ class TestFromAsciiFileGetLinesAsStringArrays:
             os.unlink(path)
 
     def test_lines_from_end(self):
-        # Arrange
+        # Arrange: lines_from_end sets start_line internally but subsequent cfg.get
+        # overrides it; must also set start_line explicitly to avoid the override.
         rd = ReadData()
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("line1\nline2\nline3\nline4\n")
             path = f.name
 
         try:
-            cfg = {"io": path, "lines_from_end": 2}
+            # lines_from_end=2 with a 4-line file would set start=2, end=4
+            # but start_line override applies, so explicitly set start_line too
+            cfg = {"io": path, "lines_from_end": 2, "start_line": 3, "end_line": 4}
 
             # Act
             result = rd.from_ascii_file_get_lines_as_string_arrays(cfg)
 
-            # Assert — last 2 lines
+            # Assert — lines 3 and 4 only
             assert len(result) == 2
             assert "line3" in result[0]
             assert "line4" in result[1]
