@@ -72,13 +72,19 @@ data:
         filename: results\dm_fsts_lngc_fsts_l015_hwl_125km3_l100_sb_lngc_fenders_dynamic.csv
       target:
         sheet_name: fenders_dyn
+timeout=20: -q
+no-header: true
+ignore=tests/modules/tests_wip: true
+ignore=tests/modules/download_data: true
+ignore=tests/modules/web_scraping: true
+ignore=tests/modules/pipeline_ci_cd: true
 Analysis:
   basename: yaml_utilities
   analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities
   file_name: yml_single_variable
   file_name_for_overwrite: yml_single_variable
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/logs
-  start_time: 2026-02-24 08:10:30.387711
+  start_time: 2026-02-24 10:50:40.675842
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yml_single_variable.yml

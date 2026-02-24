@@ -9,6 +9,13 @@ default:
   config:
     overwrite:
       output: true
+timeout=20: -q
+no-header: true
+ignore=tests/modules/tests_wip: true
+ignore=tests/modules/download_data: true
+ignore=tests/modules/web_scraping: true
+ignore=tests/modules/pipeline_ci_cd: true
+cov=src/assetutilities: true
 cov-report=term-missing: true
 Analysis:
   basename: csv_utilities
@@ -16,7 +23,7 @@ Analysis:
   file_name: csv_with_latin1
   file_name_for_overwrite: csv_with_latin1
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/csv_utilities/logs
-  start_time: 2026-02-24 08:07:24.598440
+  start_time: 2026-02-24 10:49:22.222960
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/csv_utilities/csv_with_latin1.yml

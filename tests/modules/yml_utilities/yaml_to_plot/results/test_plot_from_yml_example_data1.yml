@@ -214,13 +214,20 @@ data:
       - 1.2248
       - 1.7912
       - 2.6295
+timeout=20: -q
+no-header: true
+ignore=tests/modules/tests_wip: true
+ignore=tests/modules/download_data: true
+ignore=tests/modules/web_scraping: true
+ignore=tests/modules/pipeline_ci_cd: true
+cov=src/assetutilities: true
 Analysis:
   basename: yaml_utilities
   analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_to_plot
   file_name: test_plot_from_yml_example_data1
   file_name_for_overwrite: test_plot_from_yml_example_data1
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_to_plot/logs
-  start_time: 2026-02-24 08:09:57.912965
+  start_time: 2026-02-24 10:50:25.175871
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_to_plot/test_plot_from_yml_example_data1.yml

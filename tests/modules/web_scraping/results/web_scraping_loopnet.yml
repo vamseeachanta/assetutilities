@@ -24,6 +24,13 @@ form_data:
 scrape_data:
   flag: true
   source: loopnet
+timeout=20: -q
+no-header: true
+ignore=tests/modules/tests_wip: true
+ignore=tests/modules/download_data: true
+ignore=tests/modules/web_scraping: true
+ignore=tests/modules/pipeline_ci_cd: true
+cov=src/assetutilities: true
 cov-report=term-missing: true
 Analysis:
   basename: web_scraping
@@ -31,7 +38,7 @@ Analysis:
   file_name: web_scraping_loopnet
   file_name_for_overwrite: web_scraping_loopnet
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/web_scraping/logs
-  start_time: 2026-02-24 08:09:28.664426
+  start_time: 2026-02-24 10:50:13.112566
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/web_scraping/web_scraping_loopnet.yml

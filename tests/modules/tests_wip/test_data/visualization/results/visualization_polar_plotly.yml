@@ -38,6 +38,13 @@ settings:
   alpha:
   - 1.0
   traces: 1
+timeout=20: -q
+no-header: true
+ignore=tests/modules/tests_wip: true
+ignore=tests/modules/download_data: true
+ignore=tests/modules/web_scraping: true
+ignore=tests/modules/pipeline_ci_cd: true
+cov=src/assetutilities: true
 cov-report=term-missing: true
 Analysis:
   basename: visualization
@@ -45,7 +52,7 @@ Analysis:
   file_name: visualization_polar_plotly
   file_name_for_overwrite: visualization_polar_plotly
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/logs
-  start_time: 2026-02-24 08:08:55.154738
+  start_time: 2026-02-24 10:49:56.675758
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/visualization_polar_plotly.yml

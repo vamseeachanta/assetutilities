@@ -42,9 +42,13 @@ RHO_STEEL = 7850.0    # kg/m³ — density
 ALPHA_STEEL = 11.7e-6 # /°C  — coefficient of thermal expansion (EN 1993)
 G_STEEL = E_STEEL / (2.0 * (1.0 + NU_STEEL))  # Pa — shear modulus
 
-# Yield strengths by grade (minimum specified)
+# Yield strengths by grade (minimum specified, API 5L / ISO 3183 PSL2)
+# For full immutable dataclass records see assetutilities.constants.materials
 FY_A36 = 250e6   # Pa — ASTM A36 structural steel
+FY_A572_GR50 = 345e6  # Pa — ASTM A572 Grade 50 structural steel
+FY_X42 = 290e6   # Pa — API 5L Grade X42 (42 ksi line pipe)
 FY_X52 = 358e6   # Pa — API 5L Grade X52 (52 ksi line pipe)
+FY_X60 = 413e6   # Pa — API 5L Grade X60 (60 ksi line pipe)
 FY_X65 = 448e6   # Pa — API 5L Grade X65 (65 ksi line pipe)
 FY_X70 = 483e6   # Pa — API 5L Grade X70 (70 ksi line pipe)
 FY_X80 = 552e6   # Pa — API 5L Grade X80 (80 ksi line pipe)
