@@ -1,0 +1,54 @@
+basename: visualization
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+  theta:
+  - - 0.6108652381980153
+    - 1.2217304763960306
+    - 2.0943951023931953
+    - 2.705260340591211
+    - 3.5779249665883754
+    - 4.1887902047863905
+  type: input
+settings:
+  type: polar_scatter
+  plt_engine: plotly
+  label: Allowable Wave Height
+  multiple: false
+  file_name: allowable_wave_height
+  plt_save_extensions:
+  - .html
+  color:
+  - '#17becf'
+  linestyle:
+  - '-'
+  markerprops:
+  - marker: o
+    markersize: 2
+  alpha:
+  - 1.0
+  traces: 1
+Analysis:
+  basename: visualization
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization
+  file_name: visualization_polar_plotly
+  file_name_for_overwrite: visualization_polar_plotly
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/logs
+  start_time: 2026-02-23 22:51:10.876990
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/visualization_polar_plotly.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/tests_wip/test_data/visualization/results

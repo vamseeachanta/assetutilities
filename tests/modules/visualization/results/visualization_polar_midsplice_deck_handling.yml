@@ -1,0 +1,123 @@
+basename: visualization
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - - 2
+    - 1.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 1.5
+    - 2
+  - - 2
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 1.5
+    - 2
+  theta:
+  - - 0.0
+    - 0.5235987755982988
+    - 1.0471975511965976
+    - 1.5707963267948966
+    - 2.0943951023931953
+    - 2.6179938779914944
+    - 3.141592653589793
+    - 3.6651914291880923
+    - 4.1887902047863905
+    - 4.71238898038469
+    - 5.235987755982989
+    - 5.759586531581287
+    - 6.283185307179586
+  type: input
+  legend:
+  - vessel inline with product route
+  - vessel rotation wrt. product route
+  color:
+  - blue
+  - green
+  alpha:
+  - 1
+  - 0.75
+  linestyle:
+  - --
+  - '-'
+  - '-'
+  - ':'
+settings:
+  type: polar
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: false
+  file_name: ms_deckhandling_allowable_wave_height
+  plt_save_extensions:
+  - .png
+  title: Allowable Significant Wave Height (Hs); Midline Splice, Deck Handling
+  set_rmax: 3
+  set_rticks:
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  set_thetagrids:
+  - 15
+  - 45
+  - 75
+  - 105
+  - 135
+  - 165
+  - 195
+  - 225
+  - 255
+  - 285
+  - 315
+  - 345
+  set_rlabel_position: ~
+  theta_data: degrees
+  set_theta_zero_location: W
+  color:
+  - '#17becf'
+  - '#bcbd22'
+  linestyle:
+  - '-'
+  - '-'
+  markerprops:
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  alpha:
+  - 1.0
+  - 1.0
+  traces: 2
+Analysis:
+  basename: visualization
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization
+  file_name: visualization_polar_midsplice_deck_handling
+  file_name_for_overwrite: visualization_polar_midsplice_deck_handling
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/logs
+  start_time: 2026-02-23 22:51:14.208857
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/visualization_polar_midsplice_deck_handling.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results
