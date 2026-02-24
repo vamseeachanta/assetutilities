@@ -267,15 +267,16 @@ class VisualizationCommon:
             if not file_is_valid:
                 logging.error(
                     FileNotFoundError(
-                        f"Invalid file name/path: {group_cfg['file_name']}"
+                        f"Invalid file name/path: {img_path}"
                     )
                 )
                 logging.error(
-                    f"Please check the file name/path in the input file: {group_cfg['file_name']}"
+                    f"Please check the file name/path in the input file: {img_path}"
                 )
                 logging.error(
                     f"Program {Fore.RED}continues to run ...{Style.RESET_ALL}"
                 )
+                return
 
             transparency = plt_settings["add_image"]["transperancy"]
             r = plt_settings["add_image"]["r"]
@@ -317,15 +318,16 @@ class VisualizationCommon:
             if not file_is_valid:
                 logging.error(
                     FileNotFoundError(
-                        f"Invalid file name/path: {group_cfg['file_name']}"
+                        f"Invalid file name/path: {img_path}"
                     )
                 )
                 logging.error(
-                    f"Please check the file name/path in the input file: {group_cfg['file_name']}"
+                    f"Please check the file name/path in the input file: {img_path}"
                 )
                 logging.error(
                     f"Program {Fore.RED}continues to run ...{Style.RESET_ALL}"
                 )
+                return plt_properties
 
             transparency = plt_settings["add_image"]["transperancy"]
             x = plt_settings["add_image"]["x"]
@@ -391,7 +393,11 @@ class VisualizationCommon:
             theta_count_array = []
             r_count_array = []
             plot_count_array = []
-            for group_cfg in cfg["data"]["groups"]:
+            if "groups" in cfg["data"]:
+                groups = cfg["data"]["groups"]
+            else:
+                groups = [{"theta": cfg["data"]["theta"], "r": cfg["data"]["r"]}]
+            for group_cfg in groups:
                 if "columns" in group_cfg:
                     theta_count = len(group_cfg["columns"]["theta"])
                     r_count = len(group_cfg["columns"]["r"])

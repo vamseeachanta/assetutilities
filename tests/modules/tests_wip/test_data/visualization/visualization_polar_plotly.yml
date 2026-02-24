@@ -1,0 +1,24 @@
+basename: visualization
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: polar_scatter
+  plt_engine: plotly
+  label: Allowable Wave Height
+  multiple: False
+  file_name: allowable_wave_height
+  plt_save_extensions: ['.html']
+
+data:
+  type: input
+  r : 
+    - [0.5,1,2,2.5,3,4]
+  theta : 
+    - [35,70,120,155,205,240]
+
+

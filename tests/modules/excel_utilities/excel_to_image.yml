@@ -7,6 +7,7 @@ default:
       output: True
 
 task: excel_to_image
+use_matplotlib_fallback: true
 
 files:
   - io: excel_to_image.xlsx

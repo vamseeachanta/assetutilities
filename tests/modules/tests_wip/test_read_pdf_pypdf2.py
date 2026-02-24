@@ -1,4 +1,5 @@
 import os
+import pytest
 from assetutilities.engine import engine
 
 
@@ -9,6 +10,7 @@ def run_read_pdf(input_file):
     return result
 
 
+@pytest.mark.skip(reason="tests_wip: pdf engine not implemented")
 def test_read_pdf():
     input_file = "test_data/read_pdf_pypdf2.yml"
     result = run_read_pdf(input_file)

@@ -27,7 +27,7 @@ settings:
     prop: { family: Arial, size: 8 }
   add_image:
     flag: True
-    image_path: src\assetutilities\tests\test_data\visualization\test_data\plot.png
+    image_path: tests/modules/visualization/test_data/plot.png
     transperancy: 0.3
     x: { min: 50, max: 300 }
     y: { min: -0.25, max: 0.25 }
@@ -47,9 +47,9 @@ data:
   type: csv
   groups:
     - label: FST1
-      file_name: src/assetutilities/tests/test_data/visualization/csv/test_1.csv
+      file_name: tests/modules/visualization/csv/test_1.csv
     - label: FST2
-      file_name: src/assetutilities/tests/test_data/visualization/csv/test_2.csv
+      file_name: tests/modules/visualization/csv/test_2.csv
 
   color: [blue, green]
   alpha: [1, 0.75]

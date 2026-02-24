@@ -1,6 +1,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+import pytest
+pytest.importorskip("xlsxwriter")
 from assetutilities.engine import engine
 from test_utils import get_test_file_path
 

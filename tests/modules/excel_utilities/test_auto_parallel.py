@@ -12,6 +12,7 @@ from loguru import logger
 
 import pytest
 pytest.importorskip("xlsxwriter")
+pytest.importorskip("excel2img")
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))

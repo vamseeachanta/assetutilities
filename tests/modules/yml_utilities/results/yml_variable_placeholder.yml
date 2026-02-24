@@ -19,23 +19,28 @@ file_management:
 meta:
   basename: yaml_utilities
   library: assetutilities
+define: placeholder
 test_variables:
   flag: true
   method: placeholder
+data:
+  type: input
+  groups:
+  - label: placeholder
 placeholder_tests:
   method: '{{ test_variables.method }}'
   library: '{{ meta.library }}'
 Analysis:
   basename: yaml_utilities
-  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities
   file_name: yml_variable_placeholder
   file_name_for_overwrite: yml_variable_placeholder
-  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/logs
-  start_time: 2026-02-13 15:18:09.566563
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/logs
+  start_time: 2026-02-23 22:51:33.201489
   cfg_array_file_names: ~
   DefaultInputFile: ~
-  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/yml_variable_placeholder.yml
-  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/results
-  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/results/Data
-  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/results/Plot
-  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yaml_utlities/results
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yml_variable_placeholder.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/results

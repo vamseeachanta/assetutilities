@@ -41,22 +41,13 @@ file_management:
 meta:
   library: assetutlities
   basename: zip_utilities
-override-ini=addopts=: true
-ignore=tests/modules/excel_utilities: true
-ignore=tests/modules/file_edit: true
-ignore=tests/modules/file_management: true
-ignore=tests/modules/visualization: true
-ignore=tests/modules/word_utilities: true
-ignore=tests/modules/yaml_utlities: true
-ignore=tests/modules/agent_os/enhanced_create_specs/unit: true
-tb=short: -q
 Analysis:
   basename: zip_utilities
   analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities
   file_name: test_zip_by_stem
   file_name_for_overwrite: test_zip_by_stem
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/logs
-  start_time: 2026-02-13 15:16:32.399233
+  start_time: 2026-02-23 22:51:33.253298
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/zip_utilities/test_zip_by_stem.yml

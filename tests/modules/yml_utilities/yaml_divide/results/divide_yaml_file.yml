@@ -1,0 +1,32 @@
+library: assetutlities
+basename: yaml_utilities
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: false
+  files:
+    files_in_current_directory:
+      flag: false
+      auto_read: true
+      directory: yml
+      file_extensions:
+      - yml
+      filename_pattern: ~
+    output_directory: ~
+Analysis:
+  basename: yaml_utilities
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide
+  file_name: divide_yaml_file
+  file_name_for_overwrite: divide_yaml_file
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/logs
+  start_time: 2026-02-23 22:51:31.735887
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/divide_yaml_file.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/yml_utilities/yaml_divide/results

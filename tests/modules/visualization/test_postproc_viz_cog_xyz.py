@@ -18,5 +18,3 @@ def test_visualization_polar():
     input_file = "postproc_viz_cog_xyz.yml"
     result = run_visualization_polar(input_file)
     assert result is not None
-
-    run_visualization_polar(input_file, expected_result)

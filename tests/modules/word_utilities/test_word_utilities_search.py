@@ -18,16 +18,3 @@ def test_word_utilties_search_string():
     assert result is not None
 
 
-def test_word_utilties_search_string():
-    # input_file = 'src/assetutlities/tests/test_data/word_utilities/word_utilities.yml'
-    input_file = "word_utilities.yml"
-
-    # pytest_output_file = '../test_data/6d_buoy/buoy_6d_circular_px_0_pytest.yml'
-    # pytest_output_file = get_valid_pytest_output_file(pytest_output_file)
-    expected_result = {}
-    # expected_result = ymlInput(pytest_output_file, updateYml=None)
-
-    if len(sys.argv) > 1:
-        sys.argv.pop()
-
-    run_word_utilties_search_string(input_file, expected_result)

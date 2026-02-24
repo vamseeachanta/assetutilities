@@ -63,8 +63,16 @@ split_settings:
 
 file_management:
   flag: True
+  input_directory: NULL
   update_unfinished:
     flag: False
+
+  filename:
+    extension: [dat]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []
 
   files:
     files_in_current_directory:

@@ -2,6 +2,8 @@ meta:
   basename: yaml_utilities
   library: assetutilities
 
+define: placeholder
+
 test_variables:
   flag: True
   method: placeholder
@@ -14,6 +16,11 @@ default:
 
 file_management:
   flag: False
+
+data:
+  type: input
+  groups:
+    - label: placeholder
 
 placeholder_tests:
   method: "{{ test_variables.method }}"

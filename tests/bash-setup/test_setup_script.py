@@ -5,6 +5,7 @@ Tests the core setup script behavior, directory detection, and configuration man
 """
 
 import os
+import sys
 import tempfile
 import subprocess
 import shutil
@@ -154,10 +155,10 @@ class TestEnvironmentDetection:
     def test_python_environment_detection(self):
         """Test detection of Python environment and version."""
         # Test Python version detection (Python 3.6 compatible)
-        result = subprocess.run(["python", "--version"], 
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+        result = subprocess.run([sys.executable, "--version"],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               universal_newlines=True)
-        
+
         assert result.returncode == 0, "Python should be available"
         output = result.stdout + result.stderr  # Python version might go to stderr
         assert "Python 3." in output, "Should detect Python 3.x"

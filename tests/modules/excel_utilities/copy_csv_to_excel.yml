@@ -7,20 +7,21 @@ basename: excel_utilities
 task: csv_copy_to_excel
 
 data:
-    input_format: csv # clear_existing_data in a sheet
+    input_format: csv
     groups:
       -
-        input: 
-          filename: tests/modules/excel_utilities/input_data/inputs.csv
-        target: 
-          filename: tests/modules/excel_utilities/input_data/target.xlsx
-          sheet_name: inputs
-      -
-        input: 
-          filename: tests/modules/excel_utilities/input_data/results.csv
-        target: 
-          filename: tests/modules/excel_utilities/input_data/target.xlsx
-          sheet_name: results
+        target:
+          template: input_data/target1.xlsx
+          filename: input_data/target_output.xlsx
+        csvs:
+          - input:
+              filename: input_data/inputs.csv
+            target:
+              sheet_name: inputs
+          - input:
+              filename: input_data/results.csv
+            target:
+              sheet_name: results
 
 default:
   log_level: DEBUG

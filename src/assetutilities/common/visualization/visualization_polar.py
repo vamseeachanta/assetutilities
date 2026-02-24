@@ -30,7 +30,7 @@ class VisualizationPolar:
             visualization_common.add_image_to_polar_plot(
                 cfg, plt_settings, plt_properties
             )
-            self.save_polar_plot_and_close_plotly(plt, cfg)
+            self.save_polar_plot_and_close_plotly(plt_properties["fig"], cfg)
         elif cfg["settings"]["plt_engine"] == "matplotlib":
             plt_properties = self.get_polar_plot_matplotlib(data_df, plt_settings, cfg)
             visualization_common.add_image_to_polar_plot(
@@ -48,8 +48,19 @@ class VisualizationPolar:
 
     def get_polar_mapped_data_dict(self, cfg):
         if cfg["data"]["type"] == "input":
-            data_dict, legend = self.get_polar_mapped_data_dict_from_input(cfg)
-            if len(cfg["settings"]["legend"]["label"]) == 0:
+            if "r" in cfg["data"] and "theta" in cfg["data"]:
+                mapped_data_cfg = {
+                    "data": {
+                        "groups": [
+                            {"theta": cfg["data"]["theta"], "r": cfg["data"]["r"]}
+                        ]
+                    }
+                }
+            else:
+                mapped_data_cfg = cfg
+            data_dict, legend = self.get_polar_mapped_data_dict_from_input(mapped_data_cfg)
+            legend_label = cfg["settings"].get("legend", {}).get("label", None)
+            if legend_label is not None and len(legend_label) == 0:
                 cfg["settings"]["legend"]["label"] = legend
 
         elif cfg["data"]["type"] == "csv":
@@ -176,12 +187,15 @@ class VisualizationPolar:
             # Radial line
 
             plt.polar(df["x"], df["y"], label=plt_settings["label"])
-        elif plt_settings["plt_kind"] == "polar_scatter":
+        elif (
+            "plt_kind" in plt_settings and plt_settings["plt_kind"] == "polar_scatter"
+        ) or plt_settings.get("type") == "polar_scatter":
             # Radial scatter
             # Third party imports
             import plotly.express as px
 
-            plt = px.scatter_polar(df, r=df["r_0"], theta=df["theta_0"])
+            fig = px.scatter_polar(df, r=df["r_0"], theta=df["theta_0"])
+            return {"plt": None, "fig": fig}
 
         plt_properties = {"plt": plt, "fig": None}
 
@@ -305,15 +319,13 @@ class VisualizationPolar:
 
         return plt_properties
 
-    def save_polar_plot_and_close_plotly(self, plt, cfg):
-        plot_name_paths = self.get_plot_name_path(cfg)
+    def save_polar_plot_and_close_plotly(self, fig, cfg):
+        plot_name_paths = visualization_common.get_plot_name_path(cfg)
         for file_name in plot_name_paths:
-            # plt.write_image(file_name)
-            plt.write_html(file_name)
-
-            plt.savefig(file_name, dpi=100)
-
-        plt.close()
+            if str(file_name).endswith(".html"):
+                fig.write_html(str(file_name))
+            else:
+                fig.write_image(str(file_name))
 
     def save_polar_plot_and_close_matplotlib(self, plt_properties, cfg):
         plot_name_paths = visualization_common.get_plot_name_path(cfg)

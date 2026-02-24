@@ -1,0 +1,456 @@
+basename: visualization
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+  - - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+  theta:
+  - - 0.6108652381980153
+    - 1.2217304763960306
+    - 2.0943951023931953
+    - 2.705260340591211
+    - 3.5779249665883754
+    - 4.1887902047863905
+  type: input
+  color:
+  - blue
+  - green
+  alpha:
+  - 1
+  - 0.75
+  linestyle:
+  - --
+  - '-'
+  - '-'
+  - ':'
+  groups:
+  - name: group1
+    r:
+    - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+    theta:
+    - 35
+    - 70
+    - 120
+    - 155
+    - 205
+    - 240
+    color: blue
+  - name: group2
+    r:
+    - 0.5
+    - 1
+    - 2
+    - 2.5
+    - 3
+    - 4
+    theta:
+    - 35
+    - 70
+    - 120
+    - 155
+    - 205
+    - 240
+    color: green
+settings:
+  type: polar_scatter
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: false
+  file_name: allowable_wave_height_matplotlib
+  plt_save_extensions:
+  - .png
+  title: Allowable Significant Wave Height (Hs)
+  set_rmax: 10
+  set_rticks:
+  - 1
+  - 2
+  - 3
+  set_thetagrids:
+  - 0
+  - 30
+  - 60
+  - 90
+  - 120
+  - 150
+  - 180
+  - 210
+  - 240
+  - 270
+  - 300
+  - 330
+  set_rlabel_position: -22.5
+  legend:
+    flag: true
+    label:
+    - vessel inline with product route
+    - vessel rotation wrt. product route
+    loc: best
+    prop:
+      family: Arial
+      size: 5
+  color:
+  - '#1f77b4'
+  - '#aec7e8'
+  - '#ff7f0e'
+  - '#ffbb78'
+  - '#2ca02c'
+  - '#98df8a'
+  - '#d62728'
+  - '#ff9896'
+  - '#9467bd'
+  - '#c5b0d5'
+  - '#8c564b'
+  - '#c49c94'
+  - '#e377c2'
+  - '#f7b6d2'
+  - '#7f7f7f'
+  - '#c7c7c7'
+  - '#bcbd22'
+  - '#dbdb8d'
+  - '#17becf'
+  - '#9edae5'
+  - '#1f77b4'
+  - '#aec7e8'
+  - '#ff7f0e'
+  - '#ffbb78'
+  - '#2ca02c'
+  - '#98df8a'
+  - '#d62728'
+  - '#ff9896'
+  - '#9467bd'
+  - '#c5b0d5'
+  - '#8c564b'
+  - '#c49c94'
+  - '#e377c2'
+  - '#f7b6d2'
+  - '#7f7f7f'
+  - '#c7c7c7'
+  - '#bcbd22'
+  - '#dbdb8d'
+  - '#17becf'
+  - '#9edae5'
+  linestyle:
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - '-'
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  - --
+  markerprops:
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: o
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  - marker: v
+    markersize: 2
+  alpha:
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  - 0.95
+  traces: 2
+Analysis:
+  basename: visualization
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization
+  file_name: visualization_polar_matplotlib
+  file_name_for_overwrite: visualization_polar_matplotlib
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/logs
+  start_time: 2026-02-23 22:51:15.695413
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/visualization_polar_matplotlib.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results

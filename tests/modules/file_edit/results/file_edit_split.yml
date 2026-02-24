@@ -1,208 +1,162 @@
-&id001 !!python/object/new:assetutilities.common.data.AttributeDict
-state: *id001
-dictitems:
-  basename: file_edit
-  edit_type: split
-  concatenate_type: array
-  default:
-    log_level: DEBUG
-    config:
-      overwrite:
-        output: true
-  input:
-  - output_filename: 06a_501_section2_def
-    output_dir: ~
-    filename: ~
-    add_blank_file_in_between: false
-    input_files: []
-  split_settings:
-  - start:
-      line_number: ~
-      key_words:
-      - DECK  0
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      line_number: ~
-      key_words:
-      - DECK  1
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 00.deck
-  - start:
-      key_words:
-      - DECK  1
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  2
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 01.deck
-  - start:
-      key_words:
-      - DECK  2
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  3
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 02.deck
-  - start:
-      key_words:
-      - DECK  3
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  4
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 03.deck
-  - start:
-      key_words:
-      - DECK  4
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  5
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 04.deck
-  - start:
-      key_words:
-      - DECK  5
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  6
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 05.deck
-  - start:
-      key_words:
-      - DECK  6
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  7
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 06.deck
-  - start:
-      key_words:
-      - DECK  7
-      transform:
-        scale: 1
-        shift: -1
-    end:
-      key_words:
-      - DECK  8
-      transform:
-        scale: 1
-        shift: -2
-    file_suffix: 07.deck
-  file_management:
-    flag: true
-    update_unfinished:
+basename: file_edit
+edit_type: split
+concatenate_type: array
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+input:
+- output_filename: 06a_501_section2_def
+  output_dir: ~
+  filename: ~
+  add_blank_file_in_between: false
+  input_files: []
+split_settings:
+- start:
+    line_number: ~
+    key_words:
+    - DECK  0
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    line_number: ~
+    key_words:
+    - DECK  1
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 00.deck
+- start:
+    key_words:
+    - DECK  1
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  2
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 01.deck
+- start:
+    key_words:
+    - DECK  2
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  3
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 02.deck
+- start:
+    key_words:
+    - DECK  3
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  4
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 03.deck
+- start:
+    key_words:
+    - DECK  4
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  5
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 04.deck
+- start:
+    key_words:
+    - DECK  5
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  6
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 05.deck
+- start:
+    key_words:
+    - DECK  6
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  7
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 06.deck
+- start:
+    key_words:
+    - DECK  7
+    transform:
+      scale: 1
+      shift: -1
+  end:
+    key_words:
+    - DECK  8
+    transform:
+      scale: 1
+      shift: -2
+  file_suffix: 07.deck
+file_management:
+  flag: true
+  input_directory: ~
+  update_unfinished:
+    flag: false
+  filename:
+    extension:
+    - dat
+    pattern: ~
+    filters:
+      contains: []
+      not_contains: []
+  files:
+    files_in_current_directory:
       flag: false
-    files:
-      files_in_current_directory:
-        flag: false
-        auto_read: true
-        directory: split/wb
-        filename_pattern: ~
-        file_extensions:
-        - dat
-      output_directory: split
-    input_files:
-      dat:
-      - !!python/object/apply:pathlib.WindowsPath
-        - C:\
-        - Users
-        - sivak
-        - Desktop
-        - siva
-        - personal
-        - 2024-odd-projects
-        - assetutilities
-        - tests
-        - modules
-        - file_edit
-        - split
-        - wb
-        - D05266mm.dat
-      - !!python/object/apply:pathlib.WindowsPath
-        - C:\
-        - Users
-        - sivak
-        - Desktop
-        - siva
-        - personal
-        - 2024-odd-projects
-        - assetutilities
-        - tests
-        - modules
-        - file_edit
-        - split
-        - wb
-        - D05315mm.dat
-  Analysis:
-    basename: file_edit
-    analysis_root_folder: C:\Users\sivak\Desktop\siva\personal\2024-odd-projects\assetutilities/tests/modules/file_edit
-    file_name: file_edit_split
-    file_name_for_overwrite: file_edit_split
-    result_folder: C:\Users\sivak\Desktop\siva\personal\2024-odd-projects\assetutilities/tests/modules/file_edit\results
-    log_folder: C:\Users\sivak\Desktop\siva\personal\2024-odd-projects\assetutilities/tests/modules/file_edit\logs
-    start_time: 2024-12-02 20:29:50.550264
-    cfg_array_file_names: ~
-    DefaultInputFile: ~
-    CustomInputFile: C:\Users\sivak\Desktop\siva\personal\2024-odd-projects\assetutilities/tests/modules/file_edit/file_edit_split.yml
-    fe_folder: C:\Users\sivak\Desktop\siva\personal\2024-odd-projects\assetutilities/tests/modules/file_edit\results
-    file_management_input_directory: !!python/object/apply:pathlib.WindowsPath
-    - C:\
-    - Users
-    - sivak
-    - Desktop
-    - siva
-    - personal
-    - 2024-odd-projects
-    - assetutilities
-    - tests
-    - modules
-    - file_edit
-    - split
-    - wb
-    file_management_output_directory: !!python/object/apply:pathlib.WindowsPath
-    - C:\
-    - Users
-    - sivak
-    - Desktop
-    - siva
-    - personal
-    - 2024-odd-projects
-    - assetutilities
-    - tests
-    - modules
-    - file_edit
-    - split
+      auto_read: true
+      directory: split/wb
+      filename_pattern: ~
+      file_extensions:
+      - dat
+    output_directory: split
+  input_files:
+    dat:
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/no_load_09moors.dat
+    - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/no_load_10moors.dat
+Analysis:
+  basename: file_edit
+  analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit
+  file_name: file_edit_split
+  file_name_for_overwrite: file_edit_split
+  log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/logs
+  start_time: 2026-02-23 22:51:10.638646
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/file_edit_split.yml
+  result_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/results
+  result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/results/Data
+  result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/results/Plot
+  fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/results
+  file_management_input_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit
+  file_management_output_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/results

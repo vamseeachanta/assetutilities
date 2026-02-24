@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 pytest.importorskip("xlsxwriter")
+pytest.importorskip("excel2img")
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))

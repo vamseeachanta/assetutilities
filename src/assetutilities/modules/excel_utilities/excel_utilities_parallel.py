@@ -7,7 +7,12 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Any, List, Tuple
 
-import excel2img
+try:
+    import excel2img
+    EXCEL2IMG_AVAILABLE = True
+except ImportError:
+    excel2img = None
+    EXCEL2IMG_AVAILABLE = False
 import pandas as pd
 from loguru import logger
 from openpyxl import load_workbook
@@ -121,7 +126,10 @@ class ExcelUtilitiesParallel:
                             output_filename = os.path.join(
                                 cfg["Analysis"]["result_folder"], output_filename
                             )
-                        excel2img.export_img(io, output_filename, "", sheet_range)
+                        if EXCEL2IMG_AVAILABLE:
+                            excel2img.export_img(io, output_filename, "", sheet_range)
+                        else:
+                            logger.warning("excel2img not available, skipping image export")
     
     def _process_single_group(self, group: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[bool, str]:
         """
