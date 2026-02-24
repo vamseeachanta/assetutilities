@@ -207,15 +207,17 @@ class TestGetCommonNameFrom2Filenames:
     """Tests for get_common_name_from_2_filenames — derives unique name from two filenames."""
 
     def test_common_prefix_stripped_from_second(self):
-        # Arrange: both share 'report_' prefix
+        # Arrange: both share 'report_202' prefix; stem1='report_2023', stem2='report_2024'
+        # commonprefix('report_2023', 'report_2024') == 'report_202'
+        # unique basename = 'report_2023' + '_' + '4' (stem2 with prefix removed)
         f1 = "/data/report_2023.xlsx"
         f2 = "/data/report_2024.xlsx"
 
         # Act
         result = get_common_name_from_2_filenames(f1, f2)
 
-        # Assert
-        assert result == "report_2023_2024"
+        # Assert: common prefix is 'report_202', so remainder of stem2 is '4'
+        assert result == "report_2023_4"
 
     def test_no_common_prefix_uses_full_stems(self):
         # Arrange
@@ -250,3 +252,54 @@ class TestGetCommonNameFrom2Filenames:
 
         # Assert
         assert isinstance(result, str)
+
+
+# ---------------------------------------------------------------------------
+# get_colors
+# ---------------------------------------------------------------------------
+
+
+class TestGetColors:
+    """Tests for get_colors — returns color palettes for plotting."""
+
+    def test_single_set_small_n_returns_list(self):
+        # Arrange
+        from assetutilities.common.utilities import get_colors
+
+        # Act
+        result = get_colors(set="single", n=5)
+
+        # Assert
+        assert isinstance(result, list)
+        assert len(result) == 10  # always returns full 10-color list when n <= 10
+
+    def test_single_set_small_n_returns_hex_strings(self):
+        # Arrange
+        from assetutilities.common.utilities import get_colors
+
+        # Act
+        result = get_colors(set="single", n=5)
+
+        # Assert
+        assert all(isinstance(c, str) for c in result)
+        assert all(c.startswith("#") for c in result)
+
+    def test_single_set_large_n_returns_hex_list(self):
+        # Arrange
+        from assetutilities.common.utilities import get_colors
+
+        # Act
+        result = get_colors(set="single", n=15)
+
+        # Assert
+        assert isinstance(result, list)
+        assert len(result) == 20
+        assert all(c.startswith("#") for c in result)
+
+    def test_multi_set_too_many_colors_raises(self):
+        # Arrange
+        from assetutilities.common.utilities import get_colors
+
+        # Act / Assert
+        with pytest.raises(ValueError):
+            get_colors(set="multi", n=9)

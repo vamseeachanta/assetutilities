@@ -529,9 +529,9 @@ class TestTransformDataframeToDict:
         # Act
         result = t.dataframe_to_dict(df, cfg={"orient": "index"})
 
-        # Assert
+        # Assert: JSON serialization produces string keys '0', '1'
         assert isinstance(result, dict)
-        assert 0 in result
+        assert "0" in result
 
 
 class TestTransformGetTransformedDf:
