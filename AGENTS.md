@@ -1,9 +1,11 @@
-# Assetutilities Agent Contract Pointer
+---
+purpose: Shared engineering utilities — project config, unit conversions, calculations, CLI tools
+entry_points: [src/assetutilities/engine.py, src/assetutilities/calculation.py, src/assetutilities/cli/]
+test_command: uv run python -m pytest tests/ --noconftest
+depends_on: []
+maturity: stable
+---
+# assetutilities
 
-This repository inherits the canonical contract from:
-../AGENTS.md
-
-- Contract-Version: 1.0.0
-- Generated-At: 2026-02-17T16:39:59Z
-
-Do not hand-edit policy here. Update workspace-hub/AGENTS.md and regenerate adapters.
+Contract: ../AGENTS.md | Source: src/assetutilities/
+Key modules: engine.py, calculation.py, calculations/, base_configs/, common/, devtools/
