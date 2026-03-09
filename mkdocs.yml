@@ -1,0 +1,25 @@
+site_name: assetutilities API Reference
+site_description: Auto-generated API documentation for assetutilities
+docs_dir: docs/api
+site_dir: site
+
+nav:
+  - API Reference: index.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_submodules: true
+
+theme:
+  name: material
+  features:
+    - navigation.sections

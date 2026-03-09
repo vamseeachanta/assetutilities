@@ -11,3 +11,14 @@ repos:
         types_or: [python, pyi]
       - id: ruff-format
         types_or: [python, pyi]
+
+  # bandit security scan on staged Python files (WRK-1081)
+  - repo: local
+    hooks:
+      - id: bandit-staged
+        name: bandit security scan (staged Python files)
+        language: system
+        entry: uvx bandit[toml]==1.9.4
+        args: [-ll, -c, pyproject.toml, -b, ../config/quality/bandit-baseline-assetutilities.json]
+        types: [python]
+        exclude: ^tests/
