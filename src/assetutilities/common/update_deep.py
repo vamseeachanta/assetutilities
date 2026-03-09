@@ -1,13 +1,18 @@
-from collections.abc import Mapping
+from __future__ import annotations
+
+from collections.abc import Mapping, MutableMapping
+from typing import Any
 
 
-class AttributeDict(dict):
-    def __init__(self, *args, **kwargs):
+class AttributeDict(dict):  # type: ignore[type-arg]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.__dict__ = self
 
 
-def update_deep_dictionary(d, u):
+def update_deep_dictionary(
+    d: MutableMapping[str, Any], u: Mapping[str, Any]
+) -> MutableMapping[str, Any]:
     """for updating values in deep dictionary"""
     for k, v in u.items():
         # this condition handles the problem

@@ -1,5 +1,10 @@
+from __future__ import annotations
+
+# cfg uses AttributeDict attribute access; typed Any by design
 import os
 import pathlib
+from typing import Any
+
 from assetutilities.common.path_resolver import PathResolver
 
 from assetutilities.common.utilities import is_dir_valid_func
@@ -9,7 +14,7 @@ class FileManagement:
     def __init__(self) -> None:
         pass
 
-    def router(self, cfg):
+    def router(self, cfg: Any) -> Any:
         if "file_management" in cfg and cfg.file_management["flag"]:
             process_flag = True
         else:
@@ -20,7 +25,7 @@ class FileManagement:
 
         return cfg
 
-    def get_files_in_directory(self, cfg):
+    def get_files_in_directory(self, cfg: Any) -> Any:
         file_management_input_directory = self.get_file_management_input_directory(cfg)
         file_management_output_directory = self.get_file_management_output_directory(
             cfg
@@ -62,7 +67,7 @@ class FileManagement:
 
         return cfg
 
-    def get_filtered_files(self, files, cfg_filter):
+    def get_filtered_files(self, files: list[Any], cfg_filter: dict[str, Any]) -> list[Any]:
         # TODO Test for multiple filter values
         # Only singleton array for cfg_filter['contains'] and cfg_filter['not_contains'] tested
 
@@ -73,7 +78,7 @@ class FileManagement:
             conditions = []
 
             # Helper function for all filters to check if None or empty
-            def apply_filter(filter_key):
+            def apply_filter(filter_key: str) -> bool:
                 filter_value = cfg_filter.get(filter_key)
                 return (
                     filter_value is not None
@@ -117,13 +122,13 @@ class FileManagement:
 
         return filtered_files
 
-    def get_basenames(self, files):
+    def get_basenames(self, files: list[Any]) -> list[str]:
         basenames = []
         for file in files:
             basenames.append(os.path.basename(file))
         return basenames
 
-    def get_filename_without_extension(self, filename):
+    def get_filename_without_extension(self, filename: str) -> dict[str, str]:
         basename = os.path.splitext(os.path.basename(filename))[0]
         filename_path = pathlib.Path(filename).parent
         filename_with_path = os.path.join(filename_path, basename)
@@ -135,7 +140,7 @@ class FileManagement:
 
         return filename_without_extension
 
-    def get_file_management_input_directory(self, cfg):
+    def get_file_management_input_directory(self, cfg: Any) -> pathlib.Path:
         file_management_input_directory = cfg.file_management["input_directory"]
         if file_management_input_directory is None:
             file_management_input_directory = cfg.Analysis["analysis_root_folder"]
@@ -156,7 +161,7 @@ class FileManagement:
 
         return file_management_input_directory
 
-    def get_file_management_output_directory(self, cfg):
+    def get_file_management_output_directory(self, cfg: Any) -> pathlib.Path:
         output_directory = cfg.file_management.get("output_directory", None)
 
         # Use analysis root folder if output directory is not provided

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Standard library imports
 import logging
 import operator
@@ -5,6 +7,7 @@ import os
 from datetime import datetime
 from functools import reduce
 from pathlib import Path
+from typing import Any, Optional, Union
 from unittest import result
 
 import numpy as np
@@ -59,7 +62,7 @@ class ReadFromCSV:
 
 
 class ReadData:
-    def df_filter_by_column_values(self, cfg, df, file_index=0):
+    def df_filter_by_column_values(self, cfg: dict[str, Any], df: pd.DataFrame, file_index: int = 0) -> pd.DataFrame:
         if cfg.__contains__("files"):
             filter_dict = cfg["files"]["from_xlsx"][file_index]["filter"]
         else:
@@ -73,12 +76,12 @@ class ReadData:
 
         return df
 
-    def from_df_delete_unwanted_columns(self, df, dropped_column_array):
+    def from_df_delete_unwanted_columns(self, df: pd.DataFrame, dropped_column_array: list[int]) -> pd.DataFrame:
         df.drop(df.columns[dropped_column_array], axis=1, inplace=True)
 
         return df
 
-    def from_xlsx_get_line_number_containing_keyword(self, cfg):
+    def from_xlsx_get_line_number_containing_keyword(self, cfg: dict[str, Any]) -> Any:
         """
         https://stackoverflow.com/questions/38056233/python-search-excel-sheet-for-specific-strings-in-a-column-and-extract-those-ro/38056526
         https://www.tutorialspoint.com/How-to-check-if-multiple-strings-exist-in-another-string-in-Python
@@ -95,7 +98,7 @@ class ReadData:
         )
         return keyword_row_number
 
-    def xlsx_to_df_by_keyword_search(self, cfg):
+    def xlsx_to_df_by_keyword_search(self, cfg: dict[str, Any]) -> pd.DataFrame:
         # Third party imports
         import pandas as pd
 
@@ -127,7 +130,7 @@ class ReadData:
 
         return df
 
-    def superseded_xlsx_to_df_by_keyword_search(self, data):
+    def superseded_xlsx_to_df_by_keyword_search(self, data: dict[str, Any]) -> pd.DataFrame:
         """
         https://stackoverflow.com/questions/38056233/python-search-excel-sheet-for-specific-strings-in-a-column-and-extract-those-ro/38056526
         https://www.tutorialspoint.com/How-to-check-if-multiple-strings-exist-in-another-string-in-Python
@@ -170,7 +173,7 @@ class ReadData:
 
         return df
 
-    def from_xlsx_get_WorkSheetRowNumberWithText(self, sh, KeyWordArray):
+    def from_xlsx_get_WorkSheetRowNumberWithText(self, sh: Any, KeyWordArray: list[str]) -> Optional[int]:
         """
         Objective: To obtain the row number of the worksheet with specified keyword(s)
         """
@@ -179,8 +182,9 @@ class ReadData:
             if any(keyword in sh.row_values(rownum) for keyword in KeyWordArray):
                 return rownum
                 break
+        return None
 
-    def read_yml_file(self, data):
+    def read_yml_file(self, data: dict[str, Any]) -> dict[str, Any]:
         # Third party imports
         import yaml
 
@@ -189,10 +193,10 @@ class ReadData:
 
         return data_as_dictionary
 
-    def extract_from_dictionary(self, data_dictionary, map_list):
+    def extract_from_dictionary(self, data_dictionary: dict[str, Any], map_list: list[str]) -> Any:
         return reduce(operator.getitem, map_list, data_dictionary)
 
-    def key_chain(self, data, *args, default=None):
+    def key_chain(self, data: Any, *args: Any, default: Any = None) -> Any:
         for key in args:
             if isinstance(data, dict):
                 data = data.get(key, default)
@@ -205,7 +209,7 @@ class ReadData:
                 return default
         return data
 
-    def from_pdf(self, cfg, file_index=0):
+    def from_pdf(self, cfg: dict[str, Any], file_index: int = 0) -> Any:
         if cfg["files"]["from_pdf"][file_index].__contains__("package"):
             if cfg["files"]["from_pdf"][file_index]["package"] in [None, "tabula"]:
                 df = self.from_pdf_tabula(cfg, file_index)
@@ -216,7 +220,7 @@ class ReadData:
 
         return df
 
-    def from_pdf_tabula(self, cfg, file_index=0):
+    def from_pdf_tabula(self, cfg: dict[str, Any], file_index: int = 0) -> Any:
         # Third party imports
         import tabula
 
@@ -227,9 +231,9 @@ class ReadData:
         )
         return df
 
-    def from_pdf_camelot(self, cfg, file_index=0):
+    def from_pdf_camelot(self, cfg: dict[str, Any], file_index: int = 0) -> Any:
         # Third party imports
-        import camelot
+        import camelot  # type: ignore[import-not-found]
 
         df = camelot.read_pdf(
             cfg["files"]["from_pdf"][file_index]["io"],
@@ -239,13 +243,13 @@ class ReadData:
         print(df)
         return df
 
-    def update_extension_of_filename(self):
+    def update_extension_of_filename(self) -> None:
         # TODO add facility to update file extension from one to another
         # old_extension = .plt
         # new_extension = .out
         pass
 
-    def from_ascii_file_get_line_number_containing_keywords(self, cfg):
+    def from_ascii_file_get_line_number_containing_keywords(self, cfg: dict[str, Any]) -> list[int]:
 
         all_lines_as_strings = self.from_ascii_file_get_lines_as_string_arrays(cfg)
         keyword_line_numbers = self.get_array_rows_containing_keywords(
@@ -254,7 +258,7 @@ class ReadData:
 
         return keyword_line_numbers
 
-    def get_array_rows_containing_keywords(self, array, key_words, cfg=None):
+    def get_array_rows_containing_keywords(self, array: list[Any], key_words: list[str], cfg: Optional[dict[str, Any]] = None) -> list[Any]:
         if cfg is None:
             cfg = {}
         keyword_line_numbers = []
@@ -276,7 +280,7 @@ class ReadData:
 
         return keyword_line_numbers
 
-    def from_ascii_file_get_value(self, cfg):
+    def from_ascii_file_get_value(self, cfg: dict[str, Any]) -> Any:
 
         from_string = FromString()
         line_text = self.from_ascii_file_get_lines_as_string_arrays(cfg)
@@ -287,13 +291,13 @@ class ReadData:
 
         return result
 
-    def from_ascii_file_get_structured_data_delimited_white_space(self, cfg):
+    def from_ascii_file_get_structured_data_delimited_white_space(self, cfg: dict[str, Any]) -> Union[pd.DataFrame, list[Any]]:
         # Third party imports
         import pandas as pd
 
 
         all_lines_as_strings = self.from_ascii_file_get_lines_as_string_arrays(cfg)
-        all_lines_float_objects = []
+        all_lines_float_objects: list[list[Any]] = []
         for line_index in range(0, len(all_lines_as_strings)):
             if "delimiter" not in cfg or cfg["delimiter"] == "space":
                 line_string_objects = all_lines_as_strings[line_index].split()
@@ -306,7 +310,7 @@ class ReadData:
             except:
                 all_lines_float_objects.append(line_string_objects)
 
-        result = []
+        result: list[list[Any]] = []
         for line_float_object_index in range(0, len(all_lines_float_objects[0])):
             result.append([])
 
@@ -324,12 +328,12 @@ class ReadData:
 
         return result
 
-    def from_ascii_file_get_lines_as_string_arrays(self, cfg):
+    def from_ascii_file_get_lines_as_string_arrays(self, cfg: dict[str, Any]) -> list[str]:
 
         all_lines = []
         if isinstance(cfg["io"], list):
             # Third party imports
-            from common.ETL_components import ETL_components
+            from common.ETL_components import ETL_components  # type: ignore[import-not-found]
 
             etl_components = ETL_components(cfg=None)
             cfg["io"] = etl_components.convert_text_list_to_combined_text(cfg["io"])
@@ -369,8 +373,8 @@ class ReadData:
         return result
 
     def get_file_list_from_folder(
-        self, folder_with_file_type, with_path=True, with_extension=True
-    ):
+        self, folder_with_file_type: str, with_path: bool = True, with_extension: bool = True
+    ) -> list[str]:
 
         # Standard library imports
         import glob
@@ -401,7 +405,7 @@ class GetData:
         import time
 
         # Third party imports
-        import wget
+        import wget  # type: ignore[import-not-found]
 
         {
             "url": "https://www.data.bsee.gov/Well/Files/APIRawData.zip",
@@ -477,14 +481,14 @@ class FromString:
 
 
 class SaveData:
-    def saveDataJson(self, data, fileName):
+    def saveDataJson(self, data: Any, fileName: str) -> None:
         # Standard library imports
         import json
 
         with open(fileName + ".json", "w") as f:
             json.dump(data, f)
 
-    def saveDataYaml(self, data, fileName, default_flow_style=False, sort_keys=False):
+    def saveDataYaml(self, data: Any, fileName: str, default_flow_style: Any = False, sort_keys: bool = False) -> None:
         # Third party imports
         import yaml
 
@@ -494,7 +498,7 @@ class SaveData:
 
         elif default_flow_style == "NonAlias":
             with open(fileName + ".yml", "w") as f:
-                yaml.dump(data, f, Dumper=noalias_dumper)
+                yaml.dump(data, f, Dumper=noalias_dumper)  # type: ignore[name-defined]
         elif default_flow_style == "ruamel":
             # Third party imports
             from ruamel.yaml import ruamel
@@ -503,7 +507,7 @@ class SaveData:
                 ruamel.yaml.dump(data, f)
         elif default_flow_style == "round_trip_dump":
             with open(fileName + ".yml", "w") as f:
-                ruamel.yaml.round_trip_dump(data, f)
+                ruamel.yaml.round_trip_dump(data, f)  # type: ignore[used-before-def]
         else:
             file_path = fileName + ".yml"
             with open(file_path, "w") as f:
@@ -511,10 +515,10 @@ class SaveData:
                     data, f, default_flow_style=default_flow_style, sort_keys=sort_keys
                 )
 
-    def saveDataFrame(self, df, fileName):
+    def saveDataFrame(self, df: pd.DataFrame, fileName: str) -> None:
         df.to_csv(fileName + ".csv")
 
-    def save_ascii_file_from_array(self, array, file_name, extension=""):
+    def save_ascii_file_from_array(self, array: list[Any], file_name: str, extension: str = "") -> None:
         with open(file_name + extension, "w") as f:
             for line_index in range(0, len(array)):
                 if type(array[line_index]) is list:
@@ -555,7 +559,7 @@ class SaveData:
     https://stackoverflow.com/questions/36814050/openpyxl-get-sheet-by-name
     """
 
-    def DataFrame_To_xlsx_openpyxl(self, df, data):
+    def DataFrame_To_xlsx_openpyxl(self, df: pd.DataFrame, data: dict[str, Any]) -> None:
         # Third party imports
         import pandas as pd
         from openpyxl import load_workbook
@@ -580,7 +584,7 @@ class SaveData:
         df.to_excel(writer, data["SheetName"])
         writer.save()
 
-    def DataFrameArray_To_xlsx_openpyxl(self, dfArray, data):
+    def DataFrameArray_To_xlsx_openpyxl(self, dfArray: list[pd.DataFrame], data: dict[str, Any]) -> None:
         # Third party imports
         import pandas as pd
 
@@ -609,7 +613,7 @@ class SaveData:
 
         writer._save()
 
-    def df_to_sheet_in_existing_workbook(self, cfg):
+    def df_to_sheet_in_existing_workbook(self, cfg: dict[str, Any]) -> None:
         # cfg_example = {'template_file_name': file_name, 'sheetname': sheetname, 'saved_file_name': file_name, 'if_sheet_exists': 'replace', 'df': df, 'index': False}
 
         template_file_name = cfg["template_file_name"]
@@ -638,14 +642,14 @@ class SaveData:
         # df.to_excel(writer, sheet_name, index=False)
         # writer._save()
 
-    def df_to_table_as_image(self, df, cfg):
+    def df_to_table_as_image(self, df: pd.DataFrame, cfg: dict[str, Any]) -> None:
         (ax, fig) = self.render_df_table(
             df, header_columns=0, col_width=2.0, font_size=8
         )
         fig.savefig(cfg["file_name"])
         self.plt.close()
 
-    def df_to_table_as_docx(self, df, cfg):
+    def df_to_table_as_docx(self, df: pd.DataFrame, cfg: dict[str, Any]) -> None:
         # Third party imports
         from docx import Document
 
@@ -670,18 +674,18 @@ class SaveData:
 
     def render_df_table(
         self,
-        data,
-        col_width=3.0,
-        row_height=0.625,
-        font_size=14,
-        header_color="#40466e",
-        row_colors=None,
-        edge_color="w",
-        bbox=None,
-        header_columns=0,
-        ax=None,
-        **kwargs,
-    ):
+        data: pd.DataFrame,
+        col_width: float = 3.0,
+        row_height: float = 0.625,
+        font_size: int = 14,
+        header_color: str = "#40466e",
+        row_colors: Optional[list[str]] = None,
+        edge_color: str = "w",
+        bbox: Optional[list[float]] = None,
+        header_columns: int = 0,
+        ax: Any = None,
+        **kwargs: Any,
+    ) -> Any:
         # Third party imports
         import matplotlib.pyplot as plt
         import six
@@ -715,12 +719,12 @@ class SaveData:
                 cell.set_facecolor(row_colors[k[0] % len(row_colors)])
         return ax, fig
 
-    def write_ascii_file_from_text(self, text, file_name):
+    def write_ascii_file_from_text(self, text: str, file_name: str) -> None:
         f = open(file_name, "wb")
         f.write(text.encode())
         f.close()
 
-    def WriteOrcaFlexYMLFile(self, Files, output_filename):
+    def WriteOrcaFlexYMLFile(self, Files: list[Any], output_filename: str) -> None:
         print(f'Write file: "{output_filename}" .... ')
         with open(output_filename, "w") as f:
             for file in Files:
@@ -750,8 +754,8 @@ class DefineData:
         return data_dictionary
 
 
-class AttributeDict(dict):
-    def __init__(self, *args, **kwargs):
+class AttributeDict(dict):  # type: ignore[type-arg]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.__dict__ = self
 
@@ -788,11 +792,11 @@ class DateTimeUtility:
 class Transform:
     def numpy_interp(
         self,
-    ):
+    ) -> None:
         # TODO Add for when the x and y are in ascending or descending order to handle correct interpolation
         pass
 
-    def gis_deg_to_distance(self, df, cfg):
+    def gis_deg_to_distance(self, df: pd.DataFrame, cfg: dict[str, Any]) -> pd.DataFrame:
         # Third party imports
         import utm
 
@@ -820,14 +824,14 @@ class Transform:
         df[cfg["label"] + "_ut"] = ut_array
         return df
 
-    def gis_distance_to_deg(self):
+    def gis_distance_to_deg(self) -> None:
         # TODO
         pass
 
-    def get_gis_converted_df_superseded(self, data_set_cfg, df):
+    def get_gis_converted_df_superseded(self, data_set_cfg: dict[str, Any], df: pd.DataFrame) -> pd.DataFrame:
         if data_set_cfg.__contains__("gis"):
             # Third party imports
-            import pyproj
+            import pyproj  # type: ignore[import-not-found]
 
             p = pyproj.Proj(proj="utm", zone=data_set_cfg["gis"]["zone"], ellps="WGS84")
             if data_set_cfg["gis"]["long_lat_to_northing_easting"]["flag"]:
@@ -866,13 +870,13 @@ class Transform:
 
         return df
 
-    def dataframe_to_dataframe(self, df, cfg=None):
+    def dataframe_to_dataframe(self, df: pd.DataFrame, cfg: Optional[dict[str, Any]] = None) -> pd.DataFrame:
         df_transposed = self.transpose_df(df, cfg)
         df_transposed = self.add_column_to_df(df_transposed, cfg)
 
         return df_transposed
 
-    def dataframe_to_dict(self, df, cfg=None):
+    def dataframe_to_dict(self, df: Optional[pd.DataFrame], cfg: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         if cfg is None:
             cfg = {}
         json_dict = {}
@@ -887,7 +891,7 @@ class Transform:
 
         return json_dict
 
-    def df_JSON_strings_values_to_dict(self, df, cfg_settings):
+    def df_JSON_strings_values_to_dict(self, df: Optional[pd.DataFrame], cfg_settings: dict[str, Any]) -> Optional[pd.DataFrame]:
         if df is not None:
             if cfg_settings.__contains__("json_transformation"):
                 # Standard library imports
@@ -899,9 +903,9 @@ class Transform:
                         json_array.append(json.loads(df.iloc[df_row][column]))
                     df[column] = json_array
 
-        return df.copy()
+        return df.copy() if df is not None else None
 
-    def dataframe_to_json(self, df, cfg=None):
+    def dataframe_to_json(self, df: Optional[pd.DataFrame], cfg: Optional[dict[str, Any]] = None) -> Union[str, dict[str, Any]]:
         # Third party imports
         import pandas as pd
 
@@ -924,15 +928,15 @@ class Transform:
         return json_string
 
     def df_transform_repeat_columns_to_unique_columns(
-        self, df, transform_character="trailing_alphabet"
-    ):
+        self, df: pd.DataFrame, transform_character: str = "trailing_alphabet"
+    ) -> pd.DataFrame:
         old_columns = list(df.columns)
         cfg = {"list": old_columns, "transform_character": transform_character}
         new_columns = self.transform_list_to_unique_list(cfg)
         df.columns = new_columns
         return df
 
-    def transform_list_to_unique_list(self, cfg):
+    def transform_list_to_unique_list(self, cfg: dict[str, Any]) -> list[str]:
         old_list = cfg["list"]
         old_list.reverse()
         new_list = old_list.copy()
@@ -963,8 +967,8 @@ class Transform:
         new_list.reverse()
         return new_list
 
-    def add_column_to_df(self, df, cfg):
-        if df is not None:
+    def add_column_to_df(self, df: Optional[pd.DataFrame], cfg: Optional[dict[str, Any]]) -> Optional[pd.DataFrame]:
+        if df is not None and cfg is not None:
             add_column_to_transposed_df = cfg.get("add_column_to_transposed_df", None)
             if add_column_to_transposed_df is not None:
                 location = add_column_to_transposed_df["location"]
@@ -974,9 +978,9 @@ class Transform:
 
         return df
 
-    def transpose_df(self, df, cfg):
+    def transpose_df(self, df: Optional[pd.DataFrame], cfg: Optional[dict[str, Any]]) -> Optional[pd.DataFrame]:
         df_transposed = df
-        if df is not None:
+        if df is not None and cfg is not None:
             transposed_df_column_name = cfg.get("transposed_df_column_name", None)
             if transposed_df_column_name is not None:
                 transpose_df_columns = df[transposed_df_column_name["column"]].tolist()
@@ -986,7 +990,7 @@ class Transform:
                 df_transposed.columns = transpose_df_columns
         return df_transposed
 
-    def dataframe_to_html(self, df=None, cfg_settings=None):
+    def dataframe_to_html(self, df: Optional[pd.DataFrame] = None, cfg_settings: Optional[dict[str, Any]] = None) -> Union[str, dict[str, Any]]:
         if cfg_settings is None:
             cfg_settings = {}
         if df is None:
@@ -1040,7 +1044,7 @@ class Transform:
             df_dict = self.dataframe_to_dict(df)
             return df_dict
 
-    def convert_numpy_types_to_native_python_types(self, cfg):
+    def convert_numpy_types_to_native_python_types(self, cfg: dict[str, Any]) -> Optional[dict[str, Any]]:
         if cfg["datatype"] is dict:
             for key in cfg["data"].keys():
                 if type(cfg["data"][key]) not in [str, int, float]:
@@ -1048,8 +1052,9 @@ class Transform:
             return cfg["data"]
         else:
             print("data types not supported")
+        return None
 
-    def get_transformed_df(self, cfg_transform, df):
+    def get_transformed_df(self, cfg_transform: list[dict[str, Any]], df: pd.DataFrame) -> pd.DataFrame:
         transformed_df = df.copy()
         df_columns = list(df.columns)
         for transform_item in cfg_transform:

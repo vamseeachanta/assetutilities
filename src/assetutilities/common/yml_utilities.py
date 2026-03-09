@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Standard library imports
 import importlib.util
 
@@ -5,12 +7,13 @@ import importlib.util
 import os
 import pkgutil
 import types
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
+from typing import Any, Optional, Union
 
 # Third party imports
-import yaml
-import yaml.composer
+import yaml  # type: ignore[import-untyped]
+import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
 from jinja2 import Environment, StrictUndefined
 from loguru import logger
@@ -35,18 +38,18 @@ read_data = ReadData()
 ruamel_yaml_utilities = RuamelYAML()
 
 
-def represent_none(self, _):
+def represent_none(self: Any, _: Any) -> Any:
     return self.represent_scalar("tag:yaml.org,2002:null", "~")
 
 
 yaml.add_representer(type(None), represent_none)
 
 
-def ymlInput(defaultYml, updateYml=None):
+def ymlInput(defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
     return WorkingWithYAML().ymlInput(defaultYml, updateYml)
 
 
-def update_deep(d, u):
+def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return WorkingWithYAML().update_deep(d, u)
 
 
@@ -56,10 +59,10 @@ class WorkingWithYAML:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def router(self, cfg):
+    def router(self, cfg: dict[str, Any]) -> dict[str, Any]:
         if (
             "yml_analysis" in cfg
             and cfg["yml_analysis"]["divide"]["technique"] == "ruamel_yml"
@@ -73,7 +76,7 @@ class WorkingWithYAML:
 
         return cfg
 
-    def get_plotting_data(self, cfg):
+    def get_plotting_data(self, cfg: dict[str, Any]) -> dict[str, Any]:
         groups_key_chain = cfg["data"]["groups_key_chain"]
         groups = groups_key_chain.copy()
         for group_idx, group in enumerate(groups_key_chain):
@@ -88,7 +91,7 @@ class WorkingWithYAML:
 
         return cfg
 
-    def get_data_from_file_keychain(self, cfg, file_keychain):
+    def get_data_from_file_keychain(self, cfg: dict[str, Any], file_keychain: dict[str, Any]) -> Any:
         file_name = file_keychain["file_name"]
         key_chain = file_keychain["key_chain"]
 
@@ -109,7 +112,7 @@ class WorkingWithYAML:
 
         return data
 
-    def plot_yml_data(self, cfg):
+    def plot_yml_data(self, cfg: dict[str, Any]) -> dict[str, Any]:
         from assetutilities.engine import engine as au_engine
 
         plot_yml = viz_templates.get_xy_line_input(cfg["Analysis"].copy())
@@ -122,16 +125,17 @@ class WorkingWithYAML:
 
         plot_yml["data"] = cfg["data"].copy()
 
-        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
         return cfg
 
-    def ymlInput(self, defaultYml, updateYml=None):
+    def ymlInput(self, defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
+        cfg: dict[str, Any]
         with open(defaultYml, encoding="utf-8") as ymlfile:
             try:
-                cfg = yaml.safe_load(ymlfile)
+                cfg = yaml.safe_load(ymlfile)  # type: ignore[assignment]
             except yaml.composer.ComposerError as e:
                 logger.error(f"YAML parsing error: {e}")
                 cfg = self.yml_read_stream(defaultYml)
@@ -143,7 +147,7 @@ class WorkingWithYAML:
                     cfgUpdateValues = yaml.safe_load(ymlfile)
                 #  Convert to logs
                 # logger.info(cfgUpdateValues)
-                cfg = update_deep(cfg, cfgUpdateValues)
+                cfg = update_deep(cfg, cfgUpdateValues)  # type: ignore[assignment]
             except:
                 logger.info(
                     "Update Input file could not be loaded successfully. Running program default values"
@@ -151,8 +155,8 @@ class WorkingWithYAML:
 
         return cfg
 
-    def yml_read_stream(self, yaml_file_name):
-        stream_dict = {}
+    def yml_read_stream(self, yaml_file_name: str) -> dict[str, Any]:
+        stream_dict: dict[str, Any] = {}
         try:
             with open(yaml_file_name) as ymlfile:
                 yaml_content = ymlfile.read()
@@ -163,7 +167,7 @@ class WorkingWithYAML:
                 if type(docs) is types.GeneratorType:
                     for doc in docs:
                         if type(doc) is dict:
-                            stream_dict = update_deep(stream_dict, doc)
+                            stream_dict = update_deep(stream_dict, doc)  # type: ignore[assignment]
         except yaml.YAMLError as e:
             logger.error(f"YAML parsing error: {e}")
         except Exception:
@@ -173,7 +177,7 @@ class WorkingWithYAML:
 
         return stream_dict
 
-    def update_deep(self, d, u):
+    def update_deep(self, d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
         for k, v in u.items():
             # this condition handles the problem
             if not isinstance(d, Mapping):
@@ -186,19 +190,19 @@ class WorkingWithYAML:
 
         return d
 
-    def load_yml_with_utf_8_sig(self, file_name):
+    def load_yml_with_utf_8_sig(self, file_name: str) -> Any:
         doc = yaml.safe_load(open(file_name, encoding="utf-8-sig"))
 
         return doc
 
-    def analyze_yaml_keys(self, file_name):
+    def analyze_yaml_keys(self, file_name: str) -> None:
         """
         Analyze Yaml file
         """
         file_name_content = ymlInput(file_name)
         logger.info(file_name_content.keys())
 
-    def compare_yaml_root_keys(self, file_name1, file_name2):
+    def compare_yaml_root_keys(self, file_name1: str, file_name2: str) -> None:
         """
         Compare 2 yaml files
         """
@@ -213,7 +217,7 @@ class WorkingWithYAML:
             logger.info(f"The root keys for {file_name1}: {file_name1_keys}")
             logger.info(f"The root keys for {file_name2}: {file_name2_keys}")
 
-    def compare_yaml_files_deepdiff(self, cfg):
+    def compare_yaml_files_deepdiff(self, cfg: dict[str, Any]) -> None:
         """
         Compare 2 yaml files using DeepDiff
         """
@@ -230,7 +234,7 @@ class WorkingWithYAML:
             uniquebasename = get_common_name_from_2_filenames(file_name1, file_name2)
             self.save_diff_files(file_diff, file_directory, uniquebasename)
 
-    def compare_yaml_file_contents_deepdiff(self, cfg):
+    def compare_yaml_file_contents_deepdiff(self, cfg: dict[str, Any]) -> None:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
 
@@ -246,7 +250,7 @@ class WorkingWithYAML:
         self.save_diff_files(file_diff, cfg)
 
     def save_diff_files(
-        self, file_diff: dict, cfg: dict, deepdiff_save: bool = False
+        self, file_diff: dict[str, Any], cfg: dict[str, Any], deepdiff_save: bool = False
     ) -> None:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
@@ -283,7 +287,7 @@ class WorkingWithYAML:
                 "Yaml files are different. See wwyaml files saved in the current file directory"
             )
 
-    def get_library_yaml_file(self, cfg):
+    def get_library_yaml_file(self, cfg: dict[str, Any]) -> Any:
         library_yaml_filename = cfg["filename"]
         library_name = cfg["library_name"]
         if os.path.isfile(library_yaml_filename):
@@ -295,25 +299,29 @@ class WorkingWithYAML:
 
         return library_yaml
 
-    def get_library_filename(self, cfg):
-        filename_with_lib_path = cfg["filename"]
+    def get_library_filename(self, cfg: dict[str, Any]) -> str:
+        filename_with_lib_path: Any = cfg["filename"]
         library_name = cfg["library_name"]
         if not os.path.isfile(cfg["filename"]):
             lib_spec = importlib.util.find_spec(library_name)
+            if lib_spec is None or lib_spec.origin is None:
+                raise ImportError(f"Library '{library_name}' not found")
             lib_path = Path(lib_spec.origin).parent
             filename_with_lib_path = os.path.join(lib_path, cfg["filename"])
             if not os.path.isfile(filename_with_lib_path):
                 raise FileNotFoundError()
 
-        return filename_with_lib_path
+        return str(filename_with_lib_path)
 
-    def get_library_filepath(self, cfg, src_relative_location_flag=False):
-        filepath_with_lib_path = cfg["filepath"]
+    def get_library_filepath(self, cfg: dict[str, Any], src_relative_location_flag: bool = False) -> str:
+        filepath_with_lib_path: Any = cfg["filepath"]
         library_name = cfg["library_name"]
         if not os.path.isabs(filepath_with_lib_path) or not os.path.isdir(
             filepath_with_lib_path
         ):
             lib_spec = importlib.util.find_spec(library_name)
+            if lib_spec is None or lib_spec.origin is None:
+                raise ImportError(f"Library '{library_name}' not found")
             lib_path = Path(lib_spec.origin).parent
             if not src_relative_location_flag:
                 lib_path = lib_path.parents[1]
@@ -321,9 +329,9 @@ class WorkingWithYAML:
             if not os.path.isdir(filepath_with_lib_path):
                 raise FileNotFoundError()
 
-        return filepath_with_lib_path
+        return str(filepath_with_lib_path)
 
-    def test_variables(self, cfg):
+    def test_variables(self, cfg: dict[str, Any]) -> dict[str, Any]:
         if cfg["test_variables"]["method"] == "single":
             flag, label = self.test_single_variable(cfg)
         elif cfg["test_variables"]["method"] == "directive_block":
@@ -333,7 +341,7 @@ class WorkingWithYAML:
 
         return cfg
 
-    def test_single_variable(self, cfg):
+    def test_single_variable(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
         try:
             label = cfg["data"]["groups"][0]["label"]
             print("Label is reusable:", label)
@@ -342,7 +350,7 @@ class WorkingWithYAML:
             logger.error("Label cannot be accesible:", e)
             return False, None
 
-    def test_directive_block(self, cfg):
+    def test_directive_block(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
         try:
             target_block = cfg["data"]["groups"][0]["target"]
             target_block["template"]
@@ -352,7 +360,7 @@ class WorkingWithYAML:
             logger.error("Directive block not accessible:", e)
             return False, None
 
-    def test_variable_placeholder(self, cfg):
+    def test_variable_placeholder(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
         cfg = self.process_placeholders(cfg, cfg)
         try:
             method = cfg["placeholder_tests"]["method"]
@@ -362,7 +370,7 @@ class WorkingWithYAML:
             logger.error("yml key cannot be accesible:", e)
             return False, None
 
-    def process_placeholders(self, data, context):
+    def process_placeholders(self, data: Any, context: dict[str, Any]) -> Any:
         """
         Recursively resolve all string fields using Jinja2 templates.
         """
