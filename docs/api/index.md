@@ -2,7 +2,10 @@
 
 Auto-generated from source docstrings.
 
-::: assetutilities
+## Engine
+
+::: assetutilities.engine
     options:
-      show_submodules: true
       docstring_style: google
+      show_source: true
+      show_root_heading: true

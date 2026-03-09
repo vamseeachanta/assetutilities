@@ -9,15 +9,16 @@ nav:
 plugins:
   - search
   - mkdocstrings:
+      enable_inventory: false
       default_handler: python
       handlers:
         python:
           paths: [src]
+          inventories: []
           options:
             docstring_style: google
             show_source: true
             show_root_heading: true
-            show_submodules: true
 
 theme:
   name: material
