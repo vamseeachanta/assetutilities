@@ -37,14 +37,14 @@ file_management:
     csv:
     - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_1.csv
     - /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/csv/test_2.csv
-noconftest: true
+noconftest: -m
 Analysis:
   basename: data_exploration
   analysis_root_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration
   file_name: df_statistics_file_management
   file_name_for_overwrite: df_statistics_file_management
   log_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/logs
-  start_time: 2026-03-09 06:49:07.276089
+  start_time: 2026-03-09 17:51:48.238962
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/data_exploration/df_statistics_file_management.yml
