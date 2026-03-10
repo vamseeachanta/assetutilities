@@ -29,3 +29,15 @@ repos:
       - id: gitleaks
         # Note: requires workspace-hub parent checkout; ../.gitleaks.toml is hub-relative
         args: [--config, ../.gitleaks.toml]
+
+  # Cross-repo integration gate (WRK-1091): run downstream contract tests on push
+  - repo: local
+    hooks:
+      - id: cross-repo-integration
+        name: Cross-repo integration test
+        entry: ../scripts/hooks/assetutilities-pre-push.sh
+        language: script
+        stages: [push]
+        pass_filenames: false
+        always_run: false
+        files: ^src/
