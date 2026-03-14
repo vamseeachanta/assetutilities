@@ -1,4 +1,4 @@
-"""Shared math helpers — interpolation and numerical integration."""
+"""Shared math helpers — interpolation, numerical integration, and pipe geometry."""
 import math
 from typing import List
 
@@ -88,3 +88,65 @@ def simpsons(xs: List[float], ys: List[float]) -> float:
         h = (xs[i + 2] - xs[i]) / 2.0
         total += (h / 3.0) * (ys[i] + 4.0 * ys[i + 1] + ys[i + 2])
     return total
+
+
+# ---------------------------------------------------------------------------
+# Pipe cross-section geometry
+# ---------------------------------------------------------------------------
+
+
+def _validate_pipe_dims(od_m: float, wt_m: float) -> None:
+    """Validate outer diameter and wall thickness for pipe geometry calculations."""
+    if od_m <= 0:
+        raise ValueError(f"od_m must be positive, got {od_m}")
+    if wt_m <= 0:
+        raise ValueError(f"wt_m must be positive, got {wt_m}")
+    if wt_m >= od_m / 2:
+        raise ValueError(
+            f"wt_m ({wt_m}) must be less than od_m/2 ({od_m / 2})"
+        )
+
+
+def pipe_cross_section_area(od_m: float, wt_m: float) -> float:
+    """Steel cross-section area of a pipe (m²).
+
+    Args:
+        od_m: Outer diameter in metres.
+        wt_m: Wall thickness in metres.
+
+    Returns:
+        Cross-sectional area of the steel annulus in m².
+    """
+    _validate_pipe_dims(od_m, wt_m)
+    id_m = od_m - 2.0 * wt_m
+    return math.pi / 4.0 * (od_m**2 - id_m**2)
+
+
+def pipe_moment_of_inertia(od_m: float, wt_m: float) -> float:
+    """Second moment of area of a pipe cross-section (m⁴).
+
+    Args:
+        od_m: Outer diameter in metres.
+        wt_m: Wall thickness in metres.
+
+    Returns:
+        Second moment of area (I) in m⁴.
+    """
+    _validate_pipe_dims(od_m, wt_m)
+    id_m = od_m - 2.0 * wt_m
+    return math.pi / 64.0 * (od_m**4 - id_m**4)
+
+
+def pipe_section_modulus(od_m: float, wt_m: float) -> float:
+    """Elastic section modulus of a pipe (m³).
+
+    Z = I / (OD / 2), where I is the second moment of area.
+
+    Args:
+        od_m: Outer diameter in metres.
+        wt_m: Wall thickness in metres.
+
+    Returns:
+        Elastic section modulus (Z) in m³.
+    """
+    return pipe_moment_of_inertia(od_m, wt_m) / (od_m / 2.0)
