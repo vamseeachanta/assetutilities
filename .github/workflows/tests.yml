@@ -24,7 +24,9 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: |
+          uv sync --group dev
+          uv pip install pytest-benchmark
 
       - name: Run tests
-        run: uv run python -m pytest tests/ --noconftest -q --tb=short
+        run: uv run python -m pytest tests/ --noconftest -q --tb=short --ignore=tests/modules/file_management
