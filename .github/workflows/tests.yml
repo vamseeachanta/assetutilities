@@ -1,21 +1,15 @@
-name: Build API Docs
+name: Tests
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'docs/api/**'
-      - 'mkdocs.yml'
   pull_request:
-    paths:
-      - 'src/**'
-      - 'docs/api/**'
-      - 'mkdocs.yml'
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  docs:
+  tests:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -29,5 +23,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Build docs
-        run: uv run --group docs mkdocs build --strict
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Run tests
+        run: uv run python -m pytest tests/ --noconftest -q --tb=short
