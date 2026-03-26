@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream:tests/modules/yml_utilities/yml_variable_placeholder.yml
 meta:
   basename: yaml_utilities
   library: assetutilities
@@ -27,26 +26,3 @@ placeholder_tests:
   method: "{{ test_variables.method }}"
   library: "{{ meta.library }}"
 
-=======
-meta:
-  basename: yaml_utilities
-  library: assetutilities
-
-test_variables:
-  flag: True
-  method: placeholder
-
-default:
-  log_level: DEBUG
-  config:
-    overwrite:
-      output: True
-
-file_management:
-  flag: False
-
-placeholder_tests:
-  method: "{{ test_variables.method }}"
-  library: "{{ meta.library }}"
-
->>>>>>> Stashed changes:tests/modules/yaml_utlities/yml_variable_placeholder.yml

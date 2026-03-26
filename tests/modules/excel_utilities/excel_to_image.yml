@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 basename: excel_utilities
 
 default:
@@ -16,21 +15,3 @@ files:
     range: [[B4, S68]] # Start and finish range
     output_dir: NULL
     output_extension: [bmp, png, gif]
-=======
-basename: excel_utilities
-
-default:
-  log_level: DEBUG
-  config:
-    overwrite:
-      output: True
-
-task: excel_to_image
-
-files:
-  - io: excel_to_image.xlsx
-    sheet_name: [bm_step01_noc_rpt, bm_step01_bc_rpt]
-    range: [[B4, S68]] # Start and finish range
-    output_dir: NULL
-    output_extension: [bmp, png, gif]
->>>>>>> Stashed changes

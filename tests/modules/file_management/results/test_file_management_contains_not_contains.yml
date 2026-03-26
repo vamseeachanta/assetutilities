@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 basename: file_management
 default:
   log_level: DEBUG
@@ -37,43 +36,3 @@ Analysis:
   fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_management/results
   file_management_input_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_management
   file_management_output_directory: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_management/results
-=======
-basename: file_management
-default:
-  log_level: DEBUG
-  config:
-    overwrite:
-      output: true
-file_management:
-  flag: true
-  input_directory: ~
-  output_directory: ~
-  filename:
-    extension:
-    - bat
-    pattern: ~
-    filters:
-      contains:
-      - management
-      not_contains:
-      - WLNG
-  input_files:
-    bat:
-    - K:\github\assetutilities\tests\modules\file_management\file_management.bat
-Analysis:
-  basename: file_management
-  analysis_root_folder: K:\github\assetutilities\tests\modules\file_management
-  file_name: test_file_management_contains_not_contains
-  file_name_for_overwrite: test_file_management_contains_not_contains
-  log_folder: K:\github\assetutilities\tests\modules\file_management\logs
-  start_time: 2025-07-14 22:13:22.104235
-  cfg_array_file_names: ~
-  DefaultInputFile: ~
-  CustomInputFile: test_file_management_contains_not_contains.yml
-  result_folder: K:\github\assetutilities\tests\modules\file_management\results
-  result_data_folder: K:\github\assetutilities\tests\modules\file_management\results\Data
-  result_plot_folder: K:\github\assetutilities\tests\modules\file_management\results\Plot
-  fe_folder: K:\github\assetutilities\tests\modules\file_management\results
-  file_management_input_directory: K:\github\assetutilities\tests\modules\file_management
-  file_management_output_directory: K:\github\assetutilities\tests\modules\file_management\results
->>>>>>> Stashed changes

@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 meta:
   basename: excel_utilities
   library: assetutilities
@@ -29,34 +28,3 @@ default:
   config:
     overwrite:
       output: True
-=======
-meta:
-  basename: excel_utilities
-  library: assetutilities
-
-basename: excel_utilities
-
-task: csv_copy_to_excel
-
-data:
-    input_format: csv # clear_existing_data in a sheet
-    groups:
-      -
-        input: 
-          filename: tests/modules/excel_utilities/input_data/inputs.csv
-        target: 
-          filename: tests/modules/excel_utilities/input_data/target.xlsx
-          sheet_name: inputs
-      -
-        input: 
-          filename: tests/modules/excel_utilities/input_data/results.csv
-        target: 
-          filename: tests/modules/excel_utilities/input_data/target.xlsx
-          sheet_name: results
-
-default:
-  log_level: DEBUG
-  config:
-    overwrite:
-      output: True
->>>>>>> Stashed changes
