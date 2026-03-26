@@ -1,0 +1,583 @@
+# AssetUtilities Hub - Shared Sub-Agent Registry
+# Version: 1.0.0
+# Last Updated: 2025-08-05
+# Purpose: Central registry for shared sub-agents across all repositories
+
+metadata:
+  registry_version: "1.0.0"
+  last_updated: "2025-08-05T10:00:00Z"
+  maintainer: "AssetUtilities Hub Team"
+  description: "Central registry for shared sub-agents and workflow automation components"
+  compatibility_version: ">=1.0.0"
+
+# Repository Configuration
+hub_configuration:
+  name: "assetutilities"
+  type: "hub_repository"
+  supported_repositories:
+    # Engineering & Analysis Repositories
+    - "aceengineer-website"
+    - "aceengineercode"
+    - "digitalmodel"
+    - "energy"
+    - "rock-oil-field"
+    - "saipem"
+    
+    # Project Management Repositories
+    - "acma-projects"
+    - "client_projects"
+    - "investments"
+    - "teamresumes"
+    
+    # Infrastructure & Utilities
+    - "assethold"
+    - "pyproject-starter"
+    - "worldenergydata"
+    
+    # AI & Development
+    - "ai-native-traditional-eng"
+    
+    # Documentation Repositories
+    - "frontierdeepwater"
+    - "OGManufacturing"
+  
+  shared_modules:
+    - "agent-os"
+    - "file-management"
+    - "visualization"
+    - "authentication"
+    - "git-utilities"
+
+# Sub-Agent Registry
+sub_agents:
+  
+  # Enhanced Create-Specs Workflow Automation
+  workflow-automation:
+    metadata:
+      name: "workflow-automation"
+      display_name: "Enhanced Workflow Automation"
+      version: "1.0.0"
+      created: "2025-08-05"
+      last_updated: "2025-08-05"
+      status: "active"
+      
+    module: "agent-os"
+    path: "src/modules/agent-os/enhanced-create-specs/"
+    
+    description: "Enhanced Agent OS workflow automation with spec creation, template customization, and cross-repository integration"
+    
+    capabilities:
+      - "enhanced_spec_creation"
+      - "template_customization"
+      - "cross_repository_integration"
+      - "ai_persistence_management"
+      - "documentation_generation"
+      - "workflow_orchestration"
+      - "quality_validation"
+      - "cross_reference_management"
+    
+    features:
+      - "Prompt summary capture and evolution tracking"
+      - "Executive summary generation with business impact analysis"
+      - "Automatic mermaid diagram generation"
+      - "Module-based organization and structure"
+      - "Template variant selection (minimal, standard, enhanced)"
+      - "Conditional sub-spec generation (API, database, tests)"
+      - "Multi-level AI persistence (system/user/repo/session)"
+      - "Cross-repository reference validation"
+      - "Documentation quality metrics and validation"
+    
+    dependencies: []
+    
+    compatible_repositories: ["*"]
+    
+    repository_types:
+      - "engineering"
+      - "data_science"
+      - "project_management"
+      - "documentation"
+      - "infrastructure"
+    
+    configuration_schema:
+      required:
+        - "spec_name"
+        - "module_name"
+      optional:
+        - "variant"
+        - "custom_sections"
+        - "excluded_sections"
+        - "template_overrides"
+      defaults:
+        variant: "enhanced"
+        template_type: "standard"
+    
+    usage_examples:
+      basic: "/create-specs user-authentication auth-module enhanced"
+      custom: "/create-specs api-integration services enhanced --sections prompt_summary,executive_summary"
+      minimal: "/create-specs bug-fix utils minimal"
+    
+    integration_points:
+      - "Agent OS Framework"
+      - "CLAUDE.md system"
+      - "Git workflows"
+      - "Testing frameworks"
+      - "Documentation systems"
+    
+    performance_characteristics:
+      spec_creation_time: "< 5 seconds"
+      memory_usage: "< 512MB"
+      concurrent_operations: 5
+      max_repository_size: "10,000 files"
+  
+  # File Management Automation
+  file-management-automation:
+    metadata:
+      name: "file-management-automation"
+      display_name: "File Management Automation"
+      version: "0.9.0"
+      created: "2025-08-05"
+      status: "beta"
+      
+    module: "file-management"
+    path: "src/modules/file-management/automation/"
+    
+    description: "Automated file operations, batch processing, and file organization workflows"
+    
+    capabilities:
+      - "batch_file_processing"
+      - "file_organization"
+      - "automated_filtering"
+      - "bulk_operations"
+      - "file_validation"
+    
+    features:
+      - "Pattern-based file filtering and selection"
+      - "Automated file organization and categorization"
+      - "Batch rename, move, and copy operations"
+      - "File content validation and processing"
+      - "Integration with version control systems"
+    
+    dependencies: []
+    
+    compatible_repositories:
+      - "engineering"
+      - "data_science"
+      - "project_management"
+      - "documentation"
+    
+    configuration_schema:
+      required:
+        - "operation_type"
+        - "target_directory"
+      optional:
+        - "file_patterns"
+        - "filters"
+        - "output_directory"
+    
+    usage_examples:
+      organize: "/organize-files ./data --pattern *.csv --by-date"
+      batch_rename: "/batch-rename ./reports --prefix project_ --extension .pdf"
+      validate: "/validate-files ./uploads --types image,document"
+  
+  # Visualization Automation
+  visualization-automation:
+    metadata:
+      name: "visualization-automation"
+      display_name: "Visualization Automation"
+      version: "0.8.5"
+      created: "2025-08-05"
+      status: "beta"
+      
+    module: "visualization"
+    path: "src/modules/visualization/automation/"
+    
+    description: "Automated chart generation, data visualization, and reporting workflows"
+    
+    capabilities:
+      - "automated_chart_generation"
+      - "data_visualization"
+      - "report_generation"
+      - "interactive_dashboards"
+      - "export_automation"
+    
+    features:
+      - "Automatic chart type selection based on data"
+      - "Interactive Plotly and static Matplotlib generation"
+      - "Template-based visualization creation"
+      - "Multi-format export (PNG, PDF, HTML, SVG)"
+      - "Integration with data processing pipelines"
+    
+    dependencies:
+      - "file-management-automation"
+    
+    compatible_repositories:
+      - "engineering"
+      - "data_science"
+      - "project_management"
+    
+    configuration_schema:
+      required:
+        - "data_source"
+        - "chart_type"
+      optional:
+        - "styling"
+        - "export_formats"
+        - "interactive"
+    
+    usage_examples:
+      auto_chart: "/create-chart ./data.csv --auto-detect --export png,html"
+      dashboard: "/create-dashboard ./metrics --interactive --template business"
+      batch_viz: "/batch-visualize ./datasets/*.csv --chart-type line --style professional"
+  
+  # Authentication System
+  auth-system:
+    metadata:
+      name: "auth-system"
+      display_name: "Authentication System"
+      version: "1.1.0"
+      created: "2025-08-05"
+      status: "active"
+      
+    module: "authentication"
+    path: "src/modules/authentication/system/"
+    
+    description: "User authentication, authorization, and security management system"
+    
+    capabilities:
+      - "user_authentication"
+      - "role_based_access_control"
+      - "session_management"
+      - "security_validation"
+      - "audit_logging"
+    
+    features:
+      - "Multi-factor authentication support"
+      - "Role-based permissions and access control"
+      - "Session management and security"
+      - "Integration with external identity providers"
+      - "Comprehensive audit logging and monitoring"
+    
+    dependencies: []
+    
+    compatible_repositories:
+      - "engineering"
+      - "project_management"
+      - "infrastructure"
+    
+    security_features:
+      - "Password encryption and hashing"
+      - "Secure session tokens"
+      - "Rate limiting and brute force protection"
+      - "Input validation and sanitization"
+      - "Audit trail and compliance logging"
+    
+    configuration_schema:
+      required:
+        - "auth_method"
+        - "user_store"
+      optional:
+        - "mfa_enabled"
+        - "session_timeout"
+        - "password_policy"
+    
+    usage_examples:
+      setup: "/setup-auth --method oauth2 --provider google --mfa enabled"
+      configure: "/configure-rbac --roles admin,user,viewer --permissions read,write,delete"
+  
+  # Git Workflow Automation
+  git-workflow-automation:
+    metadata:
+      name: "git-workflow-automation"
+      display_name: "Git Workflow Automation"
+      version: "1.0.0"
+      created: "2025-08-05"
+      status: "active"
+      
+    module: "git-utilities"
+    path: "src/modules/git-utilities/automation/"
+    
+    description: "Automated git operations, branch management, and repository workflows"
+    
+    capabilities:
+      - "automated_branching"
+      - "commit_automation"
+      - "pull_request_management"
+      - "merge_automation"
+      - "repository_synchronization"
+    
+    features:
+      - "Intelligent branch naming and management"
+      - "Automated commit message generation"
+      - "Pull request creation and management"
+      - "Cross-repository synchronization"
+      - "Integration with CI/CD pipelines"
+    
+    dependencies: []
+    
+    compatible_repositories: ["*"]
+    
+    configuration_schema:
+      required:
+        - "repository_url"
+        - "branch_strategy"
+      optional:
+        - "commit_template"
+        - "pr_template"
+        - "auto_merge_rules"
+    
+    usage_examples:
+      create_branch: "/create-branch feature/user-auth --from main --push-remote"
+      auto_commit: "/auto-commit --message 'Add user authentication' --include-tests"
+      create_pr: "/create-pr --title 'User Authentication' --base main --auto-merge"
+
+# Module Definitions
+modules:
+  
+  agent-os:
+    metadata:
+      name: "agent-os"
+      version: "1.0.0"
+      status: "active"
+      last_updated: "2025-08-05"
+      
+    path: "src/modules/agent-os/"
+    description: "Enhanced workflow automation and specification management for AI-assisted development"
+    
+    sub_agents:
+      - "workflow-automation"
+    
+    components:
+      - "enhanced_documentation_generator.py"
+      - "cross_reference_manager.py"
+      - "template_customization_system.py"
+      - "templates/enhanced-spec-template.md"
+    
+    capabilities:
+      - "Enhanced spec creation with visual documentation"
+      - "Template customization and variant management"
+      - "Cross-repository integration and sharing"
+      - "AI persistence and context management"
+      - "Quality validation and compliance checking"
+    
+    integration_points:
+      - "CLAUDE.md system"
+      - "Agent OS Framework"
+      - "Cross-repository references"
+      - "Git workflows"
+      - "Testing frameworks"
+  
+  file-management:
+    metadata:
+      name: "file-management"
+      version: "0.9.0"
+      status: "beta"
+      
+    path: "src/modules/file-management/"
+    description: "Advanced file operations, batch processing, and organization utilities"
+    
+    sub_agents:
+      - "file-management-automation"
+    
+    components:
+      - "batch_processor.py"
+      - "file_organizer.py"
+      - "filter_engine.py"
+      - "validation_system.py"
+    
+    capabilities:
+      - "Pattern-based file filtering and selection"
+      - "Automated file organization and categorization"
+      - "Batch operations with progress tracking"
+      - "File content validation and processing"
+    
+    integration_points:
+      - "Git utilities for version control"
+      - "Visualization for progress reporting"
+      - "Authentication for secure operations"
+  
+  visualization:
+    metadata:
+      name: "visualization"
+      version: "0.8.5"
+      status: "beta"
+      
+    path: "src/modules/visualization/"
+    description: "Data visualization, charting, and automated reporting utilities"
+    
+    sub_agents:
+      - "visualization-automation"
+    
+    components:
+      - "chart_generator.py"
+      - "dashboard_builder.py"
+      - "export_manager.py"
+      - "template_system.py"
+    
+    capabilities:
+      - "Automatic chart type selection and generation"
+      - "Interactive and static visualization creation"
+      - "Multi-format export and publishing"
+      - "Template-based visualization workflows"
+    
+    integration_points:
+      - "File management for data input/output"
+      - "Agent OS for documentation integration"
+      - "Git utilities for version control"
+  
+  authentication:
+    metadata:
+      name: "authentication"
+      version: "1.1.0"
+      status: "active"
+      
+    path: "src/modules/authentication/"
+    description: "User authentication, authorization, and security management"
+    
+    sub_agents:
+      - "auth-system"
+    
+    components:
+      - "auth_manager.py"
+      - "rbac_system.py"
+      - "session_handler.py"
+      - "security_validator.py"
+    
+    capabilities:
+      - "Multi-factor authentication and verification"
+      - "Role-based access control and permissions"
+      - "Secure session management"
+      - "Comprehensive security validation"
+    
+    security_compliance:
+      - "OWASP security guidelines"
+      - "Industry standard encryption"
+      - "Audit logging and monitoring"
+      - "Privacy and data protection"
+    
+    integration_points:
+      - "All modules for security integration"
+      - "External identity providers"
+      - "Audit and monitoring systems"
+  
+  git-utilities:
+    metadata:
+      name: "git-utilities"
+      version: "1.0.0"
+      status: "active"
+      
+    path: "src/modules/git-utilities/"
+    description: "Git workflow automation, repository management, and version control utilities"
+    
+    sub_agents:
+      - "git-workflow-automation"
+    
+    components:
+      - "branch_manager.py"
+      - "commit_automation.py"
+      - "pr_manager.py"
+      - "sync_manager.py"
+    
+    capabilities:
+      - "Automated git workflow management"
+      - "Cross-repository synchronization"
+      - "Pull request automation"
+      - "Branch strategy enforcement"
+    
+    integration_points:
+      - "Agent OS for workflow integration"
+      - "File management for repository operations"
+      - "Authentication for secure access"
+      - "CI/CD pipeline integration"
+
+# Registry Usage Guidelines
+usage_guidelines:
+  
+  referencing_sub_agents:
+    format: "@assetutilities:agents/registry/sub-agents/{sub_agent_name}"
+    examples:
+      - "@assetutilities:agents/registry/sub-agents/workflow-automation"
+      - "@assetutilities:agents/registry/sub-agents/file-management-automation"
+  
+  referencing_components:
+    format: "@assetutilities:{module_path}/{component_name}"
+    examples:
+      - "@assetutilities:src/modules/agent-os/enhanced-create-specs/enhanced_documentation_generator.py"
+      - "@assetutilities:src/modules/file-management/automation/batch_processor.py"
+  
+  version_compatibility:
+    registry_version: "1.0.0"
+    minimum_client_version: "1.0.0"
+    compatibility_check: "required"
+  
+  repository_setup:
+    required_files:
+      - ".agent-os/cross-repo-config.yaml"
+    optional_files:
+      - ".agent-os/user-preferences.yaml"
+      - ".agent-os/organization-standards.yaml"
+    
+    configuration_template: |
+      # Cross-repository configuration
+      hub_repository: "assetutilities"
+      hub_path: "/path/to/assetutilities"
+      shared_components:
+        - "agent-os/enhanced-create-specs/enhanced_documentation_generator.py"
+      sub_agents:
+        - "workflow-automation"
+      version_requirements:
+        registry: ">=1.0.0"
+        agent-os: ">=1.0.0"
+
+# Support and Documentation
+support:
+  documentation_url: "@docs/modules/"
+  registry_documentation: "@docs/agents/registry/"
+  troubleshooting_guide: "@docs/troubleshooting/hub-integration.md"
+  examples_repository: "@examples/hub-integration/"
+  
+  contact_information:
+    team_email: "hub-team@assetutilities.org"
+    issue_tracker: "https://github.com/user/assetutilities/issues"
+    discussions: "https://github.com/user/assetutilities/discussions"
+  
+  contribution_guidelines:
+    new_sub_agents: "@docs/contributing/new-sub-agents.md"
+    module_updates: "@docs/contributing/module-updates.md"
+    registry_maintenance: "@docs/contributing/registry-maintenance.md"
+
+# Quality Assurance and Monitoring
+quality_assurance:
+  validation_required: true
+  testing_coverage: ">= 80%"
+  documentation_required: true
+  compatibility_testing: true
+  
+  monitoring:
+    usage_analytics: true
+    performance_metrics: true
+    error_tracking: true
+    version_adoption: true
+  
+  quality_gates:
+    - "All tests must pass"
+    - "Documentation must be complete"
+    - "Security review completed"
+    - "Performance benchmarks met"
+    - "Compatibility verified"
+
+# Version History
+version_history:
+  "1.0.0":
+    release_date: "2025-08-05"
+    changes:
+      - "Initial shared sub-agent registry"
+      - "Workflow automation sub-agent (v1.0.0)"
+      - "File management automation sub-agent (v0.9.0)"
+      - "Visualization automation sub-agent (v0.8.5)"
+      - "Authentication system sub-agent (v1.1.0)"
+      - "Git workflow automation sub-agent (v1.0.0)"
+      - "Comprehensive module definitions and integration points"
+      - "Usage guidelines and support documentation"
+    migration_notes: "Initial release - no migration required"
+    breaking_changes: []
+    deprecations: []

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 basename: download_data
 
 default:
@@ -16,4 +17,24 @@ input_data:
     url3: https://www.data.bsee.gov/Well/Files/eWellEORRawData.zip
   out_directory: tests/modules/download_data/results/Data
 
+=======
+basename: download_data
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+type: 
+#TBA extra things
+
+input_data:
+  urls:
+    url1: https://www.data.bsee.gov/Well/Files/APDRawData.zip
+    url2: https://www.data.bsee.gov/Well/Files/BoreholeRawData.zip
+    url3: https://www.data.bsee.gov/Well/Files/eWellEORRawData.zip
+  out_directory: tests\modules\download_data\results\Data
+
+>>>>>>> Stashed changes
      

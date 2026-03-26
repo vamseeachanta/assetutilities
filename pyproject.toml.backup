@@ -1,0 +1,126 @@
+[project]
+name = "assetutilities"
+version = "0.0.8"
+description = "utilities for general use"
+authors = [{name = "Vamsee Achanta", email = "vamsee.achanta@aceengineer.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    # Core data processing
+    "numpy>=1.24.0",
+    "pandas",
+    "openpyxl",
+    
+    # Visualization
+    "plotly",
+    "matplotlib",
+    
+    # Configuration and data formats
+    "pyyaml>=6.0",
+    "ruamel.yaml",
+    "jinja2",
+    
+    # File and encoding utilities
+    "chardet",
+    "python-certifi-win32",
+    "webcolors",
+    
+    # Excel utilities
+    "xlsxwriter",
+    "excel2img; sys_platform == 'win32'",
+    
+    # Document processing
+    "python-docx",
+    "PyPDF2>=3.0.0",
+    "pdfplumber>=0.9.0",
+    "PyMuPDF>=1.23.0",
+    "tabula",
+    
+    # Web scraping and automation
+    "scrapy==2.12",
+    "beautifulsoup4>=4.11.0",
+    "lxml>=4.9.0",
+    "requests>=2.28.0",
+    "playwright",
+    "selenium",
+    "fake_headers",
+    "undetected-chromedriver",
+    "parsel",
+    
+    # Content indexing and search
+    "sentence-transformers>=2.2.0",
+    
+    # Utilities
+    "plantuml",
+    "deepdiff",
+    "pandoc",
+    "wkhtmltopdf",
+    "gitpython==3.1.31",
+    "sympy>=1.13.3",
+    "utm",
+    "crochet",
+    "loguru",
+    
+    # File type detection
+    "python-magic>=0.4.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "bumpver",
+    "pytest",
+    "ruff",
+]
+
+[setuptools]
+include-package-data = true
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool]
+[tool.bumpver]
+current_version = "0.0.8"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"',
+]
+"src/assetutilities/__init__.py" = ["{version}"]
+"src/assetutilities/__main__.py" = ["- assetutilities v{version}"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["assetutilities"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

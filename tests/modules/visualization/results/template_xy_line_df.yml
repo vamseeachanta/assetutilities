@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 basename: visualization
 default:
   log_level: INFO
@@ -143,3 +144,150 @@ Analysis:
   result_data_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Data
   result_plot_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results/Plot
   fe_folder: /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/visualization/results
+=======
+basename: visualization
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+data:
+  r:
+  - 0.5
+  - 1
+  - 2
+  - 2.5
+  - 3
+  - 4
+  theta:
+  - 35
+  - 70
+  - 120
+  - 155
+  - 205
+  - 240
+  type: df
+  groups:
+  - columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    color: []
+    alpha: []
+    linestyle: []
+    marker:
+      symbol: square
+      size: 5
+      line:
+        width: 1
+        color: black
+    filter: []
+    transform: []
+    label: FST1
+    file_name: tests/modules/data_exploration/csv/test_1.csv
+  color:
+  - blue
+  - green
+  alpha:
+  - 1
+  - 0.75
+  linestyle:
+  - --
+  - '-'
+  - '-'
+  - ':'
+settings:
+  type: xy
+  mode: line
+  plt_engine: plotly
+  label: Allowable Wave Height
+  multiple: false
+  file_name: ~
+  plt_save_extensions:
+  - .html
+  title: Wind Coefficients for FSTs, Cx
+  xlabel: Heading
+  ylabel: data
+  columns_var_name: ~
+  customize_xdate_ticks:
+    flag: false
+    start_time: ~
+    end_time: ~
+  customize_y_ticks:
+    flag: false
+    max_value: ~
+    least_value: ~
+  set_rmax: 10
+  set_rticks:
+  - 1
+  - 2
+  - 3
+  set_thetagrids:
+  - 0
+  - 30
+  - 60
+  - 90
+  - 120
+  - 150
+  - 180
+  - 210
+  - 240
+  - 270
+  - 300
+  - 330
+  set_rlabel_position: -22.5
+  legend:
+    flag: true
+    loc: best
+    prop:
+      family: Arial
+      size: 8
+  xlim: ~
+  ylim: ~
+  xscale:
+    log: false
+  color:
+  - '#17becf'
+  linestyle:
+  - '-'
+  markerprops:
+  - marker: o
+    markersize: 2
+  alpha:
+  - 1.0
+master_settings:
+  groups:
+    columns:
+      x:
+      - Heading
+      y:
+      - Cx
+    color: []
+    alpha: []
+    linestyle: []
+    marker:
+      symbol: square
+      size: 5
+      line:
+        width: 1
+        color: black
+    filter: []
+    transform: []
+    label: FST1
+    file_name: tests/modules/data_exploration/csv/test_1.csv
+Analysis:
+  basename: visualization
+  analysis_root_folder: K:\github\assetutilities\tests\modules\visualization
+  file_name: template_xy_line_df
+  file_name_for_overwrite: template_xy_line_df
+  log_folder: K:\github\assetutilities\tests\modules\visualization\logs
+  start_time: 2025-07-13 21:12:45.410211
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: K:\github\assetutilities\tests\modules\visualization\template_xy_line_df.yml
+  result_folder: K:\github\assetutilities\tests\modules\visualization\results
+  result_data_folder: K:\github\assetutilities\tests\modules\visualization\results\Data
+  result_plot_folder: K:\github\assetutilities\tests\modules\visualization\results\Plot
+  fe_folder: K:\github\assetutilities\tests\modules\visualization\results
+>>>>>>> Stashed changes

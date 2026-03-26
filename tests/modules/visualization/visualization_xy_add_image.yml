@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 basename: visualization
 
 default:
@@ -54,3 +55,61 @@ data:
   color: [blue, green]
   alpha: [1, 0.75]
   linestyle: ["--", "-", "-", ":"]
+=======
+basename: visualization
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: xy_line
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: False
+  file_name: NULL
+  plt_save_extensions: [".png"]
+  title: Wind Coefficients for FSTs, Cx
+  xlabel: Direction (deg)
+  ylabel: Cx
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  legend:
+    flag: True
+    label: []
+    loc: best
+    prop: { family: Arial, size: 8 }
+  add_image:
+    flag: True
+    image_path: src\assetutilities\tests\test_data\visualization\test_data\plot.png
+    transperancy: 0.3
+    x: { min: 50, max: 300 }
+    y: { min: -0.25, max: 0.25 }
+
+master_settings:
+  groups:
+    columns: { x: [Heading], y: [Cx] }
+    color: []
+    alpha: []
+    linestyle: []
+    marker:
+      type: "o"
+      size: 3
+      edge_color: None
+
+data:
+  type: csv
+  groups:
+    - label: FST1
+      file_name: src/assetutilities/tests/test_data/visualization/csv/test_1.csv
+    - label: FST2
+      file_name: src/assetutilities/tests/test_data/visualization/csv/test_2.csv
+
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]
+>>>>>>> Stashed changes
