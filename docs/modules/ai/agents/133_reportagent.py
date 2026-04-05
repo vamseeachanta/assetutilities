@@ -24,7 +24,7 @@ from tavily import AsyncTavilyClient
 
 load_dotenv()
 
-llm = OpenAI(model="gpt-4o")
+llm = OpenAI(model="gpt-4.1")
 
 """## Create a function to perform web searches asynchronously
 
