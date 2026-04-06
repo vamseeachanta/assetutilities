@@ -18,7 +18,8 @@ from pathlib import Path
 
 # Import the modules we'll be testing
 import sys
-sys.path.insert(0, '/mnt/github/github/assetutilities/src/modules/agent_os/enhanced_create_specs')
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir, os.pardir, 'src', 'modules', 'agent_os', 'enhanced_create_specs'))
 
 from ai_persistence_system import (
     SystemLevelManager,
