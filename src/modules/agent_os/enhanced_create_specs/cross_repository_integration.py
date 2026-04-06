@@ -242,7 +242,7 @@ class GitSubmoduleIntegration:
                 check=True
             )
             return submodule_name in result.stdout
-        except subprocess.CalledProcessError:
+        except Exception:
             return False
     
     def add_submodule(self, config: Dict) -> Dict:
@@ -269,8 +269,8 @@ class GitSubmoduleIntegration:
             result['success'] = True
             result['message'] = f"Submodule added successfully: {submodule_path}"
             
-        except subprocess.CalledProcessError as e:
-            result['error'] = e.stderr or str(e)
+        except Exception as e:
+            result['error'] = str(e)
             result['message'] = f"Failed to add submodule: {result['error']}"
             
         return result
@@ -434,6 +434,7 @@ class ReferenceResolver:
                 
         except Exception as e:
             result['error'] = str(e)
+            result['success'] = False
             
         return result
     
@@ -716,7 +717,7 @@ class OfflineFallbackManager:
             subprocess.run(['ping', '-c', '1', '8.8.8.8'], 
                          timeout=5, check=True, capture_output=True)
             return False
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, Exception):
             return True
     
     async def get_fallback_content(self, reference: str, **options) -> Dict:

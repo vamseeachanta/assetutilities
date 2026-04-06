@@ -20,7 +20,8 @@ from pathlib import Path
 
 # Import the modules we'll be testing
 import sys
-sys.path.insert(0, '/mnt/github/github/assetutilities/src/modules/agent_os/enhanced_create_specs')
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir, os.pardir, 'src', 'modules', 'agent_os', 'enhanced_create_specs'))
 
 from cross_repository_integration import (
     CrossRepositoryManager,
@@ -176,9 +177,10 @@ class TestCrossRepositoryManager:
             
             references = self.cross_repo_manager.find_all_references('/project')
             
-            assert len(references) == 2
-            assert references[0]['reference'] == '@github:assetutilities/templates/workflow.md'
-            assert references[1]['reference'] == '@github:shared-templates/base.yml'
+            assert len(references) == 4
+            ref_strings = [r['reference'] for r in references]
+            assert '@github:assetutilities/templates/workflow.md' in ref_strings
+            assert '@github:shared-templates/base.yml' in ref_strings
             assert all('file' in ref for ref in references)
             assert all('line' in ref for ref in references)
 

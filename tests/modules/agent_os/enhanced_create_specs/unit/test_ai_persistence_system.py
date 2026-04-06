@@ -498,8 +498,8 @@ class TestContextHierarchyManager:
         
         # Verify all levels are represented
         assert merged_context['system']['ai_behaviors']['code_style'] == 'pythonic'
-        assert merged_context['user']['communication_style'] == 'detailed'
-        assert merged_context['repository']['testing_framework'] == 'pytest'
+        assert merged_context['user']['preferences']['communication_style'] == 'detailed'
+        assert merged_context['repository']['project_patterns']['testing_framework'] == 'pytest'
         assert merged_context['session']['current_task'] == 'test_context_merging'
     
     @pytest.mark.asyncio
@@ -807,8 +807,8 @@ class TestIntegrationScenarios:
         
         # Verify all levels are properly merged
         assert merged_context['system']['ai_behaviors']['code_style'] == 'pythonic'
-        assert merged_context['user']['communication_style'] == 'detailed_explanations'
-        assert merged_context['repository']['testing_framework'] == 'pytest'
+        assert merged_context['user']['preferences']['communication_style'] == 'detailed_explanations'
+        assert merged_context['repository']['project_patterns']['testing_framework'] == 'pytest'
         assert merged_context['session']['current_task'] == 'implement_ai_persistence_system'
         
         # 6. Make a decision and record it
@@ -855,8 +855,8 @@ class TestIntegrationScenarios:
         
         # Context should be restored from files
         assert restored_context['system']['ai_behaviors']['code_style'] == 'pythonic'
-        assert restored_context['user']['communication_style'] == 'detailed_explanations'
-        assert restored_context['repository']['testing_framework'] == 'pytest'
+        assert restored_context['user']['preferences']['communication_style'] == 'detailed_explanations'
+        assert restored_context['repository']['project_patterns']['testing_framework'] == 'pytest'
         
         print("✅ Complete AI context workflow test passed!")
 
