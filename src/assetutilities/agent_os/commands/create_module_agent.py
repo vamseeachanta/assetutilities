@@ -254,6 +254,10 @@ class CreateModuleAgentCommand:
         try:
             if isinstance(args, dict):
                 # Support dict-based API for programmatic calls
+                # Allow agents_base_dir override for testing
+                agents_base_dir = args.get("agents_base_dir")
+                if agents_base_dir:
+                    self.agents_dir = Path(agents_base_dir)
                 parsed_args = ParsedArgs(
                     module_name=args.get("module_name", args.get("module", "unnamed")),
                     type=args.get("agent_type", args.get("type", "general-purpose")),
@@ -390,7 +394,7 @@ You are a specialized AI agent for {{module_name}} with expertise in {{domain}}.
         # Also create the original simplified config for backward compatibility
         simplified_config = {
             "enhanced_specs": {
-                "integration": True,
+                "enabled": True,
                 "auto_update": True,
                 "workflow_refresh": {
                     "enabled": True,
@@ -401,6 +405,13 @@ You are a specialized AI agent for {{module_name}} with expertise in {{domain}}.
                     "enabled": True,
                     "pattern_recognition": True,
                     "optimization": True
+                },
+                "features": {
+                    "prompt_evolution": True,
+                    "executive_summaries": True,
+                    "mermaid_diagrams": True,
+                    "task_tracking": True,
+                    "cross_repo_references": True
                 }
             }
         }
