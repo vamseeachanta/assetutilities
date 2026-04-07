@@ -240,18 +240,30 @@ class CreateModuleAgentCommand:
         self.config_generator = ConfigGenerator()
         self.doc_scanner = DocumentationScanner()
 
-    def execute(self, args: List[str]) -> CommandResult:
+    def execute(self, args) -> CommandResult:
         """Execute the create-module-agent command.
         
         Args:
-            args: Command arguments
+            args: List of command strings OR dict with keys like
+                  module_name, agent_type, repos, templates, context_cache,
+                  agents_base_dir, config_file
             
         Returns:
             CommandResult with execution status
         """
         try:
-            # Parse arguments
-            parsed_args = self.parser.parse(args)
+            if isinstance(args, dict):
+                # Support dict-based API for programmatic calls
+                parsed_args = ParsedArgs(
+                    module_name=args.get("module_name", args.get("module", "unnamed")),
+                    type=args.get("agent_type", args.get("type", "general-purpose")),
+                    repos=args.get("repos", []),
+                    context_cache=args.get("context_cache", True),
+                    templates=args.get("templates", [])
+                )
+            else:
+                # Parse arguments from list of strings
+                parsed_args = self.parser.parse(args)
             
             # Create agent structure
             agent_dir = self.structure_generator.create_structure(parsed_args.module_name)
