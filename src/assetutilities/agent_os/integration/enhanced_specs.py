@@ -53,11 +53,15 @@ class EnhancedSpecsIntegration:
     def _load_or_create_config(self) -> EnhancedSpecsConfig:
         """Load existing config or create default."""
         config_path = self.workflows_dir / "enhanced_specs.yaml"
-        
+
         if config_path.exists():
-            with open(config_path, 'r') as f:
-                config_data = yaml.safe_load(f)
-                return EnhancedSpecsConfig(**config_data.get('enhanced_specs', {}))
+            with open(config_path, "r") as f:
+                config_data = yaml.safe_load(f) or {}
+            raw = config_data.get("enhanced_specs", {})
+            # Filter to known dataclass fields; ignore stale keys (#1962)
+            known = {"enabled", "auto_update", "workflow_refresh", "learning", "features"}
+            safe = {k: v for k, v in raw.items() if k in known}
+            return EnhancedSpecsConfig(**safe)
         else:
             return EnhancedSpecsConfig()
     
