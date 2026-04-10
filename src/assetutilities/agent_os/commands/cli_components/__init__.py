@@ -1,10 +1,6 @@
-# ABOUTME: Backward-compatible re-exports from decomposed cli_components/ subpackage.
-# ABOUTME: All classes moved to focused modules under commands/cli_components/.
-"""Backward-compatible re-exports from decomposed cli_components/ subpackage.
-
-All classes have been moved to focused modules under commands/cli_components/.
-Import from the new locations for new code.
-"""
+# ABOUTME: Re-export hub for CLI components subpackage.
+# ABOUTME: Extracted from cli.py for focused module organization.
+"""CLI components -- extracted from cli.py."""
 
 from assetutilities.agent_os.commands.cli_components.models import (
     ErrorResult,
