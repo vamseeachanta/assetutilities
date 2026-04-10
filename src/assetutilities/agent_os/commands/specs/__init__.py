@@ -1,10 +1,6 @@
-# ABOUTME: Backward-compatible re-exports from decomposed specs/ subpackage.
-# ABOUTME: All classes moved to focused modules under commands/specs/.
-"""Backward-compatible re-exports from decomposed specs/ subpackage.
-
-All classes have been moved to focused modules under commands/specs/.
-Import from the new locations for new code.
-"""
+# ABOUTME: Re-export hub for specs integration subpackage.
+# ABOUTME: Extracted from specs_integration.py for focused module organization.
+"""Enhanced specs integration system -- extracted from specs_integration.py."""
 
 from assetutilities.agent_os.commands.specs.models import (
     EnhancedSpecsConfig,
