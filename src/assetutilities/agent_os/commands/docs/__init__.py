@@ -1,10 +1,6 @@
-# ABOUTME: Backward-compatible re-exports from decomposed docs/ subpackage.
-# ABOUTME: All classes moved to focused modules under commands/docs/.
-"""Backward-compatible re-exports from decomposed docs/ subpackage.
-
-All classes have been moved to focused modules under commands/docs/.
-Import from the new locations for new code.
-"""
+# ABOUTME: Re-export hub for documentation integration subpackage.
+# ABOUTME: Extracted from documentation_integration.py for focused module organization.
+"""Documentation integration system -- extracted from documentation_integration.py."""
 
 from assetutilities.agent_os.commands.docs.linker import ExternalDocumentationLinker
 from assetutilities.agent_os.commands.docs.parser import MarkdownParser
