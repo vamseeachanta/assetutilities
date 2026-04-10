@@ -1,10 +1,6 @@
-# ABOUTME: Backward-compatible re-exports from decomposed templates/ subpackage.
-# ABOUTME: All classes moved to focused modules under commands/templates/.
-"""Backward-compatible re-exports from decomposed templates/ subpackage.
-
-All classes have been moved to focused modules under commands/templates/.
-Import from the new locations for new code.
-"""
+# ABOUTME: Re-export hub for template management subpackage.
+# ABOUTME: Extracted from template_management.py for focused module organization.
+"""Template management system -- extracted from template_management.py."""
 
 from assetutilities.agent_os.commands.templates.models import (
     Capabilities,
