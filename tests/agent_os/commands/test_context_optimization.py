@@ -202,7 +202,7 @@ class TestEmbeddingGenerator:
     def setup_method(self):
         """Set up test environment."""
         # Mock the sentence transformer to avoid dependency
-        with patch('assetutilities.agent_os.commands.context_optimization.SentenceTransformer'):
+        with patch('assetutilities.agent_os.commands.context.embedding.SentenceTransformer'):
             self.generator = EmbeddingGenerator(model_name="all-MiniLM-L6-v2")
 
     def test_generate_text_embedding(self):
@@ -223,7 +223,7 @@ class TestEmbeddingGenerator:
         assert embeddings.shape[0] == 3  # 3 texts
         assert embeddings.shape[1] == 384  # Mock embedding dimensions
 
-    @patch('assetutilities.agent_os.commands.context_optimization.SentenceTransformer')
+    @patch('assetutilities.agent_os.commands.context.embedding.SentenceTransformer')
     def test_embed_document_chunks(self, mock_transformer):
         """Test embedding document chunks."""
         mock_model = Mock()
@@ -369,20 +369,20 @@ class TestSemanticSearch:
             {"id": "3", "content": "Database optimization", "metadata": {"type": "optimization"}}
         ]
 
-    @patch('assetutilities.agent_os.commands.context_optimization.faiss')
+    @patch('assetutilities.agent_os.commands.context.embedding.faiss')
     def test_build_search_index(self, mock_faiss):
         """Test building FAISS search index."""
         mock_index = Mock()
         mock_faiss.IndexFlatL2.return_value = mock_index
-        
-        with patch('assetutilities.agent_os.commands.context_optimization.FAISS_AVAILABLE', True):
+
+        with patch('assetutilities.agent_os.commands.context.embedding.FAISS_AVAILABLE', True):
             SemanticSearch(self.mock_embeddings, self.mock_documents)
-        
+
             mock_faiss.IndexFlatL2.assert_called_once_with(3)  # 3 dimensions
             mock_index.add.assert_called_once()
 
-    @patch('assetutilities.agent_os.commands.context_optimization.faiss')
-    @patch('assetutilities.agent_os.commands.context_optimization.SentenceTransformer')
+    @patch('assetutilities.agent_os.commands.context.embedding.faiss')
+    @patch('assetutilities.agent_os.commands.context.embedding.SentenceTransformer')
     def test_semantic_search(self, mock_transformer, mock_faiss):
         """Test semantic search functionality."""
         # Mock FAISS index
@@ -398,7 +398,7 @@ class TestSemanticSearch:
         mock_model.encode.return_value = np.array([0.2, 0.3, 0.4])
         mock_transformer.return_value = mock_model
         
-        with patch('assetutilities.agent_os.commands.context_optimization.FAISS_AVAILABLE', True):
+        with patch('assetutilities.agent_os.commands.context.embedding.FAISS_AVAILABLE', True):
             search = SemanticSearch(self.mock_embeddings, self.mock_documents)
             search.index = mock_index  # Set the mocked index
             results = search.search("python tutorial", k=3)
