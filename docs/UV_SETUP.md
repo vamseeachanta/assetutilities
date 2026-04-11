@@ -35,9 +35,13 @@ uv remove requests
 ## 7. Run commands in the environment
 ```bash
 uv run python script.py
-uv run pytest
+uv run python -m pytest tests
 uv run ruff check .
 ```
+
+Run tests from the repository root using `uv run python -m pytest tests`.
+Do not use `--noconftest`; the supported test path relies on the repository's
+pytest configuration and shared fixtures.
 
 ## 8. Install a specific Python version
 ```bash

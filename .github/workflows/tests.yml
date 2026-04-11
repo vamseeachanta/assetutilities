@@ -29,4 +29,4 @@ jobs:
           uv pip install pytest-benchmark
 
       - name: Run tests
-        run: uv run python -m pytest tests/ --noconftest -q --tb=short --ignore=tests/modules/file_management
+        run: uv run python -m pytest tests -q --tb=short
