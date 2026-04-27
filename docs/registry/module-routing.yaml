@@ -1,0 +1,66 @@
+schema_version: 1
+repo: assetutilities
+issue: 2461
+canonical_surfaces:
+  agents: AGENTS.md
+  readme: README.md
+  docs_entry: docs/README.md
+  module_structure: MODULE_STRUCTURE.md
+  operator_map: docs/maps/assetutilities-operator-map.md
+  registry: docs/registry/module-routing.yaml
+  hygiene_gate: scripts/hygiene/check-source-hygiene.sh
+modules:
+  - name: agent_os
+    source_path: src/assetutilities/agent_os/
+    tests_path: tests/bash-setup/
+    docs_path: docs/modules/agent-os/
+    domain: agent command orchestration
+    stability: active
+  - name: base_configs
+    source_path: src/assetutilities/base_configs/
+    tests_path: tests/modules/
+    docs_path: docs/README.md
+    domain: shared configuration templates
+    stability: active
+  - name: calculations
+    source_path: src/assetutilities/calculations/
+    tests_path: tests/benchmarks/
+    docs_path: docs/README.md
+    domain: engineering calculations
+    stability: active
+  - name: cli
+    source_path: src/assetutilities/cli/
+    tests_path: tests/bash-setup/
+    docs_path: docs/commands/
+    domain: command-line helpers
+    stability: active
+  - name: common
+    source_path: src/assetutilities/common/
+    tests_path: tests/unit/
+    docs_path: docs/modules/
+    domain: shared file, data, YAML, visualization, and validation helpers
+    stability: active
+  - name: constants
+    source_path: src/assetutilities/constants/
+    tests_path: tests/unit/
+    docs_path: docs/README.md
+    domain: engineering constants and lookup data
+    stability: active
+  - name: devtools
+    source_path: src/assetutilities/devtools/
+    tests_path: tests/unit/
+    docs_path: src/assetutilities/devtools/README.md
+    domain: developer tooling
+    stability: active
+  - name: modules
+    source_path: src/assetutilities/modules/
+    tests_path: tests/modules/
+    docs_path: docs/modules/
+    domain: higher-level utility modules
+    stability: active
+  - name: units
+    source_path: src/assetutilities/units/
+    tests_path: tests/unit/
+    docs_path: docs/README.md
+    domain: units and quantities
+    stability: active

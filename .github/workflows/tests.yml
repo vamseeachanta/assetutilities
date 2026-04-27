@@ -28,5 +28,8 @@ jobs:
           uv sync --group dev
           uv pip install pytest-benchmark
 
+      - name: Run source hygiene gate
+        run: bash scripts/hygiene/check-source-hygiene.sh
+
       - name: Run tests
         run: uv run python -m pytest tests -q --tb=short
