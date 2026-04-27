@@ -9,3 +9,5 @@ maturity: stable
 
 Contract: ../AGENTS.md | Source: src/assetutilities/
 Key modules: engine.py, calculation.py, calculations/, base_configs/, common/, devtools/
+Canonical routing: docs/README.md, docs/maps/assetutilities-operator-map.md, docs/registry/module-routing.yaml, MODULE_STRUCTURE.md
+Hygiene gate: bash scripts/hygiene/check-source-hygiene.sh
