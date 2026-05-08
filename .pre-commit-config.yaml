@@ -23,6 +23,16 @@ repos:
         types: [python]
         exclude: ^tests/
 
+  # Repository structure gate (issue #78): prevent new root/generated drift
+  - repo: local
+    hooks:
+      - id: verify-repo-structure
+        name: Verify repository structure contract
+        language: system
+        entry: uv run python scripts/maintenance/verify_repo_structure.py
+        pass_filenames: false
+        always_run: true
+
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.21.2
     hooks:
