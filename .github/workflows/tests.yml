@@ -25,8 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --group dev
-          uv pip install pytest-benchmark
+          uv sync --group test
 
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh
