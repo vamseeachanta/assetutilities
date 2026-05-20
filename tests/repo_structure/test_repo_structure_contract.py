@@ -180,3 +180,11 @@ def test_ci_and_pre_commit_invoke_repo_structure_checker() -> None:
     assert "scripts/maintenance/verify_repo_structure.py" in PRE_COMMIT.read_text(
         encoding="utf-8"
     )
+
+
+def test_ci_uses_declared_test_dependency_group() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "uv sync --group test" in workflow
+    assert "uv sync --group dev" not in workflow
+    assert "uv pip install pytest-benchmark" not in workflow
