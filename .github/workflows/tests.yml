@@ -33,5 +33,10 @@ jobs:
       - name: Run repo-structure contract gate
         run: uv run python scripts/maintenance/verify_repo_structure.py
 
+      - name: Verify base_configs ship in the wheel (assetutilities#88 guard)
+        run: |
+          uv build --wheel --out-dir dist_check
+          uv run python scripts/maintenance/check_wheel_package_data.py dist_check
+
       - name: Run tests
         run: uv run python -m pytest tests -q --tb=short
