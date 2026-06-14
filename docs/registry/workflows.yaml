@@ -1,0 +1,88 @@
+# AssetUtilities workflow registry
+#
+# Discoverable UV workflows exposed via the standard contract:
+#   uv run python -m assetutilities examples/workflows/<slug>/input.yml
+# run from the repo root. __main__.py -> engine(inputfile) reads the YAML,
+# dispatches on cfg["basename"], and writes results next to the input.
+#
+# Invariant: each row below has a working example that runs GREEN and
+# produces the listed outputs. Routed basenames that cannot run green
+# offline are intentionally omitted (see PR body / issue for the deferred
+# list and reasons).
+schema_version: 1
+repo: assetutilities
+issue: 3063
+workflows:
+  - id: visualization
+    basename: visualization
+    input: examples/workflows/visualization/input.yml
+    outputs:
+      - examples/workflows/visualization/results/Plot/x_y_line.png
+    test: uv run python -m assetutilities examples/workflows/visualization/input.yml
+    runtime: fast
+
+  - id: data_exploration
+    basename: data_exploration
+    input: examples/workflows/data_exploration/input.yml
+    outputs:
+      - examples/workflows/data_exploration/results/input_FST1.csv
+      - examples/workflows/data_exploration/results/input_FST2.csv
+    test: uv run python -m assetutilities examples/workflows/data_exploration/input.yml
+    runtime: fast
+
+  - id: excel_utilities
+    basename: excel_utilities
+    input: examples/workflows/excel_utilities/input.yml
+    outputs:
+      - examples/workflows/excel_utilities/input_data/output.xlsx
+    test: uv run python -m assetutilities examples/workflows/excel_utilities/input.yml
+    runtime: fast
+
+  - id: zip_utilities
+    basename: zip_utilities
+    input: examples/workflows/zip_utilities/input.yml
+    outputs:
+      - examples/workflows/zip_utilities/zip/caseA.zip
+      - examples/workflows/zip_utilities/zip/caseB.zip
+    test: uv run python -m assetutilities examples/workflows/zip_utilities/input.yml
+    runtime: fast
+
+  - id: yaml_utilities
+    basename: yaml_utilities
+    input: examples/workflows/yaml_utilities/input.yml
+    outputs:
+      - examples/workflows/yaml_utilities/results/input.yml
+    test: uv run python -m assetutilities examples/workflows/yaml_utilities/input.yml
+    runtime: fast
+
+  - id: file_management
+    basename: file_management
+    input: examples/workflows/file_management/input.yml
+    outputs:
+      - examples/workflows/file_management/results/input.yml
+    test: uv run python -m assetutilities examples/workflows/file_management/input.yml
+    runtime: fast
+
+  - id: file_edit
+    basename: file_edit
+    input: examples/workflows/file_edit/input.yml
+    outputs:
+      - examples/workflows/file_edit/combined_doc.dat
+    test: uv run python -m assetutilities examples/workflows/file_edit/input.yml
+    runtime: fast
+
+  - id: word_utilities
+    basename: word_utilities
+    input: examples/workflows/word_utilities/input.yml
+    outputs:
+      - examples/workflows/word_utilities/data/sample_table.docx
+    test: uv run python -m assetutilities examples/workflows/word_utilities/input.yml
+    runtime: fast
+
+  - id: reportgen
+    basename: reportgen
+    input: examples/workflows/reportgen/input.yml
+    outputs:
+      - examples/workflows/reportgen/outputs/sample-report.out.md
+    test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
+    runtime: fast

@@ -1,0 +1,33 @@
+meta:
+  basename: excel_utilities
+  library: assetutilities
+
+basename: excel_utilities
+
+# Copy CSV data into sheets of an Excel workbook (template -> output).
+# Paths below are resolved relative to this file's directory.
+# Output: input_data/output.xlsx
+
+task: csv_copy_to_excel
+
+data:
+  input_format: csv
+  groups:
+    - target:
+        template: input_data/template.xlsx
+        filename: input_data/output.xlsx
+      csvs:
+        - input:
+            filename: input_data/inputs.csv
+          target:
+            sheet_name: inputs
+        - input:
+            filename: input_data/results.csv
+          target:
+            sheet_name: results
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True

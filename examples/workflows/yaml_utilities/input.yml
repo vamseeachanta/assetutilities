@@ -1,0 +1,31 @@
+meta:
+  basename: yaml_utilities
+  library: assetutilities
+
+# Resolve reusable YAML variable placeholders ({{ ... }}) within this file.
+# The router rewrites the placeholder_tests block using the referenced keys
+# and logs that the placeholder key is reusable.
+
+define: placeholder
+
+test_variables:
+  flag: True
+  method: placeholder
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: False
+
+data:
+  type: input
+  groups:
+    - label: placeholder
+
+placeholder_tests:
+  method: "{{ test_variables.method }}"
+  library: "{{ meta.library }}"
