@@ -1,0 +1,34 @@
+basename: file_edit
+edit_type: concatenate
+concatenate_type: array
+
+# Concatenate an ordered array of partial files into a single combined file.
+# Input parts live in input_files/ (resolved relative to this file's directory).
+# Output: combined_doc.dat
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+input:
+  - output_filename: NULL
+    input_file_labels: [doc]
+    output_basename: combined
+    output_dir: NULL
+    file_extension: dat
+    filename:
+    input_files:
+      [
+        [
+          input_files/_header.deck,
+          input_files/_section1.deck,
+          input_files/_section2.deck,
+          input_files/_footer.deck,
+        ],
+      ]
+    batch:
+      flag: False
+      extension: no
+      content:

@@ -1,0 +1,31 @@
+basename: data_exploration
+
+# Compute basic descriptive statistics across two CSV groups.
+# Sample data: csv/sample_1.csv, csv/sample_2.csv (paths are relative to repo root).
+
+type:
+  df_statistics:
+    flag: False
+    df_array: True
+    df: True
+  df_basic_statistics:
+    flag: True
+    add_to_df: False
+
+data:
+  type: csv
+  groups:
+    - label: FST1
+      file_name: examples/workflows/data_exploration/csv/sample_1.csv
+    - label: FST2
+      file_name: examples/workflows/data_exploration/csv/sample_2.csv
+
+master_settings:
+  groups:
+    columns: { x: [Heading], y: [Cx] }
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
