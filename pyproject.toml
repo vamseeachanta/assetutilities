@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "assetutilities"
-version = "0.1.0"
+version = "0.1.1"
 description = "Standardized project configuration for assetutilities"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -114,6 +114,12 @@ assetutils-propagate = "assetutilities.devtools.cli:main"
 where = ["src"]
 include = ["assetutilities*"]
 exclude = ["tests*", "docs*"]
+
+# Ship the per-basename engine configs loaded via pkgutil.get_data() at runtime.
+# Without this they are dropped from the wheel (base_configs/ is not a Python package),
+# breaking every workflow when installed from a wheel. See assetutilities#88.
+[tool.setuptools.package-data]
+assetutilities = ["base_configs/**/*.yml", "base_configs/**/*.yaml", "base_configs/**/*.csv"]
 
 [tool.black]
 line-length = 88
