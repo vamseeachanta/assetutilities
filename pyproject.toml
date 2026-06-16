@@ -135,6 +135,10 @@ python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+# Hyphenated module dirs are not valid Python package names — mypy aborts (exit 2)
+# on them before type-checking. Exclude so mypy runs (workspace-hub#3148).
+# Follow-up: rename these dirs to valid package names.
+exclude = '(^|/)(web-contextualization|agent-os)(/|$)'
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
