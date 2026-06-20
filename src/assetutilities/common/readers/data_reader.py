@@ -133,7 +133,7 @@ class ReadData:
         import yaml
 
         with open(data["io"]) as ymlfile:
-            data_as_dictionary = yaml.load(ymlfile, Loader=yaml.Loader)
+            data_as_dictionary = yaml.safe_load(ymlfile)
 
         return data_as_dictionary
 

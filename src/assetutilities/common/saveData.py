@@ -67,12 +67,14 @@ def saveDataYaml(data, fileName, default_flow_style=False):
     elif default_flow_style == "OrderedDumper":
         with open(fileName + ".yml", "w") as f:
             yaml.dump(data, f, Dumper=OrderedDumper)
-    elif default_flow_style == "ruamel":
-        with open(fileName + ".yml", "w") as f:
-            ruamel.yaml.dump(data, f)
-    elif default_flow_style == "round_trip_dump":
-        with open(fileName + ".yml", "w") as f:
-            ruamel.yaml.round_trip_dump(data, f)
+    elif default_flow_style in ("ruamel", "round_trip_dump"):
+        # Round-trip (comment/format preserving) dump via the shared ruamel helper.
+        # Previously these branches referenced an unimported ``ruamel`` symbol and
+        # raised NameError; they now delegate to the canonical ruamel utility so the
+        # YAML-split feature and these save paths share one round-trip implementation.
+        from assetutilities.modules.yml_utilities.ruamel_yaml import save_yml
+
+        save_yml(data, fileName + ".yml")
     else:
         with open(fileName + ".yml", "w") as f:
             yaml.dump(data, f, default_flow_style=default_flow_style)

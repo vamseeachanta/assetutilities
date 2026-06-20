@@ -71,20 +71,24 @@ class FileManagement:
         # TODO Test for multiple filter values
         # Only singleton array for cfg_filter['contains'] and cfg_filter['not_contains'] tested
 
-        filtered_files = files.copy()
+        # Helper to check if a filter key is None or empty.
+        def apply_filter(filter_key: str) -> bool:
+            filter_value = cfg_filter.get(filter_key)
+            return (
+                filter_value is not None
+                and filter_value != "NULL"
+                and (not isinstance(filter_value, list) or len(filter_value) > 0)
+            )
+
+        # Build the result by KEEPING files that pass, rather than removing by
+        # value from a copy. The previous `filtered_files.remove(file)` removed
+        # the first element equal to `file`, so duplicate entries (possible from
+        # glob) dropped the wrong item (review 2026-05-23).
+        filtered_files = []
         for file in files:
             file_path = pathlib.Path(file)
             file_stem = file_path.stem
             conditions = []
-
-            # Helper function for all filters to check if None or empty
-            def apply_filter(filter_key: str) -> bool:
-                filter_value = cfg_filter.get(filter_key)
-                return (
-                    filter_value is not None
-                    and filter_value != "NULL"
-                    and (not isinstance(filter_value, list) or len(filter_value) > 0)
-                )
 
             # 1. CONTAINS (must include ALL specified substrings)
             if apply_filter("contains"):
@@ -116,9 +120,11 @@ class FileManagement:
                 except re.error:  # Invalid regex → treat as no match
                     conditions.append(False)
 
-            # Apply AND logic (all conditions must be True)
-            if conditions and not all(conditions):
-                filtered_files.remove(file)
+            # Apply AND logic: keep the file unless an applicable filter fails.
+            # A file with no applicable filters is kept (matches prior behaviour
+            # where removal only happened when `conditions` was non-empty).
+            if not conditions or all(conditions):
+                filtered_files.append(file)
 
         return filtered_files
 

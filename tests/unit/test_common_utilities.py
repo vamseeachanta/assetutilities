@@ -303,3 +303,40 @@ class TestGetColors:
         # Act / Assert
         with pytest.raises(ValueError):
             get_colors(set="multi", n=9)
+
+
+# ---------------------------------------------------------------------------
+# get_module_path (imp -> importlib migration, review 2026-05-23)
+# ---------------------------------------------------------------------------
+
+
+class TestGetModulePath:
+    """get_module_path resolves a module/package path via importlib.
+
+    The deprecated `imp` module was removed in Python 3.12; these tests pin the
+    importlib-based replacement.
+    """
+
+    def test_resolves_package_directory(self):
+        from assetutilities.common.utilities import get_module_path
+
+        # A package: result is its directory and must exist.
+        result = get_module_path("assetutilities")
+
+        assert os.path.isdir(result)
+        assert result.endswith("assetutilities")
+
+    def test_resolves_stdlib_module_file(self):
+        from assetutilities.common.utilities import get_module_path
+
+        # A plain (non-package) module: result is its source file path.
+        result = get_module_path("csv")
+
+        assert os.path.exists(result)
+        assert result.endswith("csv.py")
+
+    def test_unknown_module_raises_importerror(self):
+        from assetutilities.common.utilities import get_module_path
+
+        with pytest.raises(ImportError):
+            get_module_path("this_module_does_not_exist_xyz")

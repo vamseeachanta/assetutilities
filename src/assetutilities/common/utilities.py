@@ -15,14 +15,24 @@ def get_valid_file_name(file_name):
 
 
 def get_module_path(module=None):
-    import imp
+    # The deprecated `imp` module was removed in Python 3.12; use importlib
+    # (review 2026-05-23). `imp.find_module` returned the package directory for
+    # packages and the source file for plain modules; reproduce that here.
+    import importlib.util
 
     if module is None:
         module_path = __name__
         module = module_path.split(".")[0]
-    module_info = imp.find_module(module)
-    module_path = module_info[1]
-    return module_path
+    spec = importlib.util.find_spec(module)
+    if spec is None:
+        raise ImportError(f"Module '{module}' not found")
+    if spec.submodule_search_locations:
+        # Package: return its directory (matches imp.find_module behaviour).
+        return list(spec.submodule_search_locations)[0]
+    if spec.origin:
+        # Plain module: return the source file path.
+        return spec.origin
+    raise ImportError(f"Could not resolve path for module '{module}'")
 
 
 # Determine if file is valid

@@ -243,6 +243,41 @@ class TestGetFilteredFiles:
             # Assert — NULL is treated as disabled filter, all files returned
             assert len(result) == 2
 
+    def test_duplicate_passing_files_are_all_kept_in_order(self):
+        # Regression for review 2026-05-23: the old implementation removed
+        # files by value from a copy (filtered_files.remove(file)), which on
+        # duplicate entries (possible from glob) could drop the wrong element.
+        # The filter must preserve every passing entry, including duplicates,
+        # in their original order.
+        fm = FileManagement()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            keep = pathlib.Path(tmpdir) / "report_2023.csv"
+            keep.touch()
+            drop = pathlib.Path(tmpdir) / "other.csv"
+            drop.touch()
+            # Interleave a duplicated passing path with a failing path.
+            files = [keep, drop, keep]
+            cfg_filter = {"contains": ["2023"]}
+
+            # Act
+            result = fm.get_filtered_files(files, cfg_filter)
+
+            # Assert — both occurrences of the passing file survive, in order,
+            # and the failing file is dropped.
+            assert result == [keep, keep]
+
+    def test_no_applicable_filter_keeps_file(self):
+        # A file with no applicable (non-empty) filter must be kept, matching
+        # the prior behaviour where removal only happened on an explicit fail.
+        fm = FileManagement()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            files = self._make_files(tmpdir, ["x.txt"])
+            cfg_filter = {"contains": [], "not_contains": "NULL"}
+
+            result = fm.get_filtered_files(files, cfg_filter)
+
+            assert len(result) == 1
+
 
 # ---------------------------------------------------------------------------
 # FileManagement.router

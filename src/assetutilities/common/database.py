@@ -58,17 +58,29 @@ class Database:
         self.cursor = None
         self.conn = None
 
+    # Maximum number of attempts for the retry decorator. Bounds what was
+    # previously unbounded recursion (issue #80), preventing a RecursionError /
+    # stack overflow when an operation fails persistently.
+    DB_RETRY_MAX_ATTEMPTS = 5
+
     def db_retry_decorator(f):
         import logging
         from functools import wraps
 
         @wraps(f)
         def wrapper(self, *args, **kwargs):
-            try:
-                return f(self, *args, **kwargs)
-            except Exception as e:
-                logging.info(str(e))
-                return wrapper(self, *args, **kwargs)
+            max_attempts = getattr(self, "DB_RETRY_MAX_ATTEMPTS", 5)
+            last_exc = None
+            for _ in range(max_attempts):
+                try:
+                    return f(self, *args, **kwargs)
+                except Exception as e:
+                    last_exc = e
+                    logging.info(str(e))
+            # Exhausted all attempts; re-raise the last error instead of
+            # recursing forever.
+            if last_exc is not None:
+                raise last_exc
 
         return wrapper
 
@@ -148,13 +160,12 @@ class Database:
                     )
                     try:
                         self.engine = create_engine(
-                            connection_string_generic, encoding="utf-8", echo=False
+                            connection_string_generic, echo=False
                         )
-                    except:
+                    except Exception:
                         print("Generic driver did not work. Utilizing specific driver")
                         self.engine = create_engine(
                             connection_string_driver_specific,
-                            encoding="utf-8",
                             echo=False,
                         )
                 else:
@@ -167,7 +178,6 @@ class Database:
                     )
                     self.engine = create_engine(
                         sql_alchemy_connection_string_generic,
-                        encoding="utf-8",
                         echo=False,
                     )
 
@@ -227,9 +237,14 @@ class Database:
                 serverStatusResult = db.command("serverStatus")
                 pprint(serverStatusResult)
 
-                connection_string = f"postgresql+psycopg2://{self.user}:{self.password}@{self.server}:{self.port}/{self.database}"
-                self.engine = create_engine(connection_string)
-                self.conn = self.engine.connect()
+                # MongoDB is a non-SQL store; building a postgresql+psycopg2
+                # engine here was a copy/paste error that silently connected to
+                # Postgres instead of Mongo (review 2026-05-23). Surface the
+                # missing wiring instead of misconnecting.
+                raise NotImplementedError(
+                    "MongoDB SQLAlchemy engine wiring is not implemented; "
+                    "use the MongoClient `client` directly."
+                )
             except (Exception, psycopg2.Error) as error:
                 print("Error while connecting to PostgreSQL", error)
                 logging.info(f"Error while connecting to PostgreSQL {error}")
@@ -247,16 +262,14 @@ class Database:
 
                 import pyodbc  # type: ignore
 
+                # Build the DBQ from the configured database path. A previous
+                # hardcoded developer path (C:\Users\achantv\...) that overrode
+                # this value was removed (review 2026-05-23) so the connection
+                # is no longer bound to one machine.
                 dbq = rf"DBQ={PureWindowsPath(self.database)}"
-                # below not working
                 connection_string_generic = (
                     r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
                 )
-                connection_string_generic = (
-                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
-                    + r"Dbq=C:\Users\achantv\Documents\Utilities\aceengineer\data_manager\data\bsee\2018_Atlas_Update.accdb;"
-                )
-                print(connection_string_generic)
                 self.conn = pyodbc.connect(connection_string_generic)
 
                 import pypyodbc  # type: ignore
@@ -264,16 +277,12 @@ class Database:
                 pypyodbc.lowercase = False
                 from pathlib import PureWindowsPath
 
+                # Same as above: derive DBQ from the configured database path
+                # rather than a hardcoded developer path (review 2026-05-23).
                 dbq = rf"DBQ={PureWindowsPath(self.database)}"
-                # below not working
                 connection_string_generic = (
                     r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
                 )
-                connection_string_generic = (
-                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
-                    + r"Dbq=C:\Users\achantv\Documents\Utilities\aceengineer\data_manager\data\bsee\2018_Atlas_Update.accdb;"
-                )
-                print(connection_string_generic)
                 self.conn = pypyodbc.connect(connection_string_generic)
 
             except Exception as e:
@@ -838,6 +847,19 @@ class Database:
                 print("Not a valid filename")
 
     def executeScriptsFromFile(self, filename, arg_array=None):
+        """Execute a SQL script file, substituting positional ``arg_array`` values.
+
+        .. warning::
+            SQL-INJECTION RISK (issue #80, partially mitigated). This method
+            interpolates ``arg_array`` into the SQL text via ``str.format`` rather
+            than passing them as bound parameters. Full remediation requires
+            migrating the external ``.sql`` template files (which live outside
+            this repo, under ``data_manager/data/.../functions``) from ``{}``
+            placeholders to DBAPI parameter markers and passing
+            ``params=arg_array`` to ``pd.read_sql_query``. Until those templates
+            are migrated, callers MUST only pass trusted, validated values in
+            ``arg_array`` (never raw user input). Tracked for human follow-up.
+        """
         import pandas as pd
 
         if arg_array is None:

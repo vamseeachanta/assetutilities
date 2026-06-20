@@ -16,6 +16,7 @@ import json
 import yaml
 import hashlib
 import subprocess
+import platform
 import pathlib
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass
@@ -711,13 +712,21 @@ class OfflineFallbackManager:
         """Check if system is in offline mode"""
         if not self.enable_network_check:
             return False
-        
+
+        # Probe network reachability with `ping` via subprocess.run. The count
+        # flag is platform-dependent (`-n` on Windows, `-c` elsewhere); the old
+        # hard-coded `-c` always took the except branch on Windows and reported
+        # "offline" even when online (review 2026-05-23). Any failure (non-zero
+        # exit, timeout, or OSError) means the network is unreachable.
+        count_flag = '-n' if platform.system().lower() == 'windows' else '-c'
+
         try:
-            # Try to ping a reliable service
-            subprocess.run(['ping', '-c', '1', '8.8.8.8'], 
-                         timeout=5, check=True, capture_output=True)
+            subprocess.run(
+                ['ping', count_flag, '1', '8.8.8.8'],
+                timeout=5, check=True, capture_output=True
+            )
             return False
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, Exception):
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError, Exception):
             return True
     
     async def get_fallback_content(self, reference: str, **options) -> Dict:
