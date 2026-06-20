@@ -1,4 +1,7 @@
 import os
+
+import pytest
+
 from assetutilities.engine import engine
 
 
@@ -20,6 +23,19 @@ def run_process(input_file):
     return cfg
 
 
+@pytest.mark.xfail(
+    reason=(
+        "csv_utilities router is an unimplemented loud stub — see engine.py. "
+        "CSVUtilitiesRouter.router is a no-op (its only branch is `pass`) and "
+        "CSVUtilities is an internal zip_utilities helper that reads a zip "
+        "file-object, not a standalone path workflow. The engine now raises "
+        "NotImplementedError for basename 'csv_utilities' (PR #95). This test "
+        "previously passed only because the old silent no-op returned an "
+        "unchanged cfg; it never exercised real csv_utilities behavior."
+    ),
+    raises=NotImplementedError,
+    strict=False,
+)
 def test_run_process():
     input_file = "csv_with_latin1.yml"
     result = run_process(input_file)
