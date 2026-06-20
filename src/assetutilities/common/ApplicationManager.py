@@ -169,14 +169,14 @@ class ConfigureApplicationInputs:
     def generateYMLInput(self, run_dict, cfg_argv_dict):
         if os.path.isfile(self.ApplicationInputFile):
             with open(self.ApplicationInputFile) as ymlfile:
-                cfg = yaml.load(ymlfile, Loader=yaml.Loader)
+                cfg = yaml.safe_load(ymlfile)
         else:
             cfg = self.ApplicationInputFile_dict
 
         if self.customYaml is not None:
             try:
                 with open(self.customYaml) as ymlfile:
-                    cfgCustomValues = yaml.load(ymlfile, Loader=yaml.Loader)
+                    cfgCustomValues = yaml.safe_load(ymlfile)
                     default_yaml_file = cfgCustomValues.get("default_yaml", None)
 
                 with open(self.customYaml) as fp:
@@ -197,17 +197,15 @@ class ConfigureApplicationInputs:
 
         if (self.customYaml is not None) or (self.CustomInputs is not None):
             if default_yaml_file is None:
-                cfgDefaultAndCustomValues = yaml.load(
-                    custom_file_data, Loader=yaml.Loader
-                )
+                cfgDefaultAndCustomValues = yaml.safe_load(custom_file_data)
             else:
                 with open(default_yaml_file) as fp:
                     default_file_data = fp.read()
                 custom_and_default_yaml_data = (
                     custom_file_data + "\n" + default_file_data
                 )
-                cfgDefaultAndCustomValues = yaml.load(
-                    custom_and_default_yaml_data, Loader=yaml.Loader
+                cfgDefaultAndCustomValues = yaml.safe_load(
+                    custom_and_default_yaml_data
                 )
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)

@@ -58,17 +58,29 @@ class Database:
         self.cursor = None
         self.conn = None
 
+    # Maximum number of attempts for the retry decorator. Bounds what was
+    # previously unbounded recursion (issue #80), preventing a RecursionError /
+    # stack overflow when an operation fails persistently.
+    DB_RETRY_MAX_ATTEMPTS = 5
+
     def db_retry_decorator(f):
         import logging
         from functools import wraps
 
         @wraps(f)
         def wrapper(self, *args, **kwargs):
-            try:
-                return f(self, *args, **kwargs)
-            except Exception as e:
-                logging.info(str(e))
-                return wrapper(self, *args, **kwargs)
+            max_attempts = getattr(self, "DB_RETRY_MAX_ATTEMPTS", 5)
+            last_exc = None
+            for _ in range(max_attempts):
+                try:
+                    return f(self, *args, **kwargs)
+                except Exception as e:
+                    last_exc = e
+                    logging.info(str(e))
+            # Exhausted all attempts; re-raise the last error instead of
+            # recursing forever.
+            if last_exc is not None:
+                raise last_exc
 
         return wrapper
 
@@ -838,6 +850,19 @@ class Database:
                 print("Not a valid filename")
 
     def executeScriptsFromFile(self, filename, arg_array=None):
+        """Execute a SQL script file, substituting positional ``arg_array`` values.
+
+        .. warning::
+            SQL-INJECTION RISK (issue #80, partially mitigated). This method
+            interpolates ``arg_array`` into the SQL text via ``str.format`` rather
+            than passing them as bound parameters. Full remediation requires
+            migrating the external ``.sql`` template files (which live outside
+            this repo, under ``data_manager/data/.../functions``) from ``{}``
+            placeholders to DBAPI parameter markers and passing
+            ``params=arg_array`` to ``pd.read_sql_query``. Until those templates
+            are migrated, callers MUST only pass trusted, validated values in
+            ``arg_array`` (never raw user input). Tracked for human follow-up.
+        """
         import pandas as pd
 
         if arg_array is None:

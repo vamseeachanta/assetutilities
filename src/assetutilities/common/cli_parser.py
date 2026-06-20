@@ -5,6 +5,7 @@ This module provides utilities to parse modern CLI arguments in various formats,
 supporting both legacy dictionary format and modern --key value format.
 """
 
+import ast
 import sys
 from typing import Dict, List, Any, Tuple, Optional
 
@@ -138,12 +139,16 @@ def parse_hybrid_arguments(inputfile: Optional[str] = None) -> Tuple[str, Dict[s
         # Check if using old dictionary format
         arg2 = sys.argv[2]
         if arg2.strip().startswith("{") and arg2.strip().endswith("}"):
-            # Legacy format: parse as Python dictionary
+            # Legacy format: parse as Python dictionary literal.
+            # ast.literal_eval safely evaluates only Python literal structures
+            # (dicts/lists/strings/numbers/etc.); unlike eval() it rejects
+            # arbitrary expressions such as __import__(...) or function calls,
+            # closing the RCE-by-design vector (issue #80).
             try:
-                cfg_argv_dict = eval(arg2)
+                cfg_argv_dict = ast.literal_eval(arg2)
                 if not isinstance(cfg_argv_dict, dict):
                     raise ValueError("Not a dictionary")
-            except Exception as e:
+            except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError) as e:
                 raise ValueError(
                     f"Check dictionary format provided in {arg2} ... FAIL. Error: {e}"
                 )
