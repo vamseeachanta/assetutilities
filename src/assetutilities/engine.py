@@ -1,8 +1,8 @@
-# Standard library imports
-import logging
-
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
+# Loguru logging shim (issue #28). Drop-in replacement for `logging.info(...)`;
+# the run-log file is still configured by ApplicationManager via set_logging.
+from assetutilities.common.logging_setup import logger
 from assetutilities.common.download_data.dwnld_from_zipurl import DownloadDataFromURL
 from assetutilities.common.file_edit import FileEdit
 from assetutilities.common.file_management import FileManagement
@@ -50,7 +50,7 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     else:
         cfg_base = cfg
 
-    logging.info(f"{basename}, application ... START")
+    logger.info(f"{basename}, application ... START")
 
     if basename in ["excel_utilities"]:
         # Reader imports
@@ -150,6 +150,6 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     if cfg is None:
         save_application_cfg(cfg_base=cfg_base)
 
-    logging.info(f"{basename}, application ... END")
+    logger.info(f"{basename}, application ... END")
     cfg_base = app_manager.save_cfg(cfg_base=cfg_base)
     return cfg_base
