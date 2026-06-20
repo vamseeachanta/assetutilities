@@ -22,7 +22,9 @@ class DownloadDataFromURL:
 
     def download_and_process_zip(self, url, cfg):
         base_name = os.path.basename(urlparse(url).path).replace(".zip", "")
-        r = requests.get(url)
+        # (connect, read) timeout so a slow/hung remote cannot stall the
+        # process indefinitely (review 2026-05-23).
+        r = requests.get(url, timeout=(5, 30))
         r.raise_for_status()  # Check if the download was successful
 
         z = zipfile.ZipFile(io.BytesIO(r.content))

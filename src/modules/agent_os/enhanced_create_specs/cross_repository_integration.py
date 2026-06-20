@@ -712,12 +712,17 @@ class OfflineFallbackManager:
         if not self.enable_network_check:
             return False
         
+        # Use a cross-platform TCP reachability probe instead of `ping -c`,
+        # whose `-c` flag is POSIX-only; on Windows the old code always took the
+        # except branch and reported "offline" even when online (review
+        # 2026-05-23). A successful TCP connect to a public DNS resolver
+        # (8.8.8.8:53) means the network is reachable.
+        import socket
+
         try:
-            # Try to ping a reliable service
-            subprocess.run(['ping', '-c', '1', '8.8.8.8'], 
-                         timeout=5, check=True, capture_output=True)
-            return False
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, Exception):
+            with socket.create_connection(("8.8.8.8", 53), timeout=2):
+                return False
+        except OSError:
             return True
     
     async def get_fallback_content(self, reference: str, **options) -> Dict:

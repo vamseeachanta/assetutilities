@@ -160,13 +160,12 @@ class Database:
                     )
                     try:
                         self.engine = create_engine(
-                            connection_string_generic, encoding="utf-8", echo=False
+                            connection_string_generic, echo=False
                         )
-                    except:
+                    except Exception:
                         print("Generic driver did not work. Utilizing specific driver")
                         self.engine = create_engine(
                             connection_string_driver_specific,
-                            encoding="utf-8",
                             echo=False,
                         )
                 else:
@@ -179,7 +178,6 @@ class Database:
                     )
                     self.engine = create_engine(
                         sql_alchemy_connection_string_generic,
-                        encoding="utf-8",
                         echo=False,
                     )
 
@@ -239,9 +237,14 @@ class Database:
                 serverStatusResult = db.command("serverStatus")
                 pprint(serverStatusResult)
 
-                connection_string = f"postgresql+psycopg2://{self.user}:{self.password}@{self.server}:{self.port}/{self.database}"
-                self.engine = create_engine(connection_string)
-                self.conn = self.engine.connect()
+                # MongoDB is a non-SQL store; building a postgresql+psycopg2
+                # engine here was a copy/paste error that silently connected to
+                # Postgres instead of Mongo (review 2026-05-23). Surface the
+                # missing wiring instead of misconnecting.
+                raise NotImplementedError(
+                    "MongoDB SQLAlchemy engine wiring is not implemented; "
+                    "use the MongoClient `client` directly."
+                )
             except (Exception, psycopg2.Error) as error:
                 print("Error while connecting to PostgreSQL", error)
                 logging.info(f"Error while connecting to PostgreSQL {error}")
@@ -259,16 +262,14 @@ class Database:
 
                 import pyodbc  # type: ignore
 
+                # Build the DBQ from the configured database path. A previous
+                # hardcoded developer path (C:\Users\achantv\...) that overrode
+                # this value was removed (review 2026-05-23) so the connection
+                # is no longer bound to one machine.
                 dbq = rf"DBQ={PureWindowsPath(self.database)}"
-                # below not working
                 connection_string_generic = (
                     r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
                 )
-                connection_string_generic = (
-                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
-                    + r"Dbq=C:\Users\achantv\Documents\Utilities\aceengineer\data_manager\data\bsee\2018_Atlas_Update.accdb;"
-                )
-                print(connection_string_generic)
                 self.conn = pyodbc.connect(connection_string_generic)
 
                 import pypyodbc  # type: ignore
@@ -276,16 +277,12 @@ class Database:
                 pypyodbc.lowercase = False
                 from pathlib import PureWindowsPath
 
+                # Same as above: derive DBQ from the configured database path
+                # rather than a hardcoded developer path (review 2026-05-23).
                 dbq = rf"DBQ={PureWindowsPath(self.database)}"
-                # below not working
                 connection_string_generic = (
                     r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
                 )
-                connection_string_generic = (
-                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
-                    + r"Dbq=C:\Users\achantv\Documents\Utilities\aceengineer\data_manager\data\bsee\2018_Atlas_Update.accdb;"
-                )
-                print(connection_string_generic)
                 self.conn = pypyodbc.connect(connection_string_generic)
 
             except Exception as e:

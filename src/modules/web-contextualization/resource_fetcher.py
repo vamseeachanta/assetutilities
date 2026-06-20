@@ -46,7 +46,19 @@ class ResourceFetcher:
             "status": None,
             "error": None
         }
-        
+
+        # Only allow http(s). Schemes such as file:// and gopher:// (curl)
+        # would permit local file reads / SSRF if the URL is operator- or
+        # attacker-influenced (review 2026-05-23).
+        scheme = urlparse(url).scheme.lower()
+        if scheme not in ("http", "https"):
+            metadata["status"] = "failed"
+            metadata["error"] = (
+                f"Unsupported URL scheme: {scheme!r} (only http/https allowed)"
+            )
+            logger.error(metadata["error"])
+            return None, metadata
+
         # Generate cache filename
         cache_path = self._get_cache_path(url)
         
@@ -250,16 +262,13 @@ class ResourceFetcher:
         logger.info(f"Saved version: {version_path}")
     
     def _check_command(self, command: str) -> bool:
-        """Check if a command is available."""
-        try:
-            result = subprocess.run(
-                ['which', command],
-                capture_output=True,
-                text=True
-            )
-            return result.returncode == 0
-        except:
-            return False
+        """Check if a command is available.
+
+        Uses ``shutil.which`` (cross-platform, no subprocess) instead of
+        shelling out to ``which``; the bare ``except:`` that previously masked
+        ``KeyboardInterrupt``/``SystemExit`` is removed (review 2026-05-23).
+        """
+        return shutil.which(command) is not None
     
     def clean_cache(self, max_age_days: int = 30, max_size_mb: int = 500):
         """Clean old cache files."""

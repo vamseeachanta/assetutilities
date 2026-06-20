@@ -10,6 +10,10 @@ from colorama import init as colorama_init
 
 colorama_init()
 
+# (connect, read) timeout in seconds for all HTTP calls. Without a timeout a
+# slow or hung remote stalls the process indefinitely (review 2026-05-23).
+HTTP_TIMEOUT = (5, 30)
+
 
 class BS4Scraper:
     def __init__(self):
@@ -30,7 +34,7 @@ class BS4Scraper:
 
         session = requests.Session()
 
-        response = session.get(url)  # GET request to the form page
+        response = session.get(url, timeout=HTTP_TIMEOUT)  # GET request to the form page
         soup = BeautifulSoup(response.content, "html.parser")
 
         viewstate = soup.find("input", {"name": "__VIEWSTATE"})["value"]
@@ -49,7 +53,7 @@ class BS4Scraper:
         )
 
         # Submit the API form
-        response = session.post(url, data=first_request_data)
+        response = session.post(url, data=first_request_data, timeout=HTTP_TIMEOUT)
         soup = BeautifulSoup(response.content, "html.parser")
 
         if response.status_code == 200:
@@ -76,7 +80,7 @@ class BS4Scraper:
             }
         )
 
-        csv_response = session.post(url, data=second_request_data)
+        csv_response = session.post(url, data=second_request_data, timeout=HTTP_TIMEOUT)
 
         label = input_item["label"]
         output_path = input_item["output_dir"]
