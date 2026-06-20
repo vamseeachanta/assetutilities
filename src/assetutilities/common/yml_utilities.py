@@ -16,6 +16,7 @@ import yaml  # type: ignore[import-untyped]
 import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
 from jinja2 import Environment, StrictUndefined
+from jinja2.exceptions import TemplateError, UndefinedError
 from loguru import logger
 
 # Reader imports
@@ -51,6 +52,56 @@ def ymlInput(defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]
 
 def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return WorkingWithYAML().update_deep(d, u)
+
+
+def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None) -> Any:
+    """Recursively substitute ``{{ key }}`` placeholders in a YAML-derived tree.
+
+    This implements the "YAML placeholders" scenario of issue #59. Unlike native
+    YAML anchors/aliases (``&name`` / ``*name``), which the loader resolves and
+    which only reference a single previously-defined node, placeholders are plain
+    quoted strings such as ``"{{ meta.library }}"`` that are resolved *after*
+    parsing. They can therefore reference any key in the document (including
+    nested keys via dotted access) and be embedded inside larger strings.
+
+    Substitution is performed with Jinja2. Dotted placeholders like
+    ``{{ meta.library }}`` resolve against the nested mapping ``context["meta"]``.
+
+    Args:
+        data: The value or tree to resolve. Typically the parsed config ``dict``.
+        context: Mapping that placeholder names are rendered against. When
+            ``None`` and ``data`` is a mapping, ``data`` is used as its own
+            context, supporting self-referential documents (the common case).
+
+    Returns:
+        A new structure mirroring ``data`` with every resolvable placeholder
+        replaced by its string value. Placeholders that reference an undefined
+        key are left untouched so unrelated braces are never destroyed.
+
+    Notes:
+        Note that a bare, unquoted ``{{ key }}`` in YAML is *not* a string but a
+        nested mapping (``{{'key': None}: None}``) and so cannot be resolved here;
+        placeholders must be quoted to round-trip through the YAML parser.
+    """
+    if context is None:
+        context = data if isinstance(data, Mapping) else {}
+
+    env = Environment(undefined=StrictUndefined, autoescape=False)
+
+    if isinstance(data, str):
+        try:
+            return env.from_string(data).render(**dict(context))
+        except UndefinedError:
+            # Reference a key that does not exist: leave the literal in place.
+            return data
+        except TemplateError as e:
+            logger.warning(f"Placeholder template error in {data!r}: {e}")
+            return data
+    if isinstance(data, Mapping):
+        return {k: resolve_placeholders(v, context) for k, v in data.items()}
+    if isinstance(data, list):
+        return [resolve_placeholders(item, context) for item in data]
+    return data
 
 
 class WorkingWithYAML:
@@ -370,20 +421,19 @@ class WorkingWithYAML:
             logger.error("yml key cannot be accesible:", e)
             return False, None
 
-    def process_placeholders(self, data: Any, context: dict[str, Any]) -> Any:
-        """
-        Recursively resolve all string fields using Jinja2 templates.
-        """
-        env = Environment(undefined=StrictUndefined)
+    def process_placeholders(self, data: Any, context: Optional[dict[str, Any]] = None) -> Any:
+        """Resolve ``{{ key }}`` placeholders in a config tree (backwards-compatible alias).
 
-        if isinstance(data, str):
-            try:
-                return env.from_string(data).render(**context)
-            except Exception as e:
-                logger.warning("Template failed: %s", e)
-                return data
-        elif isinstance(data, dict):
-            return {k: self.process_placeholders(v, context) for k, v in data.items()}
-        elif isinstance(data, list):
-            return [self.process_placeholders(i, context) for i in data]
-        return data
+        Thin wrapper around :func:`resolve_placeholders`. Retained so existing
+        callers (``test_variable_placeholder`` and downstream code) keep working.
+
+        Args:
+            data: The value/tree to resolve. Usually the full ``cfg`` dict.
+            context: Mapping that placeholders are rendered against. When
+                ``None`` and ``data`` is a mapping, ``data`` itself is used as
+                the context (the common "self-referential" YAML case).
+
+        Returns:
+            A new structure with every resolvable placeholder substituted.
+        """
+        return resolve_placeholders(data, context)
