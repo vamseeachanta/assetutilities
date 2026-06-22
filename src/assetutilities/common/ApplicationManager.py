@@ -138,9 +138,23 @@ class ConfigureApplicationInputs:
         return cfg
 
     def get_custom_file(self, run_dict=None, inputfile=None):
-        # Detect if running under pytest
-        is_pytest = any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
-        
+        # Detect if running under pytest.
+        #
+        # The argv-based check only works in the main pytest process. Under
+        # pytest-xdist each test runs in a separate worker subprocess whose
+        # sys.argv is ['-c'] (execnet bootstrap), so the argv check returns
+        # False there and the engine would silently skip merging the per-test
+        # input YAML -- flipping file_management.flag and raising
+        # KeyError: 'input_directory' (issue #101). PYTEST_CURRENT_TEST is set
+        # by pytest in every test-executing process, including xdist workers,
+        # so it is the robust signal; "pytest" in sys.modules is an additional
+        # fallback. The original argv check is kept for backward compatibility.
+        is_pytest = (
+            "PYTEST_CURRENT_TEST" in os.environ
+            or "pytest" in sys.modules
+            or any("pytest" in arg or "_pytest" in arg for arg in sys.argv[0:2])
+        )
+
         try:
             # During pytest, use the inputfile parameter if provided
             if is_pytest and inputfile is not None:
@@ -306,12 +320,10 @@ class ConfigureApplicationInputs:
             os.makedirs(result_folder, exist_ok=True)
 
         result_data_folder = os.path.join(result_folder, "Data")
-        if not os.path.exists(result_data_folder):
-            os.mkdir(result_data_folder)
+        os.makedirs(result_data_folder, exist_ok=True)
 
         result_plot_folder = os.path.join(result_folder, "Plot")
-        if not os.path.exists(result_plot_folder):
-            os.mkdir(result_plot_folder)
+        os.makedirs(result_plot_folder, exist_ok=True)
 
         result_folder_dict = {
             "result_folder": result_folder,
