@@ -7,11 +7,19 @@ on:
     branches: [main]
   workflow_dispatch:
 
-jobs:
-  tests:
-    name: Run Tests
-    runs-on: ubuntu-latest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  # ----------------------------------------------------- non-test gates ------
+  # Source hygiene, repo-structure contract, and the wheel-package-data guard
+  # (assetutilities#88). These ran as steps inside the old monolithic "Run
+  # Tests" job; they are now their own job and feed the aggregate gate below so
+  # they keep gating without coupling to the per-domain test fan-out.
+  gates:
+    name: Gates
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +32,7 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: |
-          uv sync --group test
+        run: uv sync --group test
 
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh
@@ -38,5 +45,140 @@ jobs:
           uv build --wheel --out-dir dist_check
           uv run python scripts/maintenance/check_wheel_package_data.py dist_check
 
-      - name: Run tests
-        run: uv run python -m pytest tests -q --tb=short
+  # --------------------------------------------------- domain discovery ------
+  # Modular per-domain test gate (ported from worldenergydata#531): a change
+  # fans out into one CI job per touched domain (+ the always-on cross-cutting
+  # core), so each domain passes/fails in isolation (a red domain no longer
+  # blocks green siblings) and they run in parallel. Targets come from
+  # scripts/ci/select_test_targets.py --emit-matrix — the single source of
+  # truth (a module is mapped iff tests/modules/<module>/ exists; new modules
+  # auto-map, guarded by tests/ci/test_select_test_targets.py). On core-path
+  # changes the matrix fans out to EVERY domain. The aggregate "Run Tests" job
+  # is the single required status check (name preserved for branch protection).
+  discover:
+    name: Discover domains
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.sel.outputs.matrix }}
+      scope: ${{ steps.sel.outputs.scope }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need the base commit to diff changed files
+
+      - name: Select domain matrix
+        id: sel
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # Stdlib only — no uv sync needed (keeps discovery fast).
+          if [ -n "$BASE_SHA" ]; then
+            git diff --name-only "$BASE_SHA"...HEAD > changed-files.txt
+          else
+            # push / dispatch: diff against the previous commit (fall back to a
+            # core path so a first/forced commit fans out to the full tree).
+            git diff --name-only HEAD~1...HEAD > changed-files.txt 2>/dev/null \
+              || echo "uv.lock" > changed-files.txt
+          fi
+          echo "Changed files:"; cat changed-files.txt
+          python3 scripts/ci/select_test_targets.py \
+            --emit-matrix --files-from changed-files.txt >> "$GITHUB_OUTPUT"
+          echo "--- matrix ---"; grep '^matrix=' "$GITHUB_OUTPUT" || true
+
+  test-domain:
+    name: Domain ${{ matrix.name }}
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # one red domain must not cancel the others
+      max-parallel: 10  # bound the fan-out (core changes can be ~28 domains)
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --group test
+
+      - name: Run domain tests (${{ matrix.name }})
+        env:
+          TARGETS: ${{ matrix.targets }}
+          MODE: ${{ matrix.mode }}
+          SHARD: ${{ matrix.name }}
+        run: |
+          # Build --deselect args for quarantined tests (known-broken on main,
+          # tracked by issues; see scripts/ci/quarantine.txt). They still RUN
+          # but do not block, at test granularity (never whole shards).
+          DESELECT=()
+          if [ -f scripts/ci/quarantine.txt ]; then
+            while IFS= read -r raw; do
+              line="${raw%%#*}"
+              line="$(echo "$line" | xargs || true)"
+              [ -z "$line" ] && continue
+              DESELECT+=(--deselect "$line")
+            done < scripts/ci/quarantine.txt
+          fi
+          [ "${#DESELECT[@]}" -gt 0 ] && echo "Quarantine: ${DESELECT[*]}"
+          XDIST=()
+          [ "$MODE" = "xdist" ] && XDIST=(-n auto)
+          echo "Shard '$SHARD' ($MODE): $TARGETS"
+          set +e
+          # shellcheck disable=SC2086 (TARGETS is an intentional target list)
+          uv run --with pytest-xdist python -m pytest $TARGETS "${XDIST[@]}" \
+            "${DESELECT[@]}" --tb=short --junitxml="test-results-${SHARD}.xml"
+          rc=$?
+          set -e
+          # exit code 5 = "no tests collected" (empty / norecursedirs-excluded
+          # shard) — not a failure for a per-domain shard.
+          if [ "$rc" -eq 5 ]; then
+            echo "::notice::shard '$SHARD' collected no tests — treating as pass"
+            rc=0
+          fi
+          exit "$rc"
+
+      - name: Upload domain test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.name }}
+          path: test-results-*.xml
+          if-no-files-found: ignore
+
+  # --------------------------------------------------------- aggregate gate --
+  # REQUIRED status check — name MUST stay "Run Tests" so branch protection is
+  # unchanged. Green only when the gates job and every domain job pass.
+  tests:
+    name: Run Tests
+    needs: [gates, discover, test-domain]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate results
+        run: |
+          echo "gates:       ${{ needs.gates.result }}"
+          echo "discover:    ${{ needs.discover.result }}"
+          echo "test-domain: ${{ needs.test-domain.result }}"
+          echo "scope:       ${{ needs.discover.outputs.scope }}"
+          if [ "${{ needs.gates.result }}" != "success" ]; then
+            echo "::error::non-test gates failed (hygiene / repo-structure / wheel)"
+            exit 1
+          fi
+          if [ "${{ needs.discover.result }}" != "success" ]; then
+            echo "::error::domain discovery failed"; exit 1
+          fi
+          # test-domain is a matrix; its result is 'success' only when every
+          # domain job passed (fail-fast is off, so all run to completion).
+          if [ "${{ needs.test-domain.result }}" != "success" ]; then
+            echo "::error::one or more domain jobs failed — see the Domain * jobs"
+            exit 1
+          fi
+          echo "All gates + domains green"
