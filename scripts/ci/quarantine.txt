@@ -15,4 +15,12 @@
 # quarantined test; pytest silently ignores a --deselect that doesn't match the
 # active rootdir, so whichever form is correct wins.
 #
-# (Seeded empty: tests.yml is green on main as of this change.)
+# issue #99 — network-dependent integration tests (live scrape/download of
+# data.bsee.gov). Not runnable on CI runners; quarantined until refactored into
+# hermetic mocked tests. Both node-id prefix forms listed (rootdir-ambiguous).
+tests/modules/web_scraping/test_BeautifulSoup.py::test_run_process
+modules/web_scraping/test_BeautifulSoup.py::test_run_process
+tests/modules/web_scraping/test_scrapy.py::test_run_process
+modules/web_scraping/test_scrapy.py::test_run_process
+tests/modules/download_data/test_dwnld_from_zipurl.py::test_run_process
+modules/download_data/test_dwnld_from_zipurl.py::test_run_process

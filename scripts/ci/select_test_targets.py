@@ -50,6 +50,13 @@ ALWAYS_XDIST = [
     "tests/unit",
 ]
 
+# Module domains that are WIP staging areas, not gating suites — never shard
+# them into the CI matrix. `tests_wip` is a holding pen for not-yet-stable tests
+# (e.g. plotly polar viz that errors in the engine). See issue #99.
+MATRIX_IGNORE_DOMAINS = {
+    "tests_wip",
+}
+
 # Changing any of these can affect every module -> run the whole tree.
 CORE_EXACT = {
     "src/assetutilities/engine.py",
@@ -122,7 +129,8 @@ def select(changed: list[str], root: Path) -> dict:
             continue
         mt = _MODULE_TEST_RE.match(p)
         if mt:
-            modules.add(mt.group(1))
+            if mt.group(1) not in MATRIX_IGNORE_DOMAINS:
+                modules.add(mt.group(1))
             relevant = True
             continue
         for rx in _MODULE_SRC_RES:
@@ -194,6 +202,7 @@ def to_matrix(changed: list[str], root: Path) -> dict:
                 if (
                     child.is_dir()
                     and child.name != "__pycache__"
+                    and child.name not in MATRIX_IGNORE_DOMAINS
                     and _has_tests(child)
                 ):
                     shards.append(

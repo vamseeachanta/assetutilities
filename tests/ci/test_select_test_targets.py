@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "ci"))
 
 from select_test_targets import (  # noqa: E402
     ALWAYS_XDIST,
+    MATRIX_IGNORE_DOMAINS,
     _has_tests,
     select,
     to_matrix,
@@ -88,7 +89,13 @@ def test_every_module_is_selected(module):
     to full/skip)."""
     r = select([f"tests/modules/{module}/test_smoke.py"], REPO_ROOT)
     assert r["scope"] == "modules"
-    assert f"tests/modules/{module}" in r["xdist"]
+    if module in MATRIX_IGNORE_DOMAINS:
+        # WIP staging domains are intentionally excluded (issue #99): the change
+        # is still "relevant" (scope=modules, runs the always-on set) but the
+        # WIP domain itself is never sharded.
+        assert f"tests/modules/{module}" not in r["xdist"]
+    else:
+        assert f"tests/modules/{module}" in r["xdist"]
 
 
 # --- Matrix-emitter (domain fan-out) tests ---
@@ -128,10 +135,22 @@ def test_matrix_full_scope_fans_out_every_module_with_tests():
     names = _names(m)
     base = REPO_ROOT / "tests" / "modules"
     for module in _modules():
-        if _has_tests(base / module):
+        if module in MATRIX_IGNORE_DOMAINS:
+            # WIP staging domains are intentionally never sharded (issue #99).
+            assert f"modules-{module}" not in names, f"{module} should be ignored"
+        elif _has_tests(base / module):
             assert f"modules-{module}" in names, f"{module} missing from full matrix"
         else:
             assert f"modules-{module}" not in names, f"{module} is an empty shard"
+
+
+def test_wip_domain_excluded_from_matrix():
+    """tests_wip is a WIP staging area — never a CI shard, in any scope."""
+    assert "tests_wip" in MATRIX_IGNORE_DOMAINS
+    full = to_matrix(["uv.lock"], REPO_ROOT)
+    assert "modules-tests_wip" not in _names(full)
+    scoped = to_matrix(["tests/modules/tests_wip/test_x.py"], REPO_ROOT)
+    assert "modules-tests_wip" not in _names(scoped)
 
 
 def test_matrix_shards_have_required_fields():
