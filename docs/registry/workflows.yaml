@@ -5,11 +5,24 @@
 # run from the repo root. __main__.py -> engine(inputfile) reads the YAML,
 # dispatches on cfg["basename"], and writes results next to the input.
 #
+# SCHEMA: schema_version 2 is the documented ADDITIVE SUPERSET defined by
+# workspace-hub#3295 (canonical schema-of-record:
+# workspace-hub/docs/standards/WORKFLOW_REGISTRY_SCHEMA.md; assetutilities
+# companion: docs/registry/SCHEMA.md). It carries the base field set + the
+# REQUIRED top-level `invocation:` key + the optional Deckhand routing triple
+# (version/status/latest) + the RESERVED structured slots
+# request_schema/response_schema/result. `invocation` MUST embed the literal
+# package name and uses {input}-ONLY substitution; deckhand/src/deckhand/
+# capability_smoke.py is the reference resolver. The per-row `result:`
+# descriptor (kind: files|in_memory) is owned by workspace-hub#3282;
+# request_schema/response_schema are RESERVED (untyped) by #3295.
+#
 # Invariant: each row below has a working example that runs GREEN and
 # produces the listed outputs. Routed basenames that cannot run green
 # offline are intentionally omitted (see PR body / issue for the deferred
 # list and reasons).
-schema_version: 1
+schema_version: 2
+invocation: "uv run python -m assetutilities {input}"
 repo: assetutilities
 issue: 3063
 workflows:
@@ -27,6 +40,12 @@ workflows:
     outputs:
       - examples/workflows/data_exploration/results/input_FST1.csv
       - examples/workflows/data_exploration/results/input_FST2.csv
+    result:
+      # #3282-owned descriptor. kind: files => run_workflow discovers the
+      # ACTUALLY emitted files by globbing the injected embed root; the embed
+      # file_name is cfg-derived (data_exploration_FST*.csv), so `outputs:`
+      # above is DOCUMENTARY (CLI-path names), not a runtime filename oracle.
+      kind: files
     test: uv run python -m assetutilities examples/workflows/data_exploration/input.yml
     runtime: fast
 
