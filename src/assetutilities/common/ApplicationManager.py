@@ -98,16 +98,85 @@ class ConfigureApplicationInputs:
     def __init__(self):
         pass
 
-    def configure(self, run_dict, library_name, basename, cfg_argv_dict, inputfile=None):
+    def configure(
+        self,
+        run_dict,
+        library_name,
+        basename,
+        cfg_argv_dict,
+        inputfile=None,
+        root_folder=None,
+        log_to_file=True,
+    ):
         cfg = self.unify_application_and_default_and_custom_yamls(
             run_dict, library_name, basename, cfg_argv_dict, inputfile
         )
-        cfg = self.get_application_configuration_parameters(run_dict, basename, cfg)
+        cfg = self.get_application_configuration_parameters(
+            run_dict, basename, cfg, root_folder=root_folder, log_to_file=log_to_file
+        )
         cfg = self.configure_overwrite_filenames(cfg)
         cfg = self.convert_cfg_to_attribute_dictionary(cfg)
         cfg = set_logging(cfg)
 
         # logger.debug(cfg)
+
+        return cfg
+
+    def configure_embed(self, cfg, basename, root_folder, log_to_file=False):
+        """Embeddable configuration for an in-memory cfg (workspace-hub#3297).
+
+        Unlike ``configure``, this does NOT run the
+        ``unify_application_and_default_and_custom_yamls`` step (which discards the
+        caller cfg in favor of the packaged base_config). It dispatches the
+        caller's cfg directly: merges the computed Analysis block INTO the caller
+        cfg, routes all results + logs under the INJECTED ``root_folder`` (never
+        ``os.getcwd()``), and uses no-file logging by default. A per-call instance
+        is expected (see ``engine``) so no ``customYaml``/``CustomInputs`` instance
+        state is touched -> re-entrant.
+        """
+        if cfg is None or root_folder is None:
+            raise ValueError("configure_embed requires both cfg and root_folder")
+
+        application_start_time = datetime.datetime.now()
+
+        custom_file_name = basename
+        label = cfg.get("meta", {}).get("label", None)
+        if label is not None:
+            custom_file_name = custom_file_name + "_" + label
+        file_name = (
+            custom_file_name + "_" + application_start_time.strftime("%Y%m%d_%Hh%Mm")
+        )
+
+        analysis_root_folder = root_folder  # INJECTED, authoritative; never os.getcwd()
+        result_folder_dict, _ = self.configure_result_folder(analysis_root_folder)
+        log_folder = os.path.join(analysis_root_folder, "logs")
+
+        # Config-relative routers (PathResolver) resolve via cfg["_config_dir_path"]
+        # (default os.getcwd()). Rebase it to the injected root so EVERY router's
+        # writes land under root_folder, not cwd.
+        cfg["_config_dir_path"] = analysis_root_folder
+
+        app_config_params = {
+            "Analysis": {
+                "basename": basename,
+                "analysis_root_folder": analysis_root_folder,
+                "file_name": file_name,
+                "file_name_for_overwrite": custom_file_name,
+                "log_folder": log_folder,
+                "log_to_file": log_to_file,
+                "start_time": application_start_time,
+                "cfg_array_file_names": None,
+                "DefaultInputFile": cfg.get("default_yaml", None),
+                "CustomInputFile": None,
+            }
+        }
+        app_config_params["Analysis"] = update_deep_dictionary(
+            app_config_params["Analysis"], result_folder_dict
+        )
+        cfg = update_deep_dictionary(cfg, app_config_params)
+        cfg = self.configure_overwrite_filenames(cfg)
+        cfg = self.convert_cfg_to_attribute_dictionary(cfg)
+        cfg = set_logging(cfg)
 
         return cfg
 
@@ -237,7 +306,9 @@ class ConfigureApplicationInputs:
 
         return cfg
 
-    def get_application_configuration_parameters(self, run_dict, basename, cfg):
+    def get_application_configuration_parameters(
+        self, run_dict, basename, cfg, root_folder=None, log_to_file=True
+    ):
         application_start_time = datetime.datetime.now()
 
         if self.customYaml is not None:
@@ -251,6 +322,13 @@ class ConfigureApplicationInputs:
         else:
             custom_file_name = os.path.split(self.ApplicationInputFile)[1].split(".")[0]
             analysis_root_folder = os.getcwd()
+
+        # Explicit injection override (workspace-hub#3297). When root_folder is
+        # None (every existing caller) the resolved root above is byte-identical
+        # to today, preserving the load-bearing clobber of a stale/relative
+        # Analysis.analysis_root_folder at the update_deep_dictionary merge below.
+        if root_folder is not None:
+            analysis_root_folder = root_folder
 
         filename_label = cfg.get("meta", {}).get("label", None)
         if filename_label is not None:
@@ -266,8 +344,9 @@ class ConfigureApplicationInputs:
         )
 
         log_folder = os.path.join(analysis_root_folder, "logs")
-        if not os.path.exists(log_folder):
-            os.mkdir(log_folder)
+        if log_to_file:
+            if not os.path.exists(log_folder):
+                os.mkdir(log_folder)
 
         cfg_array_file_names = None
 
@@ -278,6 +357,7 @@ class ConfigureApplicationInputs:
                 "file_name": file_name,
                 "file_name_for_overwrite": file_name_for_overwrite,
                 "log_folder": log_folder,
+                "log_to_file": log_to_file,
                 "start_time": application_start_time,
                 "cfg_array_file_names": cfg_array_file_names,
                 "DefaultInputFile": cfg.get("default_yaml", None),

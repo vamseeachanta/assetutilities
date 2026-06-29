@@ -24,7 +24,28 @@ fm = FileManagement()
 wwyaml = WorkingWithYAML()
 
 
-def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) -> dict:
+def engine(
+    inputfile: str = None,
+    cfg: dict = None,
+    config_flag: bool = True,
+    root_folder: str = None,
+    log_to_file: bool = True,
+    embed: bool = False,
+) -> dict:
+    """Run an assetutilities workflow.
+
+    Additive params (workspace-hub#3297); defaults are byte-identical to today's
+    behavior:
+
+    - ``root_folder`` (default None): on the file/default path, explicitly
+      override the resolved ``analysis_root_folder`` so all outputs land under
+      this dir. None => today's os.getcwd()/input-file-dir resolution.
+    - ``log_to_file`` (default True): consumed only by the ``embed`` path; the
+      file/default path keeps its forced-file logging regardless.
+    - ``embed`` (default False): when True, dispatch the caller's in-memory
+      ``cfg`` directly under ``root_folder`` (re-entrant, sandboxed, no-file
+      logging) -- the embeddable run path #3282 consumes.
+    """
     cfg_argv_dict = {}
     if cfg is None:
         inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
@@ -40,9 +61,22 @@ def engine(inputfile: str = None, cfg: dict = None, config_flag: bool = True) ->
     else:
         raise ValueError("basename not found in cfg")
 
-    if config_flag:
+    if embed:
+        # ---- EMBEDDABLE RUN PATH (the crux #3282 uses) ----
+        # Per-call instance => no module-singleton re-entrancy (does not touch
+        # customYaml/CustomInputs). Dispatches the caller cfg directly under the
+        # injected root; raises ValueError if cfg/root_folder missing.
+        cfg_base = ConfigureApplicationInputs().configure_embed(
+            cfg, basename, root_folder, log_to_file=log_to_file
+        )
         fm = FileManagement()
-        cfg_base = app_manager.configure(cfg, library_name, basename, cfg_argv_dict, inputfile)
+        cfg_base = fm.router(cfg_base)
+    elif config_flag:
+        fm = FileManagement()
+        cfg_base = app_manager.configure(
+            cfg, library_name, basename, cfg_argv_dict, inputfile,
+            root_folder=root_folder,
+        )
         cfg_base = fm.router(cfg_base)
         result_folder_dict, cfg_base = app_manager.configure_result_folder(
             None, cfg_base
