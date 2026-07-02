@@ -1,5 +1,7 @@
 # assetutilities
 
+> *Everyday complex engineering — made deterministically simple.*
+
 Shared engineering utilities for project configuration, file and YAML handling,
 data processing, engineering calculations, unit conversions, visualization, and
 automation workflows.
