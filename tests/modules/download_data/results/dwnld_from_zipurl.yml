@@ -11,7 +11,6 @@ input_data:
     url3: https://www.data.bsee.gov/Well/Files/eWellEORRawData.zip
   out_directory: tests/modules/download_data/results/Data
 type: ~
-noconftest: -m
 Analysis:
   basename: download_data
   analysis_root_folder: /mnt/local-analysis/assetutilities/tests/modules/download_data
@@ -19,7 +18,7 @@ Analysis:
   file_name_for_overwrite: dwnld_from_zipurl
   log_folder: /mnt/local-analysis/assetutilities/tests/modules/download_data/logs
   log_to_file: true
-  start_time: 2026-07-09 06:52:24.063575
+  start_time: 2026-07-09 15:15:49.724128
   cfg_array_file_names: ~
   DefaultInputFile: ~
   CustomInputFile: /mnt/local-analysis/assetutilities/tests/modules/download_data/dwnld_from_zipurl.yml
