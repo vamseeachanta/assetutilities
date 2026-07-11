@@ -20,6 +20,12 @@ from assetutilities.workflow_api.runner import (
     extract_result,
     run_workflow,
 )
+from assetutilities.workflow_api.output_contract import (
+    OutputContractError,
+    make_output_record,
+    output_equality_digest,
+)
+from assetutilities.workflow_api.report import render_report
 
 __all__ = [
     "ResultEnvelope",
@@ -32,4 +38,8 @@ __all__ = [
     "input_hash",
     "result_hash",
     "make_provenance",
+    "OutputContractError",
+    "make_output_record",
+    "output_equality_digest",
+    "render_report",
 ]
