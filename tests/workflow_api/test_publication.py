@@ -659,11 +659,19 @@ def test_rejection_reachable_from_any_nonterminal_state():
 
 
 # ---------------------------------------------------------------------------
-# real HF adapter is a documented shim, never faked
+# real HF adapter is env-token-backed and never faked green
 # ---------------------------------------------------------------------------
 
-def test_real_hf_adapter_is_documented_shim_not_faked():
-    adapter = hf_port_mod.HuggingFaceHubHfPort()
+def test_real_hf_adapter_is_env_backed_never_faked(monkeypatch):
+    # The real adapter is a drop-in HfPort but is NEVER given a fake body: with the
+    # huggingface_hub library absent it fails closed with HfUnavailableError rather than
+    # silently "succeeding". (Full mock-based behavior lives in test_hf_port_real.py; no
+    # test anywhere contacts huggingface.co.) See test_hf_port_real.py for the drop-in
+    # end-to-end proof against a mocked hub.
+    import sys
+
+    adapter = hf_port_mod.HuggingFaceHubHfPort(repo_id="aceengineer/wed-runs-test")
     assert isinstance(adapter, hf_port_mod.HfPort)
-    with pytest.raises(NotImplementedError):
+    monkeypatch.setitem(sys.modules, "huggingface_hub", None)  # force ImportError
+    with pytest.raises(hf_port_mod.HfUnavailableError):
         adapter.create_commit(objects={}, card=b"")
