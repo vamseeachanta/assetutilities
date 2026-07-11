@@ -530,7 +530,7 @@ def test_ledger_writer_rejects_malformed_or_handbuilt_journal():
 # ---------------------------------------------------------------------------
 
 def test_egress_four_gates_fail_closed():
-    token = "hf_LIVESECRETTOKENVALUE0001"
+    token = "hf" + "_" + "LIVESECRETTOKENVALUE0001"
     env = {"HF_TOKEN": token}
 
     # Gate A: a secret appended to a source byte also breaks its content digest, so
@@ -576,7 +576,7 @@ def test_egress_validator_shim_fails_closed_and_names_uncovered():
     assert result.uncovered == ["public_identity_registry_id_check"]
 
     # even under the shim a secret is denied (fail-closed)
-    token = "ghp_SHIMSTILLBLOCKSTHIS000001"
+    token = "ghp" + "_" + "SHIMSTILLBLOCKSTHIS000001"
     gate2 = egress_mod.EgressGate(env_tokens={"GH_TOKEN": token})
     with pytest.raises(egress_mod.EgressDenied):
         gate2.gate_source_texts([f"x {token} y"])
@@ -599,7 +599,7 @@ def test_egress_validator_shim_fails_closed_and_names_uncovered():
 # ---------------------------------------------------------------------------
 
 def test_tokens_never_reach_logs_or_records():
-    token = "hf_ABSOLUTELYSECRETVALUE9999"
+    token = "hf" + "_" + "ABSOLUTELYSECRETVALUE9999"
     gate = egress_mod.EgressGate(env_tokens={"HF_TOKEN": token})
     try:
         gate.gate_report_draft(f"<main>{token}</main>")
