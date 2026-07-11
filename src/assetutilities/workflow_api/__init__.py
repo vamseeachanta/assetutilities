@@ -20,6 +20,21 @@ from assetutilities.workflow_api.runner import (
     extract_result,
     run_workflow,
 )
+from assetutilities.workflow_api.output_contract import (
+    OutputContractError,
+    make_output_record,
+    output_equality_digest,
+)
+from assetutilities.workflow_api.report import render_report
+from assetutilities.workflow_api.metrics import (
+    MetricsError,
+    MetricDefinitionStore,
+    make_metric_definition,
+    make_metric_observation,
+    population_eligible,
+    assert_population_admissible,
+    assert_no_cross_algorithm,
+)
 
 __all__ = [
     "ResultEnvelope",
@@ -32,4 +47,15 @@ __all__ = [
     "input_hash",
     "result_hash",
     "make_provenance",
+    "OutputContractError",
+    "make_output_record",
+    "output_equality_digest",
+    "render_report",
+    "MetricsError",
+    "MetricDefinitionStore",
+    "make_metric_definition",
+    "make_metric_observation",
+    "population_eligible",
+    "assert_population_admissible",
+    "assert_no_cross_algorithm",
 ]
