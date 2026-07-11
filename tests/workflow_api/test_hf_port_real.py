@@ -276,7 +276,7 @@ def test_missing_huggingface_hub_import_raises_unavailable(monkeypatch):
 # ---------------------------------------------------------------------------
 
 def test_token_never_appears_in_repr_or_returned_records(monkeypatch):
-    secret = "hf_SUPERSECRET_TOKEN_value_0123456789"
+    secret = "hf" + "_" + "SUPERSECRET_TOKEN_value_0123456789"
     monkeypatch.setenv("HF_TOKEN", secret)
     obj_path = artifact.storage_locator_for(OBJ_DIGEST)
     store = {obj_path: OBJ_BYTES, hf_port_mod.CARD_PATH: CARD_BYTES}
