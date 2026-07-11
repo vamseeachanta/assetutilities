@@ -114,14 +114,29 @@ def physical_byte_digest(stored_bytes) -> str:
     return hashlib.sha256(bytes(stored_bytes)).hexdigest()
 
 
-def structured_object_digest(obj) -> str:
-    """Content_digest of a structured object via the JCS canonical form.
+def structured_stored_bytes(obj) -> bytes:
+    """The exact bytes a structured artifact resides as: its JCS canonical form.
 
-    Reuses :func:`identity.canonical_digest` (which hashes
-    ``identity.canonicalize(obj)`` with identity's domain-separation convention),
-    so two key-orderings of one object yield one digest.
+    These are the bytes the object store persists, so a plain re-hash of them
+    reproduces ``content_digest`` (see :func:`structured_object_digest`).
     """
-    return identity.canonical_digest(STRUCTURED_CONTENT_ID_TYPE, obj)
+    return identity.canonicalize(obj).encode("utf-8")
+
+
+def structured_object_digest(obj) -> str:
+    """Content_digest of a structured object = plain SHA-256 of its stored bytes.
+
+    A ``content_digest`` is a CONTENT ADDRESS, not an identity: it must equal a
+    plain ``sha256`` of the exact bytes that reside in the object store so any
+    third party (e.g. the publisher's object-store re-hash in workspace-hub#3433)
+    can revalidate integrity without knowing the artifact's type. The stored bytes
+    of a structured object are its JCS canonical form (:func:`structured_stored_bytes`),
+    so two key-orderings of one object still yield one digest. Domain separation is
+    an *identity* concern (distinguishing algorithm_version_id/run_id) and is
+    deliberately NOT applied here -- it would make the address disagree with a plain
+    byte re-hash.
+    """
+    return hashlib.sha256(structured_stored_bytes(obj)).hexdigest()
 
 
 # ---------------------------------------------------------------------------

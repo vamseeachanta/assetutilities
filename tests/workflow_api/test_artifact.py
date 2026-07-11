@@ -318,3 +318,16 @@ def test_eligibility_is_byte_license_times_reference_role():
     assert "eligible" not in public_art and "class" not in public_art
     assert artifact.RESIDENCY_CONTRACT == "content_addressed_hf_object_or_explicit_exclusion"
     assert artifact.DATASET_TABLE == "artifacts"
+
+
+def test_structured_content_digest_is_plain_hash_of_stored_bytes():
+    # A content_digest is a CONTENT ADDRESS: it must equal a plain sha256 of the
+    # exact bytes the object store persists, so workspace-hub#3433's uniform
+    # object-store re-hash can revalidate a structured artifact without knowing
+    # its type. Domain separation (an identity concern) must NOT leak in here.
+    obj = {"b": 2, "a": 1}
+    stored = artifact.structured_stored_bytes(obj)
+    assert artifact.structured_object_digest(obj) == hashlib.sha256(stored).hexdigest()
+    # and it round-trips through verify_integrity as a physical re-hash of stored bytes
+    rec = artifact.structured_artifact(obj, media_type="application/json", native_format="jcs")
+    assert artifact.verify_integrity(rec, stored_bytes=stored) is True
