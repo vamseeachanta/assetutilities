@@ -41,6 +41,129 @@ SOURCE_REPO_AUTHORITY_PLANE = ("report", "publications_ledger")
 REPORT_PATH_PATTERN = "reports/algorithms/{algorithm_id}/index.html"
 
 
+# ---- dataset card (valid HF dataset card: YAML frontmatter + Markdown body) ---
+# The run-ledger is aceengineer's own algorithm-run data (a content-addressed object
+# store, NOT tabular parquet), so the license is the HF ``other`` identifier and NO
+# ``configs:`` block is emitted (a fabricated one would make the datasets viewer error
+# on a store that has no tabular tables).
+DATASET_CARD_LICENSE = "other"
+DATASET_CARD_TAGS = ("algorithm-runs", "reproducible", "digitalmodel")
+
+
+def _yaml_dq(value) -> str:
+    """A double-quoted YAML scalar with the two structural chars escaped.
+
+    Stdlib-only (this module imports no yaml); sufficient for the plain string values we
+    emit (algorithm ids / repo ids), which never contain control characters.
+    """
+    text = str(value).replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{text}"'
+
+
+def render_dataset_card(
+    *,
+    algorithm_id,
+    run_id=None,
+    algorithm_version_id=None,
+    terminal_status=None,
+    repo_id=None,
+    run_count=None,
+    license=DATASET_CARD_LICENSE,
+    tags=DATASET_CARD_TAGS,
+) -> bytes:
+    """Render a VALID Hugging Face dataset card for an algorithm-run ledger.
+
+    Returns ``<YAML frontmatter>\\n<Markdown body>`` bytes. The frontmatter carries a
+    valid ``license`` / ``pretty_name`` / ``tags`` (so the hub does not warn about missing
+    metadata) and deliberately NO ``configs:`` block -- this is a content-addressed object
+    store, not tabular parquet, so a fabricated configs block would make the datasets
+    viewer error. The body documents the actual (workspace-hub#3433) contract.
+
+    Parameterized (``algorithm_id`` / ``repo_id`` / ``run_count`` ...) so it is generic
+    across repos and pilots, never hardcoded to one dataset.
+    """
+    pretty = f"{algorithm_id} algorithm-run ledger"
+    front = [
+        "---",
+        f"license: {license}",
+        f"pretty_name: {_yaml_dq(pretty)}",
+        "tags:",
+        *[f"- {t}" for t in tags],
+        "---",
+    ]
+
+    repo_line = f"`{repo_id}`" if repo_id else "this Hugging Face dataset"
+    count_note = (
+        f" It currently holds {run_count} accepted run(s)."
+        if run_count is not None
+        else ""
+    )
+    version_line = (
+        f"- **algorithm version:** `{algorithm_version_id}`\n"
+        if algorithm_version_id
+        else ""
+    )
+    latest_lines = ""
+    if run_id:
+        latest_lines = (
+            f"- **latest run id:** `{run_id}`"
+            + (f" (`{terminal_status}`)" if terminal_status else "")
+            + "\n"
+        )
+
+    body = f"""# {pretty}
+
+A repository-linked, content-addressed **algorithm-run ledger** for the `{algorithm_id}`
+algorithm, produced by the workspace-hub#3433 publication pipeline. {repo_line} is the
+**data plane**: it stores the immutable, reproducible artifacts of individual algorithm
+runs.{count_note}
+
+{version_line}{latest_lines}
+## Layout
+
+```
+objects/<sha256[:2]>/<sha256>
+```
+
+Every run artifact is stored **content-addressed** at a path derived from the SHA-256
+digest of its bytes. The path is a pure function of the content, so the objects are
+immutable and their integrity is **re-verifiable by re-hashing**: download an object and
+confirm its SHA-256 equals the digest in its path (and in the run record).
+
+## Immutability & authority
+
+- Each run is committed at an **immutable revision** (an exact 40-hex commit sha). A
+  corrective re-publish is a *new* revision, never an overwrite of an earlier one.
+- Eligibility is **not** read from Hugging Face visibility. Each accepted run is referenced
+  by the source repository's rolling report and pinned in an append-only `publications.jsonl`
+  ledger. **That ledger is the sole eligibility authority** -- an object visible here but
+  absent from the ledger is not an accepted run.
+
+## Consuming a run
+
+```python
+import hashlib
+from huggingface_hub import hf_hub_download
+
+digest = "<sha256-of-the-object>"                       # from the report / ledger
+path = f"objects/{{digest[:2]}}/{{digest}}"
+local = hf_hub_download(
+    repo_id={_yaml_dq(repo_id) if repo_id else '"<owner>/<dataset>"'},
+    filename=path,
+    revision="<exact-40-hex-revision>",                 # pin the immutable revision
+    repo_type="dataset",
+)
+with open(local, "rb") as fh:
+    data = fh.read()
+assert hashlib.sha256(data).hexdigest() == digest       # re-hash to verify integrity
+```
+
+Pin the exact `revision` and re-hash the bytes: a run is trustworthy only when its
+content re-hashes to the digest by which you fetched it.
+"""
+    return (("\n".join(front) + "\n\n" + body)).encode("utf-8")
+
+
 class ProjectionError(ValueError):
     """Raised when a run cannot be projected under a single strict identity."""
 
@@ -94,16 +217,27 @@ class RunProjection:
             "object_digests": sorted(self.object_digests()),
         }
 
-    def dataset_card(self) -> bytes:
-        """The dataset card bytes (a generated default unless a card was supplied)."""
+    def dataset_card(self, *, repo_id=None, run_count=None) -> bytes:
+        """The dataset card bytes (a generated default unless a card was supplied).
+
+        The generated default is a VALID Hugging Face dataset card -- YAML frontmatter
+        (``license`` / ``pretty_name`` / ``tags``) plus a Markdown body that describes the
+        content-addressed algorithm-run ledger contract -- so a live publish no longer
+        emits the "empty or missing yaml metadata in repo card" warning. ``repo_id`` and
+        ``run_count`` are optional context (the projection is a single run and does not
+        itself know the destination repo id or the repo-wide run total); pass them from the
+        publisher when known.
+        """
         if self._card is not None:
             return self._card
-        return (
-            f"# Algorithm dataset: {self.algorithm_id}\n\n"
-            f"run_id: {self.run_id}\n"
-            f"algorithm_version_id: {self.algorithm_version_id}\n"
-            f"terminal_status: {self.terminal_status}\n"
-        ).encode("utf-8")
+        return render_dataset_card(
+            algorithm_id=self.algorithm_id,
+            run_id=self.run_id,
+            algorithm_version_id=self.algorithm_version_id,
+            terminal_status=self.terminal_status,
+            repo_id=repo_id,
+            run_count=run_count,
+        )
 
     def report_path(self) -> str:
         return REPORT_PATH_PATTERN.format(algorithm_id=self.algorithm_id)

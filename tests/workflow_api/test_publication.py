@@ -231,6 +231,55 @@ def test_projection_binds_five_records_identity_strict():
         _build_projection(identity_context=bad_ctx)
 
 
+# valid HF SPDX-ish license ids (the run-ledger is aceengineer's own data -> ``other``).
+_VALID_HF_LICENSES = {"other", "mit", "apache-2.0", "cc-by-4.0", "cc0-1.0"}
+
+
+def _parse_card_frontmatter(card_bytes):
+    """Split a dataset card into (parsed YAML frontmatter dict, body). Fails if absent."""
+    import yaml  # PyYAML is a hard assetutilities dependency
+
+    text = card_bytes.decode("utf-8")
+    assert text.startswith("---\n"), "dataset card must open with a YAML frontmatter fence"
+    _, front, body = text.split("---\n", 2)
+    meta = yaml.safe_load(front)
+    assert isinstance(meta, dict), "frontmatter must parse to a YAML mapping"
+    return meta, body
+
+
+def test_dataset_card_has_valid_yaml_frontmatter_and_no_bogus_configs():
+    # The generated default card (no card supplied) must be a VALID HF dataset card:
+    # parseable YAML frontmatter with a valid license + pretty_name, and -- because this
+    # is a content-addressed object store, not tabular parquet -- NO fabricated configs
+    # block (which would make the datasets viewer error). Regression for the dm#1505 live
+    # "empty or missing yaml metadata in repo card" warning.
+    proj = _build_projection()
+    meta, body = _parse_card_frontmatter(proj.dataset_card())
+
+    assert meta.get("license") in _VALID_HF_LICENSES
+    assert isinstance(meta.get("pretty_name"), str) and meta["pretty_name"].strip()
+    assert isinstance(meta.get("tags"), list) and meta["tags"]
+    # a content-addressed store has no tabular tables -> a configs block must NOT be faked
+    assert "configs" not in meta
+
+    # the body is truthful to the actual content-addressed ledger contract
+    assert "objects/<sha256[:2]>/<sha256>" in body
+    assert "publications.jsonl" in body
+    assert "3433" in body
+
+    # parameterization: repo id / run count are threaded through when supplied
+    parameterized = proj.dataset_card(
+        repo_id="aceengineer/digitalmodel-runs", run_count=3
+    )
+    meta2, body2 = _parse_card_frontmatter(parameterized)
+    assert meta2["license"] in _VALID_HF_LICENSES
+    assert "aceengineer/digitalmodel-runs" in body2
+    assert "configs" not in meta2
+
+    # a supplied card is passed through verbatim (unchanged contract)
+    assert proj.with_card(b"custom").dataset_card() == b"custom"
+
+
 # ---------------------------------------------------------------------------
 # 2. no bypass edge to accepted
 # ---------------------------------------------------------------------------
