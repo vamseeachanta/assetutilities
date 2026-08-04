@@ -834,14 +834,20 @@ class Database:
         }
 
         update_columns = [column for column in df_columns if column != primary_key]
-        set_code_block = ", ".join(
-            f"{column} = excluded.{column}" for column in update_columns
-        )
+        if update_columns:
+            set_code_block = ", ".join(
+                f"{column} = excluded.{column}" for column in update_columns
+            )
+            conflict_action = f"DO UPDATE SET {set_code_block}"
+        else:
+            # Nothing to update: the primary key is the only column. An empty
+            # SET list is a syntax error, so the correct action is DO NOTHING.
+            conflict_action = "DO NOTHING"
 
         statement = (
             f"INSERT INTO {table_name} ({', '.join(df_columns)}) "
             f"VALUES ({', '.join(placeholders)}) "
-            f"ON CONFLICT ({primary_key}) DO UPDATE SET {set_code_block}"
+            f"ON CONFLICT ({primary_key}) {conflict_action}"
         )
         return statement, parameters
 

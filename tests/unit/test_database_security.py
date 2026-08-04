@@ -117,6 +117,24 @@ class TestUpsertIdentifiersAreValidated:
         assert sql.startswith("INSERT INTO stocks.analysis (")
 
 
+class TestUpsertWithNothingToUpdate:
+    """A dataframe whose only column is the primary key has no SET list.
+
+    Emitting 'DO UPDATE SET ' with an empty list is a syntax error, so the
+    correct statement for this shape is DO NOTHING.
+    """
+
+    def test_single_primary_key_column_produces_do_nothing(self):
+        df = pd.DataFrame([{"ticker": "ACME"}])
+        sql, _params = make_db().build_upsert_statement(
+            df, {"table_name": "analysis", "primary_key": "ticker"}
+        )
+        assert sql == (
+            "INSERT INTO analysis (ticker) VALUES (:v_0) "
+            "ON CONFLICT (ticker) DO NOTHING"
+        )
+
+
 class TestUpsertRoundTripsThroughARealEngine:
     """Legitimate input must still reach the database and land correctly."""
 
@@ -172,6 +190,22 @@ class TestUpsertRoundTripsThroughARealEngine:
             pd.DataFrame([{"ticker": "ACME", "company": "Acme Holdings"}]), cfg
         )
         assert self._fetch(sqlite_db, "ACME") == "Acme Holdings"
+
+    def test_primary_key_only_row_executes_without_a_syntax_error(self, sqlite_db):
+        from sqlalchemy import text
+
+        with sqlite_db.engine.begin() as conn:
+            conn.execute(text("CREATE TABLE keys (ticker TEXT PRIMARY KEY)"))
+        cfg = {"table_name": "keys", "primary_key": "ticker"}
+        sqlite_db.save_1_row_df_to_postgresql_db_using_primary_key(
+            pd.DataFrame([{"ticker": "ACME"}]), cfg
+        )
+        sqlite_db.save_1_row_df_to_postgresql_db_using_primary_key(
+            pd.DataFrame([{"ticker": "ACME"}]), cfg
+        )
+        with sqlite_db.engine.begin() as conn:
+            count = conn.execute(text("SELECT COUNT(*) FROM keys")).scalar()
+        assert count == 1
 
     def test_empty_dataframe_is_a_no_op_and_leaves_the_table_untouched(self, sqlite_db):
         from sqlalchemy import text
