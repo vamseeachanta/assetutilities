@@ -30,7 +30,7 @@ class Transform:
                 latitude = float(df[latitude_column].iloc[df_row])
                 longitude = float(df[longitude_column].iloc[df_row])
                 x, y, zone, ut = utm.from_latlon(latitude, longitude)
-            except:
+            except Exception:
                 x, y, zone, ut = (None, None, None, None)
             x_array.append(x)
             y_array.append(y)
@@ -241,7 +241,7 @@ class Transform:
                         temp_df = pd.DataFrame.from_dict(
                             df.iloc[df_row][column], orient="columns"
                         )
-                    except:
+                    except Exception:
                         temp_df = pd.DataFrame.from_dict(
                             df.iloc[df_row][column], orient="index"
                         )

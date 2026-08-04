@@ -233,7 +233,8 @@ class ConfigureApplicationInputs:
                 self.customYaml = sys.argv[1]
             else:
                 self.customYaml = None
-        except:
+        except Exception as e:
+            logger.debug(f"Custom yaml could not be resolved from argv: {e}")
             self.customYaml = None
             if not is_pytest:
                 print(

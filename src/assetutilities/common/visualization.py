@@ -167,8 +167,9 @@ class Visualization:
                     plot_data.append(data.copy())
 
             return plot_data
-        except:
-            logging.debug("Data does not exist")
+        except Exception as e:
+            # Include the cause; the message alone hid genuine errors (issue #80).
+            logging.debug(f"Data does not exist: {e}")
 
     def assign_grouped_data(self):
         try:
@@ -186,8 +187,8 @@ class Visualization:
                     text_data = grouped_df.get_group(name)[self.cfg["y"][0]]
                     data.update({"text": text_data})
                 self.plot_data["data"].append(data.copy())
-        except:
-            logging.debug("Data does not exist")
+        except Exception as e:
+            logging.debug(f"Data does not exist: {e}")
 
     def assign_custom_properties(self, cfg, sizedata, sizerefdata):
         cfg = self.get_cfg_with_custom_color(cfg, sizedata)

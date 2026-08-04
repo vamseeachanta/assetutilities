@@ -199,10 +199,13 @@ class WorkingWithYAML:
                 #  Convert to logs
                 # logger.info(cfgUpdateValues)
                 cfg = update_deep(cfg, cfgUpdateValues)  # type: ignore[assignment]
-            except:
+            except Exception as e:
+                # Surface the cause; this handler previously discarded it
+                # entirely (issue #80). Fallback behaviour is unchanged.
                 logger.info(
                     "Update Input file could not be loaded successfully. Running program default values"
                 )
+                logger.info(f"Error is : {e}")
 
         return cfg
 

@@ -15,10 +15,13 @@ def ymlInput(defaultYml, updateYml):
             #  Convert to logs
             # print(cfgUpdateValues)
             cfg = update_deep(cfg, cfgUpdateValues)
-        except:
+        except Exception as e:
+            # Surface the cause; this handler previously discarded it entirely
+            # (issue #80). Fallback behaviour is unchanged.
             print(
                 "Update Input file could not be loaded successfully. Running program default values"
             )
+            print(f"Error is : {e}")
 
     return cfg
 
