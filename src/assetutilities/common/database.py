@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 
 def get_db_connection(db_properties):
@@ -97,13 +98,36 @@ class Database:
         except Exception as e:
             print(f"Error getting input data in error {e}")
 
+    def _redact(self, message):
+        """Strip this connection's password out of arbitrary text.
+
+        Driver errors routinely embed the whole DSN, password included, so the
+        exception text is as much of a leak as printing the properties dict.
+        """
+        text = str(message)
+        if self.password:
+            text = text.replace(str(self.password), "***")
+        return text
+
+    def describe_connection(self):
+        """Non-secret identification of the configured connection.
+
+        Never includes password or connection_string (issue #80).
+        """
+        return (
+            f"server={self.server}, database={self.database}, user={self.user} "
+            "(credentials redacted)"
+        )
+
     def set_up_db_connection(self, db_properties):
         try:
             self.enable_connection_and_cursor()
             return True
         except Exception as e:
-            print(f"Error as {e}")
-            print(f"No connection for environment: {db_properties}")
+            # The previous implementation printed the whole db_properties dict,
+            # which carries `password` and `connection_string` (issue #80).
+            print(f"Error as {self._redact(e)}")
+            print(f"No connection for environment: {self.describe_connection()}")
             return False
 
     def enable_connection_and_cursor(self):
@@ -190,8 +214,9 @@ class Database:
                     f"Connection to Server: {self.server} Successful by user {self.user} to database {self.database}!"
                 )
 
-            except:
-                logging.info("MSSQL connection failed")
+            except Exception as e:
+                # Log the cause; it was discarded before (issue #80).
+                logging.info(f"MSSQL connection failed: {e}")
                 print("MSSQL connection failed")
 
         if self.server_type == "postgresql":
@@ -428,7 +453,7 @@ class Database:
             self.schema = db_table_df.iloc[row_index].TABLE_SCHEMA
             try:
                 column_df = self.get_table_columns(table_name)
-            except:
+            except Exception:
                 column_df = pd.DataFrame()
                 print(
                     f"          ..... FAILURE DB table columns for table {row_index} of {len(self.analysis.tables)}: {table_name}"
@@ -455,7 +480,7 @@ class Database:
                 self.get_table_statistics(table_name)
                 if len(self.table_statistics) > 0:
                     self.save_to_db(self.table_statistics, "TableStatistics")
-            except:
+            except Exception:
                 print(
                     f"          ..... FAILURE DB table statistics for table {table_index} of {len(self.analysis.tables)}: {table_name}"
                 )
@@ -743,52 +768,115 @@ class Database:
                         index_label=index_label,
                     )
 
-    def save_1_row_df_to_postgresql_db_using_primary_key(
-        self, df, cfg=None
-    ):
+    # A SQL identifier: a leading letter/underscore then letters, digits or
+    # underscores, optionally schema-qualified with a single dot. Deliberately
+    # strict -- identifiers cannot be passed as bound parameters, so the only
+    # safe handling is to reject anything that is not plainly an identifier.
+    SQL_IDENTIFIER_PATTERN = re.compile(
+        r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$"
+    )
+
+    @classmethod
+    def _validate_sql_identifier(cls, identifier, role):
+        if not isinstance(identifier, str) or not cls.SQL_IDENTIFIER_PATTERN.match(
+            identifier
+        ):
+            raise ValueError(
+                f"Invalid SQL identifier for {role}: {identifier!r}. "
+                "Identifiers cannot be parameterised, so only plain "
+                "(optionally schema-qualified) names are accepted."
+            )
+        return identifier
+
+    def build_upsert_statement(self, df, cfg):
+        """Build a parameterised single-row upsert.
+
+        Returns ``(statement_text, parameters)``. Values are always bound, never
+        interpolated, which closes the injection vector that the previous
+        ``sqlFileQuery.format(custom_dict=cfg)`` implementation carried (issue
+        #80). That implementation quoted values by string concatenation, so any
+        value containing an apostrophe broke or subverted the statement, and any
+        non-string value raised TypeError.
+
+        Identifiers (table, columns, primary key) cannot be bound, so they are
+        validated instead. Schema-qualified table names such as
+        ``stocks.analysis`` are accepted because real callers use them.
+
+        The statement is constructed here rather than read from
+        ``data/<server_type>/sql/common.upsert_single_record.sql``: that template
+        does not ship with this package, so the previous code path depended on a
+        file that had to exist in the caller's working directory.
+        """
+        if len(df) == 0:
+            raise ValueError("Cannot build an upsert statement from an empty dataframe")
+
+        table_name = self._validate_sql_identifier(
+            cfg.get("table_name", None), "table_name"
+        )
+        primary_key = self._validate_sql_identifier(
+            cfg.get("primary_key", None), "primary_key"
+        )
+
+        df_columns = [
+            self._validate_sql_identifier(column, "column") for column in df.columns
+        ]
+        if primary_key not in df_columns:
+            raise ValueError(
+                f"Primary key {primary_key!r} is not a column of the dataframe "
+                f"(columns: {df_columns})"
+            )
+
+        row = df.iloc[0].to_list()
+        placeholders = [f":v_{index}" for index in range(len(df_columns))]
+        parameters = {
+            f"v_{index}": self._as_bindable(value) for index, value in enumerate(row)
+        }
+
+        update_columns = [column for column in df_columns if column != primary_key]
+        set_code_block = ", ".join(
+            f"{column} = excluded.{column}" for column in update_columns
+        )
+
+        statement = (
+            f"INSERT INTO {table_name} ({', '.join(df_columns)}) "
+            f"VALUES ({', '.join(placeholders)}) "
+            f"ON CONFLICT ({primary_key}) DO UPDATE SET {set_code_block}"
+        )
+        return statement, parameters
+
+    @staticmethod
+    def _as_bindable(value):
+        """Convert a pandas scalar to something the DBAPI can bind.
+
+        numpy scalars are not accepted by every driver; ``item()`` unwraps them
+        to the equivalent Python builtin. NaN/NaT become None so they bind as
+        SQL NULL rather than the string 'nan'.
+        """
+        import pandas as pd
+
+        if value is None:
+            return None
+        if hasattr(value, "item") and getattr(value, "shape", None) == ():
+            value = value.item()
+        try:
+            if pd.isna(value):
+                return None
+        except (TypeError, ValueError):
+            pass
+        return value
+
+    def save_1_row_df_to_postgresql_db_using_primary_key(self, df, cfg=None):
         if cfg is None:
             cfg = {"table_name": None, "primary_key": None}
-        if len(df) > 0:
-            table_name = cfg.get("table_name", None)
-            cfg.update({"table_name": table_name})
+        if len(df) == 0:
+            # Nothing to write. The previous implementation fell through to a
+            # reference to `filename`, which was only assigned inside the
+            # non-empty branch, raising UnboundLocalError (issue #80).
+            logging.info("No row to upsert; dataframe is empty")
+            return
 
-            primary_key = cfg.get("primary_key", None)
-            cfg.update({"primary_key": primary_key})
-
-            df_columns = list(df.columns)
-            columns = ",".join(df_columns)
-            cfg.update({"columns": columns})
-
-            values = "({})".format(
-                ",".join(
-                    [
-                        "'" + item + "'" if item is not None else "NULL"
-                        for item in df.iloc[0].to_list()
-                    ]
-                )
-            )
-            cfg.update({"values": values})
-
-            df_columns.remove(primary_key)
-            set_code_block = "{}".format(
-                ",".join(
-                    [
-                        item + " = excluded." + item if item is not None else "NULL"
-                        for item in df_columns
-                    ]
-                )
-            )
-            cfg.update({"set_code_block": set_code_block})
-
-            filename = os.path.join(
-                "data", self.server_type, "sql", "common.upsert_single_record.sql"
-            )
-            sqlFileQuery = self.read_from_file(filename)
-            sqlFileQuery = sqlFileQuery.format(custom_dict=cfg)
-        if os.path.isfile(filename):
-            self.executeNoDataQuery(sqlFileQuery, [])
-        else:
-            print("Not a valid filename")
+        statement, parameters = self.build_upsert_statement(df, cfg)
+        self.executeNoDataQuery(statement, params=parameters)
 
     def get_table_column_statistics(self, table_name, column_name, column_data_type):
         import os
@@ -942,7 +1030,14 @@ class Database:
     def executeNoDataQuery_using_dict(self, query, dict):
         pass
 
-    def executeNoDataQuery(self, query, arg_array=None):
+    def executeNoDataQuery(self, query, arg_array=None, params=None):
+        """Execute a statement that returns no rows.
+
+        ``params`` carries bound parameters, which is how callers should pass
+        data values. ``arg_array`` is the legacy positional-format path, kept
+        for backward compatibility; it interpolates into the statement text and
+        so must only ever receive trusted identifiers, never user data.
+        """
         if arg_array is None:
             arg_array = []
         sql = query
@@ -959,12 +1054,18 @@ class Database:
                 arg_array[0], arg_array[1], arg_array[2], arg_array[3], arg_array[4]
             )
         try:
-            print(f"     .....Executing query: {sql}")
+            # Log only the leading verb, never the statement body: the previous
+            # print echoed every interpolated data value into stdout/logs
+            # (issue #80).
+            logging.debug(
+                f"     .....Executing no-data query: {sql.strip().split(None, 1)[0]}"
+            )
+            from sqlalchemy import text  # type: ignore
             from sqlalchemy.orm import scoped_session, sessionmaker  # type: ignore
 
             Session = scoped_session(sessionmaker(bind=self.engine))
             s = Session()
-            s.execute(query)
+            s.execute(text(sql), params or {})
             s.commit()
         except Exception as e:
             print("Command skipped: ", e)
@@ -1068,7 +1169,11 @@ class Database:
                                 statistics_df.StartTime
                                 == result_df.StartTime.iloc[row_index]
                             ][quantity_column_name].iloc[0]
-                        except:
+                        except Exception as e:
+                            logging.debug(
+                                f"Related quantity unavailable for row "
+                                f"{row_index}: {e}"
+                            )
                             related_quantity = None
                         temp_array.append(related_quantity)
                 else:
