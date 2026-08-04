@@ -247,7 +247,7 @@ class ReadData:
                 all_lines_float_objects.append(
                     [float(item) for item in line_string_objects]
                 )
-            except:
+            except Exception:
                 all_lines_float_objects.append(line_string_objects)
 
         result: list[list[Any]] = []

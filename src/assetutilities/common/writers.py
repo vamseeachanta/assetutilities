@@ -70,7 +70,7 @@ class SaveData:
 
         try:
             wb[data["SheetName"]]
-        except:
+        except Exception:
             wb.create_sheet(data["SheetName"])
             wb[data["SheetName"]]
 
@@ -91,12 +91,12 @@ class SaveData:
             wb = load_workbook(data["FileName"])
             writer = pd.ExcelWriter(data["FileName"], engine="openpyxl")
             writer.wb = wb
-        except:
+        except Exception:
             writer = pd.ExcelWriter(data["FileName"])
 
         try:
             wb[data["SheetName"]]
-        except:
+        except Exception:
             wb.create_sheet(data["SheetName"])
             wb[data["SheetName"]]
 

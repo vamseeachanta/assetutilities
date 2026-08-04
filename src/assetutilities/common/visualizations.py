@@ -1,3 +1,6 @@
+import logging
+
+
 class Visualization:
     def __init__(self, plt_settings=None):
         # matplotlib.use('Agg')
@@ -167,13 +170,14 @@ class Visualization:
                     except Exception as e:
                         print(e)
                         if "datetime.date" in str(e):
-                            # Standard library imports
-                            import sys
-
-                            print(
-                                "Error: When using datetime as X-axis, consider changing plot kind from scatter to line "
-                            )
-                            sys.exit()
+                            # Raise instead of exiting so the caller keeps
+                            # control of the run (issue #80). Any other scatter
+                            # error is still swallowed, exactly as before - this
+                            # is a process-exit fix, not a handler redesign.
+                            raise ValueError(
+                                "When using datetime as X-axis, consider changing "
+                                "plot kind from scatter to line"
+                            ) from e
 
                 elif "polar" in plt_settings["plt_kind"]:
                     self.prepare_polar_plot(df, plt_settings, x, column_index, y, label)
@@ -337,7 +341,7 @@ class Visualization:
             file_name = self.plt_settings["file_name"]
             try:
                 self.plt.savefig(file_name, dpi=800)
-            except:
+            except Exception:
                 self.plt.savefig(file_name, dpi=100)
             self.plt.close()
             if self.polar_fig is not None:
@@ -410,14 +414,14 @@ class Visualization:
             ax = self.plot_object.axes()
             if max(ax.get_yticks().tolist()) < 0.001:
                 ax.set_yticklabels([f"{item:.1e}" for item in ax.get_yticks().tolist()])
-        except:
-            print("Axis not formatted")
+        except Exception as e:
+            print(f"Axis not formatted: {e}")
         try:
             ax = self.plot_object.axes()
             if max(ax.get_xticks().tolist()) < 0.001:
                 ax.set_xticklabels([f"{item:.1e}" for item in ax.get_xticks().tolist()])
-        except:
-            print("Axis not formatted")
+        except Exception as e:
+            print(f"Axis not formatted: {e}")
 
         if self.cfg_mult is None:
             self.plot_object.xlabel(
@@ -691,8 +695,10 @@ class Visualization:
             try:
                 self.plt_settings["ylim"] = cfg["RangeGraph"][RangeGraphIndex]["ylim"]
                 self.plt.ylim(self.plt_settings["ylim"])
-            except:
-                pass
+            except Exception as e:
+                # Optional setting; keep the no-op fallback but stop discarding
+                # the reason entirely (issue #80).
+                logging.debug(f"ylim not applied: {e}")
 
             self.plt.savefig(FileName, dpi=800)
             self.plt.close()
