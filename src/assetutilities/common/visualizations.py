@@ -167,13 +167,14 @@ class Visualization:
                     except Exception as e:
                         print(e)
                         if "datetime.date" in str(e):
-                            # Standard library imports
-                            import sys
-
-                            print(
-                                "Error: When using datetime as X-axis, consider changing plot kind from scatter to line "
-                            )
-                            sys.exit()
+                            # Raise instead of exiting so the caller keeps
+                            # control of the run (issue #80). Any other scatter
+                            # error is still swallowed, exactly as before - this
+                            # is a process-exit fix, not a handler redesign.
+                            raise ValueError(
+                                "When using datetime as X-axis, consider changing "
+                                "plot kind from scatter to line"
+                            ) from e
 
                 elif "polar" in plt_settings["plt_kind"]:
                     self.prepare_polar_plot(df, plt_settings, x, column_index, y, label)

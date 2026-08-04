@@ -286,11 +286,11 @@ class Database:
                 self.conn = pypyodbc.connect(connection_string_generic)
 
             except Exception as e:
-                import sys
-
+                # Raise instead of exiting so callers can report the failure
+                # (issue #80). The print that used to sit after sys.exit() was
+                # unreachable dead code and has been removed.
                 logging.info(f"Access file connection failed: {e}")
-                sys.exit()
-                print("Access file connection failed")
+                raise ConnectionError(f"Access file connection failed: {e}") from e
 
     def perform_analysis(self, cfg_analysis):
         db_analysis_result = {}
@@ -1091,10 +1091,12 @@ class Database:
         if data_set_cfg.__contains__("x") and data_set_cfg.__contains__("y"):
             statistics_df_column_array = data_set_cfg["x"] + data_set_cfg["y"]
         else:
-            import sys
-
-            print("Data not defined for formatting table statstics")
-            sys.exit()
+            # Raise instead of exiting so the caller can report a misconfigured
+            # data set rather than losing the whole run (issue #80).
+            raise ValueError(
+                "Data not defined for formatting table statistics: "
+                "data_set_cfg must contain both 'x' and 'y'"
+            )
         statistics_df = pd.DataFrame()
         for column_index in range(0, len(statistics_df_column_array)):
             column_name = statistics_df_column_array[column_index]

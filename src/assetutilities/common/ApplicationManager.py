@@ -265,10 +265,16 @@ class ConfigureApplicationInputs:
                 with open(self.customYaml) as fp:
                     custom_file_data = fp.read()
             except Exception as e:
+                # Library code must not kill the host process: engine() callers
+                # need to catch this, emit a summary carrying screening_status
+                # and record the failure in their provenance block. Raising
+                # preserves the original message and the cause (issue #80).
                 print("Update Input file could not be loaded successfully.")
                 print(f"Error is : {e}")
-                print("Stopping program")
-                sys.exit()
+                raise ValueError(
+                    f"Update Input file could not be loaded successfully: "
+                    f"{self.customYaml}"
+                ) from e
         elif self.CustomInputs is not None:
             custom_file_data = self.CustomInputs.replace("\\'", "'").replace(
                 "\\n", "\n"
