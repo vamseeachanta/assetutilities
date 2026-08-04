@@ -206,9 +206,7 @@ class TestCredentialsAreNotLeaked:
             in capsys.readouterr().out
         )
 
-    def test_connection_failure_still_reports_false_to_the_caller(
-        self, monkeypatch
-    ):
+    def test_connection_failure_still_reports_false_to_the_caller(self, monkeypatch):
         db = make_db()
 
         def boom():
@@ -219,9 +217,7 @@ class TestCredentialsAreNotLeaked:
 
 
 class TestQueryLoggingDoesNotEchoValues:
-    def test_executenodataquery_does_not_print_the_interpolated_statement(
-        self, capsys
-    ):
+    def test_executenodataquery_does_not_print_the_interpolated_statement(self, capsys):
         db = make_db()  # no engine attribute -> the execute path fails immediately
         db.executeNoDataQuery(
             "INSERT INTO analysis (ticker) VALUES ('SENTINEL-PAYROLL-VALUE')"

@@ -22,11 +22,7 @@ UNSAFE_YAML = "cmd: !!python/object/apply:os.system ['echo pwned']\n"
 # The legitimate counterpart: ordinary scalars/lists/maps that safe_load has
 # always supported. If a fix broke normal configs this would fail.
 LEGITIMATE_YAML = (
-    "basename: viz\n"
-    "settings:\n"
-    "  plt_kind: line\n"
-    "  dpi: 800\n"
-    "  flags: [true, false]\n"
+    "basename: viz\nsettings:\n  plt_kind: line\n  dpi: 800\n  flags: [true, false]\n"
 )
 
 LEGITIMATE_EXPECTED = {

@@ -7,10 +7,7 @@ import pathlib
 import pytest
 
 COMMON_DIR = (
-    pathlib.Path(__file__).resolve().parents[2]
-    / "src"
-    / "assetutilities"
-    / "common"
+    pathlib.Path(__file__).resolve().parents[2] / "src" / "assetutilities" / "common"
 )
 
 
@@ -143,8 +140,6 @@ class TestScatterPlotErrorRaisesInsteadOfExiting:
     def test_working_scatter_plot_is_unaffected(self, monkeypatch):
         viz, df, settings = self._visualization_and_frame(monkeypatch)
         calls = []
-        monkeypatch.setattr(
-            viz.plot_object, "scatter", lambda *a, **k: calls.append(1)
-        )
+        monkeypatch.setattr(viz.plot_object, "scatter", lambda *a, **k: calls.append(1))
         viz.from_df_columns(df, settings)
         assert len(calls) == 1
