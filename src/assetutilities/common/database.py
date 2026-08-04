@@ -800,7 +800,8 @@ class Database:
 
         Identifiers (table, columns, primary key) cannot be bound, so they are
         validated instead. Schema-qualified table names such as
-        ``stocks.analysis`` are accepted because real callers use them.
+        ``stocks.analysis`` are accepted because that is the documented usage
+        shape; rejecting the dot would break it.
 
         The statement is constructed here rather than read from
         ``data/<server_type>/sql/common.upsert_single_record.sql``: that template

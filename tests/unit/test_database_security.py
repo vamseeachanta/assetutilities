@@ -104,8 +104,12 @@ class TestUpsertIdentifiersAreValidated:
             )
 
     def test_schema_qualified_table_name_is_accepted(self):
-        # The one real downstream caller passes 'stocks.analysis'; a validator
-        # that rejected the dot would break a working path.
+        # Schema-qualified names must stay accepted: a validator that rejected
+        # the dot would break the documented usage shape. The equivalent
+        # function in a sibling repo is invoked with 'stocks.analysis'. That is
+        # a separate copy, not a caller of this one -- this module currently has
+        # no importer in the workspace -- so it is evidence about the intended
+        # config shape, not proof of a live call path.
         df = pd.DataFrame([{"ticker": "ACME", "company": "Acme"}])
         sql, _params = make_db().build_upsert_statement(
             df, {"table_name": "stocks.analysis", "primary_key": "ticker"}
