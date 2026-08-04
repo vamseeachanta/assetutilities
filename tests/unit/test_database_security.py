@@ -122,7 +122,14 @@ class TestUpsertRoundTripsThroughARealEngine:
 
     @pytest.fixture
     def sqlite_db(self):
-        from sqlalchemy import create_engine, text
+        # sqlalchemy is not a declared dependency of this project -- database.py
+        # imports it lazily inside functions -- so CI's test environment does not
+        # have it. Skip rather than error there; the statement-construction tests
+        # above still run everywhere and cover the injection vector itself.
+        sqlalchemy = pytest.importorskip(
+            "sqlalchemy", reason="sqlalchemy is not a declared project dependency"
+        )
+        create_engine, text = sqlalchemy.create_engine, sqlalchemy.text
 
         db = make_db()
         db.engine = create_engine("sqlite://")
