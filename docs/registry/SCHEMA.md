@@ -8,11 +8,10 @@
 superset** (no v3 bump). Adding optional/reserved fields is backward-compatible, so rows
 that omit them still validate.
 
-## Reference resolver
+## Resolver contract
 
-`deckhand/src/deckhand/capability_smoke.py` is the **reference resolver** for this registry.
-It reads the top-level `invocation:` key (`capability_smoke.py:231`) and performs
-**`{input}`-only** substitution (`capability_smoke.py:232`) — it never substitutes `{pkg}`.
+A registry resolver reads the top-level `invocation:` key and performs
+**`{input}`-only** substitution — it never substitutes `{pkg}`.
 Therefore `invocation` MUST embed the literal package name.
 
 ## Top-level keys
@@ -34,7 +33,7 @@ Therefore `invocation` MUST embed the literal package name.
 | `outputs` | yes | **documentary** CLI-path filenames — see "Result location" below. |
 | `test` | yes | the runnable example command. |
 | `runtime` | recommended | `fast`/`offline`/… ; `requires-license` carries the license-gate (workspace-hub#3284). |
-| `version`/`status`/`latest` | optional | Deckhand routing triple (absent ⇒ `1`/`stable`/latest). |
+| `version`/`status`/`latest` | optional | Workflow versioning triple (absent ⇒ `1`/`stable`/latest). |
 | `result` | optional | **#3282-owned** result-location descriptor (below). |
 | `request_schema`/`response_schema` | reserved | structured (untyped) slots **reserved by workspace-hub#3295**; no `str` invariant; not populated here. |
 
