@@ -1,1 +1,0 @@
-../../../.claude/commands/workspace-hub/compound.md
