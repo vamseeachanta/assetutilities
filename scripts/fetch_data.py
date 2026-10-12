@@ -213,6 +213,11 @@ def parser():
         action="store_true",
         help="Verify selected local files without restoring",
     )
+    result.add_argument(
+        "--require-store",
+        action="store_true",
+        help="Fail when the store is unavailable for fetching or verification",
+    )
     return result
 
 
@@ -237,12 +242,13 @@ def main(argv=None, repo_root=None):
                     f"{row['path']}\t{row['bytes']}\t{row['sha256']}\t{row['disposition']}"
                 )
             return 0
-        route = None if args.verify else storage_route()
-        if not args.verify and route is None:
+        route = None if args.verify and not args.require_store else storage_route()
+        if (not args.verify or args.require_store) and route is None:
             print(
-                "Data store unavailable; set ACE_DATA_ROOT or ACE_DATA_HOST with ACE_DATA_ROOT. No files changed."
+                "Data store unavailable; set ACE_DATA_ROOT or ACE_DATA_HOST with ACE_DATA_ROOT. No files changed.",
+                file=sys.stderr if args.require_store else sys.stdout,
             )
-            return 0
+            return 1 if args.require_store else 0
         tracked = tracked_paths(root)
         targets = [(row, target_path(root, row["path"], tracked)) for row in selected]
         if args.verify:

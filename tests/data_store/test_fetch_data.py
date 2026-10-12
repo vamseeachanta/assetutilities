@@ -249,3 +249,46 @@ def test_public_manifest_records_placement_and_copy_status():
             else:
                 assert row["blob"] == "-"
                 assert row["second_copy"] == "not-required"
+
+
+@pytest.mark.parametrize(
+    "selection", [["fixtures/data.csv"], ["--all"], ["--verify", "--all"]]
+)
+def test_require_store_unavailable_preserves_files(
+    fetch, repository, capsys, selection
+):
+    root, _, _, _ = repository
+    target = root / "fixtures/data.csv"
+    target.parent.mkdir()
+    target.write_bytes(b"existing")
+    before = {
+        p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+    }
+    assert fetch.main(["--require-store", *selection], root) != 0
+    output = capsys.readouterr()
+    assert output.out == ""
+    assert output.err == (
+        "Data store unavailable; set ACE_DATA_ROOT or ACE_DATA_HOST with ACE_DATA_ROOT. No files changed.\n"
+    )
+    after = {
+        p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+    }
+    assert after == before
+    assert not (root / "fixtures/original.csv").exists()
+
+
+def test_require_store_available_restores_and_verifies(fetch, repository, monkeypatch):
+    root, store, _, payload = repository
+    monkeypatch.setenv("ACE_DATA_ROOT", str(store))
+    assert fetch.main(["--require-store", "--all"], root) == 0
+    assert (root / "fixtures/data.csv").read_bytes() == payload
+    assert (root / "fixtures/original.csv").read_bytes() == payload
+    assert fetch.main(["--require-store", "--verify", "--all"], root) == 0
+
+
+def test_require_store_list_needs_no_store(fetch, repository, capsys):
+    root, _, _, _ = repository
+    assert fetch.main(["--require-store", "--list"], root) == 0
+    output = capsys.readouterr()
+    assert "fixtures/data.csv" in output.out
+    assert output.err == ""

@@ -84,6 +84,7 @@ python scripts/fetch_data.py --verify --all
 
 Restoration verifies size and SHA-256 and refuses to overwrite tracked files.
 With no reachable store, fetching prints a visible message and changes nothing.
+Use `--require-store` to fail when fetching or verification needs an unavailable store.
 Restored originals are ignored; compact fixtures occupy separate tracked paths.
 
 Under the repository's lean-data rule, non-source files over 1 MB without code or test references move
