@@ -2,6 +2,7 @@
 
 Parse active hook/CI wiring; archived scanner libraries are not active gates.
 """
+
 from pathlib import Path
 import unittest
 
@@ -42,9 +43,7 @@ class RetirementContract(unittest.TestCase):
     def test_existing_secret_hooks_are_preserved(self):
         hooks = {hook["id"]: hook for hook in hook_entries()}
         self.assertIn("gitleaks", hooks)
-        self.assertEqual(
-            hooks["gitleaks"]["args"], ["--config", "../.gitleaks.toml"]
-        )
+        self.assertEqual(hooks["gitleaks"]["args"], ["--config", ".gitleaks.toml"])
         if (ROOT / "packages" / "worldenergydata-core").exists():
             self.assertIn("detect-private-key", hooks)
             workflow = (ROOT / ".github/workflows/ci.yml").read_text()
@@ -55,4 +54,3 @@ class RetirementContract(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -19,7 +19,7 @@ repos:
         name: bandit security scan (staged Python files)
         language: system
         entry: uvx bandit[toml]==1.9.4
-        args: [-ll, -c, pyproject.toml, -b, ../config/quality/bandit-baseline-assetutilities.json]
+        args: [-ll, -c, pyproject.toml, -b, config/quality/bandit-baseline-assetutilities.json]
         types: [python]
         exclude: ^tests/
 
@@ -37,17 +37,5 @@ repos:
     rev: v8.21.2
     hooks:
       - id: gitleaks
-        # Note: requires workspace-hub parent checkout; ../.gitleaks.toml is hub-relative
-        args: [--config, ../.gitleaks.toml]
-
-  # Cross-repo integration gate (WRK-1091): run downstream contract tests on push
-  - repo: local
-    hooks:
-      - id: cross-repo-integration
-        name: Cross-repo integration test
-        entry: ../scripts/hooks/assetutilities-pre-push.sh
-        language: script
-        stages: [push]
-        pass_filenames: false
-        always_run: false
-        files: ^src/
+        # Repository-local configuration supports standalone clones and worktrees.
+        args: [--config, .gitleaks.toml]
