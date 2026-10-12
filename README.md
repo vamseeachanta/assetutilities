@@ -86,7 +86,7 @@ Restoration verifies size and SHA-256 and refuses to overwrite tracked files.
 With no reachable store, fetching prints a visible message and changes nothing.
 Restored originals are ignored; compact fixtures occupy separate tracked paths.
 
-Under card L04, non-source files over 1 MB without code or test references move
+Under the repository's lean-data rule, non-source files over 1 MB without code or test references move
 to the store; referenced files unchanged for 90 days move with fetch on demand.
 Files under 1 MB stay unless explicitly superseded, re-downloadable, or private.
 The pre-commit hook blocks added files over 1,000 KB.
