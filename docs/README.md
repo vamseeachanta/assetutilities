@@ -36,7 +36,6 @@ Use these surfaces to choose source, tests, and docs paths for issue work.
 The following paths are raw inventory or supporting references. They can help
 with discovery, but they are not final routing authority:
 
-- `docs/ref/`
 - `docs/sub_data/`
 - `docs/sub_hardware/`
 - generated test result directories under `tests/modules/**/results/`
@@ -53,3 +52,5 @@ surface and update it if it is stale.
   source-hygiene changes.
 - Run `uv run python -m pytest tests/docs/test_assetutilities_routing_contract.py tests/hygiene/test_no_backup_artifacts_tracked.py`
   for focused validation.
+
+Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.

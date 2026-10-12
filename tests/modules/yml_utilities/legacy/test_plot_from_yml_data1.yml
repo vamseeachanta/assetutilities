@@ -9,7 +9,7 @@ default:
       output: True
 
 plot_yml_data:
-  flag: True
+  flag: False
   
 visualization:
   file_name: RAOsDirection0
@@ -23,12 +23,8 @@ visualization:
 
 data:
   type: input
-  groups_key_chain:
-    - x:
-        - {file_name: yml_to_plot_1/L01_import_vessels.yml, key_chain: ['VesselTypes', 0, 'Draughts', 0, 'DisplacementRAOs', 'RAOs']}
-      y:
-        - [0.5, 1, 2, 2.5, 3, 4]
-        - [1, 2, 2.5, 2.5, 3, 5]
+  # Material moved to the cold-data store on 2026-10-11 per the manifest.
+  groups_key_chain: []
 
 file_management:
   flag: False

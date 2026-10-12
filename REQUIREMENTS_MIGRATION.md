@@ -7,11 +7,9 @@ All Python dependencies have been consolidated and moved to `pyproject.toml`.
 ### Previous requirements.txt files:
 - docs/sub_databases/COD/MySQL/deployment/requirements.txt
 - docs/sub_k8_starter/app/requirements.txt
-- docs/sub_python/leg_pycodes/COD/Dockers/composetest/requirements.txt
 - requirements.txt
 - src/external/assetutilities/docs/sub_databases/COD/MySQL/deployment/requirements.txt
 - src/external/assetutilities/docs/sub_k8_starter/app/requirements.txt
-- src/external/assetutilities/docs/sub_python/leg_pycodes/COD/Dockers/composetest/requirements.txt
 - src/external/assetutilities/requirements.txt
 - src/external/assetutilities/scripts/requirements.txt
 
