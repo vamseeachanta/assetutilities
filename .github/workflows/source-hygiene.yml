@@ -33,13 +33,12 @@ jobs:
           scan_dir=$(mktemp -d "${RUNNER_TEMP}/secret-scan.XXXXXX")
           release=https://github.com/gitleaks/gitleaks/releases/download/v8.21.2
           archive=gitleaks_8.21.2_linux_x64.tar.gz
+          expected_sha256=5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba
           curl --fail --silent --show-error --location \
             "${release}/${archive}" -o "${scan_dir}/${archive}"
-          curl --fail --silent --show-error --location \
-            "${release}/gitleaks_8.21.2_checksums.txt" -o "${scan_dir}/checksums.txt"
           (
             cd "$scan_dir"
-            grep " ${archive}$" checksums.txt | sha256sum --check --strict
+            printf '%s  %s\n' "$expected_sha256" "$archive" | sha256sum --check --strict
             tar -xzf "$archive" gitleaks
           )
           test "$("${scan_dir}/gitleaks" version)" = "8.21.2"
