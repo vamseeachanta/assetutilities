@@ -73,7 +73,7 @@ def test_docs_readme_states_curated_vs_raw_boundary() -> None:
         "docs/registry/module-routing.yaml",
         "MODULE_STRUCTURE.md",
     ]
-    raw_paths = ["docs/ref/", "docs/sub_data/", "docs/sub_hardware/"]
+    raw_paths = ["docs/sub_data/", "docs/sub_hardware/"]
 
     assert all(path in text for path in curated_paths)
     assert any(path in text for path in raw_paths)

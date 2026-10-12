@@ -166,3 +166,20 @@ def test_matrix_targets_only_existing_dirs_in_module_scope():
     for shard in m["include"]:
         for tgt in shard["targets"].split():
             assert (REPO_ROOT / tgt).exists(), f"{tgt} does not exist"
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "scripts/fetch_data.py",
+        "data-manifest/MANIFEST.tsv",
+        "tests/data_store/test_fetch_data.py",
+        "uv.lock",
+    ],
+)
+def test_data_store_is_collected_for_contract_and_full_changes(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = {
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    }
+    assert "tests/data_store" in targets

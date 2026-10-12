@@ -1,4 +1,4 @@
 
 https://github.com/diehlpkpapers/heat-ai/tree/main?tab=readme-ov-file
 
-[PDF document of the study](evaluating_ai_generated_code.pdf)
+Reference material was moved to the cold-data store on 2026-10-11 per the manifest.

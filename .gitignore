@@ -226,3 +226,27 @@ site/
 
 # Scratch agent dirs written by agent_os tests (never tracked)
 /agents/
+
+# Regenerated results and manifest-restored originals
+/tests/modules/**/results/
+!/tests/modules/file_management/results/
+/tests/modules/file_management/results/*
+!/tests/modules/file_management/results/test_file_management_file_size_pytest.yml
+!/tests/modules/file_management/results/test_file_management_regex_pytest.yml
+/docs/sub_python/leg_pycodes/
+/docs/sub_mathcad/Reference Tables/
+/docs/sub_mathcad/wellbore/
+/docs/sub_mathcad/*.*
+/docs/sub_python/*.pdf
+/docs/sub_python/Jupyter notebook/
+/docs/sub_data_science/*.docx
+/docs/sub_visualization/*.pdf
+/docs/modules/git_utilities/*.pdf
+/docs/sub_databases/COD/MySQL/user_setup/*.whl
+/tests/modules/yml_utilities/yaml_to_plot/yml/
+/tests/modules/yml_utilities/yaml_to_plot/yml_to_plot_1/*.yml
+/tests/modules/yml_utilities/yml/**/*.yml
+/tests/modules/yml_utilities/yml/*.yml
+/tests/modules/yml_utilities/yml/*.7z
+/tests/modules/zip_utilities/csv/*.csv
+/tests/modules/zip_utilities/zip/*.zip

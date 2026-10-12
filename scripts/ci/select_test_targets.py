@@ -48,6 +48,7 @@ from pathlib import Path
 # PR (so the matrix is never empty) and is cheap.
 ALWAYS_XDIST = [
     "tests/unit",
+    "tests/data_store",
 ]
 
 # Module domains that are WIP staging areas, not gating suites — never shard

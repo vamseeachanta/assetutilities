@@ -39,3 +39,10 @@ repos:
       - id: gitleaks
         # Repository-local configuration supports standalone clones and worktrees.
         args: [--config, .gitleaks.toml]
+
+  # No retained tracked file exceeds this threshold; no exclusions are needed.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
