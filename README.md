@@ -47,6 +47,13 @@ uv sync --group dev
 uv run python -m pytest tests
 ```
 
+After syncing the dev tools, run `uv run pre-commit install`. Check
+`git config --get core.hooksPath`: it must be unset, since a custom value silently
+diverts Git away from installed hooks. The secret scanner reads the repo-local
+`.gitleaks.toml`; the empty linter baseline is also in-repo at
+`config/quality/bandit-baseline-assetutilities.json` and suppresses no findings.
+The same secret scanner runs in CI on pull request changes.
+
 Targeted routing and hygiene checks:
 
 ```bash
