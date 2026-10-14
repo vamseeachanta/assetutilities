@@ -91,6 +91,11 @@ class ReportGenerator:
 
 def run(config: Dict[str, Any]) -> None:
     """Entry point called by engine.py"""
+    if config.get("reporting_standard") == "P6":
+        from .standard import run as run_standard
+
+        return run_standard(config)
+
     logging.info("Starting report generation...")
     generator = ReportGenerator()
     generator.initialize_from_config(config)
