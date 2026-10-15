@@ -76,16 +76,27 @@ Word core dates come from the newest revision date. ZIP entry order and dates
 are fixed. Rebuilding the same input with the same library versions produces
 byte-identical DOCX files, without discarding report content.
 
-PDF conversion uses a separate retained LibreOffice profile and output folder
-under the supplied scratch directory. The final PDF omits volatile creation and
+PDF conversion creates private profile, home, temporary, cache, configuration,
+data, state and runtime folders under the caller-supplied scratch directory.
+The installed `soffice.bin` is used when present, because the shell launcher
+requires a writable system temporary folder before loading profile settings.
+The binary receives `OSL_SOCKET_PATH=r` and runs with the conversion directory
+as its working directory. This short relative socket path avoids Unix socket
+name limits when the caller's scratch path is long. The socket-path setting is
+LibreOffice's fallback when system temporary folders are unavailable; it does
+not override writable system temporary folders. No sandbox permission is changed.
+A fresh profile can request a normal restart (exit 81); the adapter retries that
+code once with the same profile and arguments. Other failures are not retried.
+Native conversion output and the exit-code log are retained in scratch. The final PDF omits volatile creation and
 modification metadata, XMP metadata and trailer identifiers; page content is
-cloned. Native conversion output and logs remain in scratch. PDF bytes and font
+imported with link and outline destinations mapped to the final page tree. PDF bytes and font
 pagination are only reproducible with the same converter and font environment.
 An error is raised if the converter is missing, fails or produces no PDF.
 The PDF integration test requires installed LibreOffice and is not silently
-skipped. Local conversion could not start: `ERROR: no valid pipe path found.`
-PDF read-back, link retention and repeat-build equality therefore remain
-unverified for the installed converter.
+skipped. The installed converter passes text read-back, A4 page-size checks and
+repeat-build byte equality. The sample manifest records the converter producer,
+page count, links and output digests. Visual pagination inspection remains
+necessary for reports with different content or fonts.
 
 Markdown ingestion, CSV-to-spreadsheet export, one-page table fitting, equations,
 figures, charts, arbitrary cross-references and citation resolution are outside
@@ -93,3 +104,8 @@ this input contract. The formatter does not evaluate title semantics, source
 rights, physical results, validation evidence or engineering adequacy. Citation
 binding, disclosure and provenance for the broader template inventory remain
 open in #79; this output backend alone does not complete that issue.
+
+The startup behavior is documented by the [LibreOffice command-line manual](https://help.libreoffice.org/latest/en-US/text/shared/guide/start_parameters.html)
+and its versioned source: [launcher pipe selection](https://github.com/LibreOffice/core/blob/libreoffice-24.2.7.2/desktop/unx/source/start.c),
+[socket fallback](https://github.com/LibreOffice/core/blob/libreoffice-24.2.7.2/sal/osl/unx/pipe.cxx)
+and [restart codes](https://github.com/LibreOffice/core/blob/libreoffice-24.2.7.2/include/desktop/exithelper.h).

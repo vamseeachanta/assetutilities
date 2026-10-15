@@ -273,3 +273,117 @@ def test_pdf_normalization_preserves_pages_and_links(tmp_path, monkeypatch):
     assert "/Metadata" not in reader.trailer["/Root"]
     assert "/CreationDate" not in reader.metadata
     assert "/ModDate" not in reader.metadata
+
+
+def test_converter_keeps_runtime_under_caller_scratch(tmp_path, monkeypatch):
+    import os
+    import stat
+
+    module = api()
+    source = module.write_docx(sample(), tmp_path / "input.docx")
+    installation = tmp_path / "installation"
+    installation.mkdir()
+    launcher = installation / "libreoffice"
+    launcher.touch()
+    binary = installation / "soffice.bin"
+    binary.touch()
+    monkeypatch.setattr(module.shutil, "which", lambda name: str(launcher))
+    scratch = tmp_path / "caller-scratch"
+    original_environment = os.environ.copy()
+
+    def convert(command, **kwargs):
+        assert command[0] == str(binary)
+        work = Path(kwargs["cwd"])
+        assert work.is_relative_to(scratch)
+        for name in (
+            "HOME",
+            "TMPDIR",
+            "XDG_CACHE_HOME",
+            "XDG_CONFIG_HOME",
+            "XDG_DATA_HOME",
+            "XDG_STATE_HOME",
+            "XDG_RUNTIME_DIR",
+        ):
+            directory = Path(kwargs["env"][name])
+            assert directory.is_dir()
+            assert directory.is_relative_to(work)
+        runtime = Path(kwargs["env"]["XDG_RUNTIME_DIR"])
+        assert stat.S_IMODE(runtime.stat().st_mode) == 0o700
+        assert "-env:OSL_SOCKET_PATH=r" in command
+        assert (work / "r").is_dir()
+        assert f"-env:UserInstallation={(work / 'profile').as_uri()}" in command
+        assert (work / "profile").is_dir()
+        assert Path(command[-1]) == source.resolve()
+        writer = module.PdfWriter()
+        writer.add_blank_page(width=595, height=842)
+        with (work / "input.pdf").open("wb") as stream:
+            writer.write(stream)
+
+        class Result:
+            returncode = 0
+
+        return Result()
+
+    monkeypatch.setattr(module.subprocess, "run", convert)
+    module.convert_pdf(source, tmp_path / "report.pdf", scratch)
+    assert os.environ == original_environment
+
+
+@pytest.mark.parametrize("codes", [(81, 0), (81, 81)])
+def test_converter_bounds_profile_restart(tmp_path, monkeypatch, codes):
+    module = api()
+    source = module.write_docx(sample(), tmp_path / "input.docx")
+    monkeypatch.setattr(module.shutil, "which", lambda name: "libreoffice")
+    calls = []
+
+    def convert(command, **kwargs):
+        result = module.subprocess.CompletedProcess(command, codes[len(calls)])
+        calls.append((command, kwargs["cwd"], kwargs["env"]["XDG_RUNTIME_DIR"]))
+        if result.returncode == 0:
+            writer = module.PdfWriter()
+            writer.add_blank_page(width=595, height=842)
+            with (Path(kwargs["cwd"]) / "input.pdf").open("wb") as stream:
+                writer.write(stream)
+        return result
+
+    monkeypatch.setattr(module.subprocess, "run", convert)
+    output = tmp_path / "output.pdf"
+    if codes[-1] == 0:
+        module.convert_pdf(source, output, tmp_path / "scratch")
+        assert output.is_file()
+    else:
+        with pytest.raises(RuntimeError, match=f"exit {codes[-1]}"):
+            module.convert_pdf(source, output, tmp_path / "scratch")
+        assert not output.exists()
+    assert len(calls) == len(codes)
+    assert all(call == calls[0] for call in calls)
+
+
+def test_pdf_normalization_retains_link_and_outline_destinations(tmp_path, monkeypatch):
+    from PyPDF2.generic import AnnotationBuilder
+
+    module = api()
+    source = module.write_docx(sample(), tmp_path / "input.docx")
+    monkeypatch.setattr(module.shutil, "which", lambda name: "libreoffice")
+
+    def convert(command, **kwargs):
+        writer = module.PdfWriter()
+        for _ in range(2):
+            writer.add_blank_page(width=595, height=842)
+        writer.add_annotation(
+            0, AnnotationBuilder.link(rect=(0, 0, 100, 100), target_page_index=1)
+        )
+        writer.add_outline_item("Evidence", 1)
+        with (Path(kwargs["cwd"]) / "input.pdf").open("wb") as stream:
+            writer.write(stream)
+        return module.subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(module.subprocess, "run", convert)
+    result = module.convert_pdf(source, tmp_path / "output.pdf", tmp_path / "scratch")
+    reader = PdfReader(result)
+    assert len(reader.pages) == 2
+    target = reader.pages[1].indirect_reference
+    annotation = reader.pages[0]["/Annots"][0].get_object()
+    assert annotation["/Dest"][0] == target
+    assert reader.outline[0]["/Title"] == "Evidence"
+    assert reader.get_destination_page_number(reader.outline[0]) == 1

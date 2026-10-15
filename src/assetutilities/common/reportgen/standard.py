@@ -283,52 +283,80 @@ def convert_pdf(source, destination, scratch):
     """Convert trusted DOCX using installed LibreOffice and retain native output.
 
     PDF metadata (including XMP dates) and random trailer IDs are omitted from
-    the final copy. Page content, links and outlines are retained by cloning.
+    the final copy. Page content, links and outlines are imported together.
     Byte reproducibility is scoped to the same converter and font environment.
     """
     executable = shutil.which("libreoffice") or shutil.which("soffice")
     if not executable:
         raise RuntimeError("PDF conversion requires installed LibreOffice")
+    # The shell launcher probes system temporary folders before honoring any
+    # profile setting. Its installed binary can use the bootstrap socket path.
+    binary = Path(executable).resolve().with_name("soffice.bin")
+    if binary.is_file():
+        executable = str(binary)
     source, destination, scratch = Path(source), Path(destination), Path(scratch)
     if source.suffix.lower() != ".docx" or not source.is_file():
         raise ValueError("PDF input must be an existing DOCX document")
     if source.resolve() == destination.resolve():
         raise ValueError("PDF destination must differ from the source")
     scratch.mkdir(parents=True, exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix="report-pdf-", dir=scratch))
+    work = Path(tempfile.mkdtemp(prefix="report-pdf-", dir=scratch)).resolve()
+    directories = {
+        "HOME": work / "home",
+        "TMPDIR": work / "tmp",
+        "XDG_CACHE_HOME": work / "cache",
+        "XDG_CONFIG_HOME": work / "config",
+        "XDG_DATA_HOME": work / "data",
+        "XDG_STATE_HOME": work / "state",
+        "XDG_RUNTIME_DIR": work / "r",
+    }
+    for directory in [work / "profile", *directories.values()]:
+        directory.mkdir(mode=0o700)
     environment = os.environ.copy()
+    environment.update({name: str(path) for name, path in directories.items()})
     environment.update(
         {
-            "XDG_CACHE_HOME": str(work / "cache"),
-            "XDG_CONFIG_HOME": str(work / "config"),
             "OMP_NUM_THREADS": "1",
         }
     )
     with (work / "conversion.log").open("wb") as log:
-        result = subprocess.run(
-            [
-                executable,
-                f"-env:UserInstallation={(work / 'profile').resolve().as_uri()}",
-                "--headless",
-                "--convert-to",
-                "pdf:writer_pdf_Export",
-                "--outdir",
-                str(work.resolve()),
-                str(source.resolve()),
-            ],
-            stdout=log,
-            stderr=subprocess.STDOUT,
-            env=environment,
-            timeout=120,
-            check=False,
-        )
+        # A fresh profile requests one normal restart (LibreOffice exit 81).
+        # Retain the same profile and arguments, as its launcher does, but bound
+        # the retry and propagate crashes and other failures without retrying.
+        for _ in range(2):
+            result = subprocess.run(
+                [
+                    executable,
+                    f"-env:UserInstallation={(work / 'profile').as_uri()}",
+                    # Relative to cwd so long caller paths fit Unix socket limits.
+                    "-env:OSL_SOCKET_PATH=r",
+                    "--headless",
+                    "--convert-to",
+                    "pdf:writer_pdf_Export",
+                    "--outdir",
+                    str(work.resolve()),
+                    str(source.resolve()),
+                ],
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                env=environment,
+                cwd=work,
+                timeout=120,
+                check=False,
+            )
+            log.write(f"\nConverter exit: {result.returncode}\n".encode())
+            log.flush()
+            if result.returncode != 81:
+                break
     native = work / f"{source.stem}.pdf"
     if result.returncode or not native.is_file():
         raise RuntimeError(
-            "LibreOffice conversion failed; inspect the scratch conversion log"
+            f"LibreOffice conversion failed (exit {result.returncode}); "
+            "inspect the scratch conversion log"
         )
     reader, writer = PdfReader(native), PdfWriter()
-    writer.clone_document_from_reader(reader)
+    # Import pages and remap link/outline targets to the final page tree.
+    writer.append(reader)
     writer._root_object.pop("/Metadata", None)
     writer.add_metadata({"/Producer": "assetutilities reportgen"})
     destination.parent.mkdir(parents=True, exist_ok=True)
