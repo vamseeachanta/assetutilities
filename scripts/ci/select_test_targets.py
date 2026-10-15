@@ -295,3 +295,4 @@ if __name__ == "__main__":
     raise SystemExit(main())
 
 # Exercise full shard selection without changing executable behavior.
+# Repeat the unchanged full shard matrix to observe scheduling variation.
