@@ -68,7 +68,7 @@ def test_src_module_change_maps_to_test_home():
 
 
 def test_noncode_only_change_skips_full_tree():
-    for path in ("reports/x.html", "notebooks/demo.ipynb", "README.md", "docs/x.md"):
+    for path in ("reports/x.html", "notebooks/demo.ipynb", "docs/x.md"):
         r = select([path], REPO_ROOT)
         assert r["scope"] == "skip", path
         # skip still runs the cheap always-on set, never module/full dirs
@@ -107,10 +107,36 @@ def _names(m: dict) -> set[str]:
 
 def test_matrix_is_never_empty_on_skip():
     """Docs-only change still yields the always-on shard (matrix never empty)."""
-    m = to_matrix(["README.md"], REPO_ROOT)
+    m = to_matrix(["docs/x.md"], REPO_ROOT)
     assert m["scope"] == "skip"
     assert m["include"], "matrix must never be empty (CI matrix would error)"
     assert _names(m) == {"_always"}
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        ["MODULE_STRUCTURE.md"],
+        ["docs/maps/assetutilities-operator-map.md"],
+        ["docs/registry/module-routing.yaml"],
+        ["docs/README.md"],
+        ["README.md"],
+        ["AGENTS.md"],
+        [
+            "MODULE_STRUCTURE.md",
+            "docs/maps/assetutilities-operator-map.md",
+            "docs/registry/module-routing.yaml",
+        ],
+    ],
+)
+def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
+    """Each routing contract input selects exactly one docs shard."""
+    matrix = to_matrix(changed, REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "docs"}
+    assert [shard for shard in matrix["include"] if shard["name"] == "docs"] == [
+        {"name": "docs", "targets": "tests/docs", "mode": "xdist"}
+    ]
 
 
 def test_matrix_module_scope_one_shard_per_domain():
