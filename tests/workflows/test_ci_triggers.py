@@ -114,3 +114,20 @@ def test_trigger_contract_runs_in_gates() -> None:
     """Run this contract even when the domain selector chooses only core tests."""
     commands = [step.get("run", "") for step in _workflow()["jobs"]["gates"]["steps"]]
     assert "uv run python -m pytest tests/workflows/test_ci_triggers.py" in commands
+
+
+def test_pull_request_activity_types_include_retargeting() -> None:
+    """Retargeting must start fresh gates against the new base."""
+    workflow = _workflow()
+    events = workflow.get("on", workflow.get(True))
+    assert events["pull_request"] == {
+        "types": ["opened", "synchronize", "reopened", "edited"]
+    }
+
+
+def test_edit_events_cannot_skip_jobs_or_steps() -> None:
+    """An edit must not replace failing checks with skipped checks."""
+    for job in _workflow()["jobs"].values():
+        for node in [job, *job.get("steps", [])]:
+            condition = str(node.get("if", ""))
+            assert not re.search(r"github\.event\.(action|changes)\b", condition)
