@@ -49,4 +49,6 @@ def test_trigger_contract_runs_in_gates() -> None:
     """Run this contract even when the domain selector chooses only core tests."""
     commands = [step.get("run", "") for step in _workflow()["jobs"]["gates"]["steps"]]
     assert "uv run python -m pytest tests/workflows/test_ci_triggers.py" in commands
+
+
 # Exercise incremental selection against a stacked pull-request base.
