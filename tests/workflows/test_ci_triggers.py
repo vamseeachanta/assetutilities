@@ -1,6 +1,9 @@
 """Pin pull-request coverage and preserve the existing test gate contract."""
 
 from pathlib import Path
+import re
+
+import pytest
 
 import yaml
 
@@ -37,12 +40,74 @@ def test_existing_gate_jobs_are_preserved() -> None:
     }
 
 
-def test_existing_concurrency_is_preserved() -> None:
-    """Pin the existing concurrency without changing cancellation behavior."""
-    assert _workflow()["concurrency"] == {
-        "group": "${{ github.workflow }}-${{ github.ref }}",
-        "cancel-in-progress": True,
+def test_concurrency_cancels_pull_request_runs_only() -> None:
+    """Push and dispatch runs get unique groups; only PR runs cancel."""
+    concurrency = _workflow()["concurrency"]
+    assert "github.run_id" in concurrency["group"]
+    assert "github.event_name == 'pull_request' && github.ref" in concurrency["group"]
+    assert (
+        concurrency["cancel-in-progress"]
+        == "${{ github.event_name == 'pull_request' }}"
+    )
+
+
+def _evaluate_expression(expression: str, context: dict) -> object:
+    """Evaluate the workflow's equality and short-circuit expression subset."""
+    expression = expression.strip()
+    for operator in ("||", "&&", "=="):
+        if operator in expression:
+            left, right = expression.split(operator, 1)
+            value = _evaluate_expression(left, context)
+            if operator == "||":
+                return value or _evaluate_expression(right, context)
+            if operator == "&&":
+                return value and _evaluate_expression(right, context)
+            return value == _evaluate_expression(right, context)
+    if expression.startswith("'") and expression.endswith("'"):
+        return expression[1:-1]
+    return context[expression]
+
+
+def _concurrency_for(event: str, ref: str, run_id: str) -> tuple[str, bool]:
+    """Evaluate the actual YAML group and cancellation for one event."""
+    concurrency = _workflow()["concurrency"]
+    context = {
+        "github.workflow": "Tests",
+        "github.event_name": event,
+        "github.ref": ref,
+        "github.run_id": run_id,
     }
+    group = re.sub(
+        r"\$\{\{(.*?)\}\}",
+        lambda match: str(_evaluate_expression(match[1], context)),
+        concurrency["group"],
+    )
+    cancel = concurrency["cancel-in-progress"]
+    if isinstance(cancel, str):
+        cancel = _evaluate_expression(
+            cancel.removeprefix("${{").removesuffix("}}"), context
+        )
+    return group, cancel
+
+
+def test_pull_request_concurrency_groups() -> None:
+    """Runs of one PR share a group; distinct PRs remain independent."""
+    first = _concurrency_for("pull_request", "refs/pull/1/merge", "101")
+    repeat = _concurrency_for("pull_request", "refs/pull/1/merge", "102")
+    other = _concurrency_for("pull_request", "refs/pull/2/merge", "103")
+    assert first == repeat == ("Tests-refs/pull/1/merge", True)
+    assert other == ("Tests-refs/pull/2/merge", True)
+    assert first[0] != other[0]
+
+
+@pytest.mark.parametrize("event", ["push", "workflow_dispatch", "schedule"])
+def test_non_pull_request_runs_have_unique_groups(event: str) -> None:
+    """Every non-PR event uses its run id without cancelling other runs."""
+    first = _concurrency_for(event, "refs/heads/main", "101")
+    second = _concurrency_for(event, "refs/heads/main", "102")
+    assert first == ("Tests-101", False)
+    assert second == ("Tests-102", False)
+    assert first[0] != second[0]
 
 
 def test_trigger_contract_runs_in_gates() -> None:
