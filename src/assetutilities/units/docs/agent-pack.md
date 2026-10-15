@@ -5,9 +5,9 @@
 | Module | `units` |
 | Repository | `assetutilities` |
 | Path | `src/assetutilities/units` |
-| Pack revision | 0, 2026-10-15 |
+| Pack revision | 1, 2026-10-15 |
 | Code revision | `8c8e83ef0f35400c050a45c9981b997e44b427dd` |
-| Analysis family | Python calculations; registry family `EC` |
+| Analysis family | Python calculations; registry family `EC` (engineering calculations) |
 | Quality role | Calculations quality manager |
 | Status | DRAFT; independent clearance pending |
 
@@ -22,6 +22,13 @@ Policy validates exact units and converts to one of the configured systems; form
 The routing registry records stability as `active`; it does not establish independent engineering qualification. [docs/registry/module-routing.yaml:L61-L66]
 
 The decorator converts tracked arguments to magnitudes, permits raw arguments unchanged, and wraps a return only when a return unit is supplied and an input was tracked. [src/assetutilities/units/computation.py:L47-L76]
+
+## Revision history
+
+| Revision | Date | Change and reason |
+| --- | --- | --- |
+| 0 | 2026-10-15 | Initial module knowledge pack. |
+| 1 | 2026-10-15 | Reclassify round-trip evidence, expose the independent-check gap, define the family code and clarify source and unit-alias limits. |
 
 ## 2. Inputs and outputs
 
@@ -71,13 +78,15 @@ Offshore field names and systems are exported as separate maps; the base parser 
 
 A lineage graph connects every input to every output for each logged step; it is an aggregate visualization, not proof of specific mathematical dependencies. [src/assetutilities/units/visualization.py:L22-L63]
 
-## 4. Validated worked examples
+## 4. Worked examples and validation status
+
+Validated examples: 0. No independent hand or published-factor check is established; V1 checks consistency only and does not satisfy G2.
 
 The following node IDs use inline test inputs; their offline outcomes are recorded at the pinned code revision, and tolerances are those enforced by the cited assertions. [tests/unit/test_integration.py:L53-L64] [tests/unit/test_input_parser.py:L15-L25] [tests/unit/test_domains_energy.py:L30-L32] [tests/unit/test_format_templates.py:L50-L59]
 
 | ID and class | Source and inline input | Expected output and tolerance basis | Existing test node ID | Offline result |
 | --- | --- | --- | --- | --- |
-| V1 validated round trip | Identity under forward/reverse conversion; 100 m → ft → m | 100 m, relative tolerance 1e-10 (absolute 1e-8 m); 3 provenance entries; checks reversibility, not an independent absolute factor | `tests/unit/test_integration.py::TestConfigToComputeRoundTrip::test_si_to_imperial_round_trip` | PASS at BASE and AFTER |
+| V1 consistency round trip | Identity under forward/reverse conversion; 100 m → ft → m | 100 m, relative tolerance 1e-10 (absolute 1e-8 m); 3 provenance entries; checks reversibility, not an independent absolute factor | `tests/unit/test_integration.py::TestConfigToComputeRoundTrip::test_si_to_imperial_round_trip` | PASS at BASE and AFTER |
 | R1 regression parsing | Literal fixture: thickness 0.025, SI | 0.025 m; shipped assertion uses `pytest.approx`; supplemental check requires 0 m error and exact canonical unit string | `tests/unit/test_input_parser.py::TestParseConfigValue::test_numeric_with_known_field_returns_tracked_quantity` | PASS at BASE and AFTER |
 | R2 regression energy | Registry definition repeated in test: 1 BOE | 5.8 MMBTU, relative 1e-3; compatibility only, custom-factor applicability unverified | `tests/unit/test_domains_energy.py::TestEnergyConversionsMatchWorldEnergyData::test_boe_to_mmbtu` | PASS at BASE and AFTER |
 | R3 regression formatting | Fixture 12.3456 m, explicit `FormatTemplate(precision=2)` | String contains `12.35`; 2 decimal places; substring assertion only | `tests/unit/test_format_templates.py::TestFormatterWithTemplate::test_formatter_with_template` | PASS at BASE and AFTER |
@@ -86,7 +95,9 @@ V1 evidence: [tests/unit/test_integration.py:L53-L64] R1 evidence: [tests/unit/t
 
 ## 5. QA gates
 
-AQG r0, section 10, Python calculations assigns G0 inputs/units/citations, G1 imports/tests, G2 hand or published check, G3 and G4 not applicable; section 9 assigns G5 evidence traceability. (AQG r0, sections 9–10.)
+A reachable source for AQG r0, sections 9–11, is unverified; see section 10, issue pending (6). The gate and ownership assignments below remain provisional until that source is available.
+
+The cited AQG r0, section 10, Python calculations row assigns G0 inputs/units/citations, G1 imports/tests, G2 hand or published check, G3 and G4 not applicable; section 9 assigns G5 evidence traceability. (AQG r0, sections 9–10.)
 
 Checks below define acceptance for future changes; a known defect probe is explicitly distinct from an existing passing regression test. [src/assetutilities/units/policy.py:L78-L87] [src/assetutilities/units/output_formatter.py:L99-L111]
 
@@ -98,7 +109,7 @@ Checks below define acceptance for future changes; a known defect probe is expli
 | G0 | Applicable | U04: strict policy rejects 1000 mm with exactly 1 exception (count), including when auto conversion is true; defect probe currently returns 1 m instead | Evaluate `UnitSystemPolicy("SI", strict=True).enforce(TrackedQuantity(1000,"mm"),"length")`; [src/assetutilities/units/policy.py:L20-L25] [src/assetutilities/units/policy.py:L78-L87] |
 | G0 | Applicable | U10: `get_registry` custom definitions require published source, edition and applicability metadata; 0 unresolved definitions (count); current source gap remains open | Inspect definitions and resolve their source metadata; [src/assetutilities/units/registry.py:L12-L24] |
 | G1 | Applicable | U05: import/execute all 17 direct-import test files and 7 routing tests; 0 failed test nodes (count) | Test inventory in section 10; [tests/docs/test_assetutilities_routing_contract.py:L49-L121] |
-| G2 | Applicable | U06: `TrackedQuantity.to` round trip error ≤1e-8 m at 100 m and exactly 3 provenance entries (count) | V1 node; [tests/unit/test_integration.py:L53-L64] |
+| G2 | Applicable; unmet | U06: an independent hand or published-factor check is required; 0 validated examples (count). V1 has round-trip error ≤1e-8 m at 100 m and exactly 3 provenance entries, but does not check an absolute conversion factor | V1 consistency evidence only; [tests/unit/test_integration.py:L53-L64]; issue pending (3) |
 | G3 | NOT_APPLICABLE | No dynamics calculation in this conversion path | [src/assetutilities/units/quantity.py:L130-L147] [src/assetutilities/units/domains/metocean.py:L74-L77] |
 | G4 | NOT_APPLICABLE | No diffraction input, mesh or hydrostatics calculation in this conversion path | [src/assetutilities/units/quantity.py:L130-L147] [src/assetutilities/units/domains/energy.py:L82-L85] |
 | G5 | Applicable | U07: `format_quantity` with explicit template on 12.3456 m contains 12.35 with 2 decimal places (digits) | R3 node; [tests/unit/test_format_templates.py:L50-L59] |
@@ -113,6 +124,7 @@ G5 requires retaining node outcomes and the code pin with audit evidence; a pass
 | --- | --- | --- | --- |
 | Silent conversion in strict mode or with both switches false | `enforce` raises only for strict true AND auto_convert false; U04; no existing detection test for the other switch combinations | issue pending (2); 2026-10-15 | [src/assetutilities/units/policy.py:L20-L25] [src/assetutilities/units/policy.py:L78-L87] [tests/unit/test_policy.py:L70-L86] |
 | Direct precision ignored; current test still passes | Resolved template supplies precision; assertion accepts a substring of the wrong result; U09; no exact-output detection check exists in the shipped test | issue pending (1); 2026-10-15 | [src/assetutilities/units/output_formatter.py:L99-L111] [tests/unit/test_output_formatter.py:L38-L40] |
+| `nm` silently changes meaning between entry points | Domain length mapping interprets `nm` as nautical miles; `TrackedQuantity` and explicit parser units use Pint, where `nm` means nanometres; no detection check exists | Contract limitation; callers shall use unambiguous unit names | [src/assetutilities/units/domains/metocean.py:L18-L26] [src/assetutilities/units/input_parser.py:L95-L116] [src/assetutilities/units/quantity.py:L51-L68] |
 | Unknown fields and nonnumeric values remain raw | Parser returns before validation; U01 covers known fields only; callers shall reject untracked required inputs | Contract limitation, not a recorded incident | [src/assetutilities/units/input_parser.py:L95-L116] |
 | Unknown policy quantity type passes validation | Missing policy rule returns true and enforcement returns original quantity | Contract limitation, not a recorded incident | [src/assetutilities/units/policy.py:L54-L56] [src/assetutilities/units/policy.py:L74-L76] |
 | Raw decorator inputs bypass unit checks | Only tracked quantities are converted; U05 exercises backward compatibility, not physical validity of raw inputs | Contract limitation, not a recorded incident | [src/assetutilities/units/computation.py:L51-L76] [tests/unit/test_computation.py:L22-L31] |
@@ -186,7 +198,9 @@ Module documentation found and read: `docs/units-guide.md`, `docs/README.md`, `d
 | `tests/unit/test_visualization.py` | 10 | [tests/unit/test_visualization.py:L1-L173] |
 | `tests/unit/test_visualization_rendering.py` | 9 | [tests/unit/test_visualization_rendering.py:L1-L88] |
 
-Run record: BASE: 230 collected, 226 passed, 3 failed, 1 skipped, 0 NOT_RUN; AFTER: 230 collected, 226 passed, 3 failed, 1 skipped, 0 NOT_RUN. The 223 module nodes comprise 222 passed and 1 skipped; the 7 routing nodes comprise 4 passed and 3 failed. The initial setup invocation exited 141 after installing dependencies and before test output (230 selected nodes NOT_RUN); the completed BASE re-probe used the same installed environment and command form. The skipped node is `tests/unit/test_visualization_rendering.py::TestToSvg::test_svg_returns_string`, because Graphviz is not installed. The command form is `uv run python -m pytest <17 module test paths> tests/docs/test_assetutilities_routing_contract.py -q -rA -p no:cacheprovider --basetemp=<scratch> --override-ini addopts=`; the empty addopts override is used consistently and changes no test selection; the selected pytest.ini supplies verbosity and strict-marker options, while pyproject.toml also contains coverage options. The unchanged code pin above applies to both runs.
+Run record for pack revision 1: BASE and AFTER each collected 230 nodes: 226 passed, 4 failed, 0 skipped, 0 NOT_RUN. The 223 module nodes comprise 222 passed and 1 environment failure; the 7 routing nodes comprise 4 passed and 3 baseline failures. The Graphviz Python package was installed, so `tests/unit/test_visualization_rendering.py::TestToSvg::test_svg_returns_string` ran and failed with `graphviz.backend.execute.ExecutableNotFound` because the system `dot` executable is absent. The three routing failures remain those listed below. Reading `origin/main` confirms the same routing assertions and missing domain entries, and the same SVG test and rendering code. No failure is introduced by these documentation edits.
+
+Command form for both completed runs: `uv run --no-project --with 'pytest>=7.4,<9' --with pytest-asyncio --with numpy --with 'pint>=0.23,<1.0' --with pyyaml --with graphviz python -m pytest <17 module test paths listed above> tests/docs/test_assetutilities_routing_contract.py -q -rA -p no:cacheprovider --basetemp=<scratch>`. The first invocation with pytest 9 could not collect because `tests/conftest.py` implements the removed `pytest_ignore_collect(path, config)` hook signature; pytest 8 completed collection without modifying test selection or assertions. The code pin above remains unchanged.
 
 ### Open items and clearance conditions
 
@@ -194,9 +208,10 @@ Run record: BASE: 230 collected, 226 passed, 3 failed, 1 skipped, 0 NOT_RUN; AFT
 | --- | --- | --- | --- |
 | Direct precision ignored and weak substring regression | Add exact-output coverage and reconcile public precision semantics | Module maintainer | issue pending (1); section 6 |
 | Strict/automatic policy combinations contradict documented controls | Cover all four switch combinations and reconcile enforcement semantics | Module maintainer | issue pending (2); section 6 |
-| Unsourced custom factors and inherited definition basis | Resolve both section-3 UNVERIFIED claims; document published source/edition, factor applicability, and citation sidecar decision; add independent absolute benchmarks | Module maintainer | issue pending (3); [src/assetutilities/units/registry.py:L12-L43] |
+| No validated example; unsourced custom factors and inherited definition basis | V1 is a consistency check, leaving G2 unmet and validated examples at 0. Resolve both section-3 UNVERIFIED claims; document published source/edition, factor applicability, and citation sidecar decision; add independent absolute benchmarks | Module maintainer | issue pending (3); [src/assetutilities/units/registry.py:L12-L43] |
 | Appointed deputy and independent clearance | Resolve section-8 UNVERIFIED claim and replace pending issue references after issue creation | Calculations quality manager | issue pending (4) |
 | Repository routing baseline | The operator map, registry and module structure omit the tracked workflow API domain; the three existing contract assertions fail unchanged at BASE | Module maintainer | issue pending (5); [tests/docs/test_assetutilities_routing_contract.py:L83-L103] [src/assetutilities/workflow_api/__init__.py:L9-L22] |
+| AQG source and provisional assignments | UNVERIFIED: supply a reachable source for AQG r0, sections 9–11, before accepting its gate and ownership assignments | Calculations quality manager | issue pending (6); section 5 |
 | External integration qualification | UNVERIFIED: the external adapter described by the guide is outside this checkout; no external adapter behavior is qualified here | Module maintainer | issue pending (4); [docs/units-guide.md:L275-L309] |
 
 Scope: documentation and registry link only; no calculation constants are introduced.
