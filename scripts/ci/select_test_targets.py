@@ -293,3 +293,5 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# Exercise full shard selection without changing executable behavior.
