@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: jq -c '[.action, .pull_request.base.ref, .pull_request.base.sha, (.changes.base != null)]' "$GITHUB_EVENT_PATH"
 
       - name: Set up Python
         uses: actions/setup-python@v5
