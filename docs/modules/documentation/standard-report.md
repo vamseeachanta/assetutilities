@@ -93,10 +93,10 @@ imported with link and outline destinations mapped to the final page tree. PDF b
 pagination are only reproducible with the same converter and font environment.
 An error is raised if the converter is missing, fails or produces no PDF.
 The PDF integration test requires installed LibreOffice and is not silently
-skipped. The installed converter passes text read-back, A4 page-size checks and
-repeat-build byte equality. The sample manifest records the converter producer,
-page count, links and output digests. Visual pagination inspection remains
-necessary for reports with different content or fonts.
+skipped. The hosted `PDF integration` workflow checks text read-back, A4 page
+size and repeat-build byte equality with LibreOffice Writer and Liberation Sans.
+Visual pagination inspection remains necessary for reports with different
+content or fonts.
 
 Markdown ingestion, CSV-to-spreadsheet export, one-page table fitting, equations,
 figures, charts, arbitrary cross-references and citation resolution are outside
