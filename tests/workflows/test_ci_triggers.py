@@ -131,3 +131,55 @@ def test_edit_events_cannot_skip_jobs_or_steps() -> None:
         for node in [job, *job.get("steps", [])]:
             condition = str(node.get("if", ""))
             assert not re.search(r"github\.event\.(action|changes)\b", condition)
+
+
+@pytest.mark.parametrize(
+    "job_id,checkout_index",
+    [
+        (job_id, index)
+        for job_id, job in _workflow()["jobs"].items()
+        for index, step in enumerate(job.get("steps", []))
+        if step.get("uses", "").startswith("actions/checkout@")
+    ],
+)
+def test_checkouts_verify_event_base(job_id: str, checkout_index: int) -> None:
+    """Resolve, check out and guard every PR merge against the event base."""
+    steps = _workflow()["jobs"][job_id]["steps"]
+    assert checkout_index > 0
+    resolve = steps[checkout_index - 1]
+    checkout = steps[checkout_index]
+    guard = steps[checkout_index + 1]
+    condition = "github.event_name == 'pull_request'"
+    assert resolve["if"] == guard["if"] == condition
+    assert resolve["id"] == "resolve_merge"
+    assert resolve["env"] == {
+        "GH_TOKEN": "${{ github.token }}",
+        "REPOSITORY": "${{ github.repository }}",
+        "PR_NUMBER": "${{ github.event.pull_request.number }}",
+        "BASE_SHA": "${{ github.event.pull_request.base.sha }}",
+    }
+    script = resolve["run"]
+    for fragment in (
+        'gh api "repos/$REPOSITORY/pulls/$PR_NUMBER"',
+        "--jq '.merge_commit_sha'",
+        'gh api "repos/$REPOSITORY/commits/$sha"',
+        "--jq '.parents[0].sha'",
+        "seq 1 10",
+        "sleep 6",
+        '"$parent" == "$BASE_SHA"',
+        'echo "sha=$sha" >> "$GITHUB_OUTPUT"',
+        "exit 1",
+    ):
+        assert fragment in script
+    assert checkout["with"]["ref"] == (
+        "${{ steps.resolve_merge.outputs.sha || github.sha }}"
+    )
+    assert guard["env"] == {"BASE_SHA": "${{ github.event.pull_request.base.sha }}"}
+    for fragment in (
+        "git cat-file -p HEAD | sed -n 's/^parent //p' | head -n 1",
+        '"$parent" != "$BASE_SHA"',
+        "exit 1",
+        "tested=$tested first_parent=$parent base=$BASE_SHA tree=$tree",
+        "git rev-parse 'HEAD^{tree}'",
+    ):
+        assert fragment in guard["run"]
