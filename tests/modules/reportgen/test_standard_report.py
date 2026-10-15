@@ -154,9 +154,17 @@ def test_converter_reports_failure_without_publishing_output(tmp_path, monkeypat
     assert not (tmp_path / "report.pdf").exists()
 
 
-def test_pdf_readback_and_byte_identical_builds(tmp_path):
+@pytest.mark.pdf_integration
+def test_pdf_readback_and_byte_identical_builds(tmp_path, monkeypatch):
     module = api()
-    assert shutil.which("libreoffice"), "PDF integration requires installed LibreOffice"
+    converter = shutil.which("libreoffice") or shutil.which("soffice")
+    # Exercise a soffice-only lookup using the installed converter.
+    monkeypatch.setattr(
+        shutil, "which", lambda name: converter if name == "soffice" else None
+    )
+    assert shutil.which("libreoffice") or shutil.which("soffice"), (
+        "PDF integration requires installed LibreOffice"
+    )
     source = module.write_docx(sample(), tmp_path / "source.docx")
     first = module.convert_pdf(source, tmp_path / "first.pdf", tmp_path / "scratch")
     second = module.convert_pdf(source, tmp_path / "second.pdf", tmp_path / "scratch")
