@@ -14,6 +14,7 @@ human-readable companion to `docs/registry/module-routing.yaml`.
 | `devtools` | `src/assetutilities/devtools/` | focused devtool tests when added | `src/assetutilities/devtools/README.md` | `cat:maintenance`, `cat:harness` | pyproject, CLI entry points |
 | `modules` | `src/assetutilities/modules/` | `tests/modules/`, related unit tests | `docs/modules/` | `cat:data-pipeline`, `cat:automation` | common helpers, pandas, Excel/YAML/zip dependencies |
 | `units` | `src/assetutilities/units/` | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_traceability*.py` | `docs/README.md` | `cat:engineering-calculations`, `cat:engineering-methodology` | constants, sympy, pint-style quantity behavior |
+| `workflow_api` | `src/assetutilities/workflow_api/` | `tests/workflow_api/` | `docs/README.md` | `cat:automation`, `cat:data-pipeline` | workflow engine, identity, artifact and publication helpers |
 
 ## Source-Hygiene Routing
 
