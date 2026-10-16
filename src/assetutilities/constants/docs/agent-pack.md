@@ -108,9 +108,9 @@ The following **8 checks** are executable criteria; a baseline defect is a findi
 
 | Check | Module-specific execution | Numeric pass criterion and unit | Evidence / gate |
 |---|---|---|---|
-| C01 | `TestSeawaterDensity::test_density_physical_range`, density over its temperature/salinity grid | Every result strictly between 990 and 1100 kg/m³; 0 outliers | Test assertions, G0; [tests/unit/test_seawater.py:L49-L56] |
+| C01 | `tests/unit/test_seawater.py::TestSeawaterDensity::test_density_physical_range`, density over its temperature/salinity grid | Every result strictly between 990 and 1100 kg/m³; 0 outliers | Test assertions, G0; [tests/unit/test_seawater.py:L49-L56] |
 | C02 | Compare `FY_X70` to `get_steel_grade("API 5L X70").smys_pa` | Absolute difference = 0 Pa | Direct equality check; baseline FAIL; G0; [src/assetutilities/constants/__init__.py:L53-L53] [src/assetutilities/constants/materials.py:L60-L65] |
-| C03 | `TestSteelGradesRegistry::test_get_steel_grade_returns_none_for_unknown` | Exactly 1 unknown-name lookup returns `None`; 0 false matches, count | Test assertion, G0; [tests/unit/test_materials.py:L186-L188] |
+| C03 | `tests/unit/test_materials.py::TestSteelGradesRegistry::test_get_steel_grade_returns_none_for_unknown` | Exactly 1 unknown-name lookup returns `None`; 0 false matches, count | Test assertion, G0; [tests/unit/test_materials.py:L186-L188] |
 | C11 | Run all four module test files; imports occur during collection and test execution | 126 passed test cases; 0 failures, 0 collection errors, count | Detailed pytest results, G1; [tests/unit/test_constants.py:L7-L64] [tests/unit/test_seawater.py:L6-L10] [tests/unit/test_materials.py:L7-L11] [tests/test_casing_grades.py:L7-L71] |
 | C21 | R1 `celsius_to_fahrenheit(0)` vs affine freezing expectation | Relative error ≤ 1e-9, dimensionless (output °F) | PASS regression, G2; [tests/unit/test_constants.py:L308-L309] |
 | C22 | R4 `G_STEEL` vs `E / (2 * (1 + nu))` | Relative error ≤ 1e-6, dimensionless (output Pa) | PASS identity check, G2; [tests/unit/test_constants.py:L130-L133] |
@@ -118,6 +118,7 @@ The following **8 checks** are executable criteria; a baseline defect is a findi
 | C51 | Resolve every cited source range at the code pin and link every section-4 case to its recorded test result | 0 unresolved citations; 0 missing results, count | Citation resolver and test-result mapping, G5; [tests/unit/test_constants.py:L130-L133] [tests/unit/test_constants.py:L308-L309] [tests/unit/test_constants.py:L340-L357] [tests/unit/test_seawater.py:L136-L146] |
 
 ## 6. Known failure modes and pitfalls
+sweep: not run (legacy pack)
 
 | Symptom / cause | Detection | Evidence and tracking | Date recorded |
 |---|---|---|---|
