@@ -162,9 +162,9 @@ def test_pdf_readback_and_byte_identical_builds(tmp_path, monkeypatch):
     monkeypatch.setattr(
         shutil, "which", lambda name: converter if name == "soffice" else None
     )
-    assert shutil.which("libreoffice") or shutil.which("soffice"), (
-        "PDF integration requires installed LibreOffice"
-    )
+    assert shutil.which("libreoffice") or shutil.which(
+        "soffice"
+    ), "PDF integration requires installed LibreOffice"
     source = module.write_docx(sample(), tmp_path / "source.docx")
     first = module.convert_pdf(source, tmp_path / "first.pdf", tmp_path / "scratch")
     second = module.convert_pdf(source, tmp_path / "second.pdf", tmp_path / "scratch")
