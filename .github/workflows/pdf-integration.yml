@@ -42,7 +42,7 @@ jobs:
         run: uv sync --group test
 
       - name: Test PDF workflow triggers
-        run: uv run python -m pytest tests/workflows/test_ci_triggers.py
+        run: uv run python -m pytest tests/workflows/test_pdf_integration_triggers.py
 
       - name: Run Word output and converter unit tests
         run: uv run python -m pytest tests/modules/reportgen/test_standard_report.py -q -p no:cacheprovider

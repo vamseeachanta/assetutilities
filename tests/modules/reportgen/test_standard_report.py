@@ -140,18 +140,67 @@ def test_converter_requires_installed_tool(tmp_path, monkeypatch):
         )
 
 
-def test_converter_reports_failure_without_publishing_output(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "returncode", [0, 1], ids=["missing-native-pdf", "nonzero-exit"]
+)
+def test_converter_reports_failure_without_publishing_output(
+    tmp_path, monkeypatch, returncode
+):
     module = api()
     source = module.write_docx(sample(), tmp_path / "source.docx")
     monkeypatch.setattr(module.shutil, "which", lambda name: "libreoffice")
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda command, **kwargs: module.subprocess.CompletedProcess(
+            command, returncode
+        ),
+    )
+    scratch = tmp_path / "scratch"
+    destination = tmp_path / "report.pdf"
+    with pytest.raises(
+        RuntimeError, match=rf"conversion failed \(exit {returncode}\)"
+    ) as error:
+        module.convert_pdf(source, destination, scratch)
+    assert not destination.exists()
+    (log,) = scratch.glob("report-pdf-*/conversion.log")
+    assert str(log) in str(error.value)
+    assert f"Converter exit: {returncode}" in log.read_text()
 
-    class Result:
-        returncode = 1
 
-    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: Result())
-    with pytest.raises(RuntimeError, match="conversion failed"):
-        module.convert_pdf(source, tmp_path / "report.pdf", tmp_path / "scratch")
-    assert not (tmp_path / "report.pdf").exists()
+def test_converter_timeout_names_retained_log_without_retry(tmp_path, monkeypatch):
+    module = api()
+    source = module.write_docx(sample(), tmp_path / "source.docx")
+    monkeypatch.setattr(module.shutil, "which", lambda name: "libreoffice")
+    calls = []
+    timeout = module.subprocess.TimeoutExpired("libreoffice", 120)
+
+    def convert(command, **kwargs):
+        calls.append(command)
+        kwargs["stdout"].write(b"conversion started")
+        raise timeout
+
+    monkeypatch.setattr(module.subprocess, "run", convert)
+    scratch = tmp_path / "scratch"
+    destination = tmp_path / "report.pdf"
+    with pytest.raises(RuntimeError, match="timed out") as error:
+        module.convert_pdf(source, destination, scratch)
+    assert len(calls) == 1
+    assert not destination.exists()
+    assert error.value.__cause__ is timeout
+    (log,) = scratch.glob("report-pdf-*/conversion.log")
+    assert str(log) in str(error.value)
+    assert "conversion started" in log.read_text()
+
+
+def test_legacy_pdf_request_raises_instead_of_returning_without_output():
+    from assetutilities.common.reportgen.reportgen import ReportFormat, ReportGenerator
+
+    generator = ReportGenerator()
+    generator.target_format = ReportFormat.PDF
+    assert generator.writer is None
+    with pytest.raises(NotImplementedError, match="reporting_standard: P6"):
+        generator.flush_report()
 
 
 @pytest.mark.pdf_integration

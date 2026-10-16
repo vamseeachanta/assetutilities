@@ -84,4 +84,7 @@ def test_trigger_contract_runs_in_pdf_job() -> None:
     commands = [
         step.get("run", "") for step in _workflow()["jobs"]["pdf-integration"]["steps"]
     ]
-    assert "uv run python -m pytest tests/workflows/test_ci_triggers.py" in commands
+    assert (
+        "uv run python -m pytest tests/workflows/test_pdf_integration_triggers.py"
+        in commands
+    )

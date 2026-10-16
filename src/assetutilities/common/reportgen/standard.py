@@ -319,31 +319,38 @@ def convert_pdf(source, destination, scratch):
             "OMP_NUM_THREADS": "1",
         }
     )
-    with (work / "conversion.log").open("wb") as log:
+    log_path = work / "conversion.log"
+    with log_path.open("wb") as log:
         # A fresh profile requests one normal restart (LibreOffice exit 81).
         # Retain the same profile and arguments, as its launcher does, but bound
         # the retry and propagate crashes and other failures without retrying.
         for _ in range(2):
-            result = subprocess.run(
-                [
-                    executable,
-                    f"-env:UserInstallation={(work / 'profile').as_uri()}",
-                    # Relative to cwd so long caller paths fit Unix socket limits.
-                    "-env:OSL_SOCKET_PATH=r",
-                    "--headless",
-                    "--convert-to",
-                    "pdf:writer_pdf_Export",
-                    "--outdir",
-                    str(work.resolve()),
-                    str(source.resolve()),
-                ],
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                env=environment,
-                cwd=work,
-                timeout=120,
-                check=False,
-            )
+            try:
+                result = subprocess.run(
+                    [
+                        executable,
+                        f"-env:UserInstallation={(work / 'profile').as_uri()}",
+                        # Relative to cwd so long caller paths fit Unix socket limits.
+                        "-env:OSL_SOCKET_PATH=r",
+                        "--headless",
+                        "--convert-to",
+                        "pdf:writer_pdf_Export",
+                        "--outdir",
+                        str(work.resolve()),
+                        str(source.resolve()),
+                    ],
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    env=environment,
+                    cwd=work,
+                    timeout=120,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired as error:
+                raise RuntimeError(
+                    f"LibreOffice conversion timed out after {error.timeout} seconds; "
+                    f"inspect {log_path}"
+                ) from error
             log.write(f"\nConverter exit: {result.returncode}\n".encode())
             log.flush()
             if result.returncode != 81:
@@ -352,7 +359,7 @@ def convert_pdf(source, destination, scratch):
     if result.returncode or not native.is_file():
         raise RuntimeError(
             f"LibreOffice conversion failed (exit {result.returncode}); "
-            "inspect the scratch conversion log"
+            f"inspect {log_path}"
         )
     reader, writer = PdfReader(native), PdfWriter()
     # Import pages and remap link/outline targets to the final page tree.
