@@ -174,6 +174,7 @@ The following criteria define checks for future calculation use; a pack syntax c
 | C12 | For every QA appendix row exporting `rate_casing_pipe` / `CasingPipeRatings`, retain the input fingerprint, `temperature_f` (°F), `derating_factor` (dimensionless), `burst_psi` and `collapse_psi` (psi), `tensile_yield_lbf` (lbf), standard locator, gate result and independent signature; compare the row with the returned dataclass. | 0 missing fields or units (count); 0 mismatched returned values (count). | Inspect fields and compare serialized rows against the function return; the return carries all five quantities, but automatic appendix production/signature remains unverified, U4. [src/assetutilities/calculations/casing_pipe.py:L83-L100] [src/assetutilities/calculations/casing_pipe.py:L338-L369] | G5 |
 
 ## 6. Known failure modes and pitfalls
+sweep: not run (legacy pack)
 
 | ID / symptom | Cause and detection | Tracking and date | Evidence |
 |---|---|---|---|
