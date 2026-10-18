@@ -83,14 +83,17 @@ class ReportGenerator:
 
     # Remove _parse_markdown_table and _flush_docx methods as they're now in DefaultDOCXWriter
     def _flush_pdf(self) -> None:
-        """Generate PDF report"""
-        # To be implemented
-        logging.info("PDF format not yet implemented")
-        pass
+        """Reject unsupported PDF output through the legacy writers."""
+        raise NotImplementedError("PDF output needs reporting_standard: P6")
 
 
 def run(config: Dict[str, Any]) -> None:
     """Entry point called by engine.py"""
+    if config.get("reporting_standard") == "P6":
+        from .standard import run as run_standard
+
+        return run_standard(config)
+
     logging.info("Starting report generation...")
     generator = ReportGenerator()
     generator.initialize_from_config(config)

@@ -4,12 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    # All edits rerun gates: conditional skips could mask an earlier failure.
+    # Retargeting needs a fresh merge against the new base, not an old run retry.
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # ----------------------------------------------------- non-test gates ------
@@ -22,6 +24,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          fetch-depth: 50
+
+      - name: Build and guard local merge
+        id: local_merge
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_ref="refs/remotes/base/$BASE_REF"
+          git fetch --no-tags "$BASE_URL" "+refs/heads/$BASE_REF:$base_ref"
+          tip=$(git rev-parse "$base_ref")
+          for deepen in 50 200 1000; do
+            if git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+              break
+            fi
+            if [[ $(git rev-parse --is-shallow-repository) != true ]]; then
+              break
+            fi
+            git fetch --no-tags --deepen="$deepen" origin "$PR_HEAD_SHA"
+          done
+          if ! git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+            if [[ $(git rev-parse --is-shallow-repository) == true ]]; then
+              git fetch --no-tags --unshallow origin "$PR_HEAD_SHA"
+            fi
+          fi
+          if ! git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+            echo "::error::No merge base found for current base tip and PR head"
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout --detach "$tip"
+          if ! git merge --no-ff --no-edit "$PR_HEAD_SHA"; then
+            echo "::error::Cannot merge PR head into current base tip; resolve conflicts"
+            git merge --abort
+            exit 1
+          fi
+          mapfile -t parents < <(git cat-file -p HEAD | sed -n 's/^parent //p')
+          if [[ ${#parents[@]} != 2 || ${parents[0]} != "$tip" || ${parents[1]} != "$PR_HEAD_SHA" ]]; then
+            echo "::error::Local merge must have exactly the current tip and PR head as parents"
+            exit 1
+          fi
+          tested=$(git rev-parse HEAD)
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tip=$tip" >> "$GITHUB_OUTPUT"
+          echo "tested=$tested first_parent=${parents[0]} second_parent=${parents[1]} tip=$tip event_base=$EVENT_BASE_SHA tree=$tree"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,6 +92,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --group test
+
+      - name: Test workflow triggers
+        run: uv run python -m pytest tests/workflows/test_ci_triggers.py
 
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh

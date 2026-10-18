@@ -24,3 +24,11 @@ runtime files must not become routing authority. Use:
 - `.gitignore` for ignore rules.
 - `scripts/hygiene/check-source-hygiene.sh` for deterministic validation.
 - `tests/hygiene/test_no_backup_artifacts_tracked.py` for pytest coverage.
+
+## Structured report output
+
+P6 Word and PDF output is implemented in
+`src/assetutilities/common/reportgen/standard.py`, tested in
+`tests/modules/reportgen/test_standard_report.py`, and documented in
+`docs/modules/documentation/standard-report.md`. The neutral input example is
+`examples/workflows/reportgen/standard-report.json`.

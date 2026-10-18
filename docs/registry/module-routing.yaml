@@ -1,3 +1,6 @@
+# Optional submodules.<module> metadata within each domain entry:
+# agent_pack: repository-relative path to the module knowledge pack.
+# qa_family: quality-assurance family code; EC means engineering calculations.
 schema_version: 1
 repo: assetutilities
 issue: 2461
@@ -64,6 +67,10 @@ modules:
     stability: active
   - name: units
     source_path: src/assetutilities/units/
+    submodules:
+      units:
+        agent_pack: src/assetutilities/units/docs/agent-pack.md
+        qa_family: EC
     tests_path: tests/unit/
     docs_path: docs/README.md
     domain: units and quantities
@@ -73,4 +80,10 @@ modules:
     tests_path: tests/workflow_api/
     docs_path: docs/README.md
     domain: workflow run, artifact and publication contracts
+    stability: active
+  - name: standard_report
+    source_path: src/assetutilities/common/reportgen/
+    tests_path: tests/modules/reportgen/
+    docs_path: docs/modules/documentation/standard-report.md
+    domain: structured Word report formatting and PDF conversion
     stability: active
