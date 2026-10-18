@@ -38,6 +38,7 @@ assetutilities/
 |       +-- `devtools/`
 |       +-- `modules/`
 |       +-- `units/`
+|       +-- `workflow_api/`
 +-- tests/
 ```
 
@@ -54,6 +55,7 @@ assetutilities/
 | `devtools/` | Developer tooling for dependency modernization and command propagation. | `tests/unit/` or focused devtool tests when added | `src/assetutilities/devtools/README.md` |
 | `modules/` | CSV, data exploration, Excel, PDF, YAML, zip, and test utility modules. | `tests/modules/`, `tests/unit/test_common_yml_utilities.py` | `docs/modules/` |
 | `units/` | Units, quantities, policies, traceability, and domain registries. | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_traceability*.py` | `docs/README.md` |
+| `workflow_api/` | Workflow runs, result envelopes, artifact identity, metrics, and publication contracts. | `tests/workflow_api/` | `docs/README.md` |
 
 ## File Placement Rules
 

@@ -75,6 +75,12 @@ modules:
     docs_path: docs/README.md
     domain: units and quantities
     stability: active
+  - name: workflow_api
+    source_path: src/assetutilities/workflow_api/
+    tests_path: tests/workflow_api/
+    docs_path: docs/README.md
+    domain: workflow run, artifact and publication contracts
+    stability: active
   - name: standard_report
     source_path: src/assetutilities/common/reportgen/
     tests_path: tests/modules/reportgen/

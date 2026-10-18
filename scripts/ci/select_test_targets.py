@@ -82,6 +82,12 @@ CORE_PREFIXES = (
 # Exact non-module paths that should run a specific contract suite.
 CONTRACT_ROUTES = {
     "config/repo_structure.yml": "tests/repo_structure",
+    "MODULE_STRUCTURE.md": "tests/docs",
+    "docs/maps/assetutilities-operator-map.md": "tests/docs",
+    "docs/registry/module-routing.yaml": "tests/docs",
+    "docs/README.md": "tests/docs",
+    "README.md": "tests/docs",
+    "AGENTS.md": "tests/docs",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST
