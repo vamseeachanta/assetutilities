@@ -20,7 +20,7 @@
 # Invariant: each row below has a working example that runs GREEN and
 # produces the listed outputs. Routed basenames that cannot run green
 # offline are intentionally omitted (see PR body / issue for the deferred
-# list and reasons).
+# list and reasons). web_scraping and download_data still require live network.
 schema_version: 2
 invocation: "uv run python -m assetutilities {input}"
 repo: assetutilities
@@ -104,4 +104,47 @@ workflows:
     outputs:
       - examples/workflows/reportgen/outputs/sample-report.out.md
     test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
+    runtime: fast
+
+  - id: read_pdf
+    basename: read_pdf
+    input: examples/workflows/read_pdf/input.yml
+    outputs:
+      - examples/workflows/read_pdf/results/read_pdf_first.txt
+      - examples/workflows/read_pdf/results/read_pdf_last.txt
+    test: uv run python -m assetutilities examples/workflows/read_pdf/input.yml
+    runtime: fast
+
+  - id: edit_pdf
+    basename: edit_pdf
+    input: examples/workflows/edit_pdf/input.yml
+    outputs:
+      - examples/workflows/edit_pdf/data/sample.pdf_page_1-2.pdf
+      - examples/workflows/edit_pdf/data/sample.pdf_page_3-4.pdf
+    test: uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
+    runtime: fast
+
+  - id: csv_utilities
+    basename: csv_utilities
+    input: examples/workflows/csv_utilities/input.yml
+    outputs:
+      - examples/workflows/csv_utilities/results/sample_latin1_normalized.csv
+      - examples/workflows/csv_utilities/results/sample_latin1_summary.yml
+    test: uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
+    runtime: fast
+
+  - id: text_analytics
+    basename: text_analytics
+    input: examples/workflows/text_analytics/input.yml
+    outputs:
+      - examples/workflows/text_analytics/results/text_analytics_comparison.yml
+    test: uv run python -m assetutilities examples/workflows/text_analytics/input.yml
+    runtime: fast
+
+  - id: gitpython
+    basename: gitpython
+    input: examples/workflows/gitpython/input.yml
+    outputs:
+      - examples/workflows/gitpython/results/gitpython_report.yml
+    test: uv run python -m assetutilities examples/workflows/gitpython/input.yml
     runtime: fast

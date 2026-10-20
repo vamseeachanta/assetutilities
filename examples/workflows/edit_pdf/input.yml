@@ -1,0 +1,6 @@
+# Inclusive one-based page ranges, as consumed by EditPDF.
+basename: edit_pdf
+library: PyPDF2
+files:
+  - io: examples/workflows/edit_pdf/data/sample.pdf
+    pages: [[1, 2], [3, 4]]
