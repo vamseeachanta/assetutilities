@@ -282,3 +282,15 @@ To contribute to AssetUtilities DevTools:
 ## License
 
 Part of AssetUtilities - MIT License
+
+## Utility readiness
+
+Assess explicit onboarding evidence without changing the system:
+
+```bash
+python -m assetutilities.devtools.readiness --template
+python -m assetutilities.devtools.readiness --input readiness-private.json --discover
+```
+
+See [the readiness guide](../../../docs/commands/utility-readiness.md) for
+the evidence schema, result rules, manual exercises and worked example.
