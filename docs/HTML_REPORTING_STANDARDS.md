@@ -507,7 +507,7 @@ def generate_analysis_report(csv_file, output_file):
 
     # Save as standalone HTML
     fig.write_html(output_file,
-                   include_plotlyjs='cdn',
+                   include_plotlyjs=True,
                    config={'responsive': True})
 
     print(f"Report generated: {output_file}")
@@ -579,7 +579,7 @@ def generate_dashboard(csv_file, output_file):
     )
 
     # Save
-    fig.write_html(output_file, include_plotlyjs='cdn')
+    fig.write_html(output_file, include_plotlyjs=True)
 
 # Usage
 generate_dashboard(
@@ -638,7 +638,7 @@ def auto_generate_reports(data_dir='../data/processed',
 
                 # Save report
                 output_file = report_path / f"{csv_file.stem}_report.html"
-                fig.write_html(output_file, include_plotlyjs='cdn')
+                fig.write_html(output_file, include_plotlyjs=True)
 
                 print(f"  ✓ Generated: {output_file.name}")
             else:

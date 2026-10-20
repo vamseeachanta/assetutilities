@@ -41,7 +41,7 @@ def test_invocation_required_exact_and_input_only():
 
 def test_base_required_fields_present():
     rows = _load()["workflows"]
-    assert len(rows) == 9
+    assert len(rows) == 10
     for row in rows:
         for field in BASE_REQUIRED_FIELDS:
             assert field in row, f"row {row.get('id')} missing {field}"

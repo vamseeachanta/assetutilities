@@ -44,7 +44,7 @@ def test_registry_schema_v2_invocation_and_optional_result():
     reg = load_registry()
     assert reg["schema_version"] == 2
     assert reg["invocation"] == "uv run python -m assetutilities {input}"
-    assert len(reg["workflows"]) == 9
+    assert len(reg["workflows"]) == 10
     de = resolve_registry_row("data_exploration")
     assert de["result"]["kind"] == "files"
 

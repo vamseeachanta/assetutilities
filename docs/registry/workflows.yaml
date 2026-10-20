@@ -105,3 +105,11 @@ workflows:
       - examples/workflows/reportgen/outputs/sample-report.out.md
     test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
     runtime: fast
+
+  - id: yaml_to_plot
+    basename: yaml_utilities
+    input: examples/workflows/yaml_to_plot/input.yml
+    outputs:
+      - examples/workflows/yaml_to_plot/results/Plot/input.html
+    test: uv run python -m assetutilities examples/workflows/yaml_to_plot/input.yml
+    runtime: fast

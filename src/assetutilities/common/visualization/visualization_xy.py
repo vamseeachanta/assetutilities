@@ -597,7 +597,7 @@ class VisualizationXY:
     def save_xy_plot_and_close_plotly(self, fig, cfg):
         plot_name_paths = visualization_common.get_plot_name_path(cfg)
         for file_name in plot_name_paths:
-            fig.write_html(file_name, include_plotlyjs="cdn")
+            fig.write_html(file_name, include_plotlyjs=True)
 
     def save_xy_plot_and_close_matplotlib(self, cfg):
         plot_name_paths = visualization_common.get_plot_name_path(cfg)

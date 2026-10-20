@@ -8,6 +8,9 @@ import os
 import pkgutil
 import types
 from collections.abc import Mapping, MutableMapping
+from datetime import datetime, timezone
+from html import escape
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -177,7 +180,71 @@ class WorkingWithYAML:
         plot_yml["data"] = cfg["data"].copy()
 
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
+        if cfg["plot_yml_data"].get("report", {}).get("provenance", False):
+            self._append_plot_provenance(cfg, Path(file_name + ".html"))
         return cfg
+
+    def _append_plot_provenance(self, cfg: dict[str, Any], html_path: Path) -> None:
+        """Echo the original input, before extraction mutates key-chain groups.
+
+        Metadata uses basenames; the opt-in echo retains the supplied YAML text.
+        Provenance is supplementary: a missing input or build error must not
+        prevent the already-written plot from being used.
+        """
+        try:
+            if not html_path.is_file():
+                logger.info("Plot provenance skipped: no HTML output")
+                return
+            try:
+                generator = "assetutilities " + version("assetutilities")
+            except PackageNotFoundError:
+                generator = "assetutilities (version unavailable)"
+            fields = [
+                ("Generator", generator),
+                ("Generated (UTC)", datetime.now(timezone.utc).isoformat()),
+            ]
+            input_text = None
+            input_file = cfg["Analysis"].get("CustomInputFile")
+            if input_file:
+                input_path = Path(input_file)
+                input_text = input_path.read_text(encoding="utf-8-sig")
+                original = yaml.safe_load(input_text)
+                sources = set()
+                for group in original.get("data", {}).get("groups_key_chain", []):
+                    for axis in ("x", "y"):
+                        for item in group.get(axis, []):
+                            sources.add(Path(item["file_name"]).name)
+                fields.extend(
+                    [
+                        ("Input file", input_path.name),
+                        ("Data files", ", ".join(sorted(sources))),
+                    ]
+                )
+            block = "<details><summary>Provenance &amp; input echo</summary><dl>"
+            block += "".join(
+                f"<dt>{escape(label)}</dt><dd>{escape(value)}</dd>"
+                for label, value in fields
+            )
+            block += "</dl>"
+            if input_text is not None:
+                block += f"<pre>{escape(input_text)}</pre>"
+            block += "</details>"
+            html = html_path.read_text(encoding="utf-8")
+            if "</body>" in html:
+                html = html.replace("</body>", block + "</body>", 1)
+            else:
+                html += block
+            html_path.write_text(html, encoding="utf-8")
+        except (
+            OSError,
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            yaml.YAMLError,
+        ):
+            # Avoid logging supplied YAML, paths or exception values.
+            logger.warning("Plot provenance unavailable; retaining the plot output")
 
     def ymlInput(self, defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
         if not is_file_valid_func(defaultYml):

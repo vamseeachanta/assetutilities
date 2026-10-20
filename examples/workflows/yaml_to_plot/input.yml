@@ -1,0 +1,35 @@
+meta:
+  basename: yaml_utilities
+  library: assetutilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+
+plot_yml_data:
+  flag: true
+  report:
+    provenance: true
+
+settings:
+  plt_engine: plotly
+  plt_save_extensions: [".html"]
+  title: Synthetic linear response
+  xlabel: x (dimensionless)
+  ylabel: y (dimensionless)
+
+data:
+  type: input
+  groups_key_chain:
+    - x:
+        # Zero selects the first sample, as specified by YAML sequence indexing.
+        - file_name: data/linear_response.yml
+          key_chain: [response, samples, 0, x]
+      y:
+        - file_name: data/linear_response.yml
+          key_chain: [response, samples, 0, y]
+
+file_management:
+  flag: false
