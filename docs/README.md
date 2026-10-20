@@ -17,6 +17,11 @@ This is the canonical documentation entry point for issue routing in
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
 
+The [process readiness assessment](modules/devtools/process-readiness.md) checks
+declared role coverage, procedures, handoffs and caller-supplied metric criteria.
+Its synthetic input is `examples/devtools/process-readiness.json`; focused tests
+are in `tests/modules/devtools/test_process_readiness.py`.
+
 ## Curated Routing Surfaces
 
 These files are trusted routing surfaces:

@@ -55,6 +55,11 @@ modules:
     stability: active
   - name: devtools
     source_path: src/assetutilities/devtools/
+    submodules:
+      process_readiness:
+        source_path: src/assetutilities/devtools/process_readiness.py
+        tests_path: tests/modules/devtools/test_process_readiness.py
+        docs_path: docs/modules/devtools/process-readiness.md
     tests_path: tests/unit/
     docs_path: src/assetutilities/devtools/README.md
     domain: developer tooling

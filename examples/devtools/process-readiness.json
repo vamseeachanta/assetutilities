@@ -1,0 +1,68 @@
+{
+  "roles": ["coordinator", "reviewer"],
+  "processes": [
+    {
+      "id": "request-intake",
+      "area": "sales",
+      "accountable_role": "coordinator",
+      "backup_role": "reviewer",
+      "procedure_ref": "Synthetic procedure A (2026), Intake",
+      "handoff_ref": "Synthetic record A (2026), Intake handoff",
+      "metrics": [
+        {
+          "id": "elapsed-effort",
+          "unit": "hours per accepted item",
+          "value": 6,
+          "evidence_ref": "Synthetic observation A (2026), Intake",
+          "criterion": {
+            "operator": "at_most",
+            "target": 8,
+            "source_ref": "Synthetic policy A (2026), Elapsed effort; see worked example"
+          }
+        }
+      ]
+    },
+    {
+      "id": "procedure-review",
+      "area": "process",
+      "accountable_role": "reviewer",
+      "backup_role": "coordinator",
+      "procedure_ref": "Synthetic procedure A (2026), Review",
+      "handoff_ref": "Synthetic record A (2026), Review handoff",
+      "metrics": [
+        {
+          "id": "review-output",
+          "unit": "accepted items per review",
+          "value": 3,
+          "evidence_ref": "Synthetic observation A (2026), Review",
+          "criterion": {
+            "operator": "at_least",
+            "target": 2,
+            "source_ref": "Synthetic policy A (2026), Review output; see worked example"
+          }
+        }
+      ]
+    },
+    {
+      "id": "improvement-review",
+      "area": "productivity",
+      "accountable_role": "coordinator",
+      "backup_role": "reviewer",
+      "procedure_ref": "Synthetic procedure A (2026), Improvement review",
+      "handoff_ref": "Synthetic record A (2026), Improvement handoff",
+      "metrics": [
+        {
+          "id": "elapsed-effort",
+          "unit": "hours per accepted item",
+          "value": 8,
+          "evidence_ref": "Synthetic observation A (2026), Improvement review",
+          "criterion": {
+            "operator": "at_most",
+            "target": 8,
+            "source_ref": "Synthetic policy A (2026), Elapsed effort; see worked example"
+          }
+        }
+      ]
+    }
+  ]
+}
