@@ -190,7 +190,10 @@ def test_workflow_is_real_and_unchecked(built):
     assert len(result["provenance"]["input_hash"]) == 64
     outputs = result["result"]["outputs"]
     assert outputs and all(o["size"] > 0 and len(o["sha256"]) == 64 for o in outputs)
-    assert all(set(o) == {"basename", "sha256", "size"} for o in outputs)
+    assert all(
+        set(o) == {"basename", "relative_path", "sha256", "size"} for o in outputs
+    )
+    assert all(o["relative_path"].startswith("Plot/") for o in outputs)
 
 
 def test_workflow_error_fails_closed(gallery, monkeypatch):

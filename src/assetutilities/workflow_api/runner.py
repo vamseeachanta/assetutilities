@@ -115,6 +115,8 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     ``save_cfg`` cfg-dump ``<file_name>.yml`` (written by ``engine`` into the same
     dir) is EXCLUDED -- it embeds the tempdir abspath + a ``start_time`` datetime
     that would poison the content hash and make ``reproducible`` spuriously False.
+    Each output includes a POSIX ``relative_path`` from ``result_folder`` so
+    nested files retain their identity without exposing the temporary root.
     """
     if locator.kind == "in_memory":
         if locator.key not in cfg_base:
@@ -149,6 +151,7 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
         files.append(
             {
                 "basename": os.path.basename(path),
+                "relative_path": Path(path).relative_to(results_dir).as_posix(),
                 "sha256": digest,
                 "size": os.path.getsize(path),
             }
