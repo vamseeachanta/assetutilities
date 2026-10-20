@@ -15,6 +15,7 @@ This is the canonical documentation entry point for issue routing in
 | CLI and agent commands | `src/assetutilities/cli/`, `src/assetutilities/agent_os/` | `tests/bash-setup/`, focused CLI tests when added | `docs/commands/`, `docs/modules/agent-os/` |
 | data processing and exploration | `src/assetutilities/modules/data_exploration/`, `src/assetutilities/common/data*.py` | `tests/modules/data_exploration/`, common data unit tests | `docs/modules/` |
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
+| workspace operations evidence | `scripts/operations/workspace_ops.py` | `tests/operations/` | `docs/operations/workspace-operations.md` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
 
 ## Curated Routing Surfaces
