@@ -50,6 +50,7 @@ class DocumentDOM:
                     }
                     cls._instance.first_section = Section("default")
                     cls._instance.sections: List[Section] = []
+                    cls._instance.references = []
                     cls._instance.current_section: Optional[Section] = None
         return cls._instance
 
@@ -100,7 +101,12 @@ class DocumentDOM:
 
     def initialize_dom_from_config(self, config: Dict[str, Any]) -> None:
         """Initialize DOM from configuration dictionary"""
-        self.report_details = config.get("report_details", {})
+        from .citations import parse_references, render_citation
+
+        self.references = parse_references(config)
+        self.sections = []
+        self.current_section = None
+        self.report_details = dict(config.get("report_details", {}))
         self.important_paths = config.get("important_paths", {})
 
         # Set default target_report_type if not in config
@@ -117,6 +123,15 @@ class DocumentDOM:
         # Process all document sections
         if "sections_L1" in config:
             self._process_sections(config["sections_L1"])
+
+        # Validate before a writer creates output, including nested citations.
+        for section in [self.first_section, *self.sections]:
+            paragraphs = list(section.paragraphs)
+            for subsection in section.subsections:
+                paragraphs.extend(subsection["paragraphs"])
+            for paragraph in paragraphs:
+                if paragraph.get("type") == "citation":
+                    render_citation(paragraph, self.references)
 
     def _process_sections(self, sections_data: List[Dict[str, Any]]) -> None:
         """Process all sections from config data"""
