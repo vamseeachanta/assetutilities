@@ -11,7 +11,7 @@ human-readable companion to `docs/registry/module-routing.yaml`.
 | `cli` | `src/assetutilities/cli/` | `tests/bash-setup/`, focused CLI tests when added | `docs/commands/` | `cat:automation`, `cat:harness` | agent_os, devtools |
 | `common` | `src/assetutilities/common/` | `tests/unit/test_common_*.py`, `tests/modules/` | `docs/modules/` | `cat:engineering`, `cat:data-pipeline` | pandas, YAML, file system, visualization dependencies |
 | `constants` | `src/assetutilities/constants/` | `tests/unit/test_constants.py`, `tests/test_casing_grades.py` | `docs/README.md` | `cat:engineering-calculations`, `cat:maintenance` | units, calculations |
-| `devtools` | `src/assetutilities/devtools/` | focused devtool tests when added | `src/assetutilities/devtools/README.md` | `cat:maintenance`, `cat:harness` | pyproject, CLI entry points |
+| `devtools` | `src/assetutilities/devtools/` | `tests/devtools/`, `tests/modules/devtools/` | `src/assetutilities/devtools/README.md`, `docs/modules/agent-os/ce-trial-decision.md` | `cat:maintenance`, `cat:harness` | pyproject, CLI entry points |
 | `modules` | `src/assetutilities/modules/` | `tests/modules/`, related unit tests | `docs/modules/` | `cat:data-pipeline`, `cat:automation` | common helpers, pandas, Excel/YAML/zip dependencies |
 | `units` | `src/assetutilities/units/` | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_traceability*.py` | `docs/README.md` | `cat:engineering-calculations`, `cat:engineering-methodology` | constants, sympy, pint-style quantity behavior |
 | `workflow_api` | `src/assetutilities/workflow_api/` | `tests/workflow_api/` | `docs/README.md` | `cat:automation`, `cat:data-pipeline` | workflow engine, identity, artifact and publication helpers |

@@ -58,6 +58,11 @@ modules:
     tests_path: tests/unit/
     docs_path: src/assetutilities/devtools/README.md
     domain: developer tooling
+    submodules:
+      ce_trial:
+        source_path: src/assetutilities/devtools/ce_trial.py
+        tests_path: tests/devtools/test_ce_trial.py
+        docs_path: docs/modules/agent-os/ce-trial-decision.md
     stability: active
   - name: modules
     source_path: src/assetutilities/modules/

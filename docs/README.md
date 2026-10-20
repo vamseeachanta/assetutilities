@@ -54,3 +54,10 @@ surface and update it if it is stale.
   for focused validation.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
+
+## Compound Engineering adoption
+
+Read the [trial decision and conditional rollout map](modules/agent-os/ce-trial-decision.md)
+and the persistent [adoption note](modules/agent-os/ce-adoption-note.md) before CE
+integration work. The current recommendation blocks rollout pending trial evidence
+and maintainer ratification; the read-only assessment lives in `devtools/ce_trial.py`.
