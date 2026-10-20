@@ -8,6 +8,8 @@ Engine-backed tests call the #3297 embed path. They run from the repo root
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import os
 from pathlib import Path
 
@@ -32,10 +34,15 @@ EXAMPLE_DIR = REPO_ROOT / "examples" / "workflows" / "data_exploration"
 def _snapshot(path: Path) -> dict:
     snap = {}
     for p in sorted(path.rglob("*")):
-        if p.is_file():
-            st = p.stat()
-            snap[str(p)] = (st.st_size, st.st_mtime_ns)
+        st = p.stat()
+        snap[str(p)] = (p.is_dir(), st.st_size if p.is_file() else 0, st.st_mtime_ns)
     return snap
+
+
+def test_snapshot_detects_empty_output_directories(tmp_path):
+    before = _snapshot(tmp_path)
+    (tmp_path / "logs").mkdir()
+    assert _snapshot(tmp_path) != before
 
 
 # --- registry / schema (no engine) -----------------------------------------
@@ -57,6 +64,24 @@ def test_build_cfg_merges_params_over_example():
     assert cfg["type"]["df_basic_statistics"]["flag"] is False
     # untouched example keys survive
     assert cfg["data"]["type"] == "csv"
+
+
+def test_build_cfg_resolves_plot_sources_against_example():
+    cfg = build_cfg(resolve_registry_row("yaml_to_plot"), None)
+    group = cfg["data"]["groups_key_chain"][0]
+    expected = REPO_ROOT / "examples/workflows/yaml_to_plot/data/linear_response.yml"
+    assert group["x"][0]["file_name"] == str(expected)
+    assert group["y"][0]["file_name"] == str(expected)
+
+
+@pytest.mark.parametrize("absolute", [False, True])
+def test_build_cfg_preserves_caller_plot_source_overrides(tmp_path, absolute):
+    source = str(tmp_path / "custom.yml") if absolute else "custom.yml"
+    params = {"data": {"groups_key_chain": [{"x": [{"file_name": source}], "y": []}]}}
+    before = copy.deepcopy(params)
+    cfg = build_cfg(resolve_registry_row("yaml_to_plot"), params)
+    assert cfg["data"]["groups_key_chain"][0]["x"][0]["file_name"] == source
+    assert params == before
 
 
 # --- locator unit (no engine) ----------------------------------------------
@@ -94,6 +119,32 @@ def test_extract_result_excludes_cfg_dump(tmp_path):
     assert "data_exploration.yml" not in names
 
 
+def test_extract_result_includes_declared_plot_directory(tmp_path):
+    results = tmp_path / "results"
+    plots = results / "Plot"
+    plots.mkdir(parents=True)
+    content = b"<html><body>plot</body></html>"
+    (plots / "response.html").write_bytes(content)
+    (results / "summary.csv").write_text("x,y\n0,1\n")
+    (results / "response.yml").write_text("Analysis: {}\n")
+    cfg = {
+        "Analysis": {
+            "result_folder": str(results),
+            "result_plot_folder": str(plots),
+            "file_name": "response",
+        }
+    }
+    payload, warnings = extract_result(cfg, ResultLocator(), str(tmp_path))
+    assert warnings == []
+    outputs = {item["basename"]: item for item in payload["outputs"]}
+    assert set(outputs) == {"summary.csv", "response.html"}
+    assert outputs["response.html"] == {
+        "basename": "response.html",
+        "sha256": hashlib.sha256(content).hexdigest(),
+        "size": len(content),
+    }
+
+
 # --- error envelopes (no engine) -------------------------------------------
 
 def test_run_workflow_unknown_id_error_envelope():
@@ -105,6 +156,61 @@ def test_run_workflow_unknown_id_error_envelope():
 
 
 # --- engine-backed (embed path) --------------------------------------------
+
+
+def test_run_yaml_to_plot_by_id_without_overrides():
+    env = run_workflow("yaml_to_plot")
+    assert env.status == "ok", env.warnings
+    assert len(env.result["outputs"]) == 1
+
+
+def test_run_yaml_to_plot_returns_actual_artifact_metadata(tmp_path, monkeypatch):
+    """Hash the real HTML; runtime metadata prevents identical repeated output."""
+    from assetutilities.workflow_api import runner
+
+    monkeypatch.chdir(tmp_path)
+    source = REPO_ROOT / "examples/workflows/yaml_to_plot/data/linear_response.yml"
+    group = {
+        axis: [
+            {"file_name": str(source), "key_chain": ["response", "samples", 0, axis]}
+        ]
+        for axis in ("x", "y")
+    }
+    params = {"data": {"groups_key_chain": [group]}}
+    expected, roots = [], []
+    original = runner.extract_result
+    before = _snapshot(REPO_ROOT / "examples/workflows/yaml_to_plot")
+    cwd_before = _snapshot(tmp_path)
+    logs_before = (REPO_ROOT / "logs").exists()
+    log_contents_before = _snapshot(REPO_ROOT / "logs")
+
+    def capture(cfg, locator, root):
+        roots.append(Path(root))
+        paths = list(Path(root).rglob("*.html"))
+        assert len(paths) == 1
+        content = paths[0].read_bytes()
+        expected.append(
+            {
+                "basename": paths[0].name,
+                "sha256": hashlib.sha256(content).hexdigest(),
+                "size": len(content),
+            }
+        )
+        return original(cfg, locator, root)
+
+    monkeypatch.setattr(runner, "extract_result", capture)
+    env = run_workflow("yaml_to_plot", params=params, verify_reproducible=True)
+    assert env.status == "ok", env.warnings
+    assert env.result == {"kind": "files", "outputs": expected[:1]}
+    assert len(expected) == 2 and expected[0]["sha256"] != expected[1]["sha256"]
+    assert env.determinism["reproducible"] is False
+    assert env.warnings == []
+    assert roots and all(not root.exists() for root in roots)
+    assert _snapshot(REPO_ROOT / "examples/workflows/yaml_to_plot") == before
+    assert _snapshot(tmp_path) == cwd_before
+    assert (REPO_ROOT / "logs").exists() == logs_before
+    assert _snapshot(REPO_ROOT / "logs") == log_contents_before
+
 
 def test_run_workflow_by_id_returns_envelope():
     env = run_workflow("data_exploration")

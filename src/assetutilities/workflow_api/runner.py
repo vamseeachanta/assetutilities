@@ -111,9 +111,9 @@ class ResultLocator:
 def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     """Return ``(payload, warnings)`` for an embed run.
 
-    For ``kind: files`` the ACTUALLY emitted files are discovered by globbing the
-    engine-resolved ``result_folder`` under the injected ``root_folder``. The
-    ``save_cfg`` cfg-dump ``<file_name>.yml`` (written by ``engine`` into the same
+    For ``kind: files`` emitted files are discovered in the engine-resolved
+    ``result_folder`` and declared ``result_plot_folder`` under the injected root.
+    The ``save_cfg`` cfg-dump ``<file_name>.yml`` (written by ``engine`` into the same
     dir) is EXCLUDED -- it embeds the tempdir abspath + a ``start_time`` datetime
     that would poison the content hash and make ``reproducible`` spuriously False.
     """
@@ -133,11 +133,17 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     # "_<label>"/"_<column>" suffix, so this never excludes a real output here.
     file_name = analysis.get("file_name", "")
     cfg_dump = os.path.abspath(os.path.join(results_dir, file_name + ".yml"))
+    result_dirs = {os.path.abspath(results_dir)}
+    if analysis.get("result_plot_folder"):
+        result_dirs.add(os.path.abspath(analysis["result_plot_folder"]))
 
     emitted = sorted(
-        p
-        for p in glob.glob(os.path.join(results_dir, "*"))
-        if os.path.isfile(p) and os.path.abspath(p) != cfg_dump
+        {
+            p
+            for directory in result_dirs
+            for p in glob.glob(os.path.join(directory, "*"))
+            if os.path.isfile(p) and os.path.abspath(p) != cfg_dump
+        }
     )
 
     files, warns = [], []
@@ -166,9 +172,13 @@ def build_cfg(row: dict, params: dict | None) -> dict:
     """Build the run cfg from a registry row + caller params.
 
     Starts from the row's ``basename`` + its loaded example ``input``, then
-    deep-merges caller ``params`` (params win). The example-load path is a
-    convenience for in-repo runs; the example-load-free primary path is
+    resolves bundled plotting sources relative to that example, then deep-merges
+    caller ``params`` (params win and their paths are preserved). The example-load
+    path is a convenience for in-repo runs; the example-load-free primary path is
     ``run_workflow(cfg=<full dict>)``.
+
+    Resolved example source paths are included in ``input_hash``, so these hashes
+    vary with the checkout location.
     """
     cfg: dict = {"basename": row["basename"]}
     input_rel = row.get("input")
@@ -176,6 +186,14 @@ def build_cfg(row: dict, params: dict | None) -> dict:
         example_path = resolve_example_path(input_rel)
         with open(example_path) as fh:
             example_cfg = yaml.safe_load(fh) or {}
+        for group in example_cfg.get("data", {}).get("groups_key_chain", []):
+            for axis in ("x", "y"):
+                for source in group.get(axis, []):
+                    path = Path(source["file_name"])
+                    if not path.is_absolute():
+                        source["file_name"] = str(
+                            (example_path.parent / path).resolve()
+                        )
         cfg = update_deep_dictionary(cfg, example_cfg)
     if params:
         cfg = update_deep_dictionary(cfg, copy.deepcopy(params))
