@@ -37,6 +37,10 @@ def parse_references(config: dict) -> list[dict]:
                 not isinstance(entry[key], str) or not entry[key].strip()
             ):
                 raise ValueError(f"{label} requires nonempty string {key}")
+        for key in ("code_id", "publisher", "revision"):
+            value = entry.get(key, "")
+            if value and value.splitlines() != [value]:
+                raise ValueError(f"{label} requires single-line {key}")
         if entry["code_id"] in seen:
             raise ValueError(f"Duplicate code_id in {label}")
         seen.add(entry["code_id"])

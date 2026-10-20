@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from bs4 import BeautifulSoup
 from docx import Document
 
 from assetutilities.common.reportgen import ReportGenerator, run
@@ -95,6 +96,38 @@ def test_parse_references_copies_and_defaults(config):
 def test_invalid_references_fail_closed(references):
     with pytest.raises(ValueError, match="references"):
         parse_references({"references": references})
+
+
+@pytest.mark.parametrize("extension", ["md", "docx", "html"])
+@pytest.mark.parametrize("field", ["code_id", "publisher", "revision"])
+@pytest.mark.parametrize(
+    "line_break",
+    [
+        "\r",
+        "\n",
+        "\r\n",
+        "\v",
+        "\f",
+        "\x1c",
+        "\x1d",
+        "\x1e",
+        "\x85",
+        "\u2028",
+        "\u2029",
+    ],
+    ids=["cr", "lf", "crlf", "vt", "ff", "fs", "gs", "rs", "nel", "ls", "ps"],
+)
+def test_multiline_references_fail_before_output(
+    config, tmp_path, extension, field, line_break
+):
+    config["references"][0][field] = f"Example{line_break}metadata"
+    config["sections_L1"] = []
+    config["report_details"].update(
+        target_report_type=extension, timestamped_filename=False
+    )
+    with pytest.raises(ValueError, match=rf"references.*{field}"):
+        run(config)
+    assert not list(tmp_path.iterdir())
 
 
 def test_duplicate_bindings_are_ambiguous(config):
@@ -289,16 +322,50 @@ def test_legacy_configurations_gain_no_automatic_sections(path):
     ]
 
 
-def test_reference_metadata_and_escaped_table_pipes_roundtrip(config, tmp_path):
-    config["references"][0].update(
-        publisher="Example | publisher", title="Example title", source_sibling="generic"
-    )
+@pytest.mark.parametrize("extension", ["md", "docx", "html"])
+def test_reference_metadata_and_escaped_table_pipes_roundtrip(
+    config, tmp_path, extension
+):
+    config["references"] = [
+        {
+            "code_id": "EXAMPLE-A",
+            "publisher": "Example | publisher",
+            "revision": "edition-A",
+            "title": "Example title",
+            "source_sibling": "generic",
+        },
+        {"code_id": "EXAMPLE-B", "revision": "edition-B"},
+    ]
+    config["sections_L1"] = []
     config["report_details"].update(
-        target_report_type="docx", timestamped_filename=False
+        target_report_type=extension, timestamped_filename=False
     )
     run(config)
-    document = Document(tmp_path / "outputs/report.out.docx")
-    assert document.tables[1].rows[1].cells[1].text == "Example | publisher"
+    target = tmp_path / "outputs" / f"report.out.{extension}"
+    if extension == "md":
+        table = target.read_text(encoding="utf-8").split("## References\n")[1]
+        assert table.split("## Disclosure\n")[0].strip().splitlines() == [
+            "| Code | Publisher | Revision |",
+            "| --- | --- | --- |",
+            r"| EXAMPLE-A | Example \| publisher | edition-A |",
+            "| EXAMPLE-B |  | edition-B |",
+        ]
+    else:
+        if extension == "docx":
+            table = Document(target).tables[1]
+            rows = [[cell.text for cell in row.cells] for row in table.rows]
+        else:
+            document = BeautifulSoup(target.read_text(encoding="utf-8"), "html.parser")
+            table = document.find("h2", string="References").find_next_sibling("table")
+            rows = [
+                [cell.get_text() for cell in row.find_all(["th", "td"])]
+                for row in table.find_all("tr")
+            ]
+        assert rows == [
+            ["Code", "Publisher", "Revision"],
+            ["EXAMPLE-A", "Example | publisher", "edition-A"],
+            ["EXAMPLE-B", "", "edition-B"],
+        ]
 
 
 def test_example_runs_with_outputs_in_scratch(tmp_path):
