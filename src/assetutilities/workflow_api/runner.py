@@ -16,7 +16,6 @@ This module owns ZERO engine/ApplicationManager edits; it only calls the embed p
 from __future__ import annotations
 
 import copy
-import glob
 import hashlib
 import os
 import shutil
@@ -111,8 +110,8 @@ class ResultLocator:
 def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     """Return ``(payload, warnings)`` for an embed run.
 
-    For ``kind: files`` the ACTUALLY emitted files are discovered by globbing the
-    engine-resolved ``result_folder`` under the injected ``root_folder``. The
+    For ``kind: files`` the ACTUALLY emitted files are discovered recursively in
+    the engine-resolved ``result_folder`` under the injected ``root_folder``. The
     ``save_cfg`` cfg-dump ``<file_name>.yml`` (written by ``engine`` into the same
     dir) is EXCLUDED -- it embeds the tempdir abspath + a ``start_time`` datetime
     that would poison the content hash and make ``reproducible`` spuriously False.
@@ -134,10 +133,13 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     file_name = analysis.get("file_name", "")
     cfg_dump = os.path.abspath(os.path.join(results_dir, file_name + ".yml"))
 
+    # Visualization outputs live below Plot/, rather than directly in results.
+    # Path.rglob does not descend into directory symlinks; ignore file symlinks
+    # too so nested discovery cannot collect bytes outside the result tree.
     emitted = sorted(
-        p
-        for p in glob.glob(os.path.join(results_dir, "*"))
-        if os.path.isfile(p) and os.path.abspath(p) != cfg_dump
+        str(p)
+        for p in Path(results_dir).rglob("*")
+        if p.is_file() and not p.is_symlink() and os.path.abspath(p) != cfg_dump
     )
 
     files, warns = [], []
