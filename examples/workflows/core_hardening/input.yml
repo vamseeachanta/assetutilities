@@ -1,0 +1,35 @@
+basename: yaml_utilities
+yaml_options:
+  resolve_placeholders: true
+
+labels:
+  title: Synthetic square series
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
+
+file_management:
+  flag: false
+
+plot_yml_data:
+  flag: true
+
+settings:
+  title: "{{ labels.title }}"
+  xlabel: Input
+  ylabel: Square
+  plt_engine: matplotlib
+  plt_save_extensions: [.png]
+
+data:
+  type: input
+  groups_key_chain:
+    - x:
+        - file_name: series.yml
+          key_chain: [series, x]
+      y:
+        - file_name: series.yml
+          key_chain: [series, y]

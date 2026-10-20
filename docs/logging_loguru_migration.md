@@ -1,82 +1,61 @@
-# Logging migration to loguru (issue #28)
+# Logging with loguru
 
-assetutilities is moving from Python's stdlib `logging` to
-[loguru](https://loguru.readthedocs.io/) for color-coded console output and
-richer diagnostic context, **without changing the run-log files** the library
-writes today.
+Application configuration calls `set_logging(cfg)`, which delegates to
+`logging_setup.setup_logging(cfg)`. Both entry points configure one loguru
+pipeline. Existing standard-library emitters are intercepted into that
+pipeline and continue to reach the run log without changing their imports.
 
-## What ships
+## Revision history
 
-- **`src/assetutilities/common/logging_setup.py`** — the loguru-based setup
-  shim. Exposes a `logger` and `setup_logging(cfg)`.
-- **`src/assetutilities/engine.py`** — first module migrated as proof
-  (`logging.info(...)` → `logger.info(...)`).
-- This guide for converting the remaining ~33 modules.
+| Revision | Date | Change and reason |
+|---|---|---|
+| Unified setup | 2026-10-20 | Document the shared setup and one-way interception so native and legacy emitters write once. |
 
-`common/set_logging.py` is **unchanged** and still wired into
-`ApplicationManager`; loguru and stdlib `logging` coexist during the migration.
+## Run-log behavior
 
-## Run-log preservation (the non-negotiable part)
+| Property | Behavior |
+|---|---|
+| File | `<Analysis.log_folder>/<Analysis.file_name>.log` |
+| Mode | Overwrite when a run is configured |
+| Format | Timestamp, logger name, level and message, using a twelve-hour clock |
+| Level | `default.log_level`, defaulting to `INFO` |
+| Console | Standard output |
+| No-file mode | `Analysis.log_to_file: false`; no log folder is created |
 
-Issue #28 requires loguru messages to land in the existing default run-log
-files. The shim reproduces the exact behavior of the legacy stdlib handler:
+Each emission is written once per destination. Reconfiguring logging replaces
+previous sinks. The library configures the process-wide logging root, as the
+previous setup did; independent concurrent logging configurations need separate
+processes or caller-managed logging.
 
-| Property   | Legacy (`set_logging`)                                  | Shim (`logging_setup.setup_logging`)         |
-|------------|---------------------------------------------------------|----------------------------------------------|
-| File path  | `<Analysis.log_folder>/<Analysis.file_name>.log`        | identical                                    |
-| File mode  | `filemode="w"` (overwrite per run)                      | `mode="w"`                                   |
-| Line format| `%(asctime)s - %(name)s - %(levelname)s - %(message)s`<br>datefmt `%m/%d/%Y %I:%M:%S %p` | loguru `{time:MM/DD/YYYY hh:mm:ss A} - {name} - {level} - {message}` (same shape) |
-| Level      | `cfg["default"]["log_level"]`                           | identical                                    |
-| Console    | `StreamHandler(sys.stdout)`                             | `logger.add(sys.stdout)` (loguru colorizes)  |
+## Emit messages
 
-The shim also re-attaches `set_logging.PropagateHandler` so records flow back
-into the stdlib hierarchy — modules still using `logging.getLogger(__name__)`
-keep emitting into the same run log while they are migrated.
+```python
+from assetutilities.common.logging_setup import logger
 
-## No hard dependency on import
+logger.info("Process START")
+logger.info("Rows processed: {}", count)
+```
 
-`loguru` is declared in `pyproject.toml` (`loguru>=0.7.0,<1.0.0`). Even so, the
-shim **imports loguru lazily** and falls back to a stdlib-backed `logger`
-(`_StdlibLoggerShim`) if loguru is missing, so `import logging_setup` never
-breaks and tests run without the dependency. `LOGURU_AVAILABLE` reports which
-path is active.
+Loguru uses brace formatting for positional arguments. Existing stdlib logging
+calls keep their percent-format semantics through the interception handler.
+Do not configure additional output sinks inside workflow handlers.
 
-## How to migrate a module
+Exception-local diagnostics and expanded backtraces are disabled for configured
+sinks. Applications must still avoid including confidential values in message
+text or exception messages.
 
-1. Replace the stdlib import:
-   ```python
-   import logging
-   ```
-   with the shim:
-   ```python
-   from assetutilities.common.logging_setup import logger
-   ```
-2. Convert call sites (the API is the same):
-   - `logging.info(msg)`     → `logger.info(msg)`
-   - `logging.debug(msg)`    → `logger.debug(msg)`
-   - `logging.warning(msg)`  → `logger.warning(msg)`
-   - `logging.error(msg)`    → `logger.error(msg)`
-   - `logging.exception(msg)`→ `logger.exception(msg)`
-   - `logging.getLogger(__name__)` → just use the shared `logger`
-     (loguru has a single global logger; per-module logger objects are not
-     needed). The record's module/function context is captured automatically.
-3. **Do not** call `logging.basicConfig(...)` in migrated modules. Run-log
-   configuration is centralized in `setup_logging(cfg)` /
-   `ApplicationManager`.
-4. loguru uses brace-style lazy formatting; f-strings keep working, so
-   `logger.info(f"{x}")` is fine. For lazy args you may also use
-   `logger.info("value={}", x)`.
-5. Run that module's tests.
+## Compatibility
 
-## Migration order suggestion
+`set_logging`, `setup_logging`, `logger`, `InterceptHandler` and
+`PropagateHandler` remain importable. `PropagateHandler` is retained for external
+callers, but the library setup does not install it: installing both bridge
+directions would create a loop. Direct loguru imports use the same shared logger.
+When loguru cannot be imported, the shim uses standard-library logging with the
+same destinations, level and no-file behavior.
 
-Start with leaf/entry modules that only *emit* logs (done: `engine.py`), then
-modules that *configure* logging. Once all emitters use `logger`,
-`set_logging.set_logging` can be replaced by `logging_setup.setup_logging` at
-the single call site in `ApplicationManager`, and `set_logging` retired.
+The tests check single writes from both APIs, level filtering, reconfiguration,
+no-file mode, human-readable logs and the fallback. See
+[the core example](modules/core-hardening.md) for a complete workflow.
 
-## What is left
-
-All other modules under `src/` still importing `logging` (see
-`grep -rl "import logging" src/`). They keep working unchanged thanks to the
-`PropagateHandler` bridge; migrate them incrementally using the steps above.
+Source: [Loguru migration guide](https://loguru.readthedocs.io/en/stable/resources/migration.html),
+accessed 2026-10-20, including standard logging integration and exception diagnostics.

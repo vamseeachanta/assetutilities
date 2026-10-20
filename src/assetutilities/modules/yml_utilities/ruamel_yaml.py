@@ -2,6 +2,7 @@ import os
 import re
 from pathlib import Path
 
+import yaml
 from loguru import logger
 from ruamel.yaml import YAML as ruamelYAML
 
@@ -76,10 +77,14 @@ def split_yaml_file_by_primary_key(
     primary_key_info = handler.get_primary_key_single_line_info(cleaned_yaml)
 
     output_file_name_array = []
-    for key in data.keys():
+    for key in data:
         if single_line_keys_skipped and primary_key_info.get(key, False):
             continue
 
+        if not isinstance(key, str) or not re.fullmatch(
+            r"[A-Za-z0-9_-][A-Za-z0-9_.-]*", key
+        ):
+            raise ValueError("YAML split key must be a filename component")
         output_file_name = f"{file_name_stem}_{key}.yml"
         output_file_path = os.path.join(output_dir, output_file_name)
         save_yml({key: data[key]}, output_file_path, shape_output=shape_output)
@@ -123,7 +128,7 @@ class RuamelYAML:
                 )
                 cfg[cfg["basename"]]["divide"]["groups"].append(output_file_name_array)
             else:
-                raise Exception("No divide by method specified")
+                raise ValueError("No divide by method specified")
 
     def get_primary_key_single_line_info(self, cleaned_yaml):
         """Map each top-level key -> True if it is a single-line scalar value.
@@ -176,7 +181,12 @@ class RuamelYAML:
             cleaned_yaml = self.clean_yaml_file(yaml_content)
             cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
 
+            # PyYAML documentation, "safe_load": reject nonstandard tags
+            # before using ruamel to retain comments and quoting.
+            yaml.safe_load(cleaned_yaml)
             data = ruamel_yaml.load(cleaned_yaml)
+            if not isinstance(data, dict):
+                raise TypeError("YAML split input must be a mapping")
 
         return cleaned_yaml, data
 

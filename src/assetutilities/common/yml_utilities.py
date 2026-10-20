@@ -6,17 +6,16 @@ import importlib.util
 # import logging
 import os
 import pkgutil
-import types
+import re
 from collections.abc import Mapping, MutableMapping
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 # Third party imports
 import yaml  # type: ignore[import-untyped]
 import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
-from jinja2 import Environment, StrictUndefined
-from jinja2.exceptions import TemplateError, UndefinedError
 from loguru import logger
 
 # Reader imports
@@ -46,62 +45,78 @@ def represent_none(self: Any, _: Any) -> Any:
 yaml.add_representer(type(None), represent_none)
 
 
-def ymlInput(defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
-    return WorkingWithYAML().ymlInput(defaultYml, updateYml)
+def ymlInput(
+    defaultYml: str, updateYml: str | None = None, *, placeholders: bool = False
+) -> dict[str, Any]:
+    return WorkingWithYAML().ymlInput(defaultYml, updateYml, placeholders=placeholders)
 
 
-def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+def update_deep(
+    d: MutableMapping[str, Any], u: Mapping[str, Any]
+) -> MutableMapping[str, Any]:
     return WorkingWithYAML().update_deep(d, u)
 
 
-def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None) -> Any:
-    """Recursively substitute ``{{ key }}`` placeholders in a YAML-derived tree.
+def resolve_placeholders(data: Any, context: Mapping[str, Any] | None = None) -> Any:
+    """Copy a tree, replacing scalar ``{{ dotted.mapping.key }}`` references.
 
-    This implements the "YAML placeholders" scenario of issue #59. Unlike native
-    YAML anchors/aliases (``&name`` / ``*name``), which the loader resolves and
-    which only reference a single previously-defined node, placeholders are plain
-    quoted strings such as ``"{{ meta.library }}"`` that are resolved *after*
-    parsing. They can therefore reference any key in the document (including
-    nested keys via dotted access) and be embedded inside larger strings.
-
-    Substitution is performed with Jinja2. Dotted placeholders like
-    ``{{ meta.library }}`` resolve against the nested mapping ``context["meta"]``.
-
-    Args:
-        data: The value or tree to resolve. Typically the parsed config ``dict``.
-        context: Mapping that placeholder names are rendered against. When
-            ``None`` and ``data`` is a mapping, ``data`` is used as its own
-            context, supporting self-referential documents (the common case).
-
-    Returns:
-        A new structure mirroring ``data`` with every resolvable placeholder
-        replaced by its string value. Placeholders that reference an undefined
-        key are left untouched so unrelated braces are never destroyed.
-
-    Notes:
-        Note that a bare, unquoted ``{{ key }}`` in YAML is *not* a string but a
-        nested mapping (``{{'key': None}: None}``) and so cannot be resolved here;
-        placeholders must be quoted to round-trip through the YAML parser.
+    Resolution is a single pass against the original context. Missing keys,
+    expressions, functions, attributes and template control blocks stay literal.
+    Mapping keys take precedence even when named ``items`` or ``values``.
+    Native YAML anchors/aliases are handled by the safe loader before this step.
     """
     if context is None:
         context = data if isinstance(data, Mapping) else {}
+    pattern = re.compile(
+        r"{{\s*([A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*)\s*}}"
+    )
+    active = set()
 
-    env = Environment(undefined=StrictUndefined, autoescape=False)
+    def substitute(match):
+        value = context
+        for key in match.group(1).split("."):
+            if not isinstance(value, Mapping) or key not in value:
+                return match.group(0)
+            value = value[key]
+        if value is None or type(value) in (str, int, float, bool):
+            return str(value)
+        return match.group(0)
 
-    if isinstance(data, str):
-        try:
-            return env.from_string(data).render(**dict(context))
-        except UndefinedError:
-            # Reference a key that does not exist: leave the literal in place.
-            return data
-        except TemplateError as e:
-            logger.warning(f"Placeholder template error in {data!r}: {e}")
-            return data
-    if isinstance(data, Mapping):
-        return {k: resolve_placeholders(v, context) for k, v in data.items()}
-    if isinstance(data, list):
-        return [resolve_placeholders(item, context) for item in data]
-    return data
+    def walk(value):
+        if isinstance(value, str):
+            if "{%" in value or "{#" in value:
+                return value
+            return pattern.sub(substitute, value)
+        if isinstance(value, (Mapping, list)):
+            identity = id(value)
+            if identity in active:
+                raise ValueError(
+                    "Cyclic YAML aliases cannot be resolved as placeholders"
+                )
+            active.add(identity)
+            try:
+                if isinstance(value, Mapping):
+                    return {key: walk(item) for key, item in value.items()}
+                return [walk(item) for item in value]
+            finally:
+                active.remove(identity)
+        return value
+
+    return walk(data)
+
+
+def resolve_config_placeholders(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Opt in with ``yaml_options.resolve_placeholders: true`` in a config.
+
+    Mutate the top-level mapping to preserve AttributeDict and caller identity.
+    Select the basename before substitution; placeholders cannot choose code.
+    """
+    options = cfg.get("yaml_options", {})
+    if options.get("resolve_placeholders", False):
+        resolved = resolve_placeholders(cfg)
+        cfg.clear()
+        cfg.update(resolved)
+    return cfg
 
 
 class WorkingWithYAML:
@@ -129,7 +144,7 @@ class WorkingWithYAML:
 
     def get_plotting_data(self, cfg: dict[str, Any]) -> dict[str, Any]:
         groups_key_chain = cfg["data"]["groups_key_chain"]
-        groups = groups_key_chain.copy()
+        groups = deepcopy(groups_key_chain)
         for group_idx, group in enumerate(groups_key_chain):
             for x_list_idx, x_list in enumerate(group["x"]):
                 x_list_values = self.get_data_from_file_keychain(cfg, x_list)
@@ -142,7 +157,9 @@ class WorkingWithYAML:
 
         return cfg
 
-    def get_data_from_file_keychain(self, cfg: dict[str, Any], file_keychain: dict[str, Any]) -> Any:
+    def get_data_from_file_keychain(
+        self, cfg: dict[str, Any], file_keychain: dict[str, Any]
+    ) -> Any:
         file_name = file_keychain["file_name"]
         key_chain = file_keychain["key_chain"]
 
@@ -179,9 +196,15 @@ class WorkingWithYAML:
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
         return cfg
 
-    def ymlInput(self, defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
+    def ymlInput(
+        self,
+        defaultYml: str,
+        updateYml: str | None = None,
+        *,
+        placeholders: bool = False,
+    ) -> dict[str, Any]:
         if not is_file_valid_func(defaultYml):
-            raise Exception("Not valid file. Please check the file path.")
+            raise FileNotFoundError("Not valid file. Please check the file path.")
 
         cfg: dict[str, Any]
         with open(defaultYml, encoding="utf-8") as ymlfile:
@@ -199,7 +222,13 @@ class WorkingWithYAML:
                 #  Convert to logs
                 # logger.info(cfgUpdateValues)
                 cfg = update_deep(cfg, cfgUpdateValues)  # type: ignore[assignment]
-            except Exception as e:
+            except (
+                OSError,
+                yaml.YAMLError,
+                TypeError,
+                ValueError,
+                AttributeError,
+            ) as e:
                 # Surface the cause; this handler previously discarded it
                 # entirely (issue #80). Fallback behaviour is unchanged.
                 logger.info(
@@ -207,31 +236,28 @@ class WorkingWithYAML:
                 )
                 logger.info(f"Error is : {e}")
 
+        if placeholders:
+            cfg = resolve_placeholders(cfg)
         return cfg
 
     def yml_read_stream(self, yaml_file_name: str) -> dict[str, Any]:
+        # PyYAML documentation, "safe_load_all": only standard YAML tags.
+        # Validate the complete stream before merging; a late parse/tag error
+        # must not return a partially accepted configuration.
+        with open(yaml_file_name, encoding="utf-8-sig") as ymlfile:
+            documents = list(yaml.safe_load_all(ymlfile))
         stream_dict: dict[str, Any] = {}
-        try:
-            with open(yaml_file_name) as ymlfile:
-                yaml_content = ymlfile.read()
-
-                # Clean the YAML content
-                # cleaned_yaml = self.clean_yaml_file(yaml_content)
-                docs = yaml.safe_load_all(yaml_content)
-                if type(docs) is types.GeneratorType:
-                    for doc in docs:
-                        if type(doc) is dict:
-                            stream_dict = update_deep(stream_dict, doc)  # type: ignore[assignment]
-        except yaml.YAMLError as e:
-            logger.error(f"YAML parsing error: {e}")
-        except Exception:
-            raise Exception(
-                "Stopping Program due to some inefficient data in the YAML file"
-            )
-
+        for document in documents:
+            if document is None:
+                continue
+            if not isinstance(document, Mapping):
+                raise TypeError("Each YAML configuration document must be a mapping")
+            stream_dict = update_deep(stream_dict, document)
         return stream_dict
 
-    def update_deep(self, d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+    def update_deep(
+        self, d: MutableMapping[str, Any], u: Mapping[str, Any]
+    ) -> MutableMapping[str, Any]:
         for k, v in u.items():
             # this condition handles the problem
             if not isinstance(d, Mapping):
@@ -240,14 +266,13 @@ class WorkingWithYAML:
                 r = update_deep(d.get(k, {}), v)
                 d[k] = r
             else:
-                d[k] = u[k]
+                d[k] = v
 
         return d
 
     def load_yml_with_utf_8_sig(self, file_name: str) -> Any:
-        doc = yaml.safe_load(open(file_name, encoding="utf-8-sig"))
-
-        return doc
+        with open(file_name, encoding="utf-8-sig") as stream:
+            return yaml.safe_load(stream)
 
     def analyze_yaml_keys(self, file_name: str) -> None:
         """
@@ -304,7 +329,10 @@ class WorkingWithYAML:
         self.save_diff_files(file_diff, cfg)
 
     def save_diff_files(
-        self, file_diff: dict[str, Any], cfg: dict[str, Any], deepdiff_save: bool = False
+        self,
+        file_diff: dict[str, Any],
+        cfg: dict[str, Any],
+        deepdiff_save: bool = False,
     ) -> None:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
@@ -323,10 +351,10 @@ class WorkingWithYAML:
 
             file_name = f"{file_directory}/wwyaml_{uniquebasename}_updated_values.yml"
             with open(file_name, "w") as f:
-                for key, value in file_diff.items():
-                    if key == "values_changed":
-                        for k, v in value.items():
-                            f.write(f"{k}: {v['new_value']}\n")
+                f.writelines(
+                    f"{key}: {value['new_value']}\n"
+                    for key, value in file_diff.get("values_changed", {}).items()
+                )
 
             saveDataYaml(
                 dict(file_diff), f"{file_directory}/wwyaml_{uniquebasename}_items"
@@ -367,7 +395,9 @@ class WorkingWithYAML:
 
         return str(filename_with_lib_path)
 
-    def get_library_filepath(self, cfg: dict[str, Any], src_relative_location_flag: bool = False) -> str:
+    def get_library_filepath(
+        self, cfg: dict[str, Any], src_relative_location_flag: bool = False
+    ) -> str:
         filepath_with_lib_path: Any = cfg["filepath"]
         library_name = cfg["library_name"]
         if not os.path.isabs(filepath_with_lib_path) or not os.path.isdir(
@@ -387,11 +417,11 @@ class WorkingWithYAML:
 
     def test_variables(self, cfg: dict[str, Any]) -> dict[str, Any]:
         if cfg["test_variables"]["method"] == "single":
-            flag, label = self.test_single_variable(cfg)
+            _flag, _label = self.test_single_variable(cfg)
         elif cfg["test_variables"]["method"] == "directive_block":
-            flag, label = self.test_directive_block(cfg)
+            _flag, _label = self.test_directive_block(cfg)
         elif cfg["test_variables"]["method"] == "placeholder":
-            flag, label = self.test_variable_placeholder(cfg)
+            _flag, _label = self.test_variable_placeholder(cfg)
 
         return cfg
 
@@ -424,7 +454,9 @@ class WorkingWithYAML:
             logger.error("yml key cannot be accesible:", e)
             return False, None
 
-    def process_placeholders(self, data: Any, context: Optional[dict[str, Any]] = None) -> Any:
+    def process_placeholders(
+        self, data: Any, context: dict[str, Any] | None = None
+    ) -> Any:
         """Resolve ``{{ key }}`` placeholders in a config tree (backwards-compatible alias).
 
         Thin wrapper around :func:`resolve_placeholders`. Retained so existing
