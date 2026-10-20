@@ -15,8 +15,9 @@ from typing import Any, Optional, Union
 import yaml  # type: ignore[import-untyped]
 import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
-from jinja2 import Environment, StrictUndefined
+from jinja2 import StrictUndefined
 from jinja2.exceptions import TemplateError, UndefinedError
+from jinja2.sandbox import SandboxedEnvironment
 from loguru import logger
 
 # Reader imports
@@ -50,7 +51,9 @@ def ymlInput(defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]
     return WorkingWithYAML().ymlInput(defaultYml, updateYml)
 
 
-def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+def update_deep(
+    d: MutableMapping[str, Any], u: Mapping[str, Any]
+) -> MutableMapping[str, Any]:
     return WorkingWithYAML().update_deep(d, u)
 
 
@@ -64,7 +67,9 @@ def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None)
     parsing. They can therefore reference any key in the document (including
     nested keys via dotted access) and be embedded inside larger strings.
 
-    Substitution is performed with Jinja2. Dotted placeholders like
+    Substitution is performed once with sandboxed Jinja2. Mapping keys and
+    native scalar types are preserved; template results remain strings.
+    Chained expansion is not performed. Dotted placeholders like
     ``{{ meta.library }}`` resolve against the nested mapping ``context["meta"]``.
 
     Args:
@@ -86,22 +91,43 @@ def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None)
     if context is None:
         context = data if isinstance(data, Mapping) else {}
 
-    env = Environment(undefined=StrictUndefined, autoescape=False)
+    # Jinja 3.1 API: sandboxed rendering and keep_trailing_newline preserve
+    # config text without exposing Python internals through template attributes.
+    env = SandboxedEnvironment(
+        undefined=StrictUndefined, autoescape=False, keep_trailing_newline=True
+    )
+    memo: dict[int, Any] = {}
 
-    if isinstance(data, str):
-        try:
-            return env.from_string(data).render(**dict(context))
-        except UndefinedError:
-            # Reference a key that does not exist: leave the literal in place.
-            return data
-        except TemplateError as e:
-            logger.warning(f"Placeholder template error in {data!r}: {e}")
-            return data
-    if isinstance(data, Mapping):
-        return {k: resolve_placeholders(v, context) for k, v in data.items()}
-    if isinstance(data, list):
-        return [resolve_placeholders(item, context) for item in data]
-    return data
+    def visit(value: Any) -> Any:
+        if isinstance(value, str):
+            if not any(marker in value for marker in ("{{", "{%", "{#")):
+                return value
+            try:
+                return env.from_string(value).render(dict(context))
+            except UndefinedError:
+                return value
+            except TemplateError:
+                # Do not log config values: they can contain private data.
+                logger.warning("Placeholder template could not be rendered")
+                return value
+        if isinstance(value, (Mapping, list)):
+            # YAML aliases can share nodes, including recursive nodes (YAML
+            # 1.2.2, 2021, section 3.2.1). Preserve that graph in the copy.
+            identity = id(value)
+            if identity in memo:
+                return memo[identity]
+            if isinstance(value, Mapping):
+                result: dict[Any, Any] = {}
+                memo[identity] = result
+                result.update((key, visit(item)) for key, item in value.items())
+                return result
+            items: list[Any] = []
+            memo[identity] = items
+            items.extend(visit(item) for item in value)
+            return items
+        return value
+
+    return visit(data)
 
 
 class WorkingWithYAML:
@@ -142,7 +168,9 @@ class WorkingWithYAML:
 
         return cfg
 
-    def get_data_from_file_keychain(self, cfg: dict[str, Any], file_keychain: dict[str, Any]) -> Any:
+    def get_data_from_file_keychain(
+        self, cfg: dict[str, Any], file_keychain: dict[str, Any]
+    ) -> Any:
         file_name = file_keychain["file_name"]
         key_chain = file_keychain["key_chain"]
 
@@ -179,7 +207,9 @@ class WorkingWithYAML:
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
         return cfg
 
-    def ymlInput(self, defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
+    def ymlInput(
+        self, defaultYml: str, updateYml: Optional[str] = None
+    ) -> dict[str, Any]:
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
@@ -207,7 +237,8 @@ class WorkingWithYAML:
                 )
                 logger.info(f"Error is : {e}")
 
-        return cfg
+        # Resolve against the final merged document, never an intermediate one.
+        return resolve_placeholders(cfg)
 
     def yml_read_stream(self, yaml_file_name: str) -> dict[str, Any]:
         stream_dict: dict[str, Any] = {}
@@ -231,7 +262,9 @@ class WorkingWithYAML:
 
         return stream_dict
 
-    def update_deep(self, d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+    def update_deep(
+        self, d: MutableMapping[str, Any], u: Mapping[str, Any]
+    ) -> MutableMapping[str, Any]:
         for k, v in u.items():
             # this condition handles the problem
             if not isinstance(d, Mapping):
@@ -304,7 +337,10 @@ class WorkingWithYAML:
         self.save_diff_files(file_diff, cfg)
 
     def save_diff_files(
-        self, file_diff: dict[str, Any], cfg: dict[str, Any], deepdiff_save: bool = False
+        self,
+        file_diff: dict[str, Any],
+        cfg: dict[str, Any],
+        deepdiff_save: bool = False,
     ) -> None:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
@@ -367,7 +403,9 @@ class WorkingWithYAML:
 
         return str(filename_with_lib_path)
 
-    def get_library_filepath(self, cfg: dict[str, Any], src_relative_location_flag: bool = False) -> str:
+    def get_library_filepath(
+        self, cfg: dict[str, Any], src_relative_location_flag: bool = False
+    ) -> str:
         filepath_with_lib_path: Any = cfg["filepath"]
         library_name = cfg["library_name"]
         if not os.path.isabs(filepath_with_lib_path) or not os.path.isdir(
@@ -424,7 +462,9 @@ class WorkingWithYAML:
             logger.error("yml key cannot be accesible:", e)
             return False, None
 
-    def process_placeholders(self, data: Any, context: Optional[dict[str, Any]] = None) -> Any:
+    def process_placeholders(
+        self, data: Any, context: Optional[dict[str, Any]] = None
+    ) -> Any:
         """Resolve ``{{ key }}`` placeholders in a config tree (backwards-compatible alias).
 
         Thin wrapper around :func:`resolve_placeholders`. Retained so existing

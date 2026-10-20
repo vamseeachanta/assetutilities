@@ -1,4 +1,5 @@
 import datetime
+from copy import deepcopy
 import functools
 import os
 import pkgutil
@@ -17,6 +18,7 @@ from loguru import logger
 from assetutilities.common.data import AttributeDict, SaveData
 from assetutilities.common.set_logging import set_logging
 from assetutilities.common.update_deep import update_deep_dictionary
+from assetutilities.common.yml_utilities import resolve_placeholders
 
 save_data = SaveData()
 
@@ -137,6 +139,7 @@ class ConfigureApplicationInputs:
         if cfg is None or root_folder is None:
             raise ValueError("configure_embed requires both cfg and root_folder")
 
+        cfg = resolve_placeholders(cfg)
         application_start_time = datetime.datetime.now()
 
         custom_file_name = basename
@@ -255,7 +258,7 @@ class ConfigureApplicationInputs:
             with open(self.ApplicationInputFile) as ymlfile:
                 cfg = yaml.safe_load(ymlfile)
         else:
-            cfg = self.ApplicationInputFile_dict
+            cfg = deepcopy(self.ApplicationInputFile_dict)
 
         if self.customYaml is not None:
             try:
@@ -294,9 +297,7 @@ class ConfigureApplicationInputs:
                 custom_and_default_yaml_data = (
                     custom_file_data + "\n" + default_file_data
                 )
-                cfgDefaultAndCustomValues = yaml.safe_load(
-                    custom_and_default_yaml_data
-                )
+                cfgDefaultAndCustomValues = yaml.safe_load(custom_and_default_yaml_data)
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)
             logger.debug(
@@ -311,7 +312,8 @@ class ConfigureApplicationInputs:
                 "Update default app configuration with dictionary content ... FINISH"
             )
 
-        return cfg
+        # Resolve after defaults, custom input and argument overrides are merged.
+        return resolve_placeholders(cfg)
 
     def get_application_configuration_parameters(
         self, run_dict, basename, cfg, root_folder=None, log_to_file=True
@@ -402,7 +404,7 @@ class ConfigureApplicationInputs:
             config_dir = Path(analysis_root_folder)
             result_path = (config_dir / result_sub_folder).resolve()
             result_folder = str(result_path)
-        
+
         if not os.path.exists(result_folder):
             os.makedirs(result_folder, exist_ok=True)
 
@@ -460,7 +462,7 @@ class ConfigureApplicationInputs:
         """
         # Import the cli_parser here to use the hybrid parser
         from assetutilities.common.cli_parser import parse_hybrid_arguments
-        
+
         # Use the new hybrid parser that handles both old and new formats
         return parse_hybrid_arguments(inputfile)
 
