@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YAML splitting and plotting example</title>
+<style>
+body { max-width: 60rem; margin: 2rem auto; padding: 0 1rem; font: 1rem/1.6 sans-serif; color: #172b3a; }
+pre { padding: 1rem; background: #f2f5f7; overflow: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #aab7c2; padding: .5rem; text-align: left; }
+caption { caption-side: bottom; text-align: left; }
+code { font-family: monospace; }
+</style>
+</head>
+<body>
+<h1>YAML splitting and plotting example</h1>
+<h2>Summary</h2>
+<p>A mapping is split into independently readable section files, and supplied
+arrays are plotted with the packaged X-Y template. Comments and quoted keys are
+retained by round-trip serialization. Compact row formatting changes sequence
+style without changing scalar values. The example contains synthetic,
+dimensionless values; no engineering qualification is established.</p>
+<h2>Revision history</h2>
+<table>
+<thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
+<tbody><tr><td>1</td><td>2026-10-20</td><td>Add a reproducible split-and-plot example to demonstrate lossless section output.</td></tr></tbody>
+<caption>Table 1. Document revisions.</caption>
+</table>
+<h2>Input and independent answer</h2>
+<p>The example source is <a href="../../../examples/yaml_split_plot/input.yml">input.yml</a>.
+The relation is defined as <code>y = x*x</code>. Direct multiplication gives the
+following values; no published coefficient is required.</p>
+<table>
+<thead><tr><th>x (dimensionless)</th><th>Calculation</th><th>y (dimensionless)</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0 × 0</td><td>0</td></tr>
+<tr><td>1</td><td>1 × 1</td><td>1</td></tr>
+<tr><td>2</td><td>2 × 2</td><td>4</td></tr>
+<tr><td>3</td><td>3 × 3</td><td>9</td></tr>
+</tbody>
+<caption>Table 2. Synthetic curve values, calculated independently.</caption>
+</table>
+<h2>Method</h2>
+<ol>
+<li>Parse the original UTF-8 YAML as one mapping. Literal percent signs,
+blank lines and document-marker text inside strings remain data.</li>
+<li>Select each collection or block-scalar section. Single-line scalars such as
+<code>label</code> are omitted by default. Set
+<code>single_line_keys_skipped=False</code> to emit them.</li>
+<li>Validate every selected key and destination before writing. Filenames have
+the form <code>&lt;input_stem&gt;_&lt;key&gt;.yml</code>, in input key order.</li>
+<li>Copy the round-trip mapping metadata into each section. With
+<code>shape_output=True</code>, nested two-scalar rows use flow style;
+longer rows and block-scalar text are preserved.</li>
+<li>Pass the supplied <code>curve.x</code> and <code>curve.y</code> arrays to
+<code>plot_xy_from_arrays</code>. The packaged visualization template supplies
+plot settings; no test fixture or solver application is required.</li>
+</ol>
+<h2>Run</h2>
+<p>From a checkout with the package dependencies installed, select an external
+output directory. The example script does not modify the input.</p>
+<pre><code>python examples/yaml_split_plot/split_and_plot.py \
+  examples/yaml_split_plot/input.yml "$OUTPUT_DIR"</code></pre>
+<p>The program is <a href="../../../examples/yaml_split_plot/split_and_plot.py">split_and_plot.py</a>.
+The expected outputs are:</p>
+<pre><code>sections/input_curve.yml
+sections/input_coordinates.yml
+Plot/curve.png</code></pre>
+<p>The first section contains <code>x: [0, 1, 2, 3]</code> and
+<code>y: [0, 1, 4, 9]</code>. The second contains the four corresponding pairs,
+including <code>- [2, 4]</code>. There is no <code>input_label.yml</code> under
+the default scalar-selection policy. The PNG shows the supplied curve.</p>
+<h2>Library interfaces</h2>
+<pre><code>from assetutilities.modules.yml_utilities import (
+    save_yml, split_yaml_file_by_primary_key,
+)
+
+sections = split_yaml_file_by_primary_key(
+    input_file, output_dir, shape_output=True,
+)
+# Existing saveDataYaml round-trip modes use the same save_yml writer.</code></pre>
+<p>The return value remains a list of <code>{"data": path}</code> mappings.
+The engine's <code>RuamelYAML</code> entry point uses the same splitter.
+The plot helper accepts a custom <code>template_path</code> and supports
+<code>plt_engine="plotly"</code> for HTML output.</p>
+<h2>Limits and failure handling</h2>
+<p>Empty input, non-mapping roots, duplicate mapping keys, malformed YAML,
+non-string selected keys, filename separators and case-insensitive filename
+collisions are rejected. Document streams are not split. Existing destination
+files are overwritten. Validation precedes output creation, but filesystem
+failures during writing are not transactional. Comment placement and indentation
+may be normalized by the serializer; byte-for-byte reproduction is not promised.</p>
+<p>Invalid unquoted percent placeholders are no longer repaired during splitting;
+quote literal strings in the input. Solver application opening, installation
+and model validation require a separate integration and are not evaluated here.</p>
+<h2>Verification basis</h2>
+<p>Regression tests compare parsed section outputs with literal input values,
+exercise malformed and conflicting inputs, check compact rows and comments,
+and run plotting from a package layout without repository fixtures. The worked
+example checks both section contents against Table 2 and checks PNG creation.</p>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://yaml.org/spec/1.2.2/">YAML Language Development Team, YAML 1.2.2 specification (2021)</a>,
+sections 3.2.1.1 (nodes and unique mapping keys), 7.3 (flow scalars),
+7.4 (flow collections), and 8.1 (block scalars).</li>
+<li><a href="https://yaml.dev/doc/ruamel.yaml/detail/">ruamel.yaml documentation, Details</a>,
+round-trip comments, collection metadata and block-sequence indentation; accessed 2026-10-20.</li>
+</ul>
+</body>
+</html>
