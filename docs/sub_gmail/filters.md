@@ -1,88 +1,37 @@
-## Gmail Filters
+# Gmail filters and spam reduction
 
-Gmail filters are rules that automatically organize emails based on search criteria. They can be used to: 
-- Archive emails 
-- Delete emails
-- Star emails
-- Apply labels to emails
-- Mark emails as spam
-- Forward emails
+Use the [retention cleanup guide](cleanup.md) for elapsed-age cleanup and the
+worked example. Incoming filters do not periodically revisit mail as it ages.
 
-## Gmail Filters for Email Cleanup
+## Preserve wanted mail
 
+Before changing filters, review **Settings → Filters and Blocked Addresses**
+for existing rules that delete wanted mail. Star or mark important messages that
+must be excluded from the cleanup command. A custom label alone does not grant
+that protection. Gmail has no general filter action that guarantees retention
+forever, and another matching filter can still move mail to Trash.
 
-### 1. Retaining Starred and Important Emails Forever
+For a trusted category of incoming mail, search for the intended criteria first,
+inspect the matches, then use **Create filter**. Choose an organizing label or
+archive action as appropriate. Avoid broad deletion filters when preserving
+important correspondence. Google documents the supported workflow in
+[Create rules to filter your emails](https://support.google.com/mail/answer/6579?hl=en).
+A reply is filtered only if it also matches the criteria.
 
-### **Filter Criteria:**
+## Reduce spam over time
 
-- Ensures starred and important emails are never deleted.
+Report unwanted suspicious messages using **Report spam**. Correct false positives
+using **Not spam**. For legitimate recurring bulk mail that is no longer wanted,
+use the unsubscribe action where available; block repeat unwanted senders when
+appropriate. Review matches before creating sender or category filters. Google's
+[Report spam in Gmail](https://support.google.com/mail/answer/1366858?hl=en)
+explains these actions and how reporting informs future classification.
 
- ### **Gmail Filter Setup:**
+Avoid automatically trashing every message in Spam: it removes the opportunity
+to inspect misclassified wanted messages. The cleanup policy applies the same
+age threshold and starred/important protection checks to Spam as to other mail.
+Messages already in Spam remain subject to Gmail's own retention behavior.
+Spam elimination is not guaranteed; effectiveness requires delivery history and
+a separately supplied acceptance target.
 
-1. Go to **Gmail Settings** → **Filters and Blocked Addresses** → **Create a new filter**.
-2. Enter the following message in Has_words:
-   ```
-   is:important OR is:starred
-   ```
-3. Click **Create filter**.
-4. Check the box for **Never send it to Spam**.
-5. Check the box for **Never delete it**.
-   
-   - if there is no option create a label for it.
-   - check the box **Apply the label** , create new label "RetainForever" , click create
-  
-6. Click **Create filter**.
-
----
-
-### 2. Automatically Deleting Spam Emails
-
-### **Filter Criteria:**
-
-- Deletes existing spam emails and incoming spams.
-
-### **Gmail Filter Setup:**
-
-1. Go to **Gmail Settings** → **Filters and Blocked Addresses** → **Create a new filter**.
-2. Enter the following message in include_the_words:
-   ```
-   is:spam
-   ```
-3. Click **Create filter**.
-4. Check the box for **Delete it**.
-5. Check **Also apply filter to matching conversations** - To apply for existing spam emails
-6. Click **Create filter**.
-
----
-
-### 3. Deleting Emails Older Than 1 Year 
-
-### **Filter Criteria:**
-
-- Emails older than **365 days**
-- Excludes **starred** and **important** emails 
-
-### **Gmail Filter Setup:**
-
-1. Go to **Gmail Settings** → **Filters and Blocked Addresses** → **Create a new filter**.
-2. Enter the following message in Has_words:
-   ```
-   older_than:365d -is:important -is:starred
-   ```
-   - -is:important : excludes important emails from deletion
-   - -is:starred : excludes starred emails from deletion
-  
-3. Click **Create filter**.
-4. Check the box for **Delete it**.
-5. Check **Also apply filter to matching conversations** - To apply for existing emails 
-6. Click **Create filter**.
-
-
-
-## **Verification & Testing**
-- Check the **Trash folder** after creating filters to confirm emails are being moved correctly.
-- Check the **Spam folder** after creating spam filter to ensure spam emails are deleted.
-- Ensure important and starred emails remain untouched by checking in their fields.
-
----
-
+Sources were opened on 2026-10-20. No filter or mailbox is changed by this guide.
