@@ -9,6 +9,7 @@ review; publishing, account management and deployed website changes remain manua
 | Revision | Date | Change and reason |
 |---|---|---|
 | Initial | 2026-10-20 | Add calendar and local HTML review to prepare editorial work. |
+| 1 | 2026-10-20 | Reject malformed URL ports and trailing-slash links to regular files so invalid targets are reported. |
 
 ## Worked example
 
@@ -71,6 +72,9 @@ rejected. The timestamp profile excludes fractional seconds, leap seconds and
 must fit the supported calendar date range. All rows require a schedule, including
 drafts, so that the calendar exposes intended timing for review.
 
+When a URL port is supplied, its text must contain only ASCII digits and its
+value must be in the parser's range (0-65535). An empty port is also accepted.
+
 The editor records proposed content as `draft`, reviews the wording and link,
 and explicitly changes the status to `approved`. At the supplied `as_of` instant,
 an approved row is `due` if its timestamp is earlier than or equal to that instant;
@@ -98,6 +102,10 @@ not name local files. Directory URLs map to `index.html`; this is an explicit
 static-export convention. Symlinked HTML files are rejected; symlinked directories
 are not scanned. Resolved targets outside the supplied root are reported without
 reading them. The report contains site-relative page names.
+
+A trailing-slash URL such as `guide.html/` requires a directory. It is reported
+as `broken_local_link` when `guide.html` is a regular file; a directory containing
+`index.html` remains valid.
 
 Use the inventory to identify pages that may be consolidated, review their content
 and navigation, and plan redirects before removing any page. Duplicate titles alone

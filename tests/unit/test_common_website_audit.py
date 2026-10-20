@@ -93,6 +93,27 @@ def test_resolves_relative_root_query_fragment_encoded_and_directory_links(tmp_p
     assert all(p["path"][0] != "/" for p in report["pages"])
 
 
+@pytest.mark.parametrize(
+    "href",
+    ["guide.html/", "/guide.html/", "guide.html/?source=test#intro", "guide.html%2F"],
+)
+def test_directory_url_rejects_a_regular_file_target(tmp_path, href):
+    page(tmp_path, body=f'<a href="{href}">Guide</a>')
+    page(tmp_path, "guide.html")
+    entry = next(p for p in audit_site(tmp_path)["pages"] if p["path"] == "index.html")
+    assert entry["findings"] == [{"code": "broken_local_link", "href": href}]
+    assert entry["internal_links"] == 1
+
+
+@pytest.mark.parametrize("href", ["guide.html/", "/guide.html/", "guide.html%2F"])
+def test_directory_url_accepts_a_directory_index(tmp_path, href):
+    page(tmp_path, body=f'<a href="{href}">Guide</a>')
+    page(tmp_path, "guide.html/index.html", title="Topic")
+    entry = next(p for p in audit_site(tmp_path)["pages"] if p["path"] == "index.html")
+    assert entry["findings"] == []
+    assert entry["internal_links"] == 1
+
+
 def test_reports_missing_target_and_path_escape(tmp_path):
     page(
         tmp_path,

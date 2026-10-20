@@ -78,6 +78,8 @@ def _link_kind(root: Path, source: Path, href: str) -> str:
         target = target.resolve()
         # Resolve symlinks and traversal before checking or reading a target.
         target.relative_to(root)
+        if path.endswith("/") and not target.is_dir():
+            return "broken_local_link"
         if target.is_dir():
             # Explicit static-export convention, not a server routing assumption.
             target = (target / "index.html").resolve()

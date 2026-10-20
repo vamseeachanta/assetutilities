@@ -117,6 +117,41 @@ def test_rejects_invalid_post_values(changes):
         validate_calendar({"posts": [post(**changes)]})
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.org:bad/guide",
+        "https://example.org:-1/guide",
+        "https://example.org:65536/guide",
+        "https://example.org:80:90/guide",
+        "https://example.org:443suffix/guide",
+        "https://[::1]:bad/guide",
+        "https://example.org:+443/guide",
+        "https://example.org:4_43/guide",
+        "https://example.org:\u0664\u0664\u0663/guide",
+    ],
+)
+def test_rejects_invalid_url_ports(url):
+    with pytest.raises(ValueError, match="url"):
+        validate_calendar({"posts": [post(url=url)]})
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.org/guide",
+        "https://example.org:443/guide",
+        "http://example.org:0/guide",
+        "https://example.org:65535/guide",
+        "https://example.org:/guide",
+        "https://[::1]/guide",
+        "https://[::1]:8443/guide",
+    ],
+)
+def test_preserves_valid_url_authorities(url):
+    assert validate_calendar({"posts": [post(url=url)]})[0]["url"] == url
+
+
 @pytest.mark.parametrize("row", [None, [], "post"])
 def test_rejects_non_object_rows(row):
     with pytest.raises(ValueError):

@@ -56,7 +56,16 @@ def _web_url(value: Any) -> bool:
         return False
     try:
         parts = urlsplit(value)
-        return parts.scheme in {"http", "https"} and bool(parts.hostname)
+        # Reading the property validates the port's numeric range.
+        _ = parts.port
+        authority = parts.netloc.rsplit("@", 1)[-1]
+        return (
+            parts.scheme in {"http", "https"}
+            and bool(parts.hostname)
+            # RFC 3986 section 3.2.3 permits only ASCII digits in a port.
+            and re.fullmatch(r"(?:\[[^\]]+\]|[^:\[\]]+)(?::[0-9]*)?", authority)
+            is not None
+        )
     except ValueError:
         return False
 
