@@ -13,10 +13,11 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 
-import pytest
 import yaml
 
-REGISTRY_PATH = Path(__file__).resolve().parents[2] / "docs" / "registry" / "workflows.yaml"
+REGISTRY_PATH = (
+    Path(__file__).resolve().parents[2] / "docs" / "registry" / "workflows.yaml"
+)
 EXACT_INVOCATION = "uv run python -m assetutilities {input}"
 BASE_REQUIRED_FIELDS = ("id", "basename", "input", "outputs", "test")
 STATUS_SET = {"stable", "deprecated", "experimental", "retired"}
@@ -41,7 +42,7 @@ def test_invocation_required_exact_and_input_only():
 
 def test_base_required_fields_present():
     rows = _load()["workflows"]
-    assert len(rows) == 9
+    assert len(rows) == 14
     for row in rows:
         for field in BASE_REQUIRED_FIELDS:
             assert field in row, f"row {row.get('id')} missing {field}"
@@ -80,8 +81,16 @@ def test_reserved_request_response_result_slots_accepted_untyped():
 
 def test_routing_triple_optional_and_typed():
     # Synthetic rows: version int>=1 and status in set when present.
-    good = {"id": "x", "basename": "x", "input": "i", "outputs": ["o"], "test": "t",
-            "version": 2, "status": "experimental", "latest": True}
+    good = {
+        "id": "x",
+        "basename": "x",
+        "input": "i",
+        "outputs": ["o"],
+        "test": "t",
+        "version": 2,
+        "status": "experimental",
+        "latest": True,
+    }
     assert isinstance(good["version"], int) and good["version"] >= 1
     assert good["status"] in STATUS_SET
     bad = {"version": 0}

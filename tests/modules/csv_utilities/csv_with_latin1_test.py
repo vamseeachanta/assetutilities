@@ -1,42 +1,31 @@
-import os
+"""Legacy txt_file alias stays supported without writing tracked test output."""
 
-import pytest
+from pathlib import Path
+
+import yaml
 
 from assetutilities.engine import engine
 
 
-def run_process(input_file):
-    # Fixed path resolution to prevent YAML parsing errors
-    if input_file is not None:
-        # Always resolve path relative to this test file's directory
-        test_dir = os.path.dirname(os.path.abspath(__file__))
-        test_file_path = os.path.join(test_dir, input_file)
-        
-        # Check if file exists at the resolved path
-        if os.path.exists(test_file_path):
-            input_file = test_file_path
-        elif not os.path.isabs(input_file) and not os.path.exists(input_file):
-            # If relative and doesn't exist, use test directory path
-            input_file = test_file_path
-    
-    cfg = engine(input_file)
-    return cfg
-
-
-@pytest.mark.xfail(
-    reason=(
-        "csv_utilities router is an unimplemented loud stub — see engine.py. "
-        "CSVUtilitiesRouter.router is a no-op (its only branch is `pass`) and "
-        "CSVUtilities is an internal zip_utilities helper that reads a zip "
-        "file-object, not a standalone path workflow. The engine now raises "
-        "NotImplementedError for basename 'csv_utilities' (PR #95). This test "
-        "previously passed only because the old silent no-op returned an "
-        "unchanged cfg; it never exercised real csv_utilities behavior."
-    ),
-    raises=NotImplementedError,
-    strict=False,
-)
-def test_run_process():
-    input_file = "csv_with_latin1.yml"
-    result = run_process(input_file)
-    assert result is not None
+def test_run_process(tmp_path):
+    """A header and one authored row give one record with two columns."""
+    source = tmp_path / "input.csv"
+    source.write_bytes("name,value\ncafé,7\n".encode("latin1"))
+    config = tmp_path / "input.yml"
+    config.write_text(
+        yaml.safe_dump(
+            {
+                "basename": "csv_utilities",
+                "csv_utilities": {
+                    "txt_file": "input.csv",
+                    "encoding": "latin1",
+                    "delimiter": ",",
+                },
+            }
+        )
+    )
+    result = engine(str(config))
+    outputs = result["csv_utilities"]["results"]
+    assert Path(outputs["normalized_file"]).read_text() == "name,value\ncafé,7\n"
+    summary = yaml.safe_load(Path(outputs["summary_file"]).read_text())
+    assert (summary["n_rows"], summary["n_columns"]) == (1, 2)
