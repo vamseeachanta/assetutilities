@@ -44,6 +44,18 @@ modules:
     tests_path: tests/unit/
     docs_path: docs/modules/
     domain: shared file, data, YAML, visualization, and validation helpers
+    submodules:
+      marketing_review:
+        source_paths:
+          - src/assetutilities/common/marketing.py
+          - src/assetutilities/common/website_audit.py
+          - src/assetutilities/cli/marketing.py
+        tests_paths:
+          - tests/unit/test_common_marketing.py
+          - tests/unit/test_common_website_audit.py
+          - tests/cli/test_marketing.py
+        docs_path: docs/modules/marketing/offline-review.md
+        example_path: examples/workflows/marketing/
     stability: active
   - name: constants
     source_path: src/assetutilities/constants/

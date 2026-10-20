@@ -32,3 +32,14 @@ P6 Word and PDF output is implemented in
 `tests/modules/reportgen/test_standard_report.py`, and documented in
 `docs/modules/documentation/standard-report.md`. The neutral input example is
 `examples/workflows/reportgen/standard-report.json`.
+
+## Offline marketing review
+
+The manual content calendar and static website inventory use
+`src/assetutilities/common/marketing.py`,
+`src/assetutilities/common/website_audit.py` and
+`src/assetutilities/cli/marketing.py`. Tests are in
+`tests/unit/test_common_marketing.py`,
+`tests/unit/test_common_website_audit.py` and `tests/cli/test_marketing.py`.
+See `docs/modules/marketing/offline-review.md` and the worked inputs in
+`examples/workflows/marketing/`.

@@ -54,3 +54,9 @@ surface and update it if it is stale.
   for focused validation.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
+
+## Offline marketing review
+
+Content-calendar validation and static HTML inventory are documented in
+[Offline marketing review](modules/marketing/offline-review.md), with a worked
+example in `examples/workflows/marketing/`.
