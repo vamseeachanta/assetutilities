@@ -35,6 +35,11 @@ modules:
     stability: active
   - name: cli
     source_path: src/assetutilities/cli/
+    submodules:
+      meetings:
+        source_path: src/assetutilities/cli/meetings/
+        tests_path: tests/meetings/
+        docs_path: docs/modules/meetings.md
     tests_path: tests/bash-setup/
     docs_path: docs/commands/
     domain: command-line helpers

@@ -13,6 +13,7 @@ This is the canonical documentation entry point for issue routing in
 | file and YAML utilities | `src/assetutilities/common/`, `src/assetutilities/modules/yml_utilities/` | `tests/unit/test_common_*.py`, `tests/modules/yml_utilities/` | `docs/modules/`, `docs/modules/yml_utilities/` |
 | unit conversion | `src/assetutilities/units/`, `src/assetutilities/constants/` | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_constants.py` | `docs/README.md`, `docs/registry/module-routing.yaml` |
 | CLI and agent commands | `src/assetutilities/cli/`, `src/assetutilities/agent_os/` | `tests/bash-setup/`, focused CLI tests when added | `docs/commands/`, `docs/modules/agent-os/` |
+| meeting transcripts and audio | `src/assetutilities/cli/meetings/` | `tests/meetings/` | `docs/modules/meetings.md` |
 | data processing and exploration | `src/assetutilities/modules/data_exploration/`, `src/assetutilities/common/data*.py` | `tests/modules/data_exploration/`, common data unit tests | `docs/modules/` |
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
@@ -30,6 +31,9 @@ These files are trusted routing surfaces:
 - `scripts/hygiene/check-source-hygiene.sh`
 
 Use these surfaces to choose source, tests, and docs paths for issue work.
+
+For local meeting audio and transcript summaries, see the
+[meeting utility guide](modules/meetings.md), its worked example and known limits.
 
 ## Raw Inventory And Supporting Material
 
