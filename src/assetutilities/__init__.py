@@ -4,4 +4,5 @@ See https://github.com/vamseeachanta/py_package/ for more information.
 """
 
 # Version of package
-__version__ = "0.0.8"
+# Keep aligned with project.version in pyproject.toml.
+__version__ = "0.1.1"

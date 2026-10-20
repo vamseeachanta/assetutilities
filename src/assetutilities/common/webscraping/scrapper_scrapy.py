@@ -14,6 +14,8 @@ import logging  # noqa
 from colorama import Fore, Style
 from colorama import init as colorama_init
 
+from assetutilities.common.webscraping.input_settings import iter_input_items
+
 colorama_init()
 
 logging.getLogger("scrapy").propagate = False
@@ -29,13 +31,10 @@ class SpiderScrapy(scrapy.Spider):
         self.cfg = cfg
 
     def router(self, cfg):
-
         # process = CrawlerProcess(settings=settings)
 
-        input_settings = cfg["input_settings"]
-        for input_item in cfg["input"]:
-            input_item = {**input_settings, **input_item}
-            # process.crawl(SpiderScrapy, input_item=input_item, cfg=cfg)
+        self.input_items = list(iter_input_items(cfg))
+        # Crawler execution remains unimplemented.
 
         # process.start()
 

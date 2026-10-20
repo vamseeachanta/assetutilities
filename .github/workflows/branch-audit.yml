@@ -1,0 +1,28 @@
+name: Branch audit
+
+on:
+  # Daily reporting implements issue #19 without modifying remote branches.
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Report branch state
+        run: python scripts/ci/branch_policy.py --audit > branch-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: branch-audit
+          path: branch-audit.json
+          if-no-files-found: error

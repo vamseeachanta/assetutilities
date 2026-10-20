@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v7
+      - name: Check source and tag
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          if [ "$REF_TYPE" = tag ]; then
+            python scripts/ci/validate_release.py --tag "$RELEASE_TAG"
+          else
+            python scripts/ci/validate_release.py
+          fi
+      - name: Test release contracts
+        run: uv run --no-project --with 'pytest<9' --with pyyaml --with pandas --with plotly python -m pytest tests/ci
+      - name: Build and validate distributions
+        run: |
+          uv build
+          python scripts/ci/validate_release.py --dist dist
+          python scripts/maintenance/check_wheel_package_data.py dist
+          uv run --no-project --with twine python -m twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+          if-no-files-found: error
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - name: Publish validated distributions
+        uses: pypa/gh-action-pypi-publish@release/v1
