@@ -1,0 +1,34 @@
+{
+  "docs.yml": {
+    "name": "Build API Docs",
+    "jobs": {
+      "docs": null
+    }
+  },
+  "pages.yml": {
+    "name": "Deploy Docs to Pages",
+    "jobs": {
+      "build": null,
+      "deploy": null
+    }
+  },
+  "pdf-integration.yml": {
+    "name": "PDF integration",
+    "jobs": {
+      "pdf-integration": "PDF integration"
+    }
+  },
+  "source-hygiene.yml": {
+    "name": "Source Hygiene",
+    "jobs": {
+      "source-hygiene": null
+    }
+  },
+  "tests.yml": {
+    "name": "Tests",
+    "jobs": {
+      "gates": "Gates",
+      "domain-tests": null
+    }
+  }
+}
