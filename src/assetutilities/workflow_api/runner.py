@@ -16,7 +16,6 @@ This module owns ZERO engine/ApplicationManager edits; it only calls the embed p
 from __future__ import annotations
 
 import copy
-import glob
 import hashlib
 import os
 import shutil
@@ -134,14 +133,21 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     file_name = analysis.get("file_name", "")
     cfg_dump = os.path.abspath(os.path.join(results_dir, file_name + ".yml"))
 
+    # Plot and data writers emit into subdirectories of the result folder.
     emitted = sorted(
         p
-        for p in glob.glob(os.path.join(results_dir, "*"))
-        if os.path.isfile(p) and os.path.abspath(p) != cfg_dump
+        for p in Path(results_dir).rglob("*")
+        if p.is_file() and os.path.abspath(p) != cfg_dump
     )
 
     files, warns = [], []
+    seen = set()
     for path in emitted:
+        if not path.resolve().is_relative_to(Path(results_dir).resolve()):
+            raise ValueError("Output escapes workflow results")
+        if path.name in seen:
+            raise ValueError(f"Duplicate output basename: {path.name}")
+        seen.add(path.name)
         with open(path, "rb") as fh:
             digest = hashlib.sha256(fh.read()).hexdigest()
         files.append(
@@ -152,7 +158,9 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
             }
         )
     if not files:
-        warns.append(f"declared kind:files workflow emitted no files under {results_dir}")
+        warns.append(
+            f"declared kind:files workflow emitted no files under {results_dir}"
+        )
     elif locator.outputs and len(files) != len(locator.outputs):
         # Documentary count cross-check only; names are NOT compared (embed
         # file_name != registry CLI-path names).
@@ -222,7 +230,9 @@ def run_workflow(
         else:
             cfg = copy.deepcopy(cfg)
             row = lookup_row_for_cfg(cfg)
-            locator = ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            locator = (
+                ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            )
 
         ihash = input_hash(cfg)
         payload, warns, rhash = _run_once(cfg, locator)

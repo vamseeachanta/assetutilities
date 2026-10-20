@@ -8,6 +8,9 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/pages.yml'
+      - 'scripts/build_gallery.py'
+      - 'examples/workflows/**'
+      - 'tests/modules/gallery/**'
   workflow_dispatch:
 
 permissions:
@@ -35,6 +38,9 @@ jobs:
 
       - name: Build docs
         run: uv run --group docs mkdocs build --strict
+
+      - name: Build library gallery
+        run: uv run python scripts/build_gallery.py --out site/gallery
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -22,6 +22,8 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 from PyPDF2 import PdfReader, PdfWriter
 
+from .citations import bind_structured_report
+
 SECTIONS = (
     "Executive Summary",
     "Introduction",
@@ -86,6 +88,7 @@ def validate_report(report):
     """Reject incomplete layout data; scientific adequacy needs human review."""
     if not isinstance(report, dict):
         raise ValueError("Report must be an object")
+    report = bind_structured_report(report)
     for key in ("title", "document_number", "revision"):
         _text(report.get(key), key)
     records = report.get("revisions")
@@ -216,6 +219,7 @@ def _canonical_docx(doc):
 def write_docx(report, destination):
     """Write a deterministic A4 report; revision history comes only from input."""
     validate_report(report)
+    report = bind_structured_report(report)
     doc = Document()
     section = doc.sections[0]
     section.page_width, section.page_height = Mm(210), Mm(297)
