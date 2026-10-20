@@ -31,6 +31,9 @@ These files are trusted routing surfaces:
 
 Use these surfaces to choose source, tests, and docs paths for issue work.
 
+For offline domain coverage and explicit live-service test selection, see
+[Offline domain tests and live-data opt-in](sub_ci-cd/network-tests.md).
+
 ## Raw Inventory And Supporting Material
 
 The following paths are raw inventory or supporting references. They can help
