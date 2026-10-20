@@ -282,3 +282,18 @@ To contribute to AssetUtilities DevTools:
 ## License
 
 Part of AssetUtilities - MIT License
+
+## Repository consolidation audit
+
+Review an offline inventory for repository inactivity, issue placement and merged
+branch cleanup:
+
+```bash
+PYTHONPATH=src python -m assetutilities.devtools.repo_audit \
+  examples/devtools/repo-audit.json \
+  --stale-before 2026-04-01T00:00:00Z --issue-repo tools --format markdown
+```
+
+The cutoff and permitted issue destinations are explicit inputs. Missing evidence
+is reported as `NOT_EVALUATED`. The command prints a report without executing
+repository or branch changes. See the [input schema, sources and worked example](../../../docs/modules/repo_management/consolidation-audit.md).

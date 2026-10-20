@@ -55,6 +55,11 @@ modules:
     stability: active
   - name: devtools
     source_path: src/assetutilities/devtools/
+    submodules:
+      repo_audit:
+        source_path: src/assetutilities/devtools/repo_audit.py
+        tests_path: tests/modules/devtools/test_repo_audit.py
+        docs_path: docs/modules/repo_management/consolidation-audit.md
     tests_path: tests/unit/
     docs_path: src/assetutilities/devtools/README.md
     domain: developer tooling

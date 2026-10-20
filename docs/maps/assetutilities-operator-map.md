@@ -32,3 +32,11 @@ P6 Word and PDF output is implemented in
 `tests/modules/reportgen/test_standard_report.py`, and documented in
 `docs/modules/documentation/standard-report.md`. The neutral input example is
 `examples/workflows/reportgen/standard-report.json`.
+
+## Repository consolidation audits
+
+The offline review command is implemented in
+`src/assetutilities/devtools/repo_audit.py`, tested in
+`tests/modules/devtools/test_repo_audit.py`, and documented in
+`docs/modules/repo_management/consolidation-audit.md`. The neutral snapshot is
+`examples/devtools/repo-audit.json`.
