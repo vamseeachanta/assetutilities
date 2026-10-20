@@ -39,6 +39,11 @@ modules:
     docs_path: docs/commands/
     domain: command-line helpers
     stability: active
+    submodules:
+      hardware_readiness:
+        source_path: src/assetutilities/cli/hardware_readiness.py
+        tests_path: tests/unit/test_hardware_readiness.py
+        docs_path: docs/commands/hardware-readiness.md
   - name: common
     source_path: src/assetutilities/common/
     tests_path: tests/unit/

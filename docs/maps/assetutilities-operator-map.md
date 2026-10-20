@@ -25,6 +25,14 @@ runtime files must not become routing authority. Use:
 - `scripts/hygiene/check-source-hygiene.sh` for deterministic validation.
 - `tests/hygiene/test_no_backup_artifacts_tracked.py` for pytest coverage.
 
+## Hardware readiness assessment
+
+The evidence-based checklist is implemented in
+`src/assetutilities/cli/hardware_readiness.py`, tested in
+`tests/unit/test_hardware_readiness.py`, and documented in
+`docs/commands/hardware-readiness.md`. The synthetic input example is
+`examples/hardware_readiness/observations.json`.
+
 ## Structured report output
 
 P6 Word and PDF output is implemented in

@@ -1,0 +1,30 @@
+{
+  "requirements": {
+    "shared_storage": {"minimum_capacity_bytes": 1000},
+    "displays": {"minimum_count": 2},
+    "wired_network": {
+      "minimum_observation_seconds": 3600,
+      "maximum_outages": 1
+    },
+    "kvm": {"minimum_computers": 3}
+  },
+  "observations": {
+    "graphics": {"functional": true},
+    "audio": {"playback": true},
+    "shared_storage": {"capacity_bytes": 1200, "smb_access": true},
+    "displays": {"simultaneous_count": 2},
+    "remote_access": {"login": true},
+    "meeting_audio": {"capture": true, "playback": true},
+    "wired_network": {
+      "link": true,
+      "observation_seconds": 3600,
+      "outages": 2
+    },
+    "kvm": {
+      "switched_computers": 3,
+      "keyboard": true,
+      "mouse": true,
+      "video": true
+    }
+  }
+}
