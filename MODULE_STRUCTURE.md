@@ -70,6 +70,11 @@ assetutilities/
 | Canonical docs routing | `docs/README.md`, `docs/maps/`, `docs/registry/` | Run `tests/docs/test_assetutilities_routing_contract.py`. |
 | Source hygiene | `.gitignore`, `scripts/hygiene/`, `tests/hygiene/` | Run `tests/hygiene/test_no_backup_artifacts_tracked.py` and `scripts/hygiene/check-source-hygiene.sh`. |
 
+Local knowledge vault helpers are in `common/knowledge_management.py` with the
+`cli/knowledge.py` command. See [the guide](docs/modules/knowledge-management.md),
+`tests/unit/test_common_knowledge_management.py` and `tests/cli/test_knowledge.py`
+for the portable layout, sourced capture, search and setup-check contract.
+
 ## Hygiene Rules
 
 - Do not track `*.bak` or `*.orig` files.

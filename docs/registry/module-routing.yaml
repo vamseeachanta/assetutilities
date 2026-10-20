@@ -41,6 +41,14 @@ modules:
     stability: active
   - name: common
     source_path: src/assetutilities/common/
+    submodules:
+      knowledge_management:
+        source_path: src/assetutilities/common/knowledge_management.py
+        cli_path: src/assetutilities/cli/knowledge.py
+        tests_path: tests/unit/test_common_knowledge_management.py
+        cli_tests_path: tests/cli/test_knowledge.py
+        docs_path: docs/modules/knowledge-management.md
+        examples_path: examples/workflows/knowledge_management/
     tests_path: tests/unit/
     docs_path: docs/modules/
     domain: shared file, data, YAML, visualization, and validation helpers

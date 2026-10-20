@@ -16,6 +16,7 @@ This is the canonical documentation entry point for issue routing in
 | data processing and exploration | `src/assetutilities/modules/data_exploration/`, `src/assetutilities/common/data*.py` | `tests/modules/data_exploration/`, common data unit tests | `docs/modules/` |
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
+| local knowledge vaults | `src/assetutilities/common/knowledge_management.py`, `src/assetutilities/cli/knowledge.py` | `tests/unit/test_common_knowledge_management.py`, `tests/cli/test_knowledge.py` | [Knowledge management](modules/knowledge-management.md) |
 
 ## Curated Routing Surfaces
 

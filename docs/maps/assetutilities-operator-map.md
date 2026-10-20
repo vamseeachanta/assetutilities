@@ -16,6 +16,15 @@ human-readable companion to `docs/registry/module-routing.yaml`.
 | `units` | `src/assetutilities/units/` | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_traceability*.py` | `docs/README.md` | `cat:engineering-calculations`, `cat:engineering-methodology` | constants, sympy, pint-style quantity behavior |
 | `workflow_api` | `src/assetutilities/workflow_api/` | `tests/workflow_api/` | `docs/README.md` | `cat:automation`, `cat:data-pipeline` | workflow engine, identity, artifact and publication helpers |
 
+## Local knowledge vaults
+
+Local knowledge vault creation, sourced capture, search and setup inspection use
+`src/assetutilities/common/knowledge_management.py` and
+`src/assetutilities/cli/knowledge.py`. Focused tests are
+`tests/unit/test_common_knowledge_management.py` and `tests/cli/test_knowledge.py`;
+the guide and worked example are in
+[`docs/modules/knowledge-management.md`](../modules/knowledge-management.md).
+
 ## Source-Hygiene Routing
 
 Backup artifacts, local scratch scripts, cache files, generated reports, and
