@@ -26,6 +26,9 @@ def test_run_process(tmp_path):
     )
     result = engine(str(config))
     outputs = result["csv_utilities"]["results"]
-    assert Path(outputs["normalized_file"]).read_text() == "name,value\ncafé,7\n"
+    assert (
+        Path(outputs["normalized_file"]).read_text(encoding="utf-8")
+        == "name,value\ncafé,7\n"
+    )
     summary = yaml.safe_load(Path(outputs["summary_file"]).read_text())
     assert (summary["n_rows"], summary["n_columns"]) == (1, 2)

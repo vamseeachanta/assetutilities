@@ -118,7 +118,10 @@ def test_csv_normalization(tmp_path, encoding):
         tmp_path, {"basename": "csv_utilities", "csv_utilities": options}
     )
     outputs = result["csv_utilities"]["results"]
-    assert Path(outputs["normalized_file"]).read_text() == "name,value\ncafé,7\ntea,9\n"
+    assert (
+        Path(outputs["normalized_file"]).read_text(encoding="utf-8")
+        == "name,value\ncafé,7\ntea,9\n"
+    )
     summary = yaml.safe_load(Path(outputs["summary_file"]).read_text())
     assert summary["n_rows"] == 2
     assert summary["n_columns"] == 2
@@ -128,7 +131,7 @@ def test_csv_normalization(tmp_path, encoding):
 
 def test_csv_alias_delimiter_and_limit(tmp_path):
     """A semicolon header and two rows, limited to one, yields café,7 only."""
-    (tmp_path / "input.csv").write_text("name;value\ncafé;7\ntea;9\n")
+    (tmp_path / "input.csv").write_text("name;value\ncafé;7\ntea;9\n", encoding="utf-8")
     result = run_config(
         tmp_path,
         {
@@ -141,7 +144,7 @@ def test_csv_alias_delimiter_and_limit(tmp_path):
         },
     )
     path = result["csv_utilities"]["results"]["normalized_file"]
-    assert Path(path).read_text() == "name,value\ncafé,7\n"
+    assert Path(path).read_text(encoding="utf-8") == "name,value\ncafé,7\n"
 
 
 def test_git_read_only_with_inherited_write_flags(tmp_path, monkeypatch):

@@ -54,7 +54,9 @@ def test_registered_example(tmp_path, monkeypatch, basename):
             assert reader.pages[0].extract_text().strip() == text
     elif basename == "csv_utilities":
         assert (
-            Path(result["csv_utilities"]["results"]["normalized_file"]).read_text()
+            Path(result["csv_utilities"]["results"]["normalized_file"]).read_text(
+                encoding="utf-8"
+            )
             == "name,value\ncafé,7\ntea,9\n"
         )
     elif basename == "text_analytics":
