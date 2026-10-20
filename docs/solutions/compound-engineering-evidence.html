@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Preserving unknown results in plugin trials</title>
+<main>
+<h1>Preserving unknown results in plugin trials</h1>
+<h2>Summary</h2>
+<p>A plugin trial can produce useful preparation without establishing plugin
+effectiveness. A working evidence validator, a clean worktree, and authored
+guidance do not establish that a plugin installed cleanly or improved a task.
+This distinction applies to the
+<a href="https://github.com/vamseeachanta/assetutilities/issues/81">Compound Engineering trial</a>.</p>
+<h2>Revision history</h2>
+<table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
+<tbody><tr><td>Initial</td><td>2026-10-20</td><td>Pending observations separated
+from failed and passed criteria to prevent unsupported adoption claims.</td></tr></tbody></table>
+<p>Table 1. Solution-note revisions.</p>
+<h2>Problem and reusable method</h2>
+<p>When execution restrictions prevent a live trial, mark the relevant criteria
+<code>NOT_EVALUATED</code> and state the missing observation. Do not mark them PASS
+because a preparatory artifact exists, or FAIL because execution was not attempted.</p>
+<p>Pin the candidate plugin revision, retain observations, and record evidence
+digests before judging outcomes. Require the complete criterion set and re-read
+the evidence when producing a summary. A digest mismatch invalidates the record
+until the evidence is reconciled; it does not justify silently refreshing a hash.</p>
+<p>Keep adoption separate from evidence completeness. A fully populated record
+can be ready for review while the maintainer still needs to reject or limit
+adoption. Confidence, usefulness, and reuse require a recorded judgment or
+measurement against a stated criterion.</p>
+<h2>Vocabulary</h2>
+<dl>
+<dt>Observation</dt><dd>A recorded result from actually running the candidate
+workflow under identified conditions.</dd>
+<dt>Evidence artifact</dt><dd>Retained bytes supporting an observation, addressed
+by a relative path and digest.</dd>
+<dt>NOT_EVALUATED</dt><dd>A missing observation with a reason; distinct from a
+failed trial or a measured zero.</dd>
+<dt>Readiness</dt><dd>Completeness and local byte agreement sufficient to request
+maintainer review; not approval or rollout authority.</dd>
+</dl>
+<h2>Next use and verification</h2>
+<p>Start with the <a href="../../examples/compound-engineering/deferred-trial.json">pending record</a>
+and the <a href="../evaluations/compound-engineering-trial.html">worked example and contract</a>.
+Replace a criterion only after collecting its observation and checking the
+supporting artifact. Synthetic CLI tests verify record handling, including
+tampering and escaping paths. This note is authored guidance, not plugin-produced
+compound output; time saved on a later occurrence has not been measured.</p>
+</main>
+</html>

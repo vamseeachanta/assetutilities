@@ -54,3 +54,11 @@ surface and update it if it is stale.
   for focused validation.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
+
+## Plugin Trial Evidence
+
+The [Compound Engineering trial assessment](evaluations/compound-engineering-trial.html)
+provides a worked example, evidence format, and pending live-trial procedure for
+[the trial epic](https://github.com/vamseeachanta/assetutilities/issues/81).
+The local validator checks recorded evidence; plugin effectiveness remains
+NOT_EVALUATED until a live trial is completed and reviewed.
