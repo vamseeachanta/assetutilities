@@ -124,7 +124,15 @@ class ConfigureApplicationInputs:
 
         return cfg
 
-    def configure_embed(self, cfg, basename, root_folder, log_to_file=False):
+    def configure_embed(
+        self,
+        cfg,
+        basename,
+        root_folder,
+        log_to_file=False,
+        *,
+        placeholders_resolved=False,
+    ):
         """Embeddable configuration for an in-memory cfg (workspace-hub#3297).
 
         Unlike ``configure``, this does NOT run the
@@ -134,12 +142,13 @@ class ConfigureApplicationInputs:
         cfg, routes all results + logs under the INJECTED ``root_folder`` (never
         ``os.getcwd()``), and uses no-file logging by default. A per-call instance
         is expected (see ``engine``) so no ``customYaml``/``CustomInputs`` instance
-        state is touched -> re-entrant.
+        state is touched -> re-entrant. Already-rendered file inputs set
+        ``placeholders_resolved`` to preserve single-pass substitution.
         """
         if cfg is None or root_folder is None:
             raise ValueError("configure_embed requires both cfg and root_folder")
 
-        cfg = resolve_placeholders(cfg)
+        cfg = deepcopy(cfg) if placeholders_resolved else resolve_placeholders(cfg)
         application_start_time = datetime.datetime.now()
 
         custom_file_name = basename

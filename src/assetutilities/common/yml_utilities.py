@@ -17,7 +17,7 @@ import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
 from jinja2 import StrictUndefined
 from jinja2.exceptions import TemplateError, UndefinedError
-from jinja2.sandbox import SandboxedEnvironment
+from jinja2.sandbox import ImmutableSandboxedEnvironment
 from loguru import logger
 
 # Reader imports
@@ -93,7 +93,7 @@ def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None)
 
     # Jinja 3.1 API: sandboxed rendering and keep_trailing_newline preserve
     # config text without exposing Python internals through template attributes.
-    env = SandboxedEnvironment(
+    env = ImmutableSandboxedEnvironment(
         undefined=StrictUndefined, autoescape=False, keep_trailing_newline=True
     )
     memo: dict[int, Any] = {}

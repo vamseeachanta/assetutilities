@@ -158,3 +158,67 @@ def test_original_issue_examples_load(filename):
     )
     cfg = ymlInput(str(source))
     assert cfg["data"]["groups"][0]["label"] == cfg["define"]
+
+
+@pytest.mark.parametrize("from_file", [False, True])
+@pytest.mark.parametrize(
+    ("template", "expected"),
+    [
+        ("{% raw %}{{ label }}{% endraw %}", "{{ label }}"),
+        ("{{ indirect }}", "{{ label }}"),
+    ],
+)
+def test_embedded_engine_renders_once(tmp_path, from_file, template, expected):
+    """File and mapping inputs retain literal braces after a single pass."""
+    import yaml
+
+    from assetutilities.engine import engine
+
+    cfg = {
+        "basename": "yaml_utilities",
+        "label": "sample",
+        "indirect": "{{ label }}",
+        "copy": template,
+        "default": {"log_level": "INFO", "config": {"overwrite": {"output": True}}},
+        "file_management": {"flag": False},
+    }
+    original = deepcopy(cfg)
+    if from_file:
+        source = tmp_path / "input.yml"
+        source.write_text(yaml.safe_dump(cfg))
+        result = engine(inputfile=str(source), embed=True, root_folder=str(tmp_path))
+    else:
+        result = engine(cfg=cfg, embed=True, root_folder=str(tmp_path))
+    assert result["copy"] == expected
+    assert cfg == original
+
+
+@pytest.mark.parametrize("explicit_context", [False, True])
+@pytest.mark.parametrize(
+    "template",
+    [
+        '{{ nested.labels.append("changed") }}',
+        '{{ nested.update({"label": "changed"}) }}',
+    ],
+)
+def test_rendering_preserves_nested_context(template, explicit_context):
+    """Templates cannot mutate caller lists or mappings through public methods."""
+    context = {"nested": {"labels": [], "label": "sample"}, "output": template}
+    original = deepcopy(context)
+    result = resolve_placeholders(context, context if explicit_context else None)
+    assert context == original
+    assert result["nested"] == original["nested"]
+    assert result["output"] == template
+
+
+def test_embedded_rendering_preserves_nested_caller_data(tmp_path):
+    """The automatic embedded render cannot append to caller-owned lists."""
+    cfg = {
+        "nested": {"labels": []},
+        "output": '{{ nested.labels.append("changed") }}',
+        "default": {"log_level": "INFO", "config": {"overwrite": {"output": True}}},
+    }
+    original = deepcopy(cfg)
+    result = ConfigureApplicationInputs().configure_embed(cfg, "probe", str(tmp_path))
+    assert cfg == original
+    assert result["nested"] == original["nested"]
