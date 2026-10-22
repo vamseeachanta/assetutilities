@@ -10,6 +10,7 @@ release path for this repository; it does not configure a PyPI account.
 | Revision | Date | Change and reason |
 |---|---|---|
 | Initial | 2026-10-20 | Add a checked build helper and tag-based Trusted Publishing to replace manual token handling. |
+| Update | 2026-10-22 | Pin release actions, schedule dependency updates, disable restored build caches, require merged release commits, and clarify the tag convention. |
 
 ## Maintainer setup
 
@@ -53,6 +54,7 @@ location; each variable takes one executable, not shell arguments.
 
 The helper first requires the exact tag `v` followed by the static project
 version. This prefix is a repository convention, not a PyPI requirement.
+Earlier repository tags omitted the prefix; new releases use `vX.Y.Z`.
 Dynamic versions are rejected by this helper. Then `uv build --no-sources`
 builds a source distribution and a wheel, and
 `uv run --no-project --with twine python -m twine check --strict` checks both.
@@ -106,11 +108,21 @@ git push origin vX.Y.Z
 
 Push only the intended tag. `.github/workflows/release.yml` responds to tags
 matching `v*`; a branch push or pull request does not publish. The build job
-checks the exact metadata/tag match, checks distribution metadata and packaged
+fetches complete history and rejects a release commit outside `main` before
+running build tools. It disables restored uv caches, checks the exact
+metadata/tag match, checks distribution metadata and packaged
 configurations, then stores an artifact. Only after it succeeds can the
 protected `pypi` job download and upload that artifact. Only the publishing
 job receives `id-token: write`. The publishing job neither checks out source
 nor runs the build backend. Default PyPA action attestations remain enabled.
+
+All release actions are pinned to full commit hashes with release-version
+comments. Weekly Dependabot updates keep those pins eligible for reviewed
+updates. This follows GitHub's guidance on
+[pinning actions](https://docs.github.com/en/actions/reference/security/secure-use)
+and [updating actions with Dependabot](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/auto-update-actions),
+online editions checked on 2026-10-22. These controls retain the requirement
+for protected tags and maintainer approval of the `pypi` environment.
 
 After approving the protected job, confirm the workflow succeeded and that
 PyPI lists the intended version. Test installation of that version in a clean

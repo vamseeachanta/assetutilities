@@ -17,13 +17,15 @@ def release_case(tmp_path):
     project = tmp_path / "sample package"
     project.mkdir()
     (project / "pyproject.toml").write_text(
-        '[project]\nname = "sample-package"\nversion = "1.2.3"\n'
+        '[project]\nname = "sample-package"\nversion = "1.2.3"\n',
+        encoding="utf-8",
+        newline="\n",
     )
     fake_uv = tmp_path / "fake uv"
     fake_uv.write_text(
         "#!/usr/bin/env python3\n"
         "import json, os, pathlib, sys\n"
-        "with open(os.environ['CALLS'], 'a') as stream:\n"
+        "with open(os.environ['CALLS'], 'a', encoding='utf-8', newline='\\n') as stream:\n"
         "    stream.write(json.dumps(sys.argv[1:]) + '\\n')\n"
         "if os.environ.get('FAIL_BUILD') and sys.argv[1] == 'build':\n"
         "    sys.exit(7)\n"
@@ -32,7 +34,9 @@ def release_case(tmp_path):
         "if sys.argv[1] == 'build':\n"
         "    output = pathlib.Path(sys.argv[sys.argv.index('--out-dir') + 1])\n"
         "    (output / 'sample_package-1.2.3-py3-none-any.whl').touch()\n"
-        "    (output / 'sample_package-1.2.3.tar.gz').touch()\n"
+        "    (output / 'sample_package-1.2.3.tar.gz').touch()\n",
+        encoding="utf-8",
+        newline="\n",
     )
     fake_uv.chmod(0o755)
     env = dict(os.environ, UV=str(fake_uv), CALLS=str(tmp_path / "calls"))
@@ -44,6 +48,7 @@ def run_build(case, tag="v1.2.3", **changes):
     return subprocess.run(
         ["bash", str(BUILD), str(project), str(output), tag],
         text=True,
+        encoding="utf-8",
         capture_output=True,
         env=dict(env, **changes),
         check=False,
@@ -55,7 +60,10 @@ def test_builds_then_checks_both_distributions(release_case):
     project, output, env = release_case
     result = run_build(release_case)
     assert result.returncode == 0, result.stderr
-    calls = [json.loads(line) for line in Path(env["CALLS"]).read_text().splitlines()]
+    calls = [
+        json.loads(line)
+        for line in Path(env["CALLS"]).read_text(encoding="utf-8").splitlines()
+    ]
     assert calls == [
         ["build", "--no-sources", "--out-dir", str(output), str(project)],
         [
@@ -68,8 +76,8 @@ def test_builds_then_checks_both_distributions(release_case):
             "twine",
             "check",
             "--strict",
-            str(output / "sample_package-1.2.3-py3-none-any.whl"),
-            str(output / "sample_package-1.2.3.tar.gz"),
+            f"{output}/sample_package-1.2.3-py3-none-any.whl",
+            f"{output}/sample_package-1.2.3.tar.gz",
         ],
     ]
 
@@ -85,22 +93,26 @@ def test_stale_output_prevents_build_without_deleting_data(release_case):
     output = release_case[1]
     output.mkdir()
     previous = output / "previous.whl"
-    previous.write_text("retained")
+    previous.write_text("retained", encoding="utf-8", newline="\n")
     assert run_build(release_case).returncode != 0
-    assert previous.read_text() == "retained"
+    assert previous.read_text(encoding="utf-8") == "retained"
     assert not Path(release_case[2]["CALLS"]).exists()
 
 
 def test_build_failure_stops_before_metadata_check(release_case):
     result = run_build(release_case, FAIL_BUILD="1")
     assert result.returncode == 7
-    calls = Path(release_case[2]["CALLS"]).read_text().splitlines()
+    calls = Path(release_case[2]["CALLS"]).read_text(encoding="utf-8").splitlines()
     assert len(calls) == 1
 
 
 def test_missing_arguments_has_usage():
     result = subprocess.run(
-        ["bash", str(BUILD)], text=True, capture_output=True, check=False
+        ["bash", str(BUILD)],
+        text=True,
+        encoding="utf-8",
+        capture_output=True,
+        check=False,
     )
     assert result.returncode != 0
     assert "Usage:" in result.stderr
@@ -112,7 +124,10 @@ def test_metadata_check_failure_is_propagated(release_case):
     assert result.returncode == 8
     assert len(list(release_case[1].glob("*.whl"))) == 1
     assert len(list(release_case[1].glob("*.tar.gz"))) == 1
-    assert len(Path(release_case[2]["CALLS"]).read_text().splitlines()) == 2
+    assert (
+        len(Path(release_case[2]["CALLS"]).read_text(encoding="utf-8").splitlines())
+        == 2
+    )
 
 
 def test_existing_empty_output_is_allowed(release_case):

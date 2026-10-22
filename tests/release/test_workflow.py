@@ -1,14 +1,107 @@
 """Check release boundaries from the actual YAML, following the PyPA guide."""
 
+import os
+import re
+import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def workflow():
-    return yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    return yaml.safe_load(
+        (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    )
+
+
+def test_all_release_actions_are_pinned_to_release_commits():
+    references = [
+        step["uses"]
+        for job in workflow()["jobs"].values()
+        for step in job["steps"]
+        if "uses" in step
+    ]
+    assert references
+    for reference in references:
+        assert re.fullmatch(r"[\w.-]+/[\w.-]+@[0-9a-f]{40}", reference), reference
+    lines = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    for line in lines.splitlines():
+        if re.match(r"\s*- uses:", line):
+            assert re.search(r"@[0-9a-f]{40}\s+# v\d+\.\d+\.\d+\s*$", line), line
+
+
+def test_dependabot_updates_github_actions():
+    path = ROOT / ".github/dependabot.yml"
+    assert path.is_file(), "Pinned release actions require dependency updates"
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert data["version"] == 2
+    assert any(
+        update["package-ecosystem"] == "github-actions"
+        and update["directory"] == "/"
+        and update["schedule"]["interval"] == "weekly"
+        for update in data["updates"]
+    )
+
+
+def test_release_build_disables_restored_uv_cache():
+    setup = next(
+        step
+        for step in workflow()["jobs"]["build"]["steps"]
+        if step.get("uses", "").startswith("astral-sh/setup-uv@")
+    )
+    assert setup.get("with", {}).get("enable-cache") is False
+
+
+@pytest.mark.parametrize(
+    ("release_ref", "main_ref", "allowed"),
+    [("HEAD", "HEAD", True), ("HEAD^", "HEAD", True), ("HEAD", "HEAD^", False)],
+)
+def test_release_requires_main_ancestry(tmp_path, release_ref, main_ref, allowed):
+    steps = workflow()["jobs"]["build"]["steps"]
+    guards = [step for step in steps if step.get("name") == "Require release on main"]
+    assert len(guards) == 1, "Release builds must reject commits outside main"
+    guard = guards[0]
+    checkout = next(
+        step for step in steps if "actions/checkout@" in step.get("uses", "")
+    )
+    assert checkout["with"]["fetch-depth"] == 0
+    assert steps.index(checkout) < steps.index(guard) < 2
+    assert guard["env"] == {"RELEASE_COMMIT": "${{ github.sha }}"}
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+
+    def git(*args, cwd=tmp_path):
+        return subprocess.run(
+            ["git", *args],
+            cwd=cwd,
+            env=env,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+    release = git("rev-parse", release_ref, cwd=ROOT)
+    main = git("rev-parse", main_ref, cwd=ROOT)
+    objects = Path(git("rev-parse", "--git-path", "objects", cwd=ROOT))
+    git("init")
+    # Share immutable objects; all fixture refs stay in the disposable repository.
+    (tmp_path / ".git/objects/info/alternates").write_text(
+        (ROOT / objects).resolve().as_posix() + "\n", encoding="utf-8", newline="\n"
+    )
+    git("update-ref", "refs/remotes/origin/main", main)
+    result = subprocess.run(
+        ["bash", "-e", "-o", "pipefail", "-c", guard["run"]],
+        cwd=tmp_path,
+        env=dict(env, RELEASE_COMMIT=release),
+        encoding="utf-8",
+        capture_output=True,
+        check=False,
+    )
+    assert (result.returncode == 0) is allowed
 
 
 def test_only_version_tags_trigger_release():
@@ -52,7 +145,7 @@ def test_publisher_only_downloads_and_publishes_built_artifacts():
     assert publish["permissions"] == {"id-token": "write"}
     download, upload = publish["steps"]
     assert download["uses"].startswith("actions/download-artifact@")
-    assert upload["uses"] == "pypa/gh-action-pypi-publish@release/v1"
+    assert upload["uses"].startswith("pypa/gh-action-pypi-publish@")
     build_artifact = next(
         step
         for step in data["jobs"]["build"]["steps"]
@@ -65,6 +158,8 @@ def test_publisher_only_downloads_and_publishes_built_artifacts():
 
 
 def test_release_contract_is_run_by_existing_ci():
-    data = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    data = yaml.safe_load(
+        (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+    )
     commands = [step.get("run") for step in data["jobs"]["gates"]["steps"]]
     assert "uv run python -m pytest tests/release" in commands
