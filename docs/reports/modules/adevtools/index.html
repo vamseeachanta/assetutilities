@@ -2,7 +2,25 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Devtools dependency collection analysis</title>
-<style>/* Grid –––––––––––––––––––––––––––––––––––––––––––––––––– */
+<style>/* Table of contents ––––––––––––––––––––––––––––––––––––––––––––––––––
+Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
+- Grid
+- Base Styles
+ - Typography
+ - Links
+ - Buttons
+ - Forms
+ - Lists
+ - Code
+ - Tables
+ - Spacing
+ - Utilities
+ - Clearing
+ - Media Queries
+ - Custom App CSS */
+
+
+/* Grid –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .container {
     position: relative;
     width: 100%;
@@ -829,7 +847,7 @@ a {
 }</style></head>
 <body class="hs-doc"><main class="container">
 <header><h1>Devtools dependency collection analysis</h1>
-<p>Draft for maintainer review</p><p>Revision B · 2026-10-22</p></header>
+<p>Draft for maintainer review</p><p>Revision C · 2026-10-22</p></header>
 <nav aria-label="Contents"><p>
 <a href="#summary">Executive summary</a> · <a href="#introduction">Introduction</a> ·
 <a href="#basis">Basis</a> · <a href="#method">Methodology</a> ·
@@ -846,7 +864,8 @@ a {
 <li>Review the configuration and retain input copies before any cleanup is enabled.</li></ul></li></ul>
 <h3>Revision history</h3><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
 <tbody><tr><td>A</td><td>2026-10-21</td><td>Initial dependency collection analysis to explain the count basis and acceptance boundary.</td></tr>
-<tr><td>B</td><td>2026-10-22</td><td>Reject existing case directories to prevent undeclared inputs; retain the chart title during redraws.</td></tr></tbody></table>
+<tr><td>B</td><td>2026-10-22</td><td>Reject existing case directories to prevent undeclared inputs; retain the chart title during redraws.</td></tr>
+<tr><td>C</td><td>2026-10-22</td><td>Route report checks into CI; document dependency-format failures, anchor all counts, preserve stylesheet attribution and bound browser evidence.</td></tr></tbody></table>
 </section>
 <section id="introduction" data-report-section="2"><h2>2. Introduction</h2>
 <p>Repository maintenance is provided through dependency modernization, command propagation and structure organization. The dependency collection and configuration-generation subworkflow is evaluated here using the documented public class.</p>
@@ -904,13 +923,15 @@ pytest
 </section>
 <section id="validation" data-report-section="7"><h2>7. Validation evidence</h2>
 <p>The existing devtools test file contains 11 test definitions, covering construction, requirement discovery, backup behavior and repository discovery. These tests provide unit-level evidence; no installation, solver, field-data or performance benchmark is established by them.</p>
-<p>The report tests include hand-counted anchors for discovered files, deduplicated runtime strings and the summed group count. Additional consistency checks call the module again, compare every displayed count with its returned state, and rebuild the committed report and change panel. Integer counts are compared exactly, with zero tolerance; no floating-point text is compared.</p>
+<p>The report tests include hand-counted anchors for all ten Table A values and both headline counts. Additional consistency checks call the module again, compare every displayed count with its returned state, and rebuild the committed report and change panel. Integer counts are compared exactly, with zero tolerance; no floating-point text is compared.</p>
 <p>Calculation case directories must be new: an existing directory is rejected before writing, preserving prior inputs and generated files. Regression checks cover an undeclared requirements file in a reused directory and the chart's accessible name after initial rendering and both example selections in headless Chrome. Other browser compatibility is not established.</p>
 <p>The generated configuration's runtime and development arrays are compared with the accumulated sets. That comparison establishes string preservation for these inputs; acceptance of a build environment remains NOT_EVALUATED. The presence-only validation method in the complete wrapper does not parse configuration or install packages.</p>
 </section>
 <section id="recommendations" data-report-section="8"><h2>8. Key findings, limits and recommendations</h2>
 <p>String collection is demonstrated for the supplied plain-line inputs, while package resolution and installation remain outside the evidence. Operational use is bounded by parser completeness, metadata preservation and cleanup scope.</p>
 <p>Review requirement includes, editable lines, direct references, hash fragments and conflicting version constraints before modernization. Hyphen-prefixed lines are skipped and hash content is stripped, so a full dependency grammar is not implemented. Use the grammar in <a href="#ref-c">Ref C</a> as the acceptance basis for a future parser test suite.</p>
+<p>The TOML writer interpolates requirement strings without escaping them. A double-quoted environment marker such as <code>argparse;python_version&lt;&quot;2.7&quot;</code>, or a backslash continuation line, produces unparseable <code>pyproject.toml</code>. The <code>compute_case</code> probe raises <code>TOMLDecodeError</code> for both forms; configuration acceptance fails at parsing before any installation can be assessed. These forms are documented limits, not demonstrated working inputs.</p>
+<p>Inline <code>--hash=</code> options remain in the dependency string rather than becoming a separate hash constraint. Distribution names are not normalized: <code>Foo_Bar==1.0</code> and <code>foo-bar==1.0</code> count as 2 distinct strings. Characterization checks confirm both behaviors; string preservation does not establish dependency-grammar validity or distinct distribution identity.</p>
 <p>Preserve a complete input copy, inspect the generated configuration and test installation in an isolated environment before enabling cleanup. The rationale is the observed difference between recursive cleanup and the fixed backup list, together with the current file-presence-only validation described in <a href="#ref-a">Ref A</a>.</p>
 <p>Interpret the reported total as grouped string counts. For an inventory of distinct strings, use the union of the returned sets; for an inventory of installable distributions, perform package resolution separately. No timing result, worker-count recommendation or scalability threshold is inferred from this analysis.</p>
 </section>
@@ -921,9 +942,9 @@ pytest
 <p id="ref-c">Ref C. Python Enhancement Proposal 508, final specification, “Grammar” and “Complete Grammar”: dependency strings, version constraints and markers. <a href="https://peps.python.org/pep-0508/">Public specification</a>. The source was read for this analysis; no numeric package limits are taken from it.</p>
 <h3>9.2 Repository evidence and rebuild</h3>
 <p id="ref-a">Ref A. Public API and usage: <code>src/assetutilities/devtools/README.md</code>, “Python API Usage”; exports: <code>src/assetutilities/devtools/__init__.py</code>; implementation: <code>src/assetutilities/devtools/modernize_deps.py</code>. Existing inputs and tests: <code>tests/modules/devtools/test_devtools_coverage.py</code>, especially <code>test_find_requirements_files_happy_path</code>.</p>
-<p>Related implementations reviewed for scope: <code>src/assetutilities/devtools/cli.py</code>, <code>src/assetutilities/devtools/propagate_commands.py</code> and <code>src/assetutilities/devtools/organize_structure.py</code>. Presentation basis: <code>docs/sub_utilities/assets/style.css</code>, inlined below its attribution header. No existing house-style report exemplar was found in this repository.</p>
+<p>Related implementations reviewed for scope: <code>src/assetutilities/devtools/cli.py</code>, <code>src/assetutilities/devtools/propagate_commands.py</code> and <code>src/assetutilities/devtools/organize_structure.py</code>. Presentation basis: <code>docs/sub_utilities/assets/style.css</code>, inlined in full with its upstream attribution retained. No existing house-style report exemplar was found in this repository.</p>
 <p>Calculation-source digest (SHA-256): <code>4149a13be267bf6b87e2afa764358a92f4abc3d59c0faab8a5b45e5c2c81725a</code>. The digest covers only the dependency implementation; it identifies the calculation text, not a successful installation.</p>
-<p>Rebuild: <code>python scripts/reporting/generate_devtools_report.py --work-dir &lt;scratch&gt;</code>. Checks: <code>python -m pytest tests/reports/test_devtools_report.py tests/modules/devtools -p no:cacheprovider</code>. Use a compatible pytest release and direct coverage output to scratch. Rebuild messages name this command when source content or the existing test-definition count changes.</p>
+<p>Rebuild: <code>python scripts/reporting/generate_devtools_report.py --work-dir &lt;scratch&gt;</code>. Checks: <code>python -m pytest tests/modules/devtools tests/ci/test_select_test_targets.py -p no:cacheprovider</code>. Use a compatible pytest release. The Chrome check uses Playwright and the existing browser-automation marker; it skips on a browser launch error while other report checks still run. Rebuild messages name this command when source content or the existing test-definition count changes.</p>
 </section>
 <section id="appendix" data-report-section="10"><h2>10. Appendix</h2>
 <p>Outstanding evidence and document controls are recorded here. The data register distinguishes absent measurements from example inputs.</p>
@@ -940,12 +961,14 @@ pytest
 <tr><td>Duplicate and group overlap example</td><td>Distinct strings across groups</td><td data-result="1-distinct_count" data-value="2">2</td><td>Computed example; Ref A and Ref C</td></tr></tbody></table>
 <table><thead><tr><th>Item</th><th>Status</th><th>Basis or next action</th></tr></thead><tbody>
 <tr><td>Requirement strings</td><td>Documented example and labelled extension.</td><td>Ref A; full input strings appear in the worked example.</td></tr>
+<tr><td>TOML string escaping</td><td>Parsing fails for quoted markers and backslash continuations.</td><td>Section 8; the parameterized unescaped-requirement probe expects TOMLDecodeError from compute_case for both forms.</td></tr>
+<tr><td>Hash options and distribution identity</td><td>Options remain literal; alternate spellings count separately.</td><td>Section 8; the hash-options and distribution-aliases probe checks retained --hash= text and 2 spellings, Foo_Bar==1.0 and foo-bar==1.0.</td></tr>
 <tr><td>Performance limit and installation acceptance</td><td>NOT_EVALUATED.</td><td>No benchmark or installation campaign is included.</td></tr>
 <tr><td>Physical model and operating envelope</td><td>Not applicable.</td><td>This is file-processing software.</td></tr>
 <tr><td>Assumed engineering data</td><td>None.</td><td>No missing coefficient or limit has been substituted.</td></tr>
 <tr><td>Document style exemplar</td><td>Unavailable in the inspected repository.</td><td>Existing documentation stylesheet is reused with the requested document body class.</td></tr>
 <tr><td>Pre-flight checks</td><td>Defined in the rebuild test.</td><td>Section count, links, input precision, integer anchors, result consistency, self-containment and public wording are checked.</td></tr>
-<tr><td>Browser interaction</td><td>NOT_EVALUATED.</td><td>No browser automation is included; comments and chart code require browser acceptance testing.</td></tr>
+<tr><td>Browser interaction</td><td>Chart-name check only.</td><td>Headless Chrome check of the chart name only; comment saving and other browsers NOT_EVALUATED.</td></tr>
 </tbody></table>
 <h3>10.2 Engineering changes</h3><div id="change-panel"></div>
 <h3>10.3 Review comments</h3><p>Choose a section, enter a comment and add it to the list. Save beside this document by selecting its containing folder when supported. Otherwise download the comments file and place it beside the HTML. Comments are held in this page until saved; closing the page discards unsaved comments.</p>
@@ -956,16 +979,24 @@ pytest
 </section>
 <script id="example-data" type="application/json">[{"dependencies_found": 2, "dev_count": 1, "development": ["pytest"], "distinct_count": 2, "errors": [], "files_created": ["pyproject.toml"], "files_processed": 2, "generated_development": ["pytest"], "generated_runtime": ["requests==2.28.0"], "name": "Documented discovery example", "runtime": ["requests==2.28.0"], "runtime_count": 1}, {"dependencies_found": 3, "dev_count": 1, "development": ["pytest"], "distinct_count": 2, "errors": [], "files_created": ["pyproject.toml"], "files_processed": 2, "generated_development": ["pytest"], "generated_runtime": ["requests==2.28.0", "pytest"], "name": "Duplicate and group overlap example", "runtime": ["pytest", "requests==2.28.0"], "runtime_count": 2}]</script>
 <script id="changes-data" type="application/json">{
-  "revision": "B",
+  "revision": "C",
   "date": "2026-10-22",
   "changes": [
     {
-      "section": "Dependency collection",
-      "description": "Existing case directories are rejected before writing so undeclared requirements cannot alter the displayed examples."
+      "section": "Validation and CI routing",
+      "description": "The rebuild check moves into the devtools test domain; report inputs select that domain, and all table counts and headline values have hand-counted anchors."
     },
     {
-      "section": "Interactive chart",
-      "description": "The accessible chart title is retained during initial rendering and example selection."
+      "section": "Dependency format limits",
+      "description": "Quoted markers and continuation lines can produce invalid TOML; hash options and alternate package spellings remain literal strings, as shown by characterization probes."
+    },
+    {
+      "section": "Stylesheet attribution",
+      "description": "The complete documentation stylesheet is inlined, preserving its source attribution."
+    },
+    {
+      "section": "Browser evidence",
+      "description": "Browser evidence is limited to the headless Chrome chart-name check; the marked check skips when Chrome cannot launch."
     }
   ]
 }</script>

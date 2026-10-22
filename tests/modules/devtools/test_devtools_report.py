@@ -3,13 +3,14 @@
 import importlib.util
 import json
 import re
+import tomllib
 from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import Error, sync_playwright
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 COMMAND = "python scripts/reporting/generate_devtools_report.py --work-dir <scratch>"
 SPEC = importlib.util.spec_from_file_location(
     "devtools_report", ROOT / "scripts/reporting/generate_devtools_report.py"
@@ -48,9 +49,16 @@ def test_hand_anchor_file_count(built):
     # Two named input files: requirements.txt + requirements-dev.txt = 2 files.
     # Counts are integral, so the tolerance is zero.
     assert built["cases"][0]["files_processed"] == 2
+    assert built["cases"][1]["files_processed"] == 2
 
 
 def test_hand_anchor_runtime_count(built):
+    # Discovery: R={requests}, D={pytest}; |R|=1, |D|=1, N=1+1=2,
+    # U=|{requests, pytest}|=2. Both inputs contain one requirement each.
+    assert built["cases"][0]["runtime_count"] == 1
+    assert built["cases"][0]["dev_count"] == 1
+    assert built["cases"][0]["dependencies_found"] == 2
+    assert built["cases"][0]["distinct_count"] == 2
     # Overlap case runtime lines are requests, requests, pytest.
     # Identical requests lines collapse: {requests, pytest} has 2 members.
     assert built["cases"][1]["runtime_count"] == 2
@@ -59,7 +67,9 @@ def test_hand_anchor_runtime_count(built):
 def test_hand_anchor_reported_total(built):
     # Runtime {requests, pytest} has 2 members; development {pytest} has 1.
     # The implementation reports 2 + 1 = 3, despite only 2 distinct strings.
+    assert built["cases"][1]["dev_count"] == 1
     assert built["cases"][1]["dependencies_found"] == 3
+    assert built["cases"][1]["distinct_count"] == 2
 
 
 @pytest.mark.parametrize("index", [0, 1])
@@ -78,6 +88,10 @@ def test_module_output_consistency(built, tmp_path, index):
 
 def test_displayed_inputs_recompute_headline(built, tmp_path):
     document = Document(built["html"])
+    # Headline N=|{requests, pytest}|+|{pytest}|=2+1=3;
+    # U=|{requests, pytest} union {pytest}|=2.
+    assert document.results["headline-total"] == 3
+    assert document.results["headline-distinct"] == 2
     actual = builder.compute_case(tmp_path / "headline", builder.INPUTS[1])
     assert document.results["headline-total"] == actual["dependencies_found"]
     assert document.results["headline-distinct"] == actual["distinct_count"]
@@ -113,9 +127,7 @@ def test_sections_sources_and_self_containment(built):
     assert "sec_intro-sets.html" in html
     assert "pep-0508" in html
     assert (
-        ROOT.joinpath("docs/sub_utilities/assets/style.css")
-        .read_text(encoding="utf-8")
-        .split("/* Grid", 1)[1]
+        ROOT.joinpath("docs/sub_utilities/assets/style.css").read_text(encoding="utf-8")
         in html
     )
 
@@ -163,9 +175,47 @@ def test_reused_work_directory_rejects_undeclared_requirements(tmp_path):
     assert after == before
 
 
+@pytest.mark.parametrize(
+    "requirement",
+    [
+        'argparse;python_version<"2.7"\n',
+        "requests==2.28.0 \\\n    --hash=sha256:abcd\n",
+    ],
+    ids=["quoted-marker", "continuation"],
+)
+def test_documented_unescaped_requirement_limit(tmp_path, requirement):
+    # The current writer interpolates strings without TOML escaping.
+    # These supported requirement-file forms therefore fail TOML parsing.
+    case = {"name": "TOML escaping limit", "files": {"requirements.txt": requirement}}
+    with pytest.raises(tomllib.TOMLDecodeError):
+        builder.compute_case(tmp_path / "case", case)
+
+
+def test_hash_options_and_distribution_aliases_remain_strings(tmp_path):
+    case = {
+        "name": "String identity limits",
+        "files": {
+            "requirements.txt": (
+                "Foo_Bar==1.0\nfoo-bar==1.0\n" "requests==2.28.0 --hash=sha256:abcd\n"
+            )
+        },
+    }
+    actual = builder.compute_case(tmp_path / "case", case)
+    # The two spellings remain 2 strings; the hash-bearing line adds 1: 2+1=3.
+    expected = ["Foo_Bar==1.0", "foo-bar==1.0", "requests==2.28.0 --hash=sha256:abcd"]
+    assert actual["runtime"] == expected
+    assert sorted(actual["generated_runtime"]) == expected
+    assert actual["runtime_count"] == actual["distinct_count"] == 3
+
+
+@pytest.mark.selenium
 def test_chart_keeps_accessible_name_after_render_and_selection(built):
     with sync_playwright() as runtime:
-        with runtime.chromium.launch(channel="chrome") as browser:
+        try:
+            browser = runtime.chromium.launch(channel="chrome")
+        except Error:
+            pytest.skip("Headless Chrome could not launch; this check requires Chrome.")
+        with browser:
             page = browser.new_page()
             page.set_content(built["html"])
             for selection in (None, "1", "0"):
