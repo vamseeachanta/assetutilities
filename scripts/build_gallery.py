@@ -32,8 +32,13 @@ from assetutilities.calculations import (
 from assetutilities.calculations import pipeline_dnv as pipeline
 from assetutilities.units import CalculationAuditLog, TrackedQuantity
 from assetutilities.workflow_api import run_workflow
+from assetutilities.workflow_api.runner import (
+    resolve_example_path,
+    resolve_registry_row,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
+GIT_BINDINGS = {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
 COMMON_CAVEATS = (
     "Synthetic inputs; screening-level library demonstration only. "
     "Engineering acceptance: NOT_EVALUATED. No code-compliance assessment, "
@@ -111,7 +116,10 @@ def check_self_contained(html):
 
 
 def git_output(*args):
-    return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
+    env = {key: value for key, value in os.environ.items() if key not in GIT_BINDINGS}
+    return subprocess.check_output(
+        ["git", *args], cwd=ROOT, encoding="utf-8", env=env
+    ).strip()
 
 
 def provenance():
@@ -150,7 +158,7 @@ def code_links(references, evidence):
     for function in references:
         path = Path(inspect.getsourcefile(function)).resolve().relative_to(ROOT)
         line = inspect.getsourcelines(function)[1]
-        url = f"https://github.com/{evidence['repository']}/blob/{evidence['git_sha']}/{path}#L{line}"
+        url = f"https://github.com/{evidence['repository']}/blob/{evidence['git_sha']}/{path.as_posix()}#L{line}"
         label = f"{function.__module__}.{function.__qualname__}"
         links.append(
             f"<li><a href='{escape(url, quote=True)}'>{escape(label)}</a></li>"
@@ -159,13 +167,12 @@ def code_links(references, evidence):
 
 
 def render_page(page, evidence):
-    if (
-        not page.caveats
-        or not page.caveats.strip()
-        or not page.references
-        or not page.inputs
-    ):
-        raise ValueError("Every page requires caveats, code references and input echo")
+    if not page.caveats or not page.caveats.strip():
+        raise ValueError("Every page requires caveats")
+    if not page.references:
+        raise ValueError("Every page requires code references")
+    if not page.inputs:
+        raise ValueError("Every page requires input echo")
     # JSON script data must not be able to close its containing HTML element.
     result_json = json_text(page.results).replace("<", "\\u003c")
     html = f"""<!doctype html><html lang="en"><meta charset="utf-8">
@@ -180,7 +187,8 @@ a{{color:#185cad}}h1,h2{{line-height:1.2}}pre{{white-space:pre-wrap;overflow-wra
 <main><h1>{escape(page.title)}</h1><h2>Summary</h2>
 <p>Existing library functions demonstrate synthetic inputs, methods and results.</p>
 <h2>Revision history</h2><table><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr>
-<tr><td>0</td><td>2026-10-19</td><td>Add synthetic demonstrations with traceable evidence.</td></tr></table>
+<tr><td>0</td><td>2026-10-19</td><td>Add synthetic demonstrations with traceable evidence.</td></tr>
+<tr><td>1</td><td>2026-10-22</td><td>Correct source disclosures, low-KC limits and portable artifact handling.</td></tr></table>
 <aside><h2>Caveats</h2><p>{escape(page.caveats)}</p></aside>
 <h2>Method and sources</h2><p>{escape(page.method)}</p>{page.body}
 <h2>Results</h2>{table([{"quantity": k, "value": v} for k, v in page.results.items()])}
@@ -217,7 +225,7 @@ def curve(x, y, title, xlabel, ylabel):
 
 def pipeline_page():
     # Synthetic arithmetic fixture, not a material grade or standard safety factor.
-    # Formula basis: pipeline_dnv.py, DNV OS-F101 (2013), Section 5 D300/D500/D600.
+    # These library-simplified expressions do not reproduce standard equations.
     inputs = {
         "D": 1.0,
         "thickness_m": [0.01, 0.02, 0.03],
@@ -251,6 +259,7 @@ def pipeline_page():
         checks.append(
             {
                 "check": "containment",
+                "basis": "library-simplified burst expression; engineering acceptance NOT_EVALUATED",
                 "pressure_Pa": pressure,
                 "utilization": u,
                 "screening_status": "PASS" if u <= 1.0 else "FAIL",
@@ -284,8 +293,10 @@ def pipeline_page():
         inputs,
         results,
         COMMON_CAVEATS
-        + " The combined-loading docstring and implementation differ in factor placement; "
-        "the implemented arithmetic is demonstrated. Buckle arrest is not evaluated.",
+        + " The burst and combined-loading routines use library-simplified expressions; "
+        "they do not reproduce the cited standard equations. Containment screening inherits "
+        "the simplified burst capacity. Linked docstrings do not establish standard compliance "
+        "for this demonstration. Buckle arrest is not evaluated.",
         [
             pipeline.burst_pressure_capacity,
             pipeline.pressure_containment_check,
@@ -304,7 +315,8 @@ def pipeline_page():
             "burst",
         )
         + table(checks + [combined]),
-        "Repository implementation citing DNV OS-F101 (2013), Section 5 D300/D500/D600. "
+        "The source module cites DNV OS-F101 (2013); these burst and combined-loading "
+        "expressions are library-simplified and do not reproduce its cited equations. "
         "Pb=(2t/D) min(fy alpha_U, fu alpha_U / material divisor) alpha_fab; "
         "U=P gamma_m gamma_SCPC/Pb. Library screening PASS/FAIL is not engineering acceptance.",
     )
@@ -330,6 +342,8 @@ def fatigue_page():
         scr_fatigue.fatigue_damage_tdz(
             [inputs["range_MPa"]], [inputs["cycles"]], [kc], inputs["A"], inputs["m"]
         )
+        if kc >= 10.0
+        else "NOT_EVALUATED: low-KC soil coefficient is not independently qualified"
         for kc in inputs["kc"]
     ]
     screening = []
@@ -349,7 +363,8 @@ def fatigue_page():
         {"life_cycles": life, "damage": damage, "screening": screening},
         COMMON_CAVEATS
         + " Soil and VIV empirical coefficients are inherited from the library; "
-        "the cited papers have not been independently qualified here. S-N intercept units are MPa**m cycles.",
+        "the cited papers have not been independently qualified here. Low-KC damage is "
+        "NOT_EVALUATED. S-N intercept units are MPa**m cycles.",
         [
             scr_fatigue.scr_sn_fatigue_life,
             scr_fatigue.fatigue_damage_tdz,
@@ -407,7 +422,7 @@ def units_page():
 
 
 def workflow_page():
-    input_path = ROOT / "examples/workflows/visualization/input.yml"
+    input_path = resolve_example_path(resolve_registry_row("visualization")["input"])
     envelope = run_workflow(workflow_id="visualization")
     if envelope.status != "ok" or not envelope.result.get("outputs"):
         # Do not publish arbitrary exception messages, which can contain local paths.
@@ -415,7 +430,10 @@ def workflow_page():
     result = envelope.to_dict()
     return Page(
         "YAML workflow and result envelope",
-        {"workflow_id": "visualization", "yaml": input_path.read_text()},
+        {
+            "workflow_id": "visualization",
+            "yaml": input_path.read_text(encoding="utf-8"),
+        },
         result,
         COMMON_CAVEATS + " reproducible: null means not checked. "
         "The workflow executes in a temporary directory; only file metadata survives. PNG bytes are not embedded. "
@@ -520,7 +538,8 @@ def cost_page():
             "cost",
         ),
         "NPV=sum(Ct/(1+r)^t); levelized cost=NPV(cost)/NPV(output). "
-        "Source: repository lifecycle_cost.py, citing BS 15663-2 (2001). No standard-derived coefficient is used.",
+        "Source designation: ISO 15663-2:2001 (BS EN ISO 15663-2:2001). "
+        "The library arithmetic is demonstrated; no standard-derived coefficient is used.",
     )
 
 
@@ -660,7 +679,8 @@ def build(out, no_caveats=False):
     rendered = {name: render_page(page, evidence) for name, page in pages.items()}
     out.mkdir(parents=True, exist_ok=True)
     for name, html in rendered.items():
-        (out / f"{name}.html").write_text(html, encoding="utf-8")
+        with (out / f"{name}.html").open("w", encoding="utf-8", newline="\n") as output:
+            output.write(html)
     print(f"Built {len(rendered)} self-contained gallery pages")
 
 
@@ -671,6 +691,9 @@ def main():
         "--_selftest-no-caveats", action="store_true", help=argparse.SUPPRESS
     )
     args = parser.parse_args()
+    # Isolate all child Git consumers, including workflow-envelope provenance.
+    for key in GIT_BINDINGS:
+        os.environ.pop(key, None)
     # Keep plotting caches outside source when the caller supplies a temp root.
     if "MPLCONFIGDIR" not in os.environ and os.environ.get("TMPDIR"):
         os.environ["MPLCONFIGDIR"] = str(Path(os.environ["TMPDIR"]) / "matplotlib")

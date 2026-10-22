@@ -1,5 +1,6 @@
 """Gallery contracts and independent arithmetic on synthetic examples."""
 
+import hashlib
 import importlib.util
 import json
 import math
@@ -7,7 +8,7 @@ import os
 import subprocess
 import sys
 from html.parser import HTMLParser
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -55,11 +56,57 @@ class Results(HTMLParser):
             self.value += data
 
 
+def write_utf8(path, text):
+    with path.open("w", encoding="utf-8", newline="\n") as output:
+        output.write(text)
+
+
+def source_status(root):
+    """Capture Git state and tracked or untracked nonignored source bytes."""
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
+    }
+    status = subprocess.check_output(
+        ["git", "status", "--porcelain", "--untracked-files=all"], cwd=root, env=env
+    )
+    diff = subprocess.check_output(["git", "diff", "--binary"], cwd=root, env=env)
+    head = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", "HEAD"],
+        cwd=root,
+        env=env,
+        check=False,
+        capture_output=True,
+    ).stdout
+    names = subprocess.check_output(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=root,
+        env=env,
+    ).split(b"\0")
+    fingerprints = []
+    for name in sorted(set(names) - {b""}):
+        path = root / os.fsdecode(name)
+        data = None
+        if path.is_symlink():
+            data = os.fsencode(os.readlink(path))
+        elif path.is_file():
+            data = path.read_bytes()
+        digest = hashlib.sha256(data).hexdigest() if data is not None else None
+        fingerprints.append((name, digest))
+    return status, diff, head, fingerprints
+
+
 @pytest.fixture(scope="module")
 def built(tmp_path_factory):
     out = tmp_path_factory.mktemp("gallery")
-    before = subprocess.check_output(["git", "diff", "--binary"], cwd=ROOT)
-    env = dict(os.environ, SOURCE_DATE_EPOCH="0", GITHUB_SHA="a" * 40)
+    before = source_status(ROOT)
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
+    }
+    env.update(SOURCE_DATE_EPOCH="0", GITHUB_SHA="a" * 40)
     result = subprocess.run(
         [sys.executable, str(SCRIPT), "--out", str(out)],
         cwd=out,
@@ -70,25 +117,25 @@ def built(tmp_path_factory):
         timeout=180,
     )
     assert result.returncode == 0, result.stderr
-    assert subprocess.check_output(["git", "diff", "--binary"], cwd=ROOT) == before
+    assert source_status(ROOT) == before
     return out
 
 
 def payload(out, name):
-    return json.loads(Results((out / f"{name}.html").read_text()).value)
+    return json.loads(Results((out / f"{name}.html").read_text(encoding="utf-8")).value)
 
 
 def test_complete_self_contained_gallery(built, gallery):
     assert {p.stem for p in built.glob("*.html")} == PAGES
     for page in built.glob("*.html"):
-        html = page.read_text()
+        html = page.read_text(encoding="utf-8")
         for marker in ("Provenance", "Caveats", "Input echo", "Code references"):
             assert marker in html, (page.name, marker)
         assert "1970-01-01" in html
         assert "a" * 40 in html
         gallery.check_self_contained(html)
     for name in ("pipeline_dnv", "scr_fatigue"):
-        html = (built / f"{name}.html").read_text()
+        html = (built / f"{name}.html").read_text(encoding="utf-8")
         assert "screening_status" in html
         assert "PASS" in html and "FAIL" in html
         assert "NOT_EVALUATED" in html
@@ -112,8 +159,16 @@ def test_external_dependencies_rejected(gallery, html):
         gallery.check_self_contained(html)
 
 
-@pytest.mark.parametrize("field", ["caveats", "references", "inputs"])
-def test_missing_evidence_rejected(gallery, field):
+@pytest.mark.parametrize(
+    "field,value,message",
+    [
+        ("caveats", "", "Every page requires caveats"),
+        ("caveats", " \t", "Every page requires caveats"),
+        ("references", [], "Every page requires code references"),
+        ("inputs", {}, "Every page requires input echo"),
+    ],
+)
+def test_missing_evidence_rejected(gallery, field, value, message):
     args = {
         "title": "Example",
         "inputs": {"synthetic": True},
@@ -121,8 +176,8 @@ def test_missing_evidence_rejected(gallery, field):
         "caveats": "Synthetic only",
         "references": [gallery.pipeline.burst_pressure_capacity],
     }
-    args[field] = [] if field == "references" else ""
-    with pytest.raises(ValueError):
+    args[field] = value
+    with pytest.raises(ValueError, match=f"^{message}$"):
         gallery.render_page(gallery.Page(**args), {"git_sha": "unknown"})
 
 
@@ -135,7 +190,153 @@ def test_no_caveats_cli_fails(tmp_path):
         timeout=30,
     )
     assert result.returncode != 0
+    assert "requires caveats" in result.stderr
     assert not list(tmp_path.glob("*.html"))
+
+
+def test_pipeline_discloses_simplified_expressions(built):
+    html = (built / "pipeline_dnv.html").read_text(encoding="utf-8")
+    guide = (ROOT / "docs/api/gallery-guide.md").read_text(encoding="utf-8")
+    for text in (html, guide):
+        assert "library-simplified" in text
+        assert "do not reproduce" in text
+        assert "burst and combined-loading" in text
+    for row in payload(built, "pipeline_dnv")["containment"]:
+        assert "library-simplified burst" in row["basis"]
+
+
+def test_code_links_use_posix_paths(gallery, monkeypatch):
+    class WindowsSourcePath(PureWindowsPath):
+        def resolve(self):
+            return self
+
+    monkeypatch.setattr(gallery, "Path", WindowsSourcePath)
+    monkeypatch.setattr(gallery, "ROOT", PureWindowsPath("."))
+    monkeypatch.setattr(
+        gallery.inspect, "getsourcefile", lambda _: "src/calculations/example.py"
+    )
+    evidence = {"repository": "example/library", "git_sha": "a" * 40}
+    html = gallery.code_links([gallery.riser_viv.strouhal_frequency], evidence)
+    assert "/src/calculations/example.py#L" in html
+    assert "\\" not in html
+
+
+def test_workflow_input_echo_is_utf8(gallery, monkeypatch, tmp_path):
+    import yaml
+
+    from assetutilities.workflow_api import runner
+
+    original_read = Path.read_text
+
+    def locale_read(path, encoding=None, errors=None):
+        return original_read(path, encoding=encoding or "cp1252", errors=errors)
+
+    row = runner.resolve_registry_row("visualization").copy()
+    expected = runner.resolve_example_path(row["input"]).read_text(encoding="utf-8")
+    expected += "\n# Synthetic label: · ×\n"
+    row["input"] = "registered-input.yml"
+    write_utf8(tmp_path / row["input"], expected)
+    registry = tmp_path / "docs/registry/workflows.yaml"
+    registry.parent.mkdir(parents=True)
+    write_utf8(registry, yaml.safe_dump({"workflows": [row]}))
+    monkeypatch.setattr(runner, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(Path, "read_text", locale_read)
+    echo = gallery.workflow_page().inputs["yaml"]
+    assert echo == expected
+    assert yaml.safe_load(echo) == runner.build_cfg(row, None)
+
+
+def test_gallery_writes_utf8_and_lf(gallery, monkeypatch, tmp_path):
+    original_open = Path.open
+    writes = []
+
+    def record_open(path, *args, **kwargs):
+        if path.parent == tmp_path and path.suffix == ".html":
+            writes.append(kwargs)
+        return original_open(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", record_open)
+    gallery.build(tmp_path)
+    assert len(writes) == len(PAGES)
+    assert all(w.get("encoding") == "utf-8" for w in writes)
+    assert all(w.get("newline") == "\n" for w in writes)
+    for page in tmp_path.glob("*.html"):
+        data = page.read_bytes()
+        assert b"\r" not in data
+        assert "·" in data.decode("utf-8")
+
+
+def test_source_status_detects_untracked_output(tmp_path):
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
+    }
+    subprocess.run(["git", "init", "-q", str(tmp_path)], env=env, check=True)
+    before = source_status(tmp_path)
+    write_utf8(tmp_path / "unexpected.txt", "synthetic output")
+    assert source_status(tmp_path) != before
+    assert b"?? unexpected.txt" in source_status(tmp_path)[0]
+
+
+def test_source_status_detects_changes_to_an_already_dirty_file(tmp_path):
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
+    }
+    subprocess.run(["git", "init", "-q", str(tmp_path)], env=env, check=True)
+    source = tmp_path / "source.txt"
+    write_utf8(source, "initial")
+    subprocess.run(["git", "add", "source.txt"], cwd=tmp_path, env=env, check=True)
+    write_utf8(source, "first edit")
+    before = source_status(tmp_path)
+    write_utf8(source, "second edit")
+    assert source_status(tmp_path) != before
+
+
+def test_source_status_detects_changes_to_an_existing_untracked_file(tmp_path):
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"}
+    }
+    subprocess.run(["git", "init", "-q", str(tmp_path)], env=env, check=True)
+    source = tmp_path / "unexpected.txt"
+    write_utf8(source, "initial")
+    before = source_status(tmp_path)
+    write_utf8(source, "changed")
+    assert source_status(tmp_path) != before
+
+
+def test_git_output_ignores_inherited_bindings(gallery, monkeypatch):
+    expected = gallery.git_output("rev-parse", "HEAD")
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+        monkeypatch.setenv(key, "missing-git-directory")
+    assert gallery.git_output("rev-parse", "HEAD") == expected
+
+
+def test_cli_clears_bindings_for_workflow_provenance(gallery, monkeypatch, tmp_path):
+    expected = gallery.git_output("rev-parse", "HEAD")
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+        monkeypatch.setenv(key, "missing-git-directory")
+    monkeypatch.setattr(sys, "argv", [str(SCRIPT), "--out", str(tmp_path)])
+    gallery.main()
+    result = payload(tmp_path, "workflow_envelope")
+    assert result["provenance"]["code_version"]["git_sha"] == expected
+
+
+def test_lifecycle_cost_designation(gallery):
+    guide = (ROOT / "docs/api/gallery-guide.md").read_text(encoding="utf-8")
+    for text in (gallery.cost_page().method, guide):
+        assert "ISO 15663-2:2001" in text
+        assert "BS 15663-2 (2001)" not in text
+
+
+def test_low_kc_damage_requires_qualified_soil_coefficient(built):
+    result = payload(built, "scr_fatigue")
+    assert result["damage"][0] == pytest.approx(0.1)
+    assert str(result["damage"][1]).startswith("NOT_EVALUATED:")
 
 
 def test_pipeline_hand_calculation(built):
@@ -233,7 +434,7 @@ def test_additional_calculations_by_hand(built):
 
 
 def test_template_gallery_has_embedded_images(built):
-    html = (built / "visualization_templates.html").read_text()
+    html = (built / "visualization_templates.html").read_text(encoding="utf-8")
     assert html.count("data:image/png;base64,") >= 3
     assert "Plotly.newPlot" in html
 
@@ -243,7 +444,9 @@ def test_ci_build_order():
     import yaml
 
     for filename, job in (("pages.yml", "build"), ("docs.yml", "docs")):
-        config = yaml.safe_load((ROOT / ".github/workflows" / filename).read_text())
+        config = yaml.safe_load(
+            (ROOT / ".github/workflows" / filename).read_text(encoding="utf-8")
+        )
         events = config.get("on", config.get(True))
         for event in ("push", "pull_request"):
             if event in events:

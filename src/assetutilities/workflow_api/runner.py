@@ -48,7 +48,7 @@ def registry_path() -> Path:
 
 
 def load_registry() -> dict:
-    with open(registry_path()) as fh:
+    with open(registry_path(), encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 
@@ -57,7 +57,9 @@ def resolve_registry_row(workflow_id: str) -> dict:
     for row in registry.get("workflows", []):
         if row.get("id") == workflow_id:
             return row
-    raise KeyError(f"unknown workflow_id '{workflow_id}' (not in {registry_path()})")
+    raise KeyError(
+        f"unknown workflow_id '{workflow_id}' (not in docs/registry/workflows.yaml)"
+    )
 
 
 def lookup_row_for_cfg(cfg: dict) -> dict | None:
@@ -128,7 +130,10 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
 
     # kind == "files"
     analysis = cfg_base.get("Analysis", {}) or {}
-    results_dir = analysis.get("result_folder") or os.path.join(root_folder, "results")
+    results_dir = Path(
+        analysis.get("result_folder") or os.path.join(root_folder, "results")
+    )
+    resolved_results_dir = results_dir.resolve()
     # Exclude the save_cfg cfg-dump: its name is exactly <file_name>.yml (same key
     # save_cfg uses at ApplicationManager.save_cfg). Genuine router outputs carry a
     # "_<label>"/"_<column>" suffix, so this never excludes a real output here.
@@ -136,12 +141,18 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     cfg_dump = os.path.abspath(os.path.join(results_dir, file_name + ".yml"))
 
     # Visualization outputs live below Plot/, rather than directly in results.
-    # Path.rglob does not descend into directory symlinks; ignore file symlinks
-    # too so nested discovery cannot collect bytes outside the result tree.
+    # Ignore file symlinks and require resolved containment: Windows directory
+    # junctions can be traversed even when rglob skips directory symlinks.
     emitted = sorted(
-        str(p)
-        for p in Path(results_dir).rglob("*")
-        if p.is_file() and not p.is_symlink() and os.path.abspath(p) != cfg_dump
+        (
+            p
+            for p in results_dir.rglob("*")
+            if p.is_file()
+            and not p.is_symlink()
+            and p.resolve().is_relative_to(resolved_results_dir)
+            and os.path.abspath(p) != cfg_dump
+        ),
+        key=lambda p: p.relative_to(results_dir).as_posix(),
     )
 
     files, warns = [], []
@@ -157,7 +168,9 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
             }
         )
     if not files:
-        warns.append(f"declared kind:files workflow emitted no files under {results_dir}")
+        warns.append(
+            "declared kind:files workflow emitted no files in the result directory"
+        )
     elif locator.outputs and len(files) != len(locator.outputs):
         # Documentary count cross-check only; names are NOT compared (embed
         # file_name != registry CLI-path names).
@@ -179,7 +192,7 @@ def build_cfg(row: dict, params: dict | None) -> dict:
     input_rel = row.get("input")
     if input_rel:
         example_path = resolve_example_path(input_rel)
-        with open(example_path) as fh:
+        with open(example_path, encoding="utf-8") as fh:
             example_cfg = yaml.safe_load(fh) or {}
         cfg = update_deep_dictionary(cfg, example_cfg)
     if params:
