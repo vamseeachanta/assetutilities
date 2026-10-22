@@ -7,6 +7,7 @@ The monthly example retains January and the preceding December across a year.
 
 import importlib.util
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -192,3 +193,77 @@ def test_base_failure_stops_inspection(monkeypatch):
     with pytest.raises(module.GitError):
         module.inspect(Path("fixture"), "missing")
     assert len(calls) == 1
+
+
+@pytest.fixture
+def git_repository(tmp_path):
+    repo = tmp_path / "repository"
+    repo.mkdir()
+    environment = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+
+    def run_git(*args, input=None):
+        return subprocess.run(
+            ["git", *args], cwd=repo, env=environment,
+            input=input.encode("utf-8") if input is not None else None,
+            capture_output=True, check=True,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        ).stdout.decode("utf-8").strip()
+
+    run_git("init", "--initial-branch=main")
+    tree = run_git("hash-object", "-w", "-t", "tree", "--stdin", input="")
+    # Build the fixture commit without requiring or changing Git identity settings.
+    commit = run_git(
+        "hash-object", "-w", "-t", "commit", "--stdin",
+        input=f"tree {tree}\nauthor Fixture <> 0 +0000\n"
+              "committer Fixture <> 0 +0000\n\nInitial fixture\n",
+    )
+    run_git("update-ref", "refs/heads/main", commit)
+    return repo, run_git
+
+
+@pytest.mark.parametrize("base,base_ref", [
+    ("integration", "refs/heads/integration"),
+    ("heads/integration", "refs/heads/integration"),
+    ("refs/heads/integration", "refs/heads/integration"),
+    ("origin/integration", "refs/remotes/origin/integration"),
+    ("remotes/origin/integration", "refs/remotes/origin/integration"),
+    ("refs/remotes/origin/integration", "refs/remotes/origin/integration"),
+])
+def test_inspection_protects_resolved_base(git_repository, base, base_ref, capsys):
+    repo, run_git = git_repository
+    commit = run_git("rev-parse", "HEAD")
+    run_git("update-ref", base_ref, commit)
+    commands = [("status", "--porcelain"), ("rev-parse", "HEAD"),
+                ("for-each-ref", "--format=%(refname) %(objectname)")]
+    before = [run_git(*args) for args in commands]
+
+    report = module.inspect(repo, base)
+
+    assert report["base"] == base
+    assert report["base_commit"] == commit
+    assert {row["ref"]: row["status"] for row in report["branches"]} == {
+        "refs/heads/main": "protected", base_ref: "protected",
+    }
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", base, "--fail-on-findings",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out) == report
+    assert [run_git(*args) for args in commands] == before
+
+
+@pytest.mark.parametrize("base", ["HEAD", "HEAD~0", "HEAD^{commit}", "commit_id"])
+def test_commit_expression_does_not_protect_unrelated_refs(git_repository, base):
+    repo, run_git = git_repository
+    commit = run_git("rev-parse", "HEAD")
+    run_git("update-ref", "refs/heads/topic", commit)
+    if base == "commit_id":
+        base = commit
+
+    report = module.inspect(repo, base)
+
+    assert report["base_commit"] == commit
+    assert {row["ref"]: row["status"] for row in report["branches"]} == {
+        "refs/heads/main": "protected", "refs/heads/topic": "merged_review",
+    }

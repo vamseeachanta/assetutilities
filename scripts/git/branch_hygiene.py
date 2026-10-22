@@ -78,6 +78,9 @@ def inspect(repo, base, month=None):
     if month is not None:
         retention_months(month)
     base_commit = git(repo, "rev-parse", "--verify", "--end-of-options", f"{base}^{{commit}}")
+    # Commit expressions have no symbolic ref and do not protect other branches.
+    base_ref = git(repo, "rev-parse", "--symbolic-full-name", "--verify",
+                   "--end-of-options", base)
     try:
         current = git(repo, "symbolic-ref", "--quiet", "--short", "HEAD")
     except GitError as error:
@@ -97,7 +100,7 @@ def inspect(repo, base, month=None):
     return {
         "base": base, "base_commit": base_commit, "current": current,
         "remote_state": "local_cache_only",
-        "branches": classify(refs, merged, current, base, month),
+        "branches": classify(refs, merged, current, base_ref, month),
     }
 
 
