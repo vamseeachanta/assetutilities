@@ -21,7 +21,7 @@ SPEC.loader.exec_module(module)
 
 def test_classification():
     refs = ["refs/heads/main", "refs/heads/topic/done", "refs/heads/topic/open"]
-    result = module.classify(refs, refs[:2], "topic/open", "main")
+    result = module.classify(refs, refs[:2], "refs/heads/topic/open", "refs/heads/main")
     assert [row["status"] for row in result] == [
         "protected", "merged_review", "current"
     ]
@@ -29,7 +29,7 @@ def test_classification():
 
 def test_unmerged_is_preserved_and_default_names_protected():
     refs = [f"refs/heads/{name}" for name in ("main", "master", "develop", "topic")]
-    result = module.classify(refs, [], None, "develop")
+    result = module.classify(refs, [], None, "refs/heads/develop")
     assert [row["status"] for row in result] == [
         "protected", "protected", "protected", "unmerged"
     ]
@@ -37,7 +37,7 @@ def test_unmerged_is_preserved_and_default_names_protected():
 
 def test_remote_names_and_symbolic_refs():
     refs = ["refs/remotes/origin/main", "refs/remotes/origin/topic"]
-    result = module.classify(refs, refs, None, "origin/main")
+    result = module.classify(refs, refs, None, "refs/remotes/origin/main")
     assert [row["status"] for row in result] == ["protected", "merged_review"]
     assert result[1]["ref"] == "refs/remotes/origin/topic"
 
@@ -46,7 +46,7 @@ def test_remote_names_and_symbolic_refs():
 def test_month_retention(month, previous):
     # Calendar predecessor: January wraps to December of the preceding year.
     refs = [f"refs/heads/{name}" for name in (month, previous, "202401", "topic")]
-    result = module.classify(refs, refs, None, "main", month)
+    result = module.classify(refs, refs, None, "refs/heads/main", month)
     assert [row["monthly"] for row in result] == [
         "retained", "retained", "outside_window", "not_monthly"
     ]
@@ -55,7 +55,7 @@ def test_month_retention(month, previous):
 @pytest.mark.parametrize("month", ["202600", "202613", "20261", "abcd01", "000001"])
 def test_invalid_month(month):
     with pytest.raises(ValueError):
-        module.classify([], [], None, "main", month)
+        module.classify([], [], None, "refs/heads/main", month)
 
 
 def test_runner_clears_git_bindings(monkeypatch):
@@ -87,7 +87,7 @@ def test_inspection_only_uses_read_commands(monkeypatch):
         if args[0] == "rev-parse":
             return "a" * 40
         if args[0] == "symbolic-ref":
-            return "topic/open"
+            return "refs/heads/topic/open"
         if "--merged" in args:
             return "refs/heads/main\nrefs/heads/topic/done"
         return "refs/heads/main\t\nrefs/heads/topic/done\t\nrefs/heads/topic/open\t\nrefs/remotes/origin/HEAD\trefs/remotes/origin/main"
@@ -96,6 +96,7 @@ def test_inspection_only_uses_read_commands(monkeypatch):
     report = module.inspect(repo=tmp_path, base="main")
     assert len(report["branches"]) == 3
     assert report["base_commit"] == "a" * 40
+    assert report["current"] == "topic/open"
     assert {call[0] for call in calls} == {"rev-parse", "symbolic-ref", "for-each-ref"}
     assert [row["status"] for row in report["branches"]] == [
         "protected", "merged_review", "current"
@@ -133,15 +134,18 @@ def test_cli_json_and_findings_exit(monkeypatch, capsys):
     assert module.main(["--base", "main", "--fail-on-findings"]) == 1
 
 
-def test_cli_failure_is_redacted(monkeypatch, capsys):
+@pytest.mark.parametrize("error", [OSError, RuntimeError, IndexError, KeyError, TypeError])
+def test_cli_failure_is_redacted(monkeypatch, capsys, error):
     def fail(*args):
-        raise OSError("sensitive environment details")
+        raise error("sensitive environment details")
 
     monkeypatch.setattr(module, "inspect", fail)
     assert module.main(["--base", "main"]) == 2
     captured = capsys.readouterr()
     assert not captured.out
     assert "sensitive" not in captured.err
+    assert "Branch report failed" in captured.err
+    assert "Traceback" not in captured.err
 
 
 def test_invalid_base_option():
@@ -167,14 +171,14 @@ def test_cli_no_findings(monkeypatch, capsys):
 
 def test_monthly_policy_never_changes_reachability():
     refs = ["refs/heads/202401", "refs/heads/202601"]
-    report = module.classify(refs, [], None, "main", "202601")
+    report = module.classify(refs, [], None, "refs/heads/main", "202601")
     assert [row["status"] for row in report] == ["unmerged", "unmerged"]
     assert [row["monthly"] for row in report] == ["outside_window", "retained"]
 
 
 def test_current_branch_wins_over_merged():
     refs = ["refs/heads/topic"]
-    assert module.classify(refs, refs, "topic", "main")[0]["status"] == "current"
+    assert module.classify(refs, refs, refs[0], "refs/heads/main")[0]["status"] == "current"
 
 
 def test_full_base_ref_is_protected():
@@ -267,3 +271,111 @@ def test_commit_expression_does_not_protect_unrelated_refs(git_repository, base)
     assert {row["ref"]: row["status"] for row in report["branches"]} == {
         "refs/heads/main": "protected", "refs/heads/topic": "merged_review",
     }
+
+
+@pytest.mark.parametrize("name,base,status,exit_code", [
+    ("trunk", "main", "merged_review", 1),
+    ("main", "refs/heads/main", "protected", 0),
+    ("integration", "refs/remotes/integration", "protected", 0),
+])
+def test_single_component_remote_ref(git_repository, capsys, name, base, status, exit_code):
+    repo, run_git = git_repository
+    ref = f"refs/remotes/{name}"
+    run_git("update-ref", ref, run_git("rev-parse", "HEAD"))
+
+    report = module.inspect(repo, base)
+
+    assert {row["ref"]: row["status"] for row in report["branches"]}[ref] == status
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", base, "--fail-on-findings",
+    ]) == exit_code
+    captured = capsys.readouterr()
+    assert not captured.err
+    assert json.loads(captured.out) == report
+
+
+@pytest.mark.parametrize("name", ["develop", "release/integration"])
+@pytest.mark.parametrize("remote_base", [False, True])
+@pytest.mark.parametrize("unrelated", [False, True])
+def test_base_protection_across_namespaces(
+    git_repository, capsys, name, remote_base, unrelated,
+):
+    repo, run_git = git_repository
+    commit = run_git("rev-parse", "HEAD")
+    protected = [f"refs/heads/{name}", f"refs/remotes/origin/{name}",
+                 f"refs/remotes/mirror/{name}"]
+    expected = {"refs/heads/main": "protected"}
+    for ref in protected:
+        run_git("update-ref", ref, commit)
+        expected[ref] = "protected"
+    if unrelated:
+        ref = "refs/heads/topic/integration"
+        run_git("update-ref", ref, commit)
+        expected[ref] = "merged_review"
+    base = f"origin/{name}" if remote_base else name
+    commands = [("status", "--porcelain"), ("rev-parse", "HEAD"),
+                ("for-each-ref", "--format=%(refname) %(objectname)")]
+    before = [run_git(*args) for args in commands]
+
+    report = module.inspect(repo, base)
+
+    assert {row["ref"]: row["status"] for row in report["branches"]} == expected
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", base, "--fail-on-findings",
+    ]) == int(unrelated)
+    assert json.loads(capsys.readouterr().out) == report
+    assert [run_git(*args) for args in commands] == before
+
+
+@pytest.mark.parametrize("name", ["topic", "topic/nested"])
+def test_current_branch_with_tag_collision(git_repository, capsys, name):
+    repo, run_git = git_repository
+    commit = run_git("rev-parse", "HEAD")
+    current_ref = f"refs/heads/{name}"
+    run_git("update-ref", current_ref, commit)
+    run_git("update-ref", f"refs/tags/{name}", commit)
+    run_git("symbolic-ref", "HEAD", current_ref)
+    commands = [("status", "--porcelain"), ("rev-parse", "HEAD"),
+                ("symbolic-ref", "HEAD"), ("for-each-ref", "--format=%(refname) %(objectname)")]
+    before = [run_git(*args) for args in commands]
+
+    report = module.inspect(repo, "main")
+
+    assert report["current"] == name
+    assert {row["ref"]: row["status"] for row in report["branches"]} == {
+        "refs/heads/main": "protected", current_ref: "current",
+    }
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", "main", "--fail-on-findings",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out) == report
+    assert [run_git(*args) for args in commands] == before
+
+
+@pytest.mark.parametrize("base,base_ref", [
+    ("integration", "refs/heads/integration"),
+    ("origin/integration", "refs/remotes/origin/integration"),
+])
+def test_ambiguous_named_base_is_rejected(git_repository, capsys, base, base_ref):
+    repo, run_git = git_repository
+    commit = run_git("rev-parse", "HEAD")
+    run_git("update-ref", base_ref, commit)
+    run_git("update-ref", f"refs/tags/{base}", commit)
+    commands = [("status", "--porcelain"), ("rev-parse", "HEAD"),
+                ("for-each-ref", "--format=%(refname) %(objectname)")]
+    before = [run_git(*args) for args in commands]
+
+    with pytest.raises(ValueError):
+        module.inspect(repo, base)
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", base, "--fail-on-findings",
+    ]) == 2
+    captured = capsys.readouterr()
+    assert not captured.out
+    assert "Branch report failed" in captured.err
+    assert "Traceback" not in captured.err
+    assert base not in captured.err
+    assert {row["ref"]: row["status"] for row in module.inspect(repo, base_ref)["branches"]} == {
+        "refs/heads/main": "protected", base_ref: "protected",
+    }
+    assert [run_git(*args) for args in commands] == before
