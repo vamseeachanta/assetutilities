@@ -151,7 +151,7 @@ class TestResolvePlaceholders:
 
 
 class TestPlaceholderHelper:
-    """test_variable_placeholder resolves placeholders then reports reusability."""
+    """test_variable_placeholder reports the supplied value without rendering."""
 
     def test_helper_resolves_and_reports(self):
         wwyaml = WorkingWithYAML()
@@ -167,7 +167,7 @@ class TestPlaceholderHelper:
         ok, method = wwyaml.test_variable_placeholder(cfg)
 
         assert ok is True
-        assert method == "placeholder"
+        assert method == "{{ test_variables.method }}"
 
 
 if __name__ == "__main__":

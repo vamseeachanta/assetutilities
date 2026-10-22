@@ -264,18 +264,18 @@ class ConfigureApplicationInputs:
 
     def generateYMLInput(self, run_dict, cfg_argv_dict):
         if os.path.isfile(self.ApplicationInputFile):
-            with open(self.ApplicationInputFile) as ymlfile:
+            with open(self.ApplicationInputFile, encoding="utf-8") as ymlfile:
                 cfg = yaml.safe_load(ymlfile)
         else:
             cfg = deepcopy(self.ApplicationInputFile_dict)
 
         if self.customYaml is not None:
             try:
-                with open(self.customYaml) as ymlfile:
+                with open(self.customYaml, encoding="utf-8") as ymlfile:
                     cfgCustomValues = yaml.safe_load(ymlfile)
                     default_yaml_file = cfgCustomValues.get("default_yaml", None)
 
-                with open(self.customYaml) as fp:
+                with open(self.customYaml, encoding="utf-8") as fp:
                     custom_file_data = fp.read()
             except Exception as e:
                 # Library code must not kill the host process: engine() callers
@@ -301,12 +301,14 @@ class ConfigureApplicationInputs:
             if default_yaml_file is None:
                 cfgDefaultAndCustomValues = yaml.safe_load(custom_file_data)
             else:
-                with open(default_yaml_file) as fp:
+                with open(default_yaml_file, encoding="utf-8") as fp:
                     default_file_data = fp.read()
                 custom_and_default_yaml_data = (
                     custom_file_data + "\n" + default_file_data
                 )
-                cfgDefaultAndCustomValues = yaml.safe_load(custom_and_default_yaml_data)
+                cfgDefaultAndCustomValues = yaml.safe_load(
+                    custom_and_default_yaml_data
+                )
 
             cfg = update_deep_dictionary(cfg, cfgDefaultAndCustomValues)
             logger.debug(
@@ -413,7 +415,7 @@ class ConfigureApplicationInputs:
             config_dir = Path(analysis_root_folder)
             result_path = (config_dir / result_sub_folder).resolve()
             result_folder = str(result_path)
-
+        
         if not os.path.exists(result_folder):
             os.makedirs(result_folder, exist_ok=True)
 
@@ -471,7 +473,7 @@ class ConfigureApplicationInputs:
         """
         # Import the cli_parser here to use the hybrid parser
         from assetutilities.common.cli_parser import parse_hybrid_arguments
-
+        
         # Use the new hybrid parser that handles both old and new formats
         return parse_hybrid_arguments(inputfile)
 

@@ -10,6 +10,7 @@ configuration path now performs the same substitution as the standalone helper.
 | Revision | Date | Change and reason |
 | --- | --- | --- |
 | A | 2026-10-19 | Document loading, merge order and a worked example so variable definitions can be reused consistently. |
+| B | 2026-10-22 | Handle mixed YAML keys, add literal loading for comparisons, and clarify single-pass rendering and container limits. |
 
 ## Loading and merge order
 
@@ -21,10 +22,18 @@ assert cfg["output"] == "results/sample.csv"
 assert cfg["placeholder_tests"]["method"] == "placeholder"
 ```
 
-`WorkingWithYAML().ymlInput(defaultYml, updateYml=None)` and the module-level
-`ymlInput` wrapper parse YAML safely, merge the optional update, and resolve
-placeholders against that final mapping. Multi-document inputs are combined before
-substitution. Anchors are scoped to their YAML document, not shared across files.
+`WorkingWithYAML().ymlInput(defaultYml, updateYml=None, *, resolve_placeholders=True)`
+and the module-level `ymlInput` wrapper parse YAML safely, merge the optional
+update, and by default resolve placeholders against that final mapping.
+Multi-document inputs are combined before substitution. Anchors are scoped to
+their YAML document, not shared across files.
+
+This default changes existing callers of these shared loaders immediately:
+expressions such as `$10^{{3}}$` are rendered, and Jinja `{# ... #}` comments are
+removed. For documents that contain literal template syntax, pass
+`resolve_placeholders=False`; YAML document and update merging still apply.
+The key-analysis and all three YAML comparison helpers always use this
+parsing-only mode, so comparisons distinguish templates from rendered literals.
 
 The application configuration path merges packaged defaults, custom YAML and
 argument overrides before rendering. Embedded configuration renders the supplied
@@ -87,9 +96,13 @@ of the resolver implementation.
 - Rendered values remain strings. Existing numbers, booleans and nulls keep their
   YAML types. Output text is never reparsed as YAML; punctuation and trailing
   newlines remain text. Mapping keys are not templated.
+- Only string root keys enter the Jinja context. Integer, boolean and other
+  non-string keys remain in the returned mapping without preventing string-key
+  substitution. A nested non-string key can be referenced through bracket lookup.
 - Rendering uses sandboxed Jinja with strict undefined lookup. An undefined,
-  malformed or sandbox-blocked template retains its original text. A malformed
-  template produces a generic warning without including configuration values.
+  malformed, type-incompatible or sandbox-blocked template retains its original
+  text. Rejected templates other than missing references produce a generic warning
+  without including configuration values.
   Missing references do not constitute validation failures; callers needing
   required fields must validate those fields separately.
 - Resolution is a single pass against the original merged context. For example,
@@ -99,12 +112,22 @@ of the resolver implementation.
   `"{% raw %}{{ label }}{% endraw %}"`. Do not render the returned tree again.
 - YAML aliases retain shared and recursive container references. The graph is
   copied, not flattened.
+- Traversed mappings become plain dictionaries, including nested `AttributeDict`,
+  `OrderedDict` and custom mappings supplied to embedded configuration. Lists are
+  traversed; tuples and other container types remain unchanged and their contents
+  are not rendered. Consumers that require those types should prepare their own
+  supported configuration tree before loading.
+- The placeholder diagnostic reports the supplied value without rendering again.
+  Direct users of that diagnostic should resolve their configuration first.
 - Configuration files should remain trusted inputs: sandboxing blocks Python
   internals but does not enforce execution time or memory limits.
-- Low-level raw YAML readers (`common.ymlInput`, UTF-8 readers and library-data
-  readers) retain their parsing-only behavior. The engine's `config_flag=False`
+- The separate `assetutilities.common.ymlInput` module, the UTF-8 reader and
+  library-data readers retain their parsing-only behavior. The rendering loaders
+  are in `assetutilities.common.yml_utilities`. The engine's `config_flag=False`
   path with an in-memory mapping explicitly bypasses configuration processing;
   call `resolve_placeholders` first if that path needs substitution.
+- Other template runtime errors, such as division by zero, propagate to the
+  caller; the literal fallback does not cover every exception.
 
 ## Sources and checks
 
@@ -123,5 +146,6 @@ native single variables, blocks, and rejection of Python object YAML tags.
 Both original issue examples are loaded through the shared loader; the second
 example quotes its placeholder so it is valid YAML.
 
-Adoption in dependent repositories is separate work; this change provides the
-shared loading behavior without rewriting their configurations.
+Existing consumers of the shared loaders receive the rendering default when
+upgrading. Reviewing their literal-template inputs or opting out is separate
+adoption work; this change does not rewrite consumer configurations.

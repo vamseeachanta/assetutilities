@@ -38,16 +38,22 @@ def test_loader_resolves_example(loader):
 def test_resolution_after_update_merge(tmp_path):
     """By hand: update changes label to revised, so output=revised.csv."""
     default = tmp_path / "default.yml"
-    default.write_text('label: original\noutput: "{{ label }}.csv"\n')
+    default.write_text(
+        'label: original\noutput: "{{ label }}.csv"\n', encoding="utf-8", newline="\n"
+    )
     update = tmp_path / "update.yml"
-    update.write_text("label: revised\n")
+    update.write_text("label: revised\n", encoding="utf-8", newline="\n")
     assert ymlInput(str(default), str(update))["output"] == "revised.csv"
 
 
 def test_resolution_after_stream_merge(tmp_path):
     """The second document supplies label; substitution gives sample.csv."""
     source = tmp_path / "stream.yml"
-    source.write_text('output: "{{ label }}.csv"\n---\nlabel: sample\n')
+    source.write_text(
+        'output: "{{ label }}.csv"\n---\nlabel: sample\n',
+        encoding="utf-8",
+        newline="\n",
+    )
     assert ymlInput(str(source))["output"] == "sample.csv"
 
 
@@ -60,7 +66,9 @@ def test_application_merge_uses_final_context(tmp_path):
         "output": "{{ folder }}/{{ label }}",
     }
     custom = tmp_path / "custom.yml"
-    custom.write_text('label: custom\ncopy: "{{ output }}"\n')
+    custom.write_text(
+        'label: custom\ncopy: "{{ output }}"\n', encoding="utf-8", newline="\n"
+    )
     manager.customYaml = str(custom)
     manager.CustomInputs = None
     original = deepcopy(manager.ApplicationInputFile_dict)
@@ -125,9 +133,11 @@ def test_escaped_template_is_rendered_only_once():
 
 
 def test_recursive_alias_preserves_graph(tmp_path):
-    """YAML 1.2.2 section 3.2.1 permits a node to contain itself."""
+    """YAML 1.2.2 sections 3.2.2.2 and 7.1 describe shared alias nodes."""
     source = tmp_path / "recursive.yml"
-    source.write_text("label: sample\nnode: &node\n  self: *node\n")
+    source.write_text(
+        "label: sample\nnode: &node\n  self: *node\n", encoding="utf-8", newline="\n"
+    )
     result = ymlInput(str(source))
     assert result["node"]["self"] is result["node"]
 
@@ -137,7 +147,9 @@ def test_engine_loads_example_through_standard_cfg_path(tmp_path, monkeypatch):
     from assetutilities.engine import engine
 
     source = tmp_path / "variables.yml"
-    source.write_text(EXAMPLE.read_text())
+    source.write_text(
+        EXAMPLE.read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+    )
     monkeypatch.chdir(tmp_path)
     cfg = engine(inputfile=str(source), root_folder=str(tmp_path))
     assert cfg["output"] == "results/sample.csv"
@@ -185,7 +197,7 @@ def test_embedded_engine_renders_once(tmp_path, from_file, template, expected):
     original = deepcopy(cfg)
     if from_file:
         source = tmp_path / "input.yml"
-        source.write_text(yaml.safe_dump(cfg))
+        source.write_text(yaml.safe_dump(cfg), encoding="utf-8", newline="\n")
         result = engine(inputfile=str(source), embed=True, root_folder=str(tmp_path))
     else:
         result = engine(cfg=cfg, embed=True, root_folder=str(tmp_path))
@@ -222,3 +234,131 @@ def test_embedded_rendering_preserves_nested_caller_data(tmp_path):
     result = ConfigureApplicationInputs().configure_embed(cfg, "probe", str(tmp_path))
     assert cfg == original
     assert result["nested"] == original["nested"]
+
+
+@pytest.mark.parametrize("loader", [ymlInput, WorkingWithYAML().ymlInput])
+@pytest.mark.parametrize(
+    ("entry", "key", "expected"),
+    [("2024: annual", 2024, "annual"), ("on: push", True, "push")],
+)
+def test_loader_renders_with_non_string_root_keys(
+    tmp_path, loader, entry, key, expected
+):
+    """Non-string YAML keys survive; the string label still renders once."""
+    source = tmp_path / "mixed.yml"
+    source.write_text(
+        entry + '\nlabel: sample\noutput: "{{ label }}"\n',
+        encoding="utf-8",
+        newline="\n",
+    )
+    result = loader(source.as_posix())
+    assert result[key] == expected
+    assert result["output"] == "sample"
+
+
+def test_application_merge_renders_with_non_string_root_keys(tmp_path):
+    """The application loader accepts the same mixed-key context as YAML input."""
+    manager = ConfigureApplicationInputs()
+    manager.ApplicationInputFile = (tmp_path / "packaged.yml").as_posix()
+    manager.ApplicationInputFile_dict = {
+        2024: "annual",
+        "label": "sample",
+        "copy": "{{ label }}",
+    }
+    manager.customYaml = None
+    manager.CustomInputs = None
+    result = manager.generateYMLInput({}, {})
+    assert result[2024] == "annual"
+    assert result["copy"] == "sample"
+
+
+def test_type_error_in_template_retains_literal():
+    """An incompatible operation is rejected without discarding the input text."""
+    template = "{{ 1 + 'sample' }}"
+    assert resolve_placeholders({"output": template})["output"] == template
+
+
+@pytest.mark.parametrize("loader", [ymlInput, WorkingWithYAML().ymlInput])
+def test_loader_opt_out_keeps_templates_after_all_merges(tmp_path, loader):
+    """Opting out preserves expressions, escaped braces and Jinja comments."""
+    source = tmp_path / "source.yml"
+    source.write_text(
+        'label: original\ncopy: "{{ label }}"\nmath: "$10^{{3}}$"\n'
+        'comment: "before{# keep #}after"\n---\nextra: stream\n',
+        encoding="utf-8",
+        newline="\n",
+    )
+    update = tmp_path / "update.yml"
+    update.write_text("label: revised\n", encoding="utf-8", newline="\n")
+    result = loader(source.as_posix(), update.as_posix(), resolve_placeholders=False)
+    assert result == {
+        "label": "revised",
+        "copy": "{{ label }}",
+        "math": "$10^{{3}}$",
+        "comment": "before{# keep #}after",
+        "extra": "stream",
+    }
+
+
+@pytest.mark.parametrize("contents_only", [False, True])
+def test_comparison_reports_template_and_literal_as_different(tmp_path, contents_only):
+    """Comparisons record the original string, rather than its rendered value."""
+    import yaml
+
+    source = tmp_path / "source.yml"
+    target = tmp_path / "target.yml"
+    source.write_text(
+        'label: sample\ncopy: "{{ label }}"\n', encoding="utf-8", newline="\n"
+    )
+    target.write_text("label: sample\ncopy: sample\n", encoding="utf-8", newline="\n")
+    cfg = {"file_name1": source.as_posix(), "file_name2": target.as_posix()}
+    helper = WorkingWithYAML()
+    if contents_only:
+        cfg["map_list"] = {"file_name1": ["copy"], "file_name2": ["copy"]}
+        helper.compare_yaml_file_contents_deepdiff(cfg)
+    else:
+        helper.compare_yaml_files_deepdiff(cfg)
+    outputs = list(tmp_path.glob("wwyaml_*_values_changed.yml"))
+    assert len(outputs) == 1
+    changes = yaml.safe_load(outputs[0].read_text(encoding="utf-8"))
+    assert list(changes.values()) == [
+        {"old_value": "{{ label }}", "new_value": "sample"}
+    ]
+
+
+@pytest.mark.parametrize("helper", ["analyze_yaml_keys", "compare_yaml_root_keys"])
+def test_key_helpers_do_not_render_template_values(tmp_path, helper):
+    """Key-only analysis must not evaluate expressions stored as template data."""
+    source = tmp_path / "keys.yml"
+    source.write_text('value: "{{ 1 / 0 }}"\n', encoding="utf-8", newline="\n")
+    operation = getattr(WorkingWithYAML(), helper)
+    operation(*([source.as_posix()] * (2 if helper == "compare_yaml_root_keys" else 1)))
+
+
+@pytest.mark.parametrize(
+    "template", ["{% raw %}{{ label }}{% endraw %}", "{{ indirect }}"]
+)
+def test_placeholder_diagnostic_reports_already_resolved_value(template, capsys):
+    """A diagnostic reports the single-pass result without rendering it again."""
+    cfg = resolve_placeholders(
+        {
+            "label": "sample",
+            "indirect": "{{ label }}",
+            "placeholder_tests": {"method": template},
+        }
+    )
+    assert WorkingWithYAML().test_variable_placeholder(cfg) == (True, "{{ label }}")
+    assert (
+        capsys.readouterr().out.strip()
+        == "yml key placeholder is reusable: {{ label }}"
+    )
+
+
+@pytest.mark.parametrize(
+    "loader", [ymlInput, WorkingWithYAML().load_yml_with_utf_8_sig]
+)
+def test_utf8_readers_accept_bom_and_non_ascii_text(tmp_path, loader):
+    """Explicit UTF-8 reads retain non-ASCII YAML values and accept an initial BOM."""
+    source = tmp_path / "unicode.yml"
+    source.write_text("\ufefflabel: café\n", encoding="utf-8", newline="\n")
+    assert loader(source.as_posix()) == {"label": "café"}
