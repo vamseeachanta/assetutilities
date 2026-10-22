@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -59,20 +60,12 @@ PRIVATE_PATTERNS = (
         ),
     ),
 )
-# SHA-256 of case-folded export identity tokens, without original names.
-IDENTITY_HASHES = {
-    "machine name pattern": frozenset(
-        {
-            "00e880d1a9f21c5d68e26d15a2287548ce4580e43e2b0ad088e8851c897f575f",
-            "f46852cf6a989104870443a75acc3e70eb6191c7c4175c63f9cf066d31a3b824",
-        }
-    ),
-    "user name pattern": frozenset(
-        {
-            "1eea75079965b82e89db3dd4f61ba5f5c3f38a014d83d15991a4734571c9947e",
-            "e38f5e16adc86d1f9c50c751c34abce9ff0fe82e0619a75d4aa5394ebdcaaa89",
-        }
-    ),
+# Export metadata is accepted only in these neutral forms.
+EXPORT_METADATA = re.compile(r"^\s*#\s*(User|Machine|File):\s*(.*?)\s*$", re.I)
+METADATA_PLACEHOLDERS = {
+    "user": re.compile(r"example-user"),
+    "machine": re.compile(r"example-host"),
+    "file": re.compile(r"fixtures/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-][a-zA-Z0-9_.-]*"),
 }
 
 
@@ -80,13 +73,12 @@ def _private_lines(text: str) -> list[tuple[int, str]]:
     findings = []
     for number, line in enumerate(text.splitlines(), start=1):
         kinds = {kind for kind, pattern in PRIVATE_PATTERNS if pattern.search(line)}
-        tokens = re.findall(r"[a-z0-9_.-]+", line.casefold())
-        digests = {
-            hashlib.sha256(token.encode("utf-8")).hexdigest() for token in tokens
-        }
-        kinds.update(
-            kind for kind, hashes in IDENTITY_HASHES.items() if hashes & digests
-        )
+        metadata = EXPORT_METADATA.fullmatch(line)
+        if metadata:
+            field, value = metadata.groups()
+            field = field.lower()
+            if not METADATA_PLACEHOLDERS[field].fullmatch(value):
+                kinds.add(f"export {field} metadata")
         findings.extend((number, kind) for kind in sorted(kinds))
     return findings
 
@@ -95,35 +87,48 @@ def _is_link(path: Path) -> bool:
     return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
 
 
+def _tracked_fixture_paths(root: Path) -> list[Path]:
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "tests"],
+        cwd=root.parent,
+        check=True,
+        capture_output=True,
+    )
+    return [
+        root.parent / os.fsdecode(name) for name in result.stdout.split(b"\0") if name
+    ]
+
+
 def _fixture_findings(root: Path) -> list[str]:
     assert not _is_link(root), "Fixture root must not be a link"
     fixtures = []
-    findings = []
-    for directory, directories, names in os.walk(root, followlinks=False):
-        parent = Path(directory)
-        for name in sorted(directories):
-            path = parent / name
-            if _is_link(path):
-                findings.append(
-                    f"{path.relative_to(root).as_posix()}:0: linked directory"
-                )
-                directories.remove(name)
-        for name in sorted(names):
-            path = parent / name
-            if path.suffix.lower() not in FIXTURE_SUFFIXES:
-                continue
-            if _is_link(path):
-                findings.append(
-                    f"{path.relative_to(root).as_posix()}:0: linked fixture"
-                )
-                continue
-            fixtures.append(path)
-            findings.extend(
-                f"{path.relative_to(root).as_posix()}:{number}: {kind}"
-                for number, kind in _private_lines(
-                    path.read_text(encoding="utf-8", errors="surrogateescape")
-                )
+    findings = set()
+    for path in _tracked_fixture_paths(root):
+        if path.suffix.lower() not in FIXTURE_SUFFIXES:
+            continue
+        linked_parent = next(
+            (
+                parent
+                for parent in path.parents
+                if parent != root and root in parent.parents and _is_link(parent)
+            ),
+            None,
+        )
+        if linked_parent is not None:
+            findings.add(
+                f"{linked_parent.relative_to(root).as_posix()}:0: linked directory"
             )
+            continue
+        if _is_link(path):
+            findings.add(f"{path.relative_to(root).as_posix()}:0: linked fixture")
+            continue
+        fixtures.append(path)
+        findings.update(
+            f"{path.relative_to(root).as_posix()}:{number}: {kind}"
+            for number, kind in _private_lines(
+                path.read_text(encoding="utf-8", errors="surrogateescape")
+            )
+        )
     assert fixtures, "No text fixtures found for the privacy guard"
     return sorted(findings)
 
@@ -166,6 +171,8 @@ def test_yaml_fixtures_have_no_private_paths_or_identities():
 )
 @pytest.mark.parametrize("prefix", ["# File: ", "includefile: ", "  - filename: "])
 def test_private_comments_and_payloads_are_rejected(path, kinds, prefix):
+    if prefix == "# File: ":
+        kinds = kinds | {"export file metadata"}
     findings = _private_lines("---\n" + prefix + path + "\nkey: value")
     assert findings == [(2, kind) for kind in sorted(kinds)]
 
@@ -186,15 +193,50 @@ def test_neutral_comments_and_payloads_are_allowed(value):
     assert _private_lines(value) == []
 
 
-def test_hashed_identity_tokens_are_rejected_without_disclosure(monkeypatch):
-    digest = hashlib.sha256(b"synthetic-user").hexdigest()
-    monkeypatch.setitem(IDENTITY_HASHES, "user name pattern", frozenset({digest}))
-    assert _private_lines("# User: SYNTHETIC-USER") == [(1, "user name pattern")]
-    assert _private_lines("user: synthetic-user") == [(1, "user name pattern")]
-    assert _private_lines("user: synthetic-user-extra") == []
+@pytest.mark.parametrize("field", ["User", "Machine", "File"])
+@pytest.mark.parametrize("value", ["synthetic-person", "organization-node", ""])
+def test_export_metadata_requires_explicit_placeholders(field, value):
+    assert _private_lines(f"# {field}: {value}") == [
+        (1, f"export {field.lower()} metadata")
+    ]
 
 
-def test_scan_includes_nested_fixtures_and_redacts_diagnostics(tmp_path):
+@pytest.mark.parametrize(
+    "line",
+    [
+        "# User: example-user",
+        "# Machine: example-host",
+        "# File: fixtures/reference-1.yml",
+    ],
+)
+def test_export_metadata_placeholders_are_allowed(line):
+    assert _private_lines(line) == []
+
+
+@pytest.mark.parametrize("value", ["fixtures/../source.yml", "fixtures/.."])
+def test_export_file_placeholders_cannot_traverse_parents(value):
+    assert _private_lines(f"# File: {value}") == [(1, "export file metadata")]
+
+
+def test_sibling_export_headers_use_placeholders():
+    siblings = (
+        FIXTURES / "modules/yml_utilities/yaml_to_plot/yml/"
+        "001_ship_raos_rev2_from_aqwa_orcaflex.yml",
+        FIXTURES / "modules/yml_utilities/yaml_to_plot/yml_to_plot_1/"
+        "L01_import_vessels_1_vessel.yml",
+    )
+    for fixture in siblings:
+        lines = fixture.read_text(encoding="utf-8-sig").splitlines()
+        assert lines[5:7] == [
+            "# User: example-user",
+            "# Machine: example-host",
+        ], f"{fixture.relative_to(FIXTURES).as_posix()}:6: export metadata"
+
+
+def test_scan_includes_nested_fixtures_and_redacts_diagnostics(tmp_path, monkeypatch):
+    monkeypatch.setitem(
+        globals(), "_tracked_fixture_paths", lambda root: sorted(root.rglob("*.?*"))
+    )
     nested = tmp_path / "nested"
     nested.mkdir()
     for name in ("sample.yml", "sample.yaml", "sample.csv", "sample.json"):
@@ -209,6 +251,27 @@ def test_scan_includes_nested_fixtures_and_redacts_diagnostics(tmp_path):
     ]
 
 
+def test_scan_excludes_untracked_runtime_results(tmp_path, monkeypatch):
+    root = tmp_path / "tests"
+    root.mkdir()
+    safe = root / "safe.yml"
+    safe.write_text("key: value\n", encoding="utf-8")
+    results = root / "results"
+    results.mkdir()
+    (results / "generated.yml").write_text(
+        "path: " + "Q:" + "/runtime/output.yml\n", encoding="utf-8"
+    )
+    calls = []
+
+    def tracked(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout=b"tests/safe.yml\0")
+
+    monkeypatch.setattr(subprocess, "run", tracked)
+    assert _fixture_findings(root) == []
+    assert calls == [["git", "ls-files", "-z", "--", "tests"]]
+
+
 def test_linked_directories_are_not_followed(tmp_path, monkeypatch):
     nested = tmp_path / "linked"
     nested.mkdir()
@@ -218,11 +281,15 @@ def test_linked_directories_are_not_followed(tmp_path, monkeypatch):
         newline="\n",
     )
     (tmp_path / "safe.yml").write_text("key: value\n", encoding="utf-8", newline="\n")
+    monkeypatch.setitem(
+        globals(), "_tracked_fixture_paths", lambda root: sorted(root.rglob("*.yml"))
+    )
     monkeypatch.setattr(Path, "is_junction", lambda path: path == nested, raising=False)
     assert _fixture_findings(tmp_path) == ["linked:0: linked directory"]
 
 
-def test_missing_fixtures_fail_closed(tmp_path):
+def test_missing_fixtures_fail_closed(tmp_path, monkeypatch):
+    monkeypatch.setitem(globals(), "_tracked_fixture_paths", lambda root: [])
     with pytest.raises(AssertionError, match="No text fixtures found"):
         _fixture_findings(tmp_path)
 
@@ -239,34 +306,85 @@ def _export_payload_digests() -> tuple[str, ...]:
             line
             for line in fixture.read_bytes().splitlines(keepends=True)
             if not line.lstrip().startswith(b"#")
+            and not re.match(rb"\s*(?:includefile|\w*MeshFileName):", line)
         )
         actual.append(hashlib.sha256(payload).hexdigest())
     return tuple(actual)
 
 
 def test_export_fixture_payloads_match_sanitized_baseline():
-    """Pin non-comment bytes after privacy-only substitutions to the baseline.
+    """Pin non-comment bytes, excluding path scalars, to the original revision.
 
-    Baseline: origin/main at 3626a05b71442557df44168bf2ac962dd88205c7.
-    Only identifying path scalars and export comments were replaced; numeric
-    data, placeholders, duplicate keys and original line endings are preserved.
+    Original revision: 3626a05b71442557df44168bf2ac962dd88205c7.
+    Digests were computed independently from that revision with git show.
+    Export comments, includefile and mesh file paths are excluded; all other
+    bytes, duplicate keys and original line endings are preserved.
     """
     expected = (
-        "84c15a48df7b62998578544e341499f3023fcb37c5129e5961757c5cbfdf58c4",
-        "5248a26dea22bd0b538489008f2aff7e451cf7665ac314c0160e433f0932e066",
-        "9d08d0a48bfa5f24783a268cc780543eb5cae51e586d36f295e6fc13227af291",
-        "92d7a7b2583db8bc911617348d314d61c6930572b79f08ae8eaa38e3385c6413",
-        "7f110f8993879e013628dd7f298248c07a3fabadc1bfd0d82dfcbabdc23e80e7",
+        "f73e3428db480bfd3c668f572568c1cc15cf5de3c91e7ae1c8a0646dfeae2182",
+        "1b8a17194ff50e7dab9f366513ed323b847f8b02ca40b05935fe60f05b4dd2ac",
+        "8d386f42fbfae5f33021b6e1395b23eb46303507475649540beca0cfb15015e2",
+        "3a244fa86f2c6665f57e0457058d4ab7cc4761b5c13b00f23b3d09ac09bf4c69",
+        "ef6e901b522f2486f01890120719327188324e77276dcd99421dab7384fd3031",
         "2a3195d2dc75622e9528cf4bb3d01b9387f56d0833e8d6c296e02942904724e1",
     )
-    assert _export_payload_digests() == expected, (
-        'Rebuild expected digests: python -c "import runpy; '
-        "m = runpy.run_path('tests/hygiene/test_yaml_fixture_header_privacy.py'); "
-        "print(m['_export_payload_digests']())\""
-    )
+    assert _export_payload_digests() == expected
 
 
 def test_export_identity_comments_are_omitted():
     for fixture in EXPORT_FIXTURES:
         text = fixture.read_text(encoding="utf-8")
         assert not re.search(r"(?m)^# (?:File|User|Machine):", text), fixture.name
+
+
+DIRECTORY_FIXTURES = (
+    "modules/excel_utilities/app_excel_utilities_excel_utilities.yml",
+    "modules/excel_utilities/app_excel_utilities_excel_utilities_custom_calculation.yml",
+    "modules/excel_utilities/excel_utilities_cross_reference_closed_workbook.yml",
+    "modules/reportgen/reportgen-cfg-20in-docx.yml",
+    "modules/reportgen/reportgen-cfg-20in-md.yml",
+    "modules/reportgen/reportgen-cfg-docx.yml",
+    "modules/reportgen/reportgen-cfg-evolving.yml",
+    "modules/reportgen/reportgen-cfg-md.yml",
+    "modules/reportgen/reportgen-cfg.yml",
+    "modules/reportgen/reportgen-sympy_function_1_cfg.yml",
+)
+
+
+@pytest.mark.parametrize("relative", DIRECTORY_FIXTURES)
+def test_directory_placeholders_remain_relative_directories(relative):
+    text = (FIXTURES / relative).read_text(encoding="utf-8")
+    values = re.findall(
+        r"^\s*(?:project_root|analysis_root_folder|log_folder|result_folder|path):"
+        r"\s*[\"\']?([^\"\'\s]+)",
+        text,
+        re.M,
+    )
+    assert values
+    assert all(re.fullmatch(r"fixtures/reference-\d+/", v) for v in values)
+
+
+BATCH_FIXTURES = (
+    "app_file_edit_file_edit_concatenate_array.bat",
+    "file_edit_concatenate_2d_array_0.bat",
+    "file_edit_concatenate_2d_array_1.bat",
+    "file_edit_concatenate_array.bat",
+    "file_edit_concatenate_array_0.bat",
+    "file_edit_concatenate_array.yml",
+    "file_edit_concatenate_2d_array.yml",
+)
+
+
+@pytest.mark.parametrize("name", BATCH_FIXTURES)
+def test_batch_placeholders_keep_a_command_and_argument(name):
+    text = (FIXTURES / "modules/file_edit" / name).read_text(encoding="utf-8")
+    commands = (
+        text.splitlines()
+        if name.endswith(".bat")
+        else re.findall(r"^\s*content: (.+)$", text, re.M)
+    )
+    assert commands
+    assert all(
+        re.fullmatch(r"fixture-command fixtures/reference-\d+\.dat", c)
+        for c in commands
+    )

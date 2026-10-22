@@ -3,13 +3,13 @@ dictitems:
   Analysis:
     CustomInputFile: fixtures/reference-9.yml
     DefaultInputFile: null
-    analysis_root_folder: fixtures/reference-5.dat
+    analysis_root_folder: fixtures/reference-5/
     basename: excel_utilities
     cfg_array_file_names: null
     file_name: app_excel_utilities_excel_utilities_custom_calculation
     file_name_for_overwrite: app_excel_utilities_excel_utilities_custom_calculation
-    log_folder: fixtures/reference-6.dat
-    result_folder: fixtures/reference-7.dat
+    log_folder: fixtures/reference-6/
+    result_folder: fixtures/reference-7/
     start_time: 2023-11-15 05:42:01.525669
   basename: excel_utilities
   default:
@@ -20,12 +20,12 @@ dictitems:
   files:
     source:
       cell_range: null
-      path: fixtures/reference-8.dat
+      path: fixtures/reference-8/
       workbook: S01-Dyn-FC180-2.5mHs.xlsx
       worksheet: EditingTable
     target:
       cell_range: null
-      path: fixtures/reference-8.dat
+      path: fixtures/reference-8/
       workbook: Summary_1.xlsx
       worksheet: Sheet1
   task: custom_calculation
