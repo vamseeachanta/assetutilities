@@ -164,3 +164,103 @@ def test_malformed_or_multiple_documents_create_no_output(tmp_path, text):
     with pytest.raises(YAMLError):
         split_yaml_file_by_primary_key(source, output)
     assert not output.exists()
+
+
+@pytest.mark.parametrize("shape_output", [False, True])
+def test_root_merge_does_not_leak_keys_into_split_sections(tmp_path, shape_output):
+    """A root merge contributes values, never extra keys in a section file."""
+    source = tmp_path / "sample.yml"
+    source.write_text(
+        "defaults: &defaults\n"
+        "  inherited: 1\n"
+        "<<: *defaults\n"
+        "section:\n"
+        "  - 2\n",
+        encoding="utf-8",
+    )
+    result = split_yaml_file_by_primary_key(
+        source, tmp_path / "out", shape_output=shape_output
+    )
+    assert [Path(item["data"]).name for item in result] == [
+        "sample_defaults.yml",
+        "sample_section.yml",
+    ]
+    assert YAML(typ="safe").load(Path(result[0]["data"])) == {
+        "defaults": {"inherited": 1}
+    }
+    assert YAML(typ="safe").load(Path(result[1]["data"])) == {"section": [2]}
+
+
+@pytest.mark.parametrize("shape_output", [False, True])
+@pytest.mark.parametrize("skip_scalars", [False, True])
+def test_inherited_root_values_are_materialized_per_section(
+    tmp_path, shape_output, skip_scalars
+):
+    """Inherited collections survive; explicit overrides and scalar opt-in hold."""
+    source = tmp_path / "sample.yml"
+    source.write_text(
+        "defaults: &defaults\n"
+        '  "points": [[1, 2]]\n'
+        '  label: "inherited"\n'
+        "  overridden: [0]\n"
+        "<<: *defaults\n"
+        "overridden: [3]\n",
+        encoding="utf-8",
+    )
+    result = split_yaml_file_by_primary_key(
+        source,
+        tmp_path / "out",
+        shape_output=shape_output,
+        single_line_keys_skipped=skip_scalars,
+    )
+    expected = {
+        "defaults": {
+            "points": [[1, 2]],
+            "label": "inherited",
+            "overridden": [0],
+        },
+        "overridden": [3],
+        "points": [[1, 2]],
+    }
+    if not skip_scalars:
+        expected["label"] = "inherited"
+    assert {Path(item["data"]).name for item in result} == {
+        f"sample_{key}.yml" for key in expected
+    }
+    for item in result:
+        path = Path(item["data"])
+        key = path.stem.removeprefix("sample_")
+        text = path.read_text(encoding="utf-8-sig")
+        assert YAML(typ="safe").load(text) == {key: expected[key]}
+        assert not YAML().load(text).merge
+        if key == "points":
+            assert '"points"' in text
+        if key == "label":
+            assert '"inherited"' in text
+
+
+@pytest.mark.parametrize("shape_output", [False, True])
+def test_split_transfers_only_root_and_selected_key_comments(tmp_path, shape_output):
+    """Fresh section roots retain their own quotes, comments and nested merges."""
+    source = tmp_path / "sample.yml"
+    source.write_text(
+        "# document comment\n"
+        "defaults: &defaults {enabled: true}  # other key comment\n"
+        '"section":  # selected key comment\n'
+        "  settings:\n"
+        "    <<: *defaults\n"
+        '    label: "quoted"\n',
+        encoding="utf-8",
+    )
+    result = split_yaml_file_by_primary_key(
+        source, tmp_path / "out", shape_output=shape_output
+    )
+    text = Path(result[1]["data"]).read_text(encoding="utf-8-sig")
+    assert YAML(typ="safe").load(text) == {
+        "section": {"settings": {"enabled": True, "label": "quoted"}}
+    }
+    assert '"section"' in text
+    assert '"quoted"' in text
+    assert "# document comment" in text
+    assert "# selected key comment" in text
+    assert "<<:" in text

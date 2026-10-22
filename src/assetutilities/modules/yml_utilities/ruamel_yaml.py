@@ -1,12 +1,13 @@
 import os
 import re
 from collections.abc import Mapping
+from copy import deepcopy
 from io import StringIO
 from pathlib import Path
 
 from loguru import logger
 from ruamel.yaml import YAML as ruamelYAML
-from ruamel.yaml.comments import CommentedSeq
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ruamel.yaml.scalarstring import FoldedScalarString, LiteralScalarString
 
 
@@ -151,11 +152,12 @@ def split_yaml_file_by_primary_key(
 
     output_file_name_array = []
     for key, output_file_path in destinations:
-        # Copy the round-trip mapping to retain root key quotes and comments.
-        section = data.copy()
-        for other_key in data:
-            if other_key != key:
-                del section[other_key]
+        # A fresh root materializes inherited values without copying root merges.
+        # Reuse the key/value nodes to retain quotes and nested round-trip data.
+        section = CommentedMap({key: data[key]})
+        section.ca.comment = deepcopy(data.ca.comment)
+        if key in data.ca.items:
+            section.ca.items[key] = deepcopy(data.ca.items[key])
         save_yml(section, output_file_path, shape_output=shape_output)
         output_file_name_array.append({"data": output_file_path})
 
