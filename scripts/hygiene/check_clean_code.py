@@ -10,8 +10,8 @@ import argparse
 import ast
 import hashlib
 import json
+import stat
 import sys
-import tokenize
 from collections import Counter
 from pathlib import Path
 
@@ -34,15 +34,18 @@ def canonical_ast(value):
     return value
 
 
-def inspect_source(source: str) -> list[dict[str, str]]:
+def inspect_source(source: str | bytes) -> list[dict[str, str]]:
     """Return bare-handler and direct-print fingerprints, or a syntax failure.
 
     AST serialization excludes positions so comments and formatting do not
     invalidate a legacy entry. Arguments and handler bodies remain significant.
     Strings containing example conflict markers are valid Python, not conflicts.
+    Compilation validates context-sensitive syntax without executing source.
+    Byte input lets Python honor source encoding declarations and UTF-8 BOMs.
     """
     try:
         tree = ast.parse(source)
+        compile(tree, "<unknown>", "exec", dont_inherit=True)
     except SyntaxError as error:
         return [{"rule": "syntax", "fingerprint": str(error.lineno)}]
     findings = []
@@ -76,14 +79,25 @@ def scan_tree(root: Path) -> list[dict[str, str]]:
     if not source_root.is_dir():
         raise ValueError("source root is missing")
     findings = []
-    files = sorted(source_root.rglob("*.py"))
+    files = []
+    pending = [source_root]
+    while pending:
+        path = pending.pop()
+        attributes = getattr(path.lstat(), "st_file_attributes", 0)
+        if (
+            path.is_symlink()
+            or attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT
+            or not path.resolve().is_relative_to(root.resolve())
+        ):
+            raise ValueError("source path escapes the root or is a link")
+        if path.is_dir():
+            pending.extend(path.iterdir())
+        elif path.suffix == ".py":
+            files.append(path)
     if not files:
         raise ValueError("source root contains no Python files")
-    for path in files:
-        if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
-            raise ValueError("source path escapes the root or is a symlink")
-        with tokenize.open(path) as stream:
-            source = stream.read()
+    for path in sorted(files):
+        source = path.read_bytes()
         for item in inspect_source(source):
             findings.append({"path": path.relative_to(root).as_posix(), **item})
     return findings

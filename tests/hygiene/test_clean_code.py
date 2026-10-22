@@ -4,9 +4,11 @@ import hashlib
 import importlib.util
 import json
 import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -33,6 +35,9 @@ def checker():
         ("text = '''\n<<<<<<< example\n=======\n>>>>>>> example\n'''\n", []),
         ("<<<<<<< branch\nx = 1\n=======\nx = 2\n>>>>>>> branch\n", ["syntax"]),
         ("def broken(:\n", ["syntax"]),
+        ("return\n", ["syntax"]),
+        ("break\n", ["syntax"]),
+        ("def f(a, a): pass\n", ["syntax"]),
     ],
 )
 def test_source_rules(checker, source, rules):
@@ -55,6 +60,7 @@ def run_checker(root, baseline):
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         env=env,
         check=False,
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
@@ -65,14 +71,16 @@ def run_checker(root, baseline):
 def tree(tmp_path):
     source = tmp_path / "src/assetutilities/sample.py"
     source.parent.mkdir(parents=True)
-    source.write_text("print('legacy')\n", encoding="utf-8")
+    source.write_text("print('legacy')\n", encoding="utf-8", newline="\n")
     baseline = tmp_path / "baseline.json"
     return tmp_path, source, baseline
 
 
 def save_baseline(checker, tree):
     root, _, baseline = tree
-    baseline.write_text(json.dumps(checker.scan_tree(root)), encoding="utf-8")
+    baseline.write_text(
+        json.dumps(checker.scan_tree(root)), encoding="utf-8", newline="\n"
+    )
 
 
 def test_exact_legacy_inventory_passes(checker, tree):
@@ -80,6 +88,65 @@ def test_exact_legacy_inventory_passes(checker, tree):
     result = run_checker(tree[0], tree[2])
     assert result.returncode == 0, result.stderr
     assert "PASS" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "source, line",
+    [
+        ("return\n", 1),
+        ("\nbreak\n", 2),
+        ("def f(a, a): pass\n", 1),
+    ],
+    ids=["top-level-return", "top-level-break", "duplicate-argument"],
+)
+def test_cli_rejects_compilation_errors(tree, source, line):
+    root, path, baseline = tree
+    path.write_text(source, encoding="utf-8", newline="\n")
+    baseline.write_text("[]", encoding="utf-8", newline="\n")
+    result = run_checker(root, baseline)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        f"src/assetutilities/sample.py:{line}: invalid Python syntax" in result.stdout
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"message = 'caf\xc3\xa9'\nraise RuntimeError(message)\n",
+        b"\xef\xbb\xbfraise RuntimeError('must not execute')\n",
+        b"# coding: latin-1\nmessage = 'caf\xe9'\nraise RuntimeError(message)\n",
+    ],
+    ids=["utf8", "utf8-bom", "coding-cookie"],
+)
+def test_cli_compiles_source_without_execution(tree, payload):
+    root, path, baseline = tree
+    path.write_bytes(payload)
+    baseline.write_text("[]", encoding="utf-8", newline="\n")
+    result = run_checker(root, baseline)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "PASS" in result.stdout
+
+
+@pytest.mark.parametrize("directory", [False, True], ids=["file", "directory"])
+def test_reparse_points_fail_closed(checker, tree, monkeypatch, directory):
+    """Windows junctions and other reparse points must not enter the scan."""
+    root, source, _ = tree
+    target = source.parent if directory else source
+    original_lstat = Path.lstat
+
+    def lstat(path, *args, **kwargs):
+        result = original_lstat(path, *args, **kwargs)
+        if path == target:
+            return SimpleNamespace(
+                st_mode=result.st_mode,
+                st_file_attributes=stat.FILE_ATTRIBUTE_REPARSE_POINT,
+            )
+        return result
+
+    monkeypatch.setattr(Path, "lstat", lstat)
+    with pytest.raises(ValueError, match="link"):
+        checker.scan_tree(root)
 
 
 @pytest.mark.parametrize(
@@ -94,25 +161,27 @@ def test_exact_legacy_inventory_passes(checker, tree):
 def test_inventory_cannot_hide_changes(checker, tree, source):
     """Two identical calls exceed one entry; changed or removed calls mismatch."""
     save_baseline(checker, tree)
-    tree[1].write_text(source, encoding="utf-8")
+    tree[1].write_text(source, encoding="utf-8", newline="\n")
     assert run_checker(tree[0], tree[2]).returncode == 1
 
 
 def test_line_only_movement_preserves_fingerprint(checker, tree):
     save_baseline(checker, tree)
-    tree[1].write_text("# explanation\n\nprint( 'legacy' )\n", encoding="utf-8")
+    tree[1].write_text(
+        "# explanation\n\nprint( 'legacy' )\n", encoding="utf-8", newline="\n"
+    )
     assert run_checker(tree[0], tree[2]).returncode == 0
 
 
 @pytest.mark.parametrize("payload", ["{", "{}", '[{"rule": "syntax"}]'])
 def test_invalid_baseline_fails_closed(tree, payload):
-    tree[2].write_text(payload, encoding="utf-8")
+    tree[2].write_text(payload, encoding="utf-8", newline="\n")
     assert run_checker(tree[0], tree[2]).returncode != 0
 
 
 def test_missing_source_root_fails_closed(tmp_path):
     baseline = tmp_path / "baseline.json"
-    baseline.write_text("[]", encoding="utf-8")
+    baseline.write_text("[]", encoding="utf-8", newline="\n")
     assert run_checker(tmp_path, baseline).returncode != 0
 
 
