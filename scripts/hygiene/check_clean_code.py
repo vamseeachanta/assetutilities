@@ -1,5 +1,7 @@
 """Check Python source conventions without importing application modules.
 
+Rule source: docs/plans/2026-05-05-issue-41-clean-code.md:44-46,56-57
+(no print calls in src and no bare exception handlers).
 The legacy inventory is an exact multiset, not a per-file exemption. Changes
 to it require review; this command deliberately has no baseline-update option.
 """
@@ -10,10 +12,12 @@ import argparse
 import ast
 import hashlib
 import json
-import stat
 import sys
 from collections import Counter
 from pathlib import Path
+
+# IO_REPARSE_TAG_SYMLINK and IO_REPARSE_TAG_MOUNT_POINT on every platform.
+LINK_REPARSE_TAGS = {0xA000000C, 0xA0000003}
 
 
 def canonical_ast(value):
@@ -46,8 +50,14 @@ def inspect_source(source: str | bytes) -> list[dict[str, str]]:
     try:
         tree = ast.parse(source)
         compile(tree, "<unknown>", "exec", dont_inherit=True)
-    except SyntaxError as error:
-        return [{"rule": "syntax", "fingerprint": str(error.lineno)}]
+    except (SyntaxError, ValueError, MemoryError, RecursionError) as error:
+        return [
+            {
+                "rule": "syntax",
+                "fingerprint": str(getattr(error, "lineno", None) or "?"),
+                "cause": type(error).__name__,
+            }
+        ]
     findings = []
     for node in ast.walk(tree):
         rule = None
@@ -76,28 +86,43 @@ def inspect_source(source: str | bytes) -> list[dict[str, str]]:
 def scan_tree(root: Path) -> list[dict[str, str]]:
     """Inspect every Python file below src; never execute package code."""
     source_root = root / "src"
-    if not source_root.is_dir():
-        raise ValueError("source root is missing")
+    try:
+        if not source_root.is_dir():
+            raise ValueError("src: source root is missing or is not a directory")
+    except OSError as error:
+        raise ValueError(
+            f"src: unable to inspect source root ({type(error).__name__})"
+        ) from None
     findings = []
     files = []
     pending = [source_root]
     while pending:
         path = pending.pop()
-        attributes = getattr(path.lstat(), "st_file_attributes", 0)
-        if (
-            path.is_symlink()
-            or attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT
-            or not path.resolve().is_relative_to(root.resolve())
-        ):
-            raise ValueError("source path escapes the root or is a link")
-        if path.is_dir():
-            pending.extend(path.iterdir())
-        elif path.suffix == ".py":
-            files.append(path)
+        label = path.relative_to(root).as_posix()
+        try:
+            tag = getattr(path.lstat(), "st_reparse_tag", 0)
+            if path.is_symlink() or tag in LINK_REPARSE_TAGS:
+                raise ValueError(f"{label}: source path is a link")
+            if not path.resolve().is_relative_to(root.resolve()):
+                raise ValueError(f"{label}: source path escapes the root")
+            if path.is_dir():
+                pending.extend(path.iterdir())
+            elif path.suffix == ".py":
+                files.append(path)
+        except (OSError, RuntimeError) as error:
+            raise ValueError(
+                f"{label}: unable to inspect source ({type(error).__name__})"
+            ) from None
     if not files:
-        raise ValueError("source root contains no Python files")
+        raise ValueError("src: source root contains no Python files")
     for path in sorted(files):
-        source = path.read_bytes()
+        try:
+            source = path.read_bytes()
+        except OSError as error:
+            raise ValueError(
+                f"{path.relative_to(root).as_posix()}: "
+                f"unable to read source ({type(error).__name__})"
+            ) from None
         for item in inspect_source(source):
             findings.append({"path": path.relative_to(root).as_posix(), **item})
     return findings
@@ -108,13 +133,13 @@ def inventory(items: object) -> Counter:
     if not isinstance(items, list):
         raise TypeError("baseline must be a list")
     result = Counter()
-    for item in items:
+    for index, item in enumerate(items, start=1):
         if (
             not isinstance(item, dict)
             or set(item) != {"path", "rule", "fingerprint"}
             or not all(isinstance(value, str) for value in item.values())
         ):
-            raise ValueError("invalid baseline record")
+            raise ValueError(f"invalid baseline record {index}")
         path, rule, fingerprint = item["path"], item["rule"], item["fingerprint"]
         if (
             not path.startswith("src/")
@@ -125,9 +150,33 @@ def inventory(items: object) -> Counter:
             or len(fingerprint) != hashlib.sha256().digest_size * 2
             or any(char not in "0123456789abcdef" for char in fingerprint)
         ):
-            raise ValueError("invalid baseline path, rule or fingerprint")
+            raise ValueError(
+                f"invalid baseline record {index}: invalid path, rule or fingerprint"
+            )
         result[(path, rule, fingerprint)] += 1
     return result
+
+
+def load_baseline(path: Path, root: Path) -> Counter:
+    """Give baseline failures context without disclosing external paths."""
+    try:
+        label = path.absolute().relative_to(root.absolute()).as_posix()
+    except ValueError:
+        label = "<baseline>"
+    try:
+        items = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            f"{label}: invalid JSON at line {error.lineno}, column {error.colno}"
+        ) from None
+    except (OSError, UnicodeError) as error:
+        raise ValueError(
+            f"{label}: unable to read baseline ({type(error).__name__})"
+        ) from None
+    try:
+        return inventory(items)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label}: {error}") from None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -140,11 +189,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     baseline = args.baseline or args.root / "scripts/hygiene/clean_code_baseline.json"
     try:
-        expected = inventory(json.loads(baseline.read_text(encoding="utf-8")))
+        expected = load_baseline(baseline, args.root)
         findings = scan_tree(args.root)
         syntax = [item for item in findings if item["rule"] == "syntax"]
         for item in syntax:
-            print(f"FAIL: {item['path']}:{item['fingerprint']}: invalid Python syntax")
+            print(
+                f"FAIL: {item['path']}:{item['fingerprint']}: invalid Python syntax "
+                f"({item.get('cause', 'SyntaxError')})"
+            )
         actual = inventory([item for item in findings if item["rule"] != "syntax"])
         for label, delta in (("new", actual - expected), ("stale", expected - actual)):
             for (path, rule, fingerprint), count in sorted(delta.items()):
@@ -153,12 +205,9 @@ def main(argv: list[str] | None = None) -> int:
                 )
         if syntax or actual != expected:
             return 1
-    except (OSError, TypeError, ValueError, SyntaxError) as error:
-        # Avoid exposing absolute paths through OS exception messages.
-        print(
-            f"FAIL: unable to inspect source or baseline ({type(error).__name__})",
-            file=sys.stderr,
-        )
+    except ValueError as error:
+        # Only contextual errors above reach this handler, never raw OS messages.
+        print(f"FAIL: {error}", file=sys.stderr)
         return 1
     print(f"PASS: Python hygiene; {sum(expected.values())} inventoried legacy findings")
     return 0

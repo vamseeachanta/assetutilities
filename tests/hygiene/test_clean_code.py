@@ -71,16 +71,14 @@ def run_checker(root, baseline):
 def tree(tmp_path):
     source = tmp_path / "src/assetutilities/sample.py"
     source.parent.mkdir(parents=True)
-    source.write_text("print('legacy')\n", encoding="utf-8", newline="\n")
+    source.write_bytes(b"print('legacy')\n")
     baseline = tmp_path / "baseline.json"
     return tmp_path, source, baseline
 
 
 def save_baseline(checker, tree):
     root, _, baseline = tree
-    baseline.write_text(
-        json.dumps(checker.scan_tree(root)), encoding="utf-8", newline="\n"
-    )
+    baseline.write_bytes(json.dumps(checker.scan_tree(root)).encode("utf-8"))
 
 
 def test_exact_legacy_inventory_passes(checker, tree):
@@ -101,8 +99,8 @@ def test_exact_legacy_inventory_passes(checker, tree):
 )
 def test_cli_rejects_compilation_errors(tree, source, line):
     root, path, baseline = tree
-    path.write_text(source, encoding="utf-8", newline="\n")
-    baseline.write_text("[]", encoding="utf-8", newline="\n")
+    path.write_bytes(source.encode("utf-8"))
+    baseline.write_bytes(b"[]")
     result = run_checker(root, baseline)
     assert result.returncode == 1, result.stdout + result.stderr
     assert (
@@ -122,17 +120,20 @@ def test_cli_rejects_compilation_errors(tree, source, line):
 def test_cli_compiles_source_without_execution(tree, payload):
     root, path, baseline = tree
     path.write_bytes(payload)
-    baseline.write_text("[]", encoding="utf-8", newline="\n")
+    baseline.write_bytes(b"[]")
     result = run_checker(root, baseline)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "PASS" in result.stdout
 
 
-@pytest.mark.parametrize("directory", [False, True], ids=["file", "directory"])
-def test_reparse_points_fail_closed(checker, tree, monkeypatch, directory):
-    """Windows junctions and other reparse points must not enter the scan."""
+@pytest.mark.parametrize("kind", ["file", "directory", "source-root"])
+@pytest.mark.parametrize("tag", [0xA000000C, 0xA0000003], ids=["symlink", "junction"])
+def test_reparse_points_fail_closed(checker, tree, monkeypatch, kind, tag):
+    """Windows symlinks and junctions must not enter the scan."""
     root, source, _ = tree
-    target = source.parent if directory else source
+    target = {"file": source, "directory": source.parent, "source-root": root / "src"}[
+        kind
+    ]
     original_lstat = Path.lstat
 
     def lstat(path, *args, **kwargs):
@@ -141,6 +142,7 @@ def test_reparse_points_fail_closed(checker, tree, monkeypatch, directory):
             return SimpleNamespace(
                 st_mode=result.st_mode,
                 st_file_attributes=stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                st_reparse_tag=tag,
             )
         return result
 
@@ -161,28 +163,40 @@ def test_reparse_points_fail_closed(checker, tree, monkeypatch, directory):
 def test_inventory_cannot_hide_changes(checker, tree, source):
     """Two identical calls exceed one entry; changed or removed calls mismatch."""
     save_baseline(checker, tree)
-    tree[1].write_text(source, encoding="utf-8", newline="\n")
+    tree[1].write_bytes(source.encode("utf-8"))
     assert run_checker(tree[0], tree[2]).returncode == 1
 
 
 def test_line_only_movement_preserves_fingerprint(checker, tree):
     save_baseline(checker, tree)
-    tree[1].write_text(
-        "# explanation\n\nprint( 'legacy' )\n", encoding="utf-8", newline="\n"
-    )
+    tree[1].write_bytes(b"# explanation\n\nprint( 'legacy' )\n")
     assert run_checker(tree[0], tree[2]).returncode == 0
 
 
-@pytest.mark.parametrize("payload", ["{", "{}", '[{"rule": "syntax"}]'])
-def test_invalid_baseline_fails_closed(tree, payload):
-    tree[2].write_text(payload, encoding="utf-8", newline="\n")
-    assert run_checker(tree[0], tree[2]).returncode != 0
+@pytest.mark.parametrize(
+    "payload, cause",
+    [
+        ("{", "invalid JSON"),
+        ("{}", "baseline must be a list"),
+        ('[{"rule": "syntax"}]', "invalid baseline record"),
+    ],
+)
+def test_invalid_baseline_fails_closed(tree, payload, cause):
+    tree[2].write_bytes(payload.encode("utf-8"))
+    result = run_checker(tree[0], tree[2])
+    assert result.returncode == 1
+    assert "baseline.json" in result.stderr
+    assert cause in result.stderr
+    assert str(tree[0]) not in result.stdout + result.stderr
 
 
 def test_missing_source_root_fails_closed(tmp_path):
     baseline = tmp_path / "baseline.json"
-    baseline.write_text("[]", encoding="utf-8", newline="\n")
-    assert run_checker(tmp_path, baseline).returncode != 0
+    baseline.write_bytes(b"[]")
+    result = run_checker(tmp_path, baseline)
+    assert result.returncode == 1
+    assert "src" in result.stderr and "missing" in result.stderr
+    assert str(tmp_path) not in result.stdout + result.stderr
 
 
 def test_repository_inventory():
@@ -243,3 +257,118 @@ def test_cli_syntax_cannot_be_inventoried(checker, monkeypatch):
         lambda root: [{"path": "src/example.py", "rule": "syntax", "fingerprint": "1"}],
     )
     assert checker.main([]) == 1
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [b"\x00", b"\xef\xbb\xbf# coding: latin-1\n", b"-" * 200_000 + b"0\n"],
+    ids=["null-byte", "conflicting-encoding", "parser-exhaustion"],
+)
+def test_cli_syntax_without_line_has_relative_diagnostic(tree, payload):
+    root, source, baseline = tree
+    source.write_bytes(payload)
+    baseline.write_bytes(b"[]")
+    result = run_checker(root, baseline)
+    assert result.returncode == 1
+    assert "src/assetutilities/sample.py:?: invalid Python syntax" in result.stdout
+    assert "Traceback" not in result.stderr
+    assert str(root) not in result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("failure", [MemoryError, RecursionError])
+@pytest.mark.parametrize("phase", ["parse", "compile"])
+def test_parser_resource_errors_are_syntax_findings(
+    checker, monkeypatch, failure, phase
+):
+    def exhausted(*args, **kwargs):
+        raise failure
+
+    if phase == "parse":
+        monkeypatch.setattr(checker, "ast", SimpleNamespace(parse=exhausted))
+    else:
+        monkeypatch.setattr(checker, "compile", exhausted, raising=False)
+    findings = checker.inspect_source(b"value = 1\n")
+    assert len(findings) == 1
+    assert findings[0]["rule"] == "syntax"
+    assert findings[0]["fingerprint"] == "?"
+
+
+@pytest.mark.parametrize("kind", ["file", "directory", "source-root"])
+def test_non_link_reparse_points_are_scanned(checker, tree, monkeypatch, kind):
+    root, source, _ = tree
+    target = {"file": source, "directory": source.parent, "source-root": root / "src"}[
+        kind
+    ]
+    original_lstat = Path.lstat
+
+    def lstat(path, *args, **kwargs):
+        result = original_lstat(path, *args, **kwargs)
+        if path == target:
+            return SimpleNamespace(
+                st_mode=result.st_mode,
+                st_file_attributes=stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                st_reparse_tag=0x8000001B,
+            )
+        return result
+
+    monkeypatch.setattr(Path, "lstat", lstat)
+    findings = checker.scan_tree(root)
+    assert len(findings) == 1
+    assert findings[0]["path"] == "src/assetutilities/sample.py"
+    assert findings[0]["rule"] == "print"
+
+
+def test_resolved_source_escape_fails_closed(checker, tree, monkeypatch):
+    root, source, _ = tree
+    original_resolve = Path.resolve
+
+    def resolve(path, *args, **kwargs):
+        if path == source:
+            return root.parent / "outside.py"
+        return original_resolve(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+    with pytest.raises(ValueError, match="escapes"):
+        checker.scan_tree(root)
+
+
+def test_link_diagnostic_names_relative_source(checker, tree, monkeypatch, capsys):
+    root, source, baseline = tree
+    baseline.write_bytes(b"[]")
+    original_is_symlink = Path.is_symlink
+
+    def is_symlink(path):
+        return path == source or original_is_symlink(path)
+
+    monkeypatch.setattr(Path, "is_symlink", is_symlink)
+    assert checker.main(["--root", str(root), "--baseline", str(baseline)]) == 1
+    result = capsys.readouterr()
+    assert "src/assetutilities/sample.py" in result.err
+    assert "link" in result.err
+    assert str(root) not in result.out + result.err
+
+
+def test_unreadable_source_diagnostic_has_path_and_cause(
+    checker, tree, monkeypatch, capsys
+):
+    root, source, baseline = tree
+    baseline.write_bytes(b"[]")
+
+    def denied(path):
+        raise PermissionError(13, "permission denied", str(path))
+
+    monkeypatch.setattr(Path, "read_bytes", denied)
+    assert checker.main(["--root", str(root), "--baseline", str(baseline)]) == 1
+    result = capsys.readouterr()
+    assert "src/assetutilities/sample.py" in result.err
+    assert "PermissionError" in result.err
+    assert str(root) not in result.out + result.err
+
+
+def test_missing_baseline_diagnostic_has_path_and_cause(tree):
+    root, _, baseline = tree
+    result = run_checker(root, baseline)
+    assert result.returncode == 1
+    assert "baseline.json" in result.stderr
+    assert "FileNotFoundError" in result.stderr
+    assert str(root) not in result.stdout + result.stderr
