@@ -2,10 +2,14 @@
 Document Object Model (DOM) for report generation.
 """
 
+import copy
 import threading
+
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 import sympy as im_sympy
+
+from .citations import parse_references, render_citation
 
 
 class Section:
@@ -50,6 +54,7 @@ class DocumentDOM:
                     }
                     cls._instance.first_section = Section("default")
                     cls._instance.sections: List[Section] = []
+                    cls._instance.references = []
                     cls._instance.current_section: Optional[Section] = None
         return cls._instance
 
@@ -100,8 +105,11 @@ class DocumentDOM:
 
     def initialize_dom_from_config(self, config: Dict[str, Any]) -> None:
         """Initialize DOM from configuration dictionary"""
-        self.report_details = config.get("report_details", {})
-        self.important_paths = config.get("important_paths", {})
+        self.references = parse_references(config)
+        self.sections = []
+        self.current_section = None
+        self.report_details = copy.deepcopy(config.get("report_details", {}))
+        self.important_paths = copy.deepcopy(config.get("important_paths", {}))
 
         # Set default target_report_type if not in config
         if "target_report_type" in config:
@@ -141,7 +149,7 @@ class DocumentDOM:
                 for para_list in subsection.get("paragraphs", []):
                     for para in para_list:
                         if isinstance(para, dict):
-                            paragraphs.append(para)
+                            paragraphs.append(self._bind_paragraph(para))
                         else:
                             paragraphs.append({"type": "text", "content": para})
                 sub["paragraphs"] = paragraphs
@@ -161,9 +169,19 @@ class DocumentDOM:
         for para_list in paragraphs_data:
             for para in para_list:
                 if isinstance(para, dict):
-                    target.append(para)
+                    target.append(self._bind_paragraph(para))
                 else:
                     target.append({"type": "text", "content": para})
+
+    def _bind_paragraph(self, paragraph):
+        """Resolve citation metadata before any writer creates a file.
+
+        A content field supports every existing Markdown and Word writer.
+        """
+        paragraph = copy.deepcopy(paragraph)
+        if paragraph.get("type") == "citation":
+            paragraph["content"] = render_citation(paragraph, self.references)
+        return paragraph
 
     def add_section(self, name: str, title: str = None) -> Section:
         """Add a new section to the document"""

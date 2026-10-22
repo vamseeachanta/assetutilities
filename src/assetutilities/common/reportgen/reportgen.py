@@ -6,9 +6,11 @@ import logging
 from enum import Enum
 from typing import Any, Dict
 
+from .citations import appendix_sections
 from .dom import DocumentDOM
 from .writers import (
     DefaultDOCXWriter,
+    DefaultHTMLWriter,
     DefaultMDWriter,
     ReportWriter,
     ReportWriterRegistry,
@@ -18,6 +20,7 @@ from .writers import (
 class ReportFormat(Enum):
     MARKDOWN = "md"
     WORD = "docx"
+    HTML = "html"
     PDF = "pdf"
 
 
@@ -31,6 +34,8 @@ class ReportGenerator:
     def initialize_from_config(self, config: Dict[str, Any]) -> None:
         """Initialize generator with config data"""
         self.dom.initialize_dom_from_config(config)
+        self.dom.sections.extend(appendix_sections(self.dom.references, config))
+        self.writer = None
 
         # Handle target report format
         format_type = self.dom.report_details.get("target_report_type", "md").lower()
@@ -78,6 +83,8 @@ class ReportGenerator:
         elif self.target_format == ReportFormat.WORD:
             writer = DefaultDOCXWriter(self.dom)
             writer.flush()
+        elif self.target_format == ReportFormat.HTML:
+            DefaultHTMLWriter(self.dom).flush()
         elif self.target_format == ReportFormat.PDF:
             self._flush_pdf()
 

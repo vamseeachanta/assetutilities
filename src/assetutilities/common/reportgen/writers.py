@@ -2,6 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime
+from html import escape
 from pathlib import Path
 from typing import Any, Optional
 
@@ -70,9 +71,11 @@ class ReportWriter(ABC):
 
         # Get extension from report_details
         extension = self.dom.report_details["target_report_type"].lower()
-        if extension not in ["md", "docx"]:
+        if extension not in ["md", "docx", "html"]:
             raise ValueError(f"Unsupported report type: {extension}")
 
+        if not self.dom.report_details.get("timestamped_filename", True):
+            return f"{file_stub}.out.{extension}"
         return f"{file_stub}.{timestamp}.out.{extension}"
 
 
@@ -195,6 +198,45 @@ class DefaultDOCXWriter(ReportWriter):
         # Save document
         doc.save(str(output_path))
         logging.info(f"Generated default Word report at: {output_path}")
+
+
+class DefaultHTMLWriter(ReportWriter):
+    """Self-contained HTML using the same bound paragraphs as other writers."""
+
+    def _paragraph(self, paragraph):
+        content = paragraph["content"]
+        if paragraph.get("type") == "markdown_table":
+            headers, rows = DefaultDOCXWriter._parse_markdown_table(self, content)
+            head = "".join(f"<th>{escape(cell)}</th>" for cell in headers)
+            body = "".join(
+                "<tr>" + "".join(f"<td>{escape(cell)}</td>" for cell in row) + "</tr>"
+                for row in rows
+            )
+            return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+        return f'<p class="{escape(paragraph.get("type", "text"))}">{escape(str(content))}</p>'
+
+    def flush(self):
+        parts = [
+            '<!doctype html><html lang="en"><meta charset="utf-8">',
+            f"<title>{escape(self.dom.first_section.name)}</title>",
+            "<style>body{font-family:sans-serif;max-width:70em;margin:2em auto;padding:1em}"
+            "table{border-collapse:collapse}th,td{border:1px solid;padding:.4em}</style>",
+            f"<h1>{escape(self.dom.first_section.name)}</h1>",
+        ]
+        parts.extend(self._paragraph(p) for p in self.dom.first_section.paragraphs)
+        for section in self.dom.sections:
+            parts.append(f"<h2>{escape(section.name)}</h2>")
+            parts.extend(self._paragraph(p) for p in section.paragraphs)
+            for sub in section.subsections:
+                parts.append(f"<h3>{escape(sub['name'])}</h3>")
+                parts.extend(self._paragraph(p) for p in sub["paragraphs"])
+        parts.append("</html>")
+        (self.output_dir / self.target_file).write_text(
+            "\n".join(parts), encoding="utf-8"
+        )
+
+
+ReportWriterRegistry.register("DefaultHTMLWriter", DefaultHTMLWriter)
 
 
 # Register the writers

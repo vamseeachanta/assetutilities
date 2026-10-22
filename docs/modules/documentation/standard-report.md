@@ -102,8 +102,10 @@ Markdown ingestion, CSV-to-spreadsheet export, one-page table fitting, equations
 figures, charts, arbitrary cross-references and citation resolution are outside
 this input contract. The formatter does not evaluate title semantics, source
 rights, physical results, validation evidence or engineering adequacy. Citation
-binding, disclosure and provenance for the broader template inventory remain
-open in #79; this output backend alone does not complete that issue.
+binding and disclosure use the [shared report citation pattern](../../api/report-citations.md).
+Structured reports retain deterministic revision-based metadata; legacy reports
+can additionally emit the workflow provenance block. Private source resolution
+remains outside both output backends.
 
 The startup behavior is documented by the [LibreOffice command-line manual](https://help.libreoffice.org/latest/en-US/text/shared/guide/start_parameters.html)
 and its versioned source: [launcher pipe selection](https://github.com/LibreOffice/core/blob/libreoffice-24.2.7.2/desktop/unx/source/start.c),
