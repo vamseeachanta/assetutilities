@@ -58,9 +58,24 @@ def _json_data(value: Any, ancestors: tuple = ()) -> None:
         raise ValueError("Only finite JSON-compatible data is supported")
 
 
+def _json_mapping(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("JSON mapping keys must be unique strings")
+        result[key] = value
+    return result
+
+
 def _parse_yaml(text: str) -> Any:
+    """Preserve JSON values; use the YAML resolver only for non-JSON syntax."""
     try:
-        data = yaml.load(text, Loader=_UniqueLoader)
+        try:
+            data = json.loads(
+                text.removeprefix("\ufeff"), object_pairs_hook=_json_mapping
+            )
+        except json.JSONDecodeError:
+            data = yaml.load(text, Loader=_UniqueLoader)
         _json_data(data)
         return data
     except (yaml.YAMLError, UnicodeError, RecursionError) as exc:
@@ -69,7 +84,7 @@ def _parse_yaml(text: str) -> Any:
 
 def _load_yaml(path: str | Path) -> Any:
     try:
-        return _parse_yaml(Path(path).read_text(encoding="utf-8-sig"))
+        return _parse_yaml(Path(path).read_text(encoding="utf-8"))
     except UnicodeError as exc:
         raise ValueError("Input must be UTF-8 text") from exc
 

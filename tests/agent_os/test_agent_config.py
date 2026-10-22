@@ -19,7 +19,8 @@ CATALOG = ROOT / "docs/modules/ai/_agents"
 
 def write_yaml(tmp_path, text):
     path = tmp_path / "agents.yaml"
-    path.write_text(text, encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(text)
     return path
 
 
@@ -133,6 +134,57 @@ def test_portable_bundle_round_trip(agents):
     assert json.loads(text) == {"agents": agents}
     assert parse_agents(text) == agents
     assert bundle_agents(agents) == text
+
+
+@pytest.mark.parametrize(
+    "value", [1e-7, 1e20, "before\u0085after", "before\u2028after"]
+)
+@pytest.mark.parametrize("from_file", [False, True], ids=["memory", "file"])
+def test_bundle_preserves_metadata(agents, tmp_path, value, from_file):
+    agents[0]["metadata"] = {"nested": [value]}
+    text = bundle_agents(agents)
+    if from_file:
+        path = tmp_path / "bundle.json"
+        with path.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(text)
+        imported = load_agents(path)
+    else:
+        imported = parse_agents(text)
+    assert imported == agents
+    assert type(imported[0]["metadata"]["nested"][0]) is type(value)
+    assert bundle_agents(imported) == text
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '[{"name":"a","name":"b","role":"test"}]',
+        '[{"name":"a","role":"test","metadata":{"x":1,"\\u0078":2}}]',
+        '{"agents":[{"name":"a","role":"test"}],"agents":[]}',
+        '[{"name":"a","role":"test","metadata":NaN}]',
+        '[{"name":"a","role":"test","metadata":Infinity}]',
+        '[{"name":"a","role":"test","metadata":-Infinity}]',
+        '[{"name":"a","role":"test","metadata":1e999}]',
+    ],
+)
+@pytest.mark.parametrize("from_file", [False, True], ids=["memory", "file"])
+def test_invalid_json_catalog_rejected(tmp_path, text, from_file):
+    with pytest.raises(ValueError):
+        if from_file:
+            load_agents(write_yaml(tmp_path, text))
+        else:
+            parse_agents(text)
+
+
+@pytest.mark.parametrize("from_file", [False, True], ids=["memory", "file"])
+def test_json_utf8_bom_preserves_metadata(agents, tmp_path, from_file):
+    agents[0]["metadata"] = {"value": 1e-7, "text": "before\u0085after"}
+    text = "\ufeff" + bundle_agents(agents)
+    if from_file:
+        imported = load_agents(write_yaml(tmp_path, text))
+    else:
+        imported = parse_agents(text)
+    assert imported == agents
 
 
 def test_portable_bundle_in_memory(agents):
