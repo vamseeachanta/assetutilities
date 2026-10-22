@@ -93,9 +93,50 @@ def table(headers, rows):
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
+_CSS_RESOURCE = re.compile(r"url\s*\(|@import|\\|/\*", re.I)
+
+
 class _ResourceCheck(HTMLParser):
     def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
+        if tag == "base" or (
+            tag == "meta"
+            and any(
+                key == "http-equiv" and (value or "").strip().lower() == "refresh"
+                for key, value in attrs
+            )
+        ):
+            raise ValueError("Redirecting resource in gallery page")
+        if any(
+            key == "style" and _CSS_RESOURCE.search(value or "") for key, value in attrs
+        ):
+            raise ValueError("External CSS resource in gallery page")
+        if tag in (
+            "image",
+            "use",
+            "feimage",
+            "lineargradient",
+            "radialgradient",
+            "pattern",
+            "filter",
+            "textpath",
+            "mpath",
+            "tref",
+            "altglyph",
+            "cursor",
+            "font-face-uri",
+            "glyphref",
+            "animate",
+            "animatemotion",
+            "animatetransform",
+            "set",
+        ):
+            for key, value in attrs:
+                if (
+                    key in ("href", "xlink:href")
+                    and value
+                    and not value.strip().startswith("#")
+                ):
+                    raise ValueError("External SVG resource in gallery page")
         if tag in (
             "script",
             "link",
@@ -107,25 +148,29 @@ class _ResourceCheck(HTMLParser):
             "video",
             "audio",
         ):
-            for key in ("src", "href", "data", "srcset", "poster"):
-                value = attrs.get(key)
-                if value and not (
-                    tag == "img"
-                    and key == "src"
-                    and value.startswith("data:image/png;base64,")
+            for key, value in attrs:
+                if (
+                    key in ("src", "href", "xlink:href", "data", "srcset", "poster")
+                    and value
+                    and not (
+                        tag == "img"
+                        and key == "src"
+                        and value.startswith("data:image/png;base64,")
+                    )
                 ):
                     raise ValueError("External resource in gallery page")
 
 
 def check_self_contained(html):
-    """Reject external HTML resources and CSS imports before writing output.
+    """Check the gallery's supported resource syntax before writing output.
 
     Inline Plotly contains unused geo/map URL strings; those are not resource
     elements. The gallery emits only Cartesian traces and disables its toolbar.
+    CSS escapes and comments are excluded from the gallery's supported styles.
     """
     _ResourceCheck().feed(html)
     for css in re.findall(r"<style[^>]*>(.*?)</style>", html, re.I | re.S):
-        if re.search(r"url\s*\(|@import", css, re.I):
+        if _CSS_RESOURCE.search(css):
             raise ValueError("External CSS resource in gallery page")
 
 
@@ -410,7 +455,9 @@ def build(out):
         "workflow_envelope": (
             "YAML workflow evidence",
             yaml.safe_load(
-                (ROOT / "examples/workflows/visualization/input.yml").read_text()
+                (ROOT / "examples/workflows/visualization/input.yml").read_text(
+                    encoding="utf-8"
+                )
             ),
             workflow,
             [
@@ -444,11 +491,13 @@ def build(out):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     for slug, html in rendered.items():
-        (out / f"{slug}.html").write_text(html, encoding="utf-8")
+        (out / f"{slug}.html").write_text(html, encoding="utf-8", newline="\n")
     (out / "workflow.json").write_text(
-        json.dumps(envelope.to_dict(), indent=2), encoding="utf-8"
+        json.dumps(envelope.to_dict(), indent=2), encoding="utf-8", newline="\n"
     )
-    (out / "answers.json").write_text(json.dumps(values, indent=2), encoding="utf-8")
+    (out / "answers.json").write_text(
+        json.dumps(values, indent=2), encoding="utf-8", newline="\n"
+    )
 
 
 if __name__ == "__main__":

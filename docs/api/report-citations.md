@@ -10,6 +10,7 @@ validity of an equation or permission to reproduce content.
 | Revision | Date | What changed and why |
 |---|---|---|
 | 1 | 2026-10-20 | Standardized reference bindings and disclosure across report outputs. |
+| 2 | 2026-10-22 | Rejected blank locations and invalid pages, unified missing publishers, and excluded output paths from input hashes. |
 
 ## Template inventory
 
@@ -41,17 +42,17 @@ sections_L1:
 ```
 
 The example renders `[NIST-SP-811 2008 §4.3, table 5]`. `page` is optional and
-renders with a `p.` prefix. It must identify an actual page when supplied; no
+renders with a `p.` prefix. When supplied, it must be a positive integer or a
+string containing a positive integer. Supplied sections must not be blank; no
 page or clause is invented. Identifiers and revisions must be nonempty strings.
 Duplicate identifiers and unbound inline citations fail before a report file is
 created. Unknown private slugs are not silently treated as resolved.
 
 `source_sibling: generic` carries the public binding's origin convention. It is
-metadata only and does not locate a directory. The pattern aligns with the
-calculation citation contract's `code_id`, `publisher`, `revision`, `section`
-and `source_sibling` fields. The OCIMF MEG3/MEG4 and DNV mooring pilot patterns
-use the same fields; no pilot coefficients, editions or private content are
-copied here. Supply their reviewed binding metadata when using those methods.
+metadata only and does not locate a directory. `code_id`, `publisher`,
+`revision`, `section` and `source_sibling` are the fields supported by this
+repository's binding layer. Supply reviewed source metadata for each method;
+the binding itself does not qualify that method.
 
 For structured reports, declare the same top-level `references` and put
 `{type: citation, code_id: ..., section: ...}` after the opening paragraph in a
@@ -60,7 +61,8 @@ disclosure. Word and its derived PDF contain the same citation text.
 
 ## Appendix and disclosure
 
-References render as Code / Publisher / Revision. Reports with bindings include:
+References render as Code / Publisher / Revision. An omitted or blank publisher
+renders as `Not supplied` in every format. Reports with bindings include:
 
 > Citations in this report reference an internal engineering-standards index by
 > code identifier and revision. The full text of each cited standard is not
@@ -68,7 +70,9 @@ References render as Code / Publisher / Revision. Reports with bindings include:
 > not reproduce copyrighted standard content.
 
 Legacy section-based reports also append package version, Git SHA, input hash
-and generation time from the workflow provenance helpers. No filesystem paths
+and generation time from the workflow provenance helpers. The input hash excludes
+the `important_paths` output-location mapping and the workflow helper's volatile
+keys; changing report content still changes the hash. No filesystem paths
 are emitted in those provenance rows. Provenance defaults on when references
 exist; `provenance: false` suppresses it and `provenance: true` enables it without
 references. Structured reports retain their deterministic revision-based metadata.

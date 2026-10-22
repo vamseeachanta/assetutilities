@@ -19,6 +19,7 @@ import copy
 import hashlib
 import os
 import shutil
+import stat
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -48,7 +49,7 @@ def registry_path() -> Path:
 
 
 def load_registry() -> dict:
-    with open(registry_path()) as fh:
+    with open(registry_path(), encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 
@@ -57,7 +58,9 @@ def resolve_registry_row(workflow_id: str) -> dict:
     for row in registry.get("workflows", []):
         if row.get("id") == workflow_id:
             return row
-    raise KeyError(f"unknown workflow_id '{workflow_id}' (not in {registry_path()})")
+    raise KeyError(
+        f"unknown workflow_id '{workflow_id}' (not in docs/registry/workflows.yaml)"
+    )
 
 
 def lookup_row_for_cfg(cfg: dict) -> dict | None:
@@ -134,33 +137,39 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     cfg_dump = os.path.abspath(os.path.join(results_dir, file_name + ".yml"))
 
     # Plot and data writers emit into subdirectories of the result folder.
-    emitted = sorted(
-        p
-        for p in Path(results_dir).rglob("*")
-        if p.is_file() and os.path.abspath(p) != cfg_dump
+    results_root = Path(results_dir)
+    if _is_link(results_root):
+        raise ValueError("Workflow results directory is a link")
+    if not results_root.resolve().is_relative_to(Path(root_folder).resolve()):
+        raise ValueError("Output escapes workflow run directory")
+    emitted = []
+    walk = (
+        os.walk(results_root, onerror=_raise_walk_error)
+        if results_root.exists() else ()
     )
+    for directory, subdirs, filenames in walk:
+        for name in subdirs + filenames:
+            path = Path(directory) / name
+            if _is_link(path):
+                raise ValueError("Workflow output is a link")
+            if not path.resolve().is_relative_to(results_root.resolve()):
+                raise ValueError("Output escapes workflow results")
+            if path.is_file() and os.path.abspath(path) != cfg_dump:
+                emitted.append(path)
 
     files, warns = [], []
-    seen = set()
-    for path in emitted:
-        if not path.resolve().is_relative_to(Path(results_dir).resolve()):
-            raise ValueError("Output escapes workflow results")
-        if path.name in seen:
-            raise ValueError(f"Duplicate output basename: {path.name}")
-        seen.add(path.name)
+    for path in sorted(emitted):
         with open(path, "rb") as fh:
             digest = hashlib.sha256(fh.read()).hexdigest()
         files.append(
             {
-                "basename": os.path.basename(path),
+                "basename": path.relative_to(results_root).as_posix(),
                 "sha256": digest,
                 "size": os.path.getsize(path),
             }
         )
     if not files:
-        warns.append(
-            f"declared kind:files workflow emitted no files under {results_dir}"
-        )
+        warns.append("declared kind:files workflow emitted no files under results")
     elif locator.outputs and len(files) != len(locator.outputs):
         # Documentary count cross-check only; names are NOT compared (embed
         # file_name != registry CLI-path names).
@@ -168,6 +177,21 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
             f"emitted {len(files)} files; registry outputs lists {len(locator.outputs)}"
         )
     return {"kind": "files", "outputs": files}, warns
+
+
+def _raise_walk_error(error: OSError):
+    raise ValueError("Cannot read workflow output directory") from error
+
+
+def _is_link(path: Path) -> bool:
+    """Include Windows junctions and other reparse points before traversal."""
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(metadata.st_mode) or bool(
+        getattr(metadata, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+    )
 
 
 def build_cfg(row: dict, params: dict | None) -> dict:
@@ -182,7 +206,7 @@ def build_cfg(row: dict, params: dict | None) -> dict:
     input_rel = row.get("input")
     if input_rel:
         example_path = resolve_example_path(input_rel)
-        with open(example_path) as fh:
+        with open(example_path, encoding="utf-8") as fh:
             example_cfg = yaml.safe_load(fh) or {}
         cfg = update_deep_dictionary(cfg, example_cfg)
     if params:
@@ -230,9 +254,7 @@ def run_workflow(
         else:
             cfg = copy.deepcopy(cfg)
             row = lookup_row_for_cfg(cfg)
-            locator = (
-                ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
-            )
+            locator = ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
 
         ihash = input_hash(cfg)
         payload, warns, rhash = _run_once(cfg, locator)

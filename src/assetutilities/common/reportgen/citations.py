@@ -31,6 +31,7 @@ def parse_references(config):
             if any(char in value for char in ("\n", "\r", "|")):
                 raise ValueError(f"Reference {index} contains a table delimiter")
             item[key] = value.strip()
+        item["publisher"] = item["publisher"] or "Not supplied"
         if item["code_id"] in seen:
             raise ValueError(f"Duplicate reference {item['code_id']}")
         seen.add(item["code_id"])
@@ -46,11 +47,16 @@ def render_citation(paragraph, references):
         raise ValueError(f"Unbound citation: {identifier}")
     parts = [identifier, reference["revision"]]
     for key, prefix in (("section", "§"), ("page", "p.")):
-        value = paragraph.get(key)
-        if value is not None:
+        if key in paragraph:
+            value = paragraph[key]
             if not isinstance(value, (str, int)) or isinstance(value, bool):
                 raise ValueError(f"Citation {key} must be text or an integer")
-            parts.append(prefix + str(value))
+            text = str(value).strip()
+            if not text:
+                raise ValueError(f"Citation {key} must not be blank")
+            if key == "page" and (not text.isdecimal() or int(text) <= 0):
+                raise ValueError("Citation page must be a positive integer")
+            parts.append(prefix + text)
     return "[" + " ".join(parts) + "]"
 
 
@@ -76,7 +82,9 @@ def appendix_sections(references, config):
         values = {
             "Package version": version["package_version"],
             "Git SHA": version["git_sha"],
-            "Input sha256": envelope.input_hash(config),
+            "Input sha256": envelope.input_hash(
+                {key: value for key, value in config.items() if key != "important_paths"}
+            ),
             "Generated (UTC)": envelope.utc_now_iso(),
         }
         section = Section("Provenance")
@@ -127,7 +135,7 @@ def bind_structured_report(report):
                         "rows": [
                             [
                                 r["code_id"],
-                                r["publisher"] or "Not supplied",
+                                r["publisher"],
                                 r["revision"],
                             ]
                             for r in references
