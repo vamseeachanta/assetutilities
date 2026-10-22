@@ -8,6 +8,7 @@ import json
 import re
 import shutil
 import subprocess
+from html import unescape
 from html.parser import HTMLParser
 from importlib.metadata import version
 from pathlib import Path
@@ -41,6 +42,19 @@ def test_hand_anchor_force(builder):
     # OpenStax University Physics 1 (2016), 14.1 Eq. 14.3: F = p*A.
     # 101.325 kPa * 4.0 m^2 = 405.300 kN = 405.3 kN; tolerance 1e-12.
     assert builder.calculate()["values"]["force_kn"] == pytest.approx(405.3, rel=1e-12)
+    # 101325 Pa * 4.0 m^2 = 405300 N, by the same pressure relation.
+    assert builder.calculate()["values"]["force_n"] == pytest.approx(405300, rel=1e-12)
+
+
+def test_hand_anchor_curve(builder):
+    # OpenStax University Physics 1 (2016), 14.1 Eq. 14.3: F = p*A.
+    # At 101.325 kPa, multiply each area 0, 1, 2, 3, 4 m^2 by 101.325
+    # to obtain 0, 101.325, 202.650, 303.975, 405.300 kN, respectively.
+    curve = builder.calculate()["curve"]
+    assert [point["area_m2"] for point in curve] == [0, 1, 2, 3, 4]
+    assert [point["force_kn"] for point in curve] == pytest.approx(
+        [0, 101.325, 202.650, 303.975, 405.300], rel=1e-12
+    )
 
 
 def test_hand_anchor_length(builder):
@@ -80,6 +94,104 @@ def test_displayed_inputs_recompute_headline(builder):
     assert float(display["pressure_kpa"]) * float(display["area_m2"]) == (
         pytest.approx(float(display["force_kn"]), abs=0.00001)
     )
+
+
+@pytest.mark.parametrize("line_ending", [b"\n", b"\r\n"])
+def test_source_digests_ignore_checkout_line_endings(
+    builder, tmp_path, monkeypatch, line_ending
+):
+    committed = json.loads(
+        re.search(
+            r'<script id="report-data" type="application/json">(.*?)</script>',
+            REPORT.read_text(encoding="utf-8"),
+            re.S,
+        )[1]
+    )["source_digests"]
+    for name in {*builder.CALCULATION_SOURCES, "docs/units-guide.md"}:
+        source = (ROOT / name).read_bytes().replace(b"\r\n", b"\n")
+        destination = tmp_path / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(source.replace(b"\n", line_ending))
+    monkeypatch.setattr(builder, "ROOT", tmp_path)
+    assert builder.calculate()["source_digests"] == committed, REBUILD
+
+
+def test_source_digest_detects_content_change(builder, tmp_path, monkeypatch):
+    original = builder.calculate()["source_digests"]
+    for name in {*builder.CALCULATION_SOURCES, "docs/units-guide.md"}:
+        destination = tmp_path / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, destination)
+    changed = "src/assetutilities/units/quantity.py"
+    target = tmp_path / changed
+    target.write_bytes(target.read_bytes() + b"\n# Content change probe.\n")
+    monkeypatch.setattr(builder, "ROOT", tmp_path)
+    current = builder.calculate()["source_digests"]
+    assert current[changed] != original[changed], REBUILD
+    assert {name for name in current if current[name] != original[name]} == {changed}
+
+
+def test_calculation_checks_pressure_and_area_dimensions(builder, monkeypatch):
+    checked = []
+    original = builder.TrackedQuantity.check_dimensions
+
+    def record_check(quantity, expected):
+        original(quantity, expected)
+        checked.append((quantity.magnitude, expected))
+
+    monkeypatch.setattr(builder.TrackedQuantity, "check_dimensions", record_check)
+    data = builder.calculate()
+    assert checked == [
+        (data["values"]["pressure_kpa"], "Pa"),
+        (data["values"]["area_m2"], "m**2"),
+    ]
+
+
+def test_displayed_workflow_matches_executed_audit(builder):
+    listing = unescape(
+        re.search(r"<pre><code>(.*?)</code></pre>", builder.render_report(), re.S)[1]
+    )
+    namespace = {
+        "TrackedQuantity": builder.TrackedQuantity,
+        "CalculationAuditLog": builder.CalculationAuditLog,
+        "pressure_value": builder.guide_input("pressure", "kPa"),
+        "area_value": builder.guide_input("force", "m**2"),
+    }
+    exec(compile(listing, "displayed-workflow", "exec"), namespace)
+    expected = builder.calculate()["audit"]
+    assert builder.without_timestamps(namespace["record"]) == expected
+
+
+def test_digests_cover_documented_interface_sources(builder):
+    sources = builder.calculate()["source_digests"]
+    expected = {
+        "docs/units-guide.md",
+        "src/assetutilities/units/__init__.py",
+        "src/assetutilities/units/quantity.py",
+        "src/assetutilities/units/registry.py",
+        "src/assetutilities/units/traceability.py",
+        "src/assetutilities/units/policy.py",
+        "src/assetutilities/units/computation.py",
+        "src/assetutilities/units/input_parser.py",
+        "src/assetutilities/units/output_formatter.py",
+        "src/assetutilities/units/visualization.py",
+        "src/assetutilities/units/domains/metocean.py",
+        "src/assetutilities/units/domains/energy.py",
+        "src/assetutilities/units/domains/offshore.py",
+    }
+    assert expected <= sources.keys(), REBUILD
+    parser = ReportParser()
+    parser.feed(builder.render_report())
+    for link in parser.links:
+        if link.startswith("../../../../src/"):
+            assert link.removeprefix("../../../../") in sources, REBUILD
+
+
+def test_table_captions_are_first_children(builder):
+    for html in (builder.render_report(), REPORT.read_text(encoding="utf-8")):
+        tables = re.findall(r"<table\b[^>]*>(.*?)</table>", html, re.S)
+        assert len(tables) == 2
+        assert all(table.lstrip().startswith("<caption>") for table in tables)
 
 
 class ReportParser(HTMLParser):
@@ -276,7 +388,12 @@ def test_change_panel_and_comment_save(builder, tmp_path, interaction):
 
 
 def test_report_assets_use_explicit_text_encoding():
-    for path in (BUILDER, Path(__file__)):
+    for path in (
+        BUILDER,
+        Path(__file__),
+        ROOT / "scripts/ci/select_test_targets.py",
+        ROOT / "tests/ci/test_select_test_targets.py",
+    ):
         text = path.read_text(encoding="utf-8")
         for call in ast.walk(ast.parse(text)):
             if not isinstance(call, ast.Call) or not isinstance(

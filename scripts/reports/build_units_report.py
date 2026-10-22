@@ -24,9 +24,19 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 DESTINATION = ROOT / "docs/reports/modules/aunits"
 CALCULATION_SOURCES = (
+    "docs/units-guide.md",
+    "src/assetutilities/units/__init__.py",
     "src/assetutilities/units/quantity.py",
     "src/assetutilities/units/registry.py",
     "src/assetutilities/units/traceability.py",
+    "src/assetutilities/units/policy.py",
+    "src/assetutilities/units/computation.py",
+    "src/assetutilities/units/input_parser.py",
+    "src/assetutilities/units/output_formatter.py",
+    "src/assetutilities/units/visualization.py",
+    "src/assetutilities/units/domains/metocean.py",
+    "src/assetutilities/units/domains/energy.py",
+    "src/assetutilities/units/domains/offshore.py",
 )
 CHANGES = {
     "document": "Units module analysis",
@@ -47,6 +57,11 @@ CHANGES = {
             "section": "5, Appendix B and Review Comments",
             "change": "Rebuild comparisons retain dependency provenance without requiring identical versions; comment saving and loading preserve newer notes.",
             "reason": "Version provenance is separated from numerical and source checks, and navigation warnings protect newer notes during file operations.",
+        },
+        {
+            "section": "3, 5, 9 and Appendices A–B",
+            "change": "Source digests normalize checkout line endings and include the documented interfaces; the listing matches executed dimensional checks, table captions use valid markup, and force and curve values have literal anchors.",
+            "reason": "Cross-platform rebuilds and interface freshness are checked, and documentation, generator and report-test changes select the report suite in continuous integration.",
         },
     ],
 }
@@ -100,12 +115,15 @@ def calculate() -> dict:
     thickness = TrackedQuantity(
         guide_input("thickness", "mm"), "mm", source="Public guide: TrackedQuantity"
     )
+    pressure.check_dimensions("Pa")
+    area.check_dimensions("m**2")
     force = (pressure.to("Pa") * area).to("kN")
     audit = CalculationAuditLog()
     audit.add_input("pressure", pressure)
     audit.add_input("area", area)
     audit.add_step(
-        "Convert pressure to pascals, multiply by area, convert force to kilonewtons."
+        "Check pressure and area dimensions, convert pressure to pascals, "
+        "multiply by area, convert force to kilonewtons."
     )
     audit.add_output("force", force)
     values = {
@@ -132,7 +150,9 @@ def calculate() -> dict:
         "curve": curve,
         "audit": without_timestamps(audit.to_dict()),
         "source_digests": {
-            name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+            name: hashlib.sha256(
+                (ROOT / name).read_bytes().replace(b"\r\n", b"\n")
+            ).hexdigest()
             for name in CALCULATION_SOURCES
         },
         "versions": {name: version(name) for name in ("pint", "numpy")},
