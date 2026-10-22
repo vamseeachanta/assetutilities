@@ -30,11 +30,11 @@ describes this checkout only; downstream adoption is not established.
 
 A catalog is either a nonempty YAML list of agent mappings or a mapping with
 only the `agents` key containing that list. Each agent has a unique `name`
-matching `[a-z][a-z0-9_]*` and a nonempty `role` string or list of strings.
-Optional `principles` is a nonempty list of nonempty strings. Other fields are
-preserved as opaque JSON-compatible metadata. This is not full validation of
-legacy tasks: for example, null task parameters in the DevOps definition are
-not executable specifications.
+matching `[a-z][a-z0-9_]*` and a non-blank `role` string or nonempty list of
+non-blank strings. Optional `principles` is a nonempty list of non-blank strings.
+Other fields are preserved as opaque JSON-compatible metadata. This is not full
+validation of legacy tasks: for example, null task parameters in the DevOps
+definition are not executable specifications.
 
 Duplicate mapping keys, duplicate agent names, unsafe YAML tags, recursive
 structures, non-string mapping keys, timestamps and non-finite numbers are
@@ -43,14 +43,16 @@ are unsupported. Use reviewed local configuration; the parser is not a
 resource-isolation boundary for arbitrary large or adversarial documents.
 
 A prompt request has exactly `agent`, `template` and `inputs`. Templates use
-`$name` or `${name}` placeholders and `$$` for a literal dollar. Inputs must
-provide exactly the placeholders present, with nonempty string values. Missing
-and unused inputs are errors. Substitution is literal and occurs once; values
-are not evaluated as expressions, paths, shell commands or nested templates.
+`$name` or `${name}` placeholders and `$$` for a literal dollar. Templates must
+be non-blank. Inputs must provide exactly the placeholders present, with
+non-blank string values. Missing and unused inputs are errors. Substitution is
+literal and occurs once; values are not evaluated as expressions, paths, shell
+commands or nested templates.
 
-`validate`, `render` and `bundle` write results to stdout. Invalid configuration
-produces a diagnostic on stderr and a nonzero exit status. No output files are
-created by the module. Bundles preserve agent ordering and metadata, sort
+`validate`, `render` and `bundle` write UTF-8 results with LF line endings to
+stdout, including when redirected. Invalid configuration produces a diagnostic
+on stderr and a nonzero exit status. No output files are created by the module.
+Bundles preserve agent ordering and metadata, sort
 mapping keys, and use JSON so other libraries can consume them without a
 provider-specific dependency. Review bundle contents before transferring them.
 

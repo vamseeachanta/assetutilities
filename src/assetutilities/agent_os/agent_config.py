@@ -75,7 +75,11 @@ def _parse_yaml(text: str) -> Any:
                 text.removeprefix("\ufeff"), object_pairs_hook=_json_mapping
             )
         except json.JSONDecodeError:
-            data = yaml.load(text, Loader=_UniqueLoader)
+            loader = _UniqueLoader(text)
+            try:
+                data = loader.get_single_data()
+            finally:
+                loader.dispose()
         _json_data(data)
         return data
     except (yaml.YAMLError, UnicodeError, RecursionError) as exc:
@@ -103,7 +107,7 @@ def _validate_agents(agents: Any) -> list[dict[str, Any]]:
         raise ValueError("A nonempty list of agents is required")
     names = set()
     for agent in agents:
-        if type(agent) is not dict:
+        if not isinstance(agent, dict):
             raise ValueError("Each agent must be a mapping")
         name = agent.get("name")
         if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name):
@@ -233,7 +237,7 @@ def main(argv: list[str] | None = None) -> int:
     except (ValueError, RecursionError) as exc:
         print(f"Invalid configuration: {exc}", file=sys.stderr)
         return 1
-    print(output, end="")
+    sys.stdout.buffer.write(output.encode("utf-8"))
     return 0
 
 

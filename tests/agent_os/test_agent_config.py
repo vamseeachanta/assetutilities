@@ -1,6 +1,9 @@
 """Contract examples for the portable, offline agent configuration consumer."""
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -193,6 +196,13 @@ def test_portable_bundle_in_memory(agents):
     assert text == bundle_agents(agents)
 
 
+def test_bundle_accepts_dict_subclasses(agents):
+    class AgentMapping(dict):
+        pass
+
+    assert json.loads(bundle_agents([AgentMapping(agents[0])])) == {"agents": agents}
+
+
 @pytest.mark.parametrize(
     "data",
     [
@@ -215,6 +225,59 @@ def test_cli_validate_and_bundle(capsys):
     assert "python_programmer" in capsys.readouterr().out
     assert main(["bundle", source]) == 0
     assert json.loads(capsys.readouterr().out)["agents"] == load_agents(source)
+
+
+@pytest.mark.parametrize("value", ["caf\u00e9", "\u2192"], ids=["accent", "arrow"])
+def test_cli_redirected_bundle_is_utf8(tmp_path, agents, value):
+    agents[0]["metadata"] = {"text": value}
+    source = write_yaml(tmp_path, json.dumps(agents, ensure_ascii=False))
+    result = run_legacy_cli("bundle", source)
+    assert result.returncode == 0
+    assert result.stderr == b""
+    assert b"\r" not in result.stdout
+    assert json.loads(result.stdout.decode("utf-8")) == {"agents": agents}
+    output = tmp_path / "bundle.json"
+    output.write_bytes(result.stdout)
+    assert load_agents(output) == agents
+    validated = run_legacy_cli("validate", output)
+    assert validated.returncode == 0
+    assert validated.stdout == b"python_programmer\n"
+    assert validated.stderr == b""
+
+
+@pytest.mark.parametrize("value", ["caf\u00e9", "\u2192"], ids=["accent", "arrow"])
+def test_cli_redirected_prompt_is_utf8(tmp_path, value):
+    request = write_yaml(
+        tmp_path,
+        json.dumps(
+            {
+                "agent": "python_programmer",
+                "template": "Task: $task",
+                "inputs": {"task": value},
+            },
+            ensure_ascii=False,
+        ),
+    )
+    result = run_legacy_cli("render", CATALOG / "multi_agent.yaml", request)
+    assert result.returncode == 0
+    assert result.stderr == b""
+    assert b"\r" not in result.stdout
+    assert result.stdout.decode("utf-8") == (
+        "# python_programmer\n\nRole: Writes code in Python\n\n"
+        "Principles:\n- clean code\n- DRY\n- keep it simple stupid\n- etc.\n\n"
+        f"Task: {value}\n"
+    )
+
+
+def run_legacy_cli(*args):
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252", "PYTHONPATH": str(ROOT / "src")}
+    env.pop("PYTHONUTF8", None)
+    return subprocess.run(
+        [sys.executable, "-m", "assetutilities.agent_os.agent_config", *map(str, args)],
+        capture_output=True,
+        env=env,
+        cwd=ROOT,
+    )
 
 
 def test_cli_worked_example(capsys):
