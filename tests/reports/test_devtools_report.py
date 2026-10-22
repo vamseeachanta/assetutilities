@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 COMMAND = "python scripts/reporting/generate_devtools_report.py --work-dir <scratch>"
@@ -141,3 +142,42 @@ def test_no_working_tree_side_effects(built):
     assert set(built) == {"html", "changes", "cases"}
     assert built["cases"][0]["files_created"] == ["pyproject.toml"]
     assert all(case["errors"] == [] for case in built["cases"])
+
+
+def test_reused_work_directory_rejects_undeclared_requirements(tmp_path):
+    builder.build(tmp_path)
+    extra = tmp_path / "case-1" / "requirements-extra.txt"
+    extra.write_text("wheel\n", encoding="utf-8", newline="\n")
+    before = {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(FileExistsError):
+        builder.build(tmp_path)
+    after = {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    assert after == before
+
+
+def test_chart_keeps_accessible_name_after_render_and_selection(built):
+    with sync_playwright() as runtime:
+        with runtime.chromium.launch(channel="chrome") as browser:
+            page = browser.new_page()
+            page.set_content(built["html"])
+            for selection in (None, "1", "0"):
+                if selection is not None:
+                    page.select_option("#case-choice", selection)
+                chart = page.locator("#count-chart")
+                label = chart.get_attribute("aria-labelledby")
+                assert label
+                assert chart.locator(f"title#{label}").count() == 1
+                assert (
+                    page.get_by_role(
+                        "img", name="Requirement string counts by dependency group"
+                    ).count()
+                    == 1
+                )

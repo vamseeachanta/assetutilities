@@ -54,24 +54,29 @@ LABELS = (
     "Distinct strings across groups",
 )
 CHANGES = {
-    "revision": "A",
-    "date": "2026-10-21",
+    "revision": "B",
+    "date": "2026-10-22",
     "changes": [
         {
             "section": "Dependency collection",
-            "description": "Initial analysis distinguishes grouped requirement counts from distinct strings and package resolution.",
+            "description": "Existing case directories are rejected before writing so undeclared requirements cannot alter the displayed examples.",
         },
         {
-            "section": "Limits and recommendations",
-            "description": "File-presence checks are separated from installation acceptance; controlled-copy use is specified.",
+            "section": "Interactive chart",
+            "description": "The accessible chart title is retained during initial rendering and example selection.",
         },
     ],
 }
 
 
 def compute_case(work_dir: Path, case: dict) -> dict:
-    """Call the documented class; leave all input and output copies in scratch."""
-    work_dir.mkdir(parents=True, exist_ok=True)
+    """Call the documented class in a new case directory, preserving prior data."""
+    try:
+        work_dir.mkdir(parents=True)
+    except FileExistsError:
+        raise FileExistsError(
+            "Case directory already exists; use a fresh work directory."
+        ) from None
     for name, content in case["files"].items():
         (work_dir / name).write_text(content, encoding="utf-8", newline="\n")
     modernizer = DependencyModernizer(work_dir, backup=False)
@@ -151,7 +156,7 @@ def build(work_dir: Path) -> dict:
 <style>$css</style></head>
 <body class="hs-doc"><main class="container">
 <header><h1>Devtools dependency collection analysis</h1>
-<p>Draft for maintainer review</p><p>Revision A · 2026-10-21</p></header>
+<p>Draft for maintainer review</p><p>Revision B · 2026-10-22</p></header>
 <nav aria-label="Contents"><p>
 <a href="#summary">Executive summary</a> · <a href="#introduction">Introduction</a> ·
 <a href="#basis">Basis</a> · <a href="#method">Methodology</a> ·
@@ -167,7 +172,8 @@ def build(work_dir: Path) -> dict:
 <ul><li>No package resolution, installation test or throughput limit is established by the computed examples.</li>
 <li>Review the configuration and retain input copies before any cleanup is enabled.</li></ul></li></ul>
 <h3>Revision history</h3><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
-<tbody><tr><td>A</td><td>2026-10-21</td><td>Initial dependency collection analysis to explain the count basis and acceptance boundary.</td></tr></tbody></table>
+<tbody><tr><td>A</td><td>2026-10-21</td><td>Initial dependency collection analysis to explain the count basis and acceptance boundary.</td></tr>
+<tr><td>B</td><td>2026-10-22</td><td>Reject existing case directories to prevent undeclared inputs; retain the chart title during redraws.</td></tr></tbody></table>
 </section>
 <section id="introduction" data-report-section="2"><h2>2. Introduction</h2>
 <p>Repository maintenance is provided through dependency modernization, command propagation and structure organization. The dependency collection and configuration-generation subworkflow is evaluated here using the documented public class.</p>
@@ -218,6 +224,7 @@ $outputs
 <section id="validation" data-report-section="7"><h2>7. Validation evidence</h2>
 <p>The existing devtools test file contains $test_count test definitions, covering construction, requirement discovery, backup behavior and repository discovery. These tests provide unit-level evidence; no installation, solver, field-data or performance benchmark is established by them.</p>
 <p>The report tests include hand-counted anchors for discovered files, deduplicated runtime strings and the summed group count. Additional consistency checks call the module again, compare every displayed count with its returned state, and rebuild the committed report and change panel. Integer counts are compared exactly, with zero tolerance; no floating-point text is compared.</p>
+<p>Calculation case directories must be new: an existing directory is rejected before writing, preserving prior inputs and generated files. Regression checks cover an undeclared requirements file in a reused directory and the chart's accessible name after initial rendering and both example selections in headless Chrome. Other browser compatibility is not established.</p>
 <p>The generated configuration's runtime and development arrays are compared with the accumulated sets. That comparison establishes string preservation for these inputs; acceptance of a build environment remains NOT_EVALUATED. The presence-only validation method in the complete wrapper does not parse configuration or install packages.</p>
 </section>
 <section id="recommendations" data-report-section="8"><h2>8. Key findings, limits and recommendations</h2>
@@ -272,7 +279,7 @@ const ns = 'http://www.w3.org/2000/svg';
 function drawChart() {
   const item = cases[Number(document.getElementById('case-choice').value)];
   const chart = document.getElementById('count-chart');
-  chart.replaceChildren();
+  chart.replaceChildren(document.getElementById('chart-title'));
   const groups = [['Runtime', item.runtime_count], ['Development', item.dev_count],
     ['Reported total', item.dependencies_found], ['Distinct union', item.distinct_count]];
   const scale = Math.max(...cases.map(c => c.dependencies_found));
