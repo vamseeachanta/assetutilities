@@ -12,7 +12,7 @@ def test_split_ranges(tmp_path):
     """[1,2] selects pages 1 and 2; [3,4] selects pages 3 and 4: two each."""
     sample = (
         Path(__file__).resolve().parents[3]
-        / "examples/workflows/edit_pdf/data/sample.pdf"
+        / "examples/workflows/read_pdf/data/sample.pdf"
     )
     source = tmp_path / "sample.pdf"
     shutil.copyfile(sample, source)

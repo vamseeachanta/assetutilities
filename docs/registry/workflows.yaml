@@ -119,8 +119,8 @@ workflows:
     basename: edit_pdf
     input: examples/workflows/edit_pdf/input.yml
     outputs:
-      - examples/workflows/edit_pdf/data/sample.pdf_page_1-2.pdf
-      - examples/workflows/edit_pdf/data/sample.pdf_page_3-4.pdf
+      - examples/workflows/read_pdf/data/sample.pdf_page_1-2.pdf
+      - examples/workflows/read_pdf/data/sample.pdf_page_3-4.pdf
     test: uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
     runtime: fast
 

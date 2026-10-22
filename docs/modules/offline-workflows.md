@@ -22,7 +22,8 @@ The four-page `data/sample.pdf` contains the literal text
 geometry and page count are example inputs, not engineering acceptance limits.
 The fixture was generated with matplotlib's `PdfPages`: each iteration creates a
 figure, places that string with `fig.text`, saves it and closes it. The two examples
-use identical copies. PDF creation and modification timestamps were omitted.
+share the fixture in `examples/workflows/read_pdf/data/sample.pdf`.
+PDF creation and modification timestamps were omitted.
 
 `read_pdf` specifies `library: PyPDF2` and a complete `files.from_pdf` list with
 `io`, `page` and optional `label` per entry. The example requests pages 1 and 4.
@@ -34,14 +35,16 @@ literal fixture string in `results/read_pdf_first.txt` and
 
 PDF input paths resolve against the process working directory. Text outputs use
 `Analysis.result_folder`; direct callers without it get `results/` beside the PDF.
-Returned text paths are relative to the working directory. Labels are sanitized
-and duplicate labels receive suffixes. A blank page produces empty text. Invalid
+Returned text paths retain the configured directory and use forward slashes.
+Labels are sanitized and duplicate labels receive suffixes.
+A blank page produces empty text. Invalid
 page types and out-of-range pages raise `ValueError`.
 
 `edit_pdf` selects inclusive ranges `[1, 2]` and `[3, 4]`. Independent enumeration
 gives two pages per output, containing the original first/second and third/fourth
 page strings respectively. The existing splitter writes beside the input:
-`data/sample.pdf_page_1-2.pdf` and `data/sample.pdf_page_3-4.pdf`.
+`examples/workflows/read_pdf/data/sample.pdf_page_1-2.pdf` and
+`examples/workflows/read_pdf/data/sample.pdf_page_3-4.pdf`.
 
 Method source: [PyPDF2 3.0.0, Extract Text from a PDF](https://pypdf2.readthedocs.io/en/3.0.0/user/extract-text.html).
 The one-based YAML convention and inclusive splitter ranges follow the issue #91

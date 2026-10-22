@@ -10,25 +10,42 @@ from git import Repo
 from assetutilities.modules.git_utilities.git_utilities import GitUtilities
 
 
-def test_real_checkout_from_subdirectory(tmp_path):
-    """The checkout's own HEAD is an independent read-only comparison oracle."""
-    root = Path(__file__).resolve().parents[3]
-    with Repo(root) as repository:
-        before = repository.head.commit.hexsha
+def test_temporary_repository_preserves_index(tmp_path, monkeypatch):
+    """Inspection must preserve staged bytes and suppress optional index writes."""
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    root = tmp_path / "repository"
+    original_is_dirty = Repo.is_dirty
+
+    def inspect_without_optional_locks(repository, *args, **kwargs):
+        assert repository.git.environment().get("GIT_OPTIONAL_LOCKS") == "0"
+        return original_is_dirty(repository, *args, **kwargs)
+
+    monkeypatch.setattr(Repo, "is_dirty", inspect_without_optional_locks)
+    with Repo.init(root) as repository:
+        (root / "sample.txt").write_text(
+            "synthetic input\n", encoding="utf-8", newline="\n"
+        )
+        repository.index.add(["sample.txt"])
+        index = Path(repository.git_dir) / "index"
+        before = index.read_bytes()
+    (root / "nested").mkdir()
     cfg = {
         "Analysis": {
-            "analysis_root_folder": str(root / "examples/workflows/gitpython"),
-            "result_folder": str(tmp_path),
+            "analysis_root_folder": (root / "nested").as_posix(),
+            "result_folder": (tmp_path / "out").as_posix(),
         },
         "repos": [{"io": "."}],
         "common_cfg": {"commit": True, "push": True, "clone": True},
     }
     GitUtilities().router(cfg)
-    report = yaml.safe_load((tmp_path / "gitpython_report.yml").read_text())
-    assert report["repositories"][0]["head"] == before
+    report = yaml.safe_load(
+        (tmp_path / "out/gitpython_report.yml").read_text(encoding="utf-8")
+    )
+    assert report["repositories"][0]["head"] is None
+    assert report["repositories"][0]["is_dirty"] is True
     assert report["write_operations"] == "skipped: write operations not supported"
-    with Repo(root) as repository:
-        assert repository.head.commit.hexsha == before
+    assert index.read_bytes() == before
 
 
 @pytest.mark.parametrize("state", ["attached", "detached", "unborn"])

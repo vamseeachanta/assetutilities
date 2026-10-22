@@ -39,6 +39,24 @@ def test_extract_all_entries(tmp_path):
     assert len(PdfReader(SAMPLE).pages) == 4
 
 
+def test_output_path_does_not_require_same_drive(tmp_path, monkeypatch):
+    """Extraction must not relativize output against the working directory."""
+
+    def different_drives(*args, **kwargs):
+        raise ValueError("paths are on different drives")
+
+    monkeypatch.setattr("os.path.relpath", different_drives)
+    cfg = {
+        "library": "PyPDF2",
+        "Analysis": {"result_folder": tmp_path.as_posix()},
+        "files": {"from_pdf": [{"io": SAMPLE.as_posix(), "page": 1}]},
+    }
+    result = ReadPDF().read_pdf(cfg)
+    output = tmp_path / "read_pdf_file_1.txt"
+    assert result[0]["output_file"] == output.as_posix()
+    assert "sample page 1" in output.read_text(encoding="utf-8")
+
+
 @pytest.mark.parametrize("page", [0, -1, 5, True, "1"])
 def test_invalid_page_rejected(tmp_path, page):
     """A four-page input admits integer YAML page numbers 1 through 4 only."""

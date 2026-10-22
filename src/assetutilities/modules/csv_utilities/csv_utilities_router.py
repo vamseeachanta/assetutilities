@@ -9,7 +9,10 @@ import yaml
 class CSVUtilitiesRouter:
     def router(self, cfg):
         options = cfg["csv_utilities"]
-        source = Path(options.get("input_file") or options["txt_file"])
+        input_file = options.get("input_file") or options.get("txt_file")
+        if not input_file:
+            raise ValueError("csv_utilities requires input_file (or txt_file)")
+        source = Path(input_file)
         analysis = cfg["Analysis"]
         if not source.is_absolute():
             source = Path(analysis.get("analysis_root_folder", ".")) / source
@@ -37,9 +40,9 @@ class CSVUtilitiesRouter:
         folder.mkdir(parents=True, exist_ok=True)
         normalized = folder / f"{source.stem}_normalized.csv"
         summary_file = folder / f"{source.stem}_summary.yml"
-        frame.to_csv(normalized, index=False, encoding="utf-8")
+        frame.to_csv(normalized, index=False, encoding="utf-8", lineterminator="\n")
         summary = {
-            "input_file": str(source),
+            "input_file": source.as_posix(),
             "encoding_used": encoding,
             "delimiter": delimiter,
             "n_rows": len(frame),
@@ -47,10 +50,10 @@ class CSVUtilitiesRouter:
             "columns": frame.columns.tolist(),
         }
         summary_file.write_text(
-            yaml.safe_dump(summary, sort_keys=False), encoding="utf-8"
+            yaml.safe_dump(summary, sort_keys=False), encoding="utf-8", newline="\n"
         )
         options["results"] = {
-            "normalized": str(normalized),
-            "summary": str(summary_file),
+            "normalized": normalized.as_posix(),
+            "summary": summary_file.as_posix(),
         }
         return cfg

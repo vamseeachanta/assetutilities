@@ -1,7 +1,6 @@
 """Extract PDF text with PyPDF2; retain optional table-reader entry points."""
 
 import json
-import os
 from pathlib import Path
 import re
 
@@ -91,10 +90,10 @@ class ReadPDF:
         if output_name is None:
             output_name = re.sub(r"[^A-Za-z0-9_-]+", "_", label).strip("_") or "file"
         output = folder / f"read_pdf_{output_name}.txt"
-        output.write_text(text, encoding="utf-8")
+        output.write_text(text, encoding="utf-8", newline="\n")
         return {
             "label": label,
             "page": page,
-            "output_file": os.path.relpath(output),
+            "output_file": output.as_posix(),
             "n_chars": len(text),
         }
