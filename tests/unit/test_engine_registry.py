@@ -5,12 +5,22 @@ dispatch chain. Synthetic handlers establish the return/mutation contract;
 real workflow outputs are covered by the existing workflow and embed tests.
 """
 
+from importlib import import_module
 from types import SimpleNamespace
 
 import pytest
 
 from assetutilities import engine_registry
 from assetutilities.engine_registry import HandlerRegistry, registry
+
+
+@pytest.mark.parametrize("name", engine_registry._BUILTINS)
+def test_builtin_targets_resolve_without_running_workflows(name):
+    handler = engine_registry._BUILTINS[name]
+    target = getattr(import_module(handler.module), handler.attribute)
+    assert callable(target)
+    if handler.method is not None:
+        assert callable(getattr(target, handler.method))
 
 
 @pytest.mark.parametrize(
@@ -124,5 +134,5 @@ def test_published_workflows_have_registered_handlers():
     import yaml
 
     path = Path(__file__).resolve().parents[2] / "docs/registry/workflows.yaml"
-    for row in yaml.safe_load(path.read_text())["workflows"]:
+    for row in yaml.safe_load(path.read_text(encoding="utf-8"))["workflows"]:
         assert row["basename"] in registry.names()

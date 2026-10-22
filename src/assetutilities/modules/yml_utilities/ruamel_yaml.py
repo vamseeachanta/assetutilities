@@ -34,16 +34,16 @@ def save_yml(data, output_file_path, shape_output=False):
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    with open(output_file_path, "w", encoding="utf-8-sig") as f:
+    with open(output_file_path, "w", encoding="utf-8", newline="\n") as f:
         ruamel_yaml.dump(data, f)
 
     if shape_output:
-        with open(output_file_path, encoding="utf-8-sig") as f:
+        with open(output_file_path, encoding="utf-8") as f:
             content = f.read()
         modified_content = re.sub(
             r"-\s+-\s+([^\n]+)\n\s+-\s+([^\n]+)", r"- [\1, \2]", content
         )
-        with open(output_file_path, "w", encoding="utf-8-sig") as f:
+        with open(output_file_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(modified_content)
 
     return output_file_path
@@ -76,22 +76,26 @@ def split_yaml_file_by_primary_key(
     cleaned_yaml, data = handler.load_clean_yaml_file(input_file)
     primary_key_info = handler.get_primary_key_single_line_info(cleaned_yaml)
 
-    output_file_name_array = []
-    for key in data:
-        if single_line_keys_skipped and primary_key_info.get(key, False):
-            continue
+    keys = [
+        key
+        for key in data
+        if not (single_line_keys_skipped and primary_key_info.get(key, False))
+    ]
+    components = [str(key) for key in keys]
+    if any(part in name for name in components for part in ("/", "\\", "..")):
+        raise ValueError("YAML split key must be a filename component")
+    if len(set(components)) != len(components):
+        raise ValueError("YAML split keys must not produce the same filename")
 
-        if not isinstance(key, str) or not re.fullmatch(
-            r"[A-Za-z0-9_-][A-Za-z0-9_.-]*", key
-        ):
-            raise ValueError("YAML split key must be a filename component")
+    output_file_name_array = []
+    for key in keys:
         output_file_name = f"{file_name_stem}_{key}.yml"
-        output_file_path = os.path.join(output_dir, output_file_name)
+        output_file_path = (Path(output_dir) / output_file_name).as_posix()
         save_yml({key: data[key]}, output_file_path, shape_output=shape_output)
         output_file_name_array.append({"data": output_file_path})
 
     logger.debug(
-        f"Split {input_file} into {len(output_file_name_array)} file(s) by primary key"
+        "Split YAML into {} file(s) by primary key", len(output_file_name_array)
     )
     return output_file_name_array
 
@@ -175,7 +179,7 @@ class RuamelYAML:
         return output_file_name_array
 
     def load_clean_yaml_file(self, file_name):
-        with open(file_name, encoding="utf-8-sig") as file:
+        with open(file_name, encoding="utf-8") as file:
             yaml_content = file.read()
 
             cleaned_yaml = self.clean_yaml_file(yaml_content)

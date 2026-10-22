@@ -111,7 +111,9 @@ def resolve_config_placeholders(cfg: dict[str, Any]) -> dict[str, Any]:
     Mutate the top-level mapping to preserve AttributeDict and caller identity.
     Select the basename before substitution; placeholders cannot choose code.
     """
-    options = cfg.get("yaml_options", {})
+    options = cfg.get("yaml_options")
+    if options is None:
+        options = {}
     if options.get("resolve_placeholders", False):
         resolved = resolve_placeholders(cfg)
         cfg.clear()
@@ -217,7 +219,7 @@ class WorkingWithYAML:
         if updateYml is not None:
             #  Update values file
             try:
-                with open(updateYml) as ymlfile:
+                with open(updateYml, encoding="utf-8") as ymlfile:
                     cfgUpdateValues = yaml.safe_load(ymlfile)
                 #  Convert to logs
                 # logger.info(cfgUpdateValues)
@@ -244,7 +246,7 @@ class WorkingWithYAML:
         # PyYAML documentation, "safe_load_all": only standard YAML tags.
         # Validate the complete stream before merging; a late parse/tag error
         # must not return a partially accepted configuration.
-        with open(yaml_file_name, encoding="utf-8-sig") as ymlfile:
+        with open(yaml_file_name, encoding="utf-8") as ymlfile:
             documents = list(yaml.safe_load_all(ymlfile))
         stream_dict: dict[str, Any] = {}
         for document in documents:
@@ -271,7 +273,7 @@ class WorkingWithYAML:
         return d
 
     def load_yml_with_utf_8_sig(self, file_name: str) -> Any:
-        with open(file_name, encoding="utf-8-sig") as stream:
+        with open(file_name, encoding="utf-8") as stream:
             return yaml.safe_load(stream)
 
     def analyze_yaml_keys(self, file_name: str) -> None:
@@ -350,7 +352,7 @@ class WorkingWithYAML:
                 )
 
             file_name = f"{file_directory}/wwyaml_{uniquebasename}_updated_values.yml"
-            with open(file_name, "w") as f:
+            with open(file_name, "w", encoding="utf-8", newline="\n") as f:
                 f.writelines(
                     f"{key}: {value['new_value']}\n"
                     for key, value in file_diff.get("values_changed", {}).items()
@@ -373,7 +375,7 @@ class WorkingWithYAML:
         library_yaml_filename = cfg["filename"]
         library_name = cfg["library_name"]
         if os.path.isfile(library_yaml_filename):
-            with open(library_yaml_filename) as ymlfile:
+            with open(library_yaml_filename, encoding="utf-8") as ymlfile:
                 library_yaml = yaml.safe_load(ymlfile)
         else:
             data = pkgutil.get_data(library_name, cfg["filename"])

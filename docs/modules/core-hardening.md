@@ -10,6 +10,7 @@ the dispatch, YAML and logging parts of #120.
 | Revision | Date | Change and reason |
 |---|---|---|
 | Initial | 2026-10-20 | Document explicit dispatch, YAML boundaries and one logging pipeline so consumers can reproduce the supported behavior. |
+| 1 | 2026-10-22 | Correct compatibility claims and describe migration steps for logging, YAML placeholders and engine imports. |
 
 ## Handler registry
 
@@ -41,6 +42,14 @@ excluded from the registry. Calling them still raises `NotImplementedError`
 with a specific diagnostic. Unknown names raise `ValueError` before the engine
 creates output folders. Existing runnable workflow rows remain unchanged.
 
+The module-level `de` and `fm` instances and several incidental workflow-class
+re-exports have been removed from `assetutilities.engine`. Downstream callers
+must import classes from their implementation modules and construct their own
+instances. For example, import `DataExploration` from
+`assetutilities.modules.data_exploration.data_exploration` and `FileManagement`
+from `assetutilities.common.file_management`. The public `engine` entry point
+remains available.
+
 ## YAML contract
 
 Configuration loaders use PyYAML's safe constructors. `yml_read_stream` validates
@@ -51,8 +60,11 @@ prefix cannot be returned as a successful partial configuration.
 
 The reusable ruamel split module validates standard YAML tags with `safe_load`
 before round-trip loading to preserve comments and quotes. Split keys must be
-filename components: letters, digits, underscores, hyphens and internal dots.
-Paths and non-string keys raise `ValueError`. Custom tags need a separately
+filename components; spaces, Unicode and integer keys are supported. Keys
+containing either path separator or `..` raise `ValueError`. Keys producing
+the same filename are rejected before any split file is written. Output paths use
+forward slashes, and output text uses UTF-8 with LF line endings and no BOM.
+Custom tags need a separately
 designed and tested constructor policy; they are not accepted by this surface.
 
 Native anchors and aliases work during parsing. Quoted placeholders can be
@@ -73,8 +85,11 @@ Resolution makes one pass against the original mapping and substitutes scalar
 values by dotted key lookup. Undefined references stay literal. Mapping keys
 such as `items` work; Python attributes, calls, expressions and template control
 blocks are not evaluated. This narrows the previous general Jinja rendering
-helper to the documented placeholder syntax. Chained placeholders are not
-expanded recursively. Cyclic aliases raise an exception during resolution.
+helper to the documented placeholder syntax: filters and non-scalar
+substitutions also remain literal. Migrate templates that need those features
+by computing their values before passing the mapping to the engine. Missing
+or null `yaml_options` leaves placeholder resolution disabled. Chained placeholders
+are not expanded recursively. Cyclic aliases raise an exception during resolution.
 
 Engine payload resolution occurs after configuration preparation and before
 dispatch. Basename selection, output paths and file-management preparation
@@ -107,8 +122,21 @@ files under that root when using the override.
 
 Both `set_logging(cfg)` and `setup_logging(cfg)` configure the same pipeline.
 Legacy standard-library records flow into loguru; no reverse propagation sink
-is installed. Each emission appears once per destination. The run-log path,
-human-readable format, configured level and overwrite behavior are preserved.
+is installed. Each emission appears once per destination. The run-log path and
+overwrite behavior are retained. The following compatibility changes require
+migration:
+
+- `set_logging` now writes human-readable text instead of loguru JSON records.
+  Consumers that parsed JSON must accept the text format or configure a separate
+  caller-managed loguru sink with `serialize=True` after setup.
+- `setup_logging` no longer forwards native loguru records to named stdlib
+  handlers. Capture native records with a loguru sink; handlers such as pytest's
+  `caplog` no longer receive them automatically. Stdlib-originated records still
+  flow into loguru. Installing bridges in both directions can create a loop.
+- Both entry points now require stdlib-recognized levels, such as `DEBUG`,
+  `INFO`, `WARNING`, `ERROR` and `CRITICAL`. Configurations using loguru-only
+  `TRACE` or `SUCCESS` must select a stdlib level instead.
+
 `Analysis.log_to_file: false` creates no log directory. Reconfiguration closes
 the previous run's sinks. Exception-local variable inspection is disabled;
 applications must still avoid putting confidential data in log messages.
