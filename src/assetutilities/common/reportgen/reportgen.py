@@ -46,8 +46,13 @@ class ReportGenerator:
                     build_disclosure_section(),
                 ]
             )
-        flag = config.get("provenance")
-        if (self.dom.references and flag is not False) or flag is True:
+        flag = config.get("provenance", bool(self.dom.references))
+        if not isinstance(flag, bool):
+            raise ValueError("provenance must be a boolean")
+        timestamped = self.dom.report_details.get("timestamped_filename", True)
+        if not isinstance(timestamped, bool):
+            raise ValueError("timestamped_filename must be a boolean")
+        if flag:
             self.dom.sections.append(build_provenance_section(config))
 
         # Handle target report format
@@ -62,6 +67,19 @@ class ReportGenerator:
         # Check if writer class specified
         writer_class = self.dom.report_details.get("report_writer_class")
         if writer_class:
+            paragraphs = [
+                paragraph
+                for section in [self.dom.first_section, *self.dom.sections]
+                for paragraph in (
+                    section.paragraphs
+                    + [p for sub in section.subsections for p in sub["paragraphs"]]
+                )
+            ]
+            if any(p.get("type") == "citation" for p in paragraphs) and (
+                ReportWriterRegistry.get_writer(writer_class)
+                not in (DefaultMDWriter, DefaultDOCXWriter, DefaultHTMLWriter)
+            ):
+                raise ValueError("citation paragraphs require a default writer")
             self._initialize_writer(writer_class)
 
     def _initialize_writer(self, writer_class: str) -> None:

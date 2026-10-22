@@ -1,7 +1,7 @@
 basename: reportgen
 
 # Generate a Markdown report with document-local standard citation bindings.
-# Revisions below are metadata from the issue #79 example, not design criteria.
+# Identifiers and revisions match publisher information; no design criteria apply.
 # No standard text or engineering coefficients are included.
 # project_root + outputs_path determine where the report is written (relative
 # to the repo root when run via `uv run python -m assetutilities <this file>`).
@@ -27,8 +27,8 @@ report_details:
   # timestamped_filename: false  # optional stable output name
 
 references:
-  - code_id: DNV-OS-E301
-    publisher: DNV
+  - code_id: DNVGL-OS-E301
+    publisher: DNV GL
     revision: "2018-07"
   - code_id: OCIMF-MEG4
     publisher: OCIMF
@@ -43,7 +43,7 @@ sections_L1:
   - name: "Revision history"
     paragraphs:
       - [{ "type": "markdown_table",
-            "content": "| Revision | Date | What changed and why |\n|---|---|---|\n| A | 2026-10-19 | Added citation metadata to demonstrate reference binding. |" }]
+            "content": "| Revision | Date | What changed and why |\n|---|---|---|\n| A | 2026-10-19 | Added citation metadata to demonstrate reference binding. |\n| B | 2026-10-22 | Corrected the 2018 identifier to match the publisher edition. |" }]
 
   - name: "Inputs and method"
     paragraphs:
@@ -51,7 +51,7 @@ sections_L1:
 
   - name: "Results"
     paragraphs:
-      - [{ "type": "citation", "code_id": "DNV-OS-E301" }]
+      - [{ "type": "citation", "code_id": "DNVGL-OS-E301" }]
       - [{ "type": "citation", "code_id": "OCIMF-MEG4" }]
       - ["Answer: both citation identifiers bind to the declared revisions. No clause or page is asserted without a checked source."]
       - ["A markdown table can be embedded directly:"]

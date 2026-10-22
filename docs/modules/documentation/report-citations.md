@@ -10,6 +10,7 @@ content or qualify an engineering calculation.
 | Revision | Date | What changed and why |
 |---|---|---|
 | A | 2026-10-19 | Documented citation bindings and a worked formatting example for consistent report references. |
+| B | 2026-10-22 | Rejected unsupported writers and malformed metadata before output; corrected the example identifier to match its edition. |
 
 ## Template inventory
 
@@ -51,7 +52,11 @@ requires nonempty string `code_id` and `revision`. Optional `publisher`, `title`
 and `source_sibling` must be nonempty strings when supplied; `source_sibling`
 defaults to `generic`. It is retained for contract alignment but is not rendered
 or used to access a private repository. Bind only one revision per identifier in
-one document; duplicate identifiers and unbound citations raise `ValueError`.
+one document; duplicate identifiers and unbound citations raise `ValueError`. Identifiers
+with surrounding whitespace are rejected. Rendered reference fields and citation
+locators must be single-line values. Locators accept strings or integers, with
+booleans and other types rejected. Citation paragraphs require a default writer;
+a configured custom or unknown writer raises `ValueError` before output is created.
 
 Citation paragraphs have `type: citation`, `code_id`, and optional `section` and
 `page` locators. The example renders as
@@ -70,6 +75,10 @@ The internal resolver is unavailable to report recipients. References confer no
 access or reproduction rights; the full standard must be acquired separately.
 
 ## Provenance and output
+
+`provenance` and `report_details.timestamped_filename` accept only booleans when
+supplied; strings, numbers and explicit null values raise `ValueError`. Omitted
+options retain the defaults below. Text output uses UTF-8 and LF line endings.
 
 Provenance uses `workflow_api.envelope.code_version`, `input_hash` and
 `utc_now_iso`. It records Package version, Git SHA, Input sha256 and Generated
@@ -97,16 +106,18 @@ Regenerating a stable name replaces the previous output at that location.
 ## Worked formatting example
 
 Input: [the workflow example](../../../examples/workflows/reportgen/input.yml)
-declares `DNV-OS-E301` revision `2018-07` and `OCIMF-MEG4` revision `2018`.
-These metadata strings come from the issue #79 example; no engineering value
-is taken from those standards. No clause or page is asserted without a checked
-source.
+declares `DNVGL-OS-E301` revision `2018-07` and `OCIMF-MEG4` revision `2018`.
+The [publisher edition announcement](https://www.dnv.com/news/2018/dnv-gl-rules-for-classification-and-offshore-standards-july-2018-edition-124858/)
+identifies Position mooring under the historical DNV GL prefix. The
+[MEG4 publisher catalogue](https://www.ocimf.org/publications/books/mooring-equipment-guidelines-meg4)
+lists the fourth edition as 2018. No engineering value is taken from those
+standards. No clause or page is asserted without a checked source.
 
 Method: for each citation, match `code_id` to a declared reference, read its
 revision, and join the identifier and revision inside square brackets. Append
 the reference table, standardized disclosure and shared provenance fields.
 
-Answer: `[DNV-OS-E301 2018-07]` and `[OCIMF-MEG4 2018]` appear in Results,
+Answer: `[DNVGL-OS-E301 2018-07]` and `[OCIMF-MEG4 2018]` appear in Results,
 followed by References, Disclosure and Provenance. The report includes revision
 history after its opening summary. It demonstrates formatting rather than an
 engineering calculation; no equations, coefficients or acceptance limits apply.

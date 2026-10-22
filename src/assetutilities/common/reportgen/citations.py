@@ -41,6 +41,8 @@ def parse_references(config: dict) -> list[dict]:
             value = entry.get(key, "")
             if value and value.splitlines() != [value]:
                 raise ValueError(f"{label} requires single-line {key}")
+        if entry["code_id"] != entry["code_id"].strip():
+            raise ValueError(f"{label} requires code_id without surrounding whitespace")
         if entry["code_id"] in seen:
             raise ValueError(f"Duplicate code_id in {label}")
         seen.add(entry["code_id"])
@@ -62,6 +64,8 @@ def render_citation(para: dict, references: list[dict]) -> str:
         if value is not None and value != "":
             if isinstance(value, bool) or not isinstance(value, (str, int)):
                 raise ValueError(f"Citation {key} must be text or an integer")
+            if isinstance(value, str) and value.splitlines() != [value]:
+                raise ValueError(f"Citation {key} must be single-line")
             parts.append(f"{prefix}{value}")
     return "[" + " ".join(parts) + "]"
 

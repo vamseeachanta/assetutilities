@@ -77,7 +77,10 @@ class ReportWriter(ABC):
         if extension not in ["md", "docx", "html"]:
             raise ValueError(f"Unsupported report type: {extension}")
 
-        if not self.dom.report_details.get("timestamped_filename", True):
+        timestamped = self.dom.report_details.get("timestamped_filename", True)
+        if not isinstance(timestamped, bool):
+            raise ValueError("timestamped_filename must be a boolean")
+        if not timestamped:
             return f"{file_stub}.out.{extension}"
         return f"{file_stub}.{timestamp}.out.{extension}"
 
@@ -91,9 +94,9 @@ class DefaultMDWriter(ReportWriter):
     def flush(self) -> None:
         """Generate markdown report"""
         output_path = Path(os.path.join(self.output_dir, self.target_file))
-        logging.info(f"Writing default markdown report to: {output_path}")
+        logging.info(f"Writing default markdown report to: {output_path.as_posix()}")
 
-        with open(output_path, "w", encoding="utf-8") as f:
+        with open(output_path, "w", encoding="utf-8", newline="\n") as f:
             # Write first section
             f.write(f"# {self.dom.first_section.name}\n")
             for para in self.dom.first_section.paragraphs:
@@ -130,7 +133,7 @@ class DefaultMDWriter(ReportWriter):
                             else:  # text type
                                 f.write(f"{para['content']}\n")
 
-        logging.info(f"Generated default markdown report at: {output_path}")
+        logging.info(f"Generated default markdown report at: {output_path.as_posix()}")
 
 
 class DefaultDOCXWriter(ReportWriter):
@@ -167,7 +170,7 @@ class DefaultDOCXWriter(ReportWriter):
     def flush(self) -> None:
         """Generate Word document report"""
         output_path = Path(os.path.join(self.output_dir, self.target_file))
-        logging.info(f"Writing default Word report to: {output_path}")
+        logging.info(f"Writing default Word report to: {output_path.as_posix()}")
 
         doc = Document()
 
@@ -210,7 +213,7 @@ class DefaultDOCXWriter(ReportWriter):
 
         # Save document
         doc.save(str(output_path))
-        logging.info(f"Generated default Word report at: {output_path}")
+        logging.info(f"Generated default Word report at: {output_path.as_posix()}")
 
 
 def parse_markdown_table(markdown_table: str) -> tuple[list[str], list[list[str]]]:
@@ -265,7 +268,7 @@ class DefaultHTMLWriter(ReportWriter):
                 parts.append(f"<h3>{escape(subsection['name'])}</h3>\n")
                 parts.extend(self._paragraph(p) for p in subsection["paragraphs"])
         parts.append("</body></html>\n")
-        output_path.write_text("".join(parts), encoding="utf-8")
+        output_path.write_text("".join(parts), encoding="utf-8", newline="\n")
 
 
 # Register the writers

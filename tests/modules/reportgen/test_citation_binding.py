@@ -25,7 +25,10 @@ from assetutilities.common.reportgen.citations import (
     render_citation,
 )
 from assetutilities.common.reportgen.dom import DocumentDOM
-from assetutilities.common.reportgen.writers import DefaultMDWriter
+from assetutilities.common.reportgen.writers import (
+    DefaultMDWriter,
+    ReportWriterRegistry,
+)
 from assetutilities.workflow_api import envelope
 
 
@@ -39,7 +42,10 @@ def reset_dom():
 @pytest.fixture
 def config(tmp_path):
     return {
-        "important_paths": {"project_root": str(tmp_path), "outputs_path": "outputs"},
+        "important_paths": {
+            "project_root": tmp_path.as_posix(),
+            "outputs_path": "outputs",
+        },
         "report_details": {
             "name": "Citation example",
             "project_name": "Synthetic example",
@@ -130,6 +136,81 @@ def test_multiline_references_fail_before_output(
     assert not list(tmp_path.iterdir())
 
 
+@pytest.mark.parametrize("position", ["section", "subsection"])
+@pytest.mark.parametrize("registered", [False, True])
+def test_custom_citation_writer_fails_before_output(
+    config, tmp_path, monkeypatch, position, registered
+):
+    class CustomWriter(DefaultMDWriter):
+        pass
+
+    if registered:
+        monkeypatch.setitem(ReportWriterRegistry._writers, "CustomWriter", CustomWriter)
+    config["report_details"]["report_writer_class"] = "CustomWriter"
+    if position == "section":
+        config["sections_L1"][0]["sections_L2"] = []
+    else:
+        config["sections_L1"][0]["paragraphs"] = []
+    with pytest.raises(ValueError, match="citation.*default writer"):
+        run(config)
+    assert not list(tmp_path.rglob("*.out.*"))
+
+
+@pytest.mark.parametrize(
+    "writer,extension",
+    [
+        ("DefaultMDWriter", "md"),
+        ("DefaultDOCXWriter", "docx"),
+        ("DefaultHTMLWriter", "html"),
+    ],
+)
+def test_configured_default_writers_support_citations(
+    config, tmp_path, writer, extension
+):
+    config["report_details"].update(
+        report_writer_class=writer,
+        target_report_type=extension,
+        timestamped_filename=False,
+    )
+    run(config)
+    assert (tmp_path / "outputs" / f"report.out.{extension}").is_file()
+
+
+def test_custom_writer_without_citations_remains_supported(
+    config, tmp_path, monkeypatch
+):
+    class CustomWriter(DefaultMDWriter):
+        pass
+
+    monkeypatch.setitem(ReportWriterRegistry._writers, "CustomWriter", CustomWriter)
+    config["report_details"].update(
+        report_writer_class="CustomWriter", timestamped_filename=False
+    )
+    config["sections_L1"] = [{"name": "Legacy", "paragraphs": [["Uncited text"]]}]
+    run(config)
+    assert "Uncited text" in (tmp_path / "outputs/report.out.md").read_text(
+        encoding="utf-8"
+    )
+
+
+@pytest.mark.parametrize(
+    "code_id", [" EXAMPLE-A", "EXAMPLE-A ", "\tEXAMPLE-A", "EXAMPLE-A\u00a0"]
+)
+@pytest.mark.parametrize("extension", ["md", "docx", "html"])
+def test_padded_reference_identifier_fails_before_output(
+    config, tmp_path, code_id, extension
+):
+    config["references"] = [
+        {"code_id": "EXAMPLE-A", "revision": "example"},
+        {"code_id": code_id, "revision": "example"},
+    ]
+    config["sections_L1"] = []
+    config["report_details"]["target_report_type"] = extension
+    with pytest.raises(ValueError, match="code_id"):
+        run(config)
+    assert not list(tmp_path.rglob("*.out.*"))
+
+
 def test_duplicate_bindings_are_ambiguous(config):
     config["references"] *= 2
     with pytest.raises(ValueError, match="Duplicate"):
@@ -140,6 +221,8 @@ def test_duplicate_bindings_are_ambiguous(config):
     "locator,expected",
     [
         ({}, "[DNV-OS-E301 example]"),
+        ({"section": 2, "page": 0}, "[DNV-OS-E301 example §2 p.0]"),
+        ({"section": "", "page": None}, "[DNV-OS-E301 example]"),
         ({"section": "example-clause"}, "[DNV-OS-E301 example §example-clause]"),
         ({"page": "example-page"}, "[DNV-OS-E301 example p.example-page]"),
         (
@@ -153,6 +236,46 @@ def test_render_citation(config, locator, expected):
         render_citation({"code_id": "DNV-OS-E301", **locator}, parse_references(config))
         == expected
     )
+
+
+@pytest.mark.parametrize("field", ["section", "page"])
+@pytest.mark.parametrize(
+    "line_break",
+    [
+        "\r",
+        "\n",
+        "\r\n",
+        "\v",
+        "\f",
+        "\x1c",
+        "\x1d",
+        "\x1e",
+        "\x85",
+        "\u2028",
+        "\u2029",
+    ],
+    ids=["cr", "lf", "crlf", "vt", "ff", "fs", "gs", "rs", "nel", "ls", "ps"],
+)
+@pytest.mark.parametrize("extension", ["md", "docx", "html"])
+def test_multiline_locators_fail_before_output(
+    config, tmp_path, field, line_break, extension
+):
+    config["sections_L1"][0]["paragraphs"][0][0][field] = (
+        f"first{line_break}{line_break}second"
+    )
+    config["report_details"]["target_report_type"] = extension
+    with pytest.raises(ValueError, match=rf"Citation {field}.*single-line"):
+        run(config)
+    assert not list(tmp_path.rglob("*.out.*"))
+
+
+@pytest.mark.parametrize("field", ["section", "page"])
+@pytest.mark.parametrize("value", [True, False, 1.5])
+def test_nontext_noninteger_locators_fail_before_output(config, tmp_path, field, value):
+    config["sections_L1"][0]["paragraphs"][0][0][field] = value
+    with pytest.raises(ValueError, match=rf"Citation {field}.*text or an integer"):
+        run(config)
+    assert not list(tmp_path.rglob("*.out.*"))
 
 
 def test_unbound_citation_fails_before_output(config, tmp_path):
@@ -190,6 +313,32 @@ def test_provenance_uses_shared_helpers(monkeypatch):
     digest = hashlib.sha256(b'{"purpose": "example"}').hexdigest()
     for expected in ("example-version", "example-revision", "example-UTC", digest):
         assert expected in content
+
+
+@pytest.mark.parametrize("option", ["provenance", "timestamped_filename"])
+@pytest.mark.parametrize("value", ["false", "true", 0, 1, None, [], {}])
+@pytest.mark.parametrize("has_refs", [True, False])
+def test_nonboolean_options_fail_before_output(
+    config, tmp_path, option, value, has_refs
+):
+    if not has_refs:
+        config.pop("references")
+        config["sections_L1"] = []
+    target = config if option == "provenance" else config["report_details"]
+    target[option] = value
+    with pytest.raises(ValueError, match=option):
+        run(config)
+    assert not list(tmp_path.rglob("*.out.*"))
+
+
+@pytest.mark.parametrize("value", ["false", 0, None])
+def test_direct_writer_rejects_nonboolean_timestamp_option(config, tmp_path, value):
+    generator = ReportGenerator()
+    generator.initialize_from_config(config)
+    generator.dom.report_details["timestamped_filename"] = value
+    with pytest.raises(ValueError, match="timestamped_filename"):
+        DefaultMDWriter(generator.dom)
+    assert not list(tmp_path.rglob("*.out.*"))
 
 
 @pytest.mark.parametrize(
@@ -237,6 +386,7 @@ def test_all_writer_positions_and_appendices(config, tmp_path, extension):
         )
     else:
         content = target.read_text(encoding="utf-8")
+        assert b"\r" not in target.read_bytes()
     assert content.count("[DNV-OS-E301 example]") == 3
     for expected in ("References", "Disclosure", "Provenance", DISCLOSURE_TEXT):
         assert expected in content
@@ -371,12 +521,12 @@ def test_reference_metadata_and_escaped_table_pipes_roundtrip(
 def test_example_runs_with_outputs_in_scratch(tmp_path):
     path = Path(__file__).parents[3] / "examples/workflows/reportgen/input.yml"
     config = yaml.safe_load(path.read_text(encoding="utf-8"))
-    config["important_paths"]["project_root"] = str(tmp_path)
+    config["important_paths"]["project_root"] = tmp_path.as_posix()
     run(config)
     content = next(tmp_path.rglob("*.out.md")).read_text(encoding="utf-8")
     for expected in (
-        "DNV-OS-E301",
-        "OCIMF-MEG4",
+        "[DNVGL-OS-E301 2018-07]",
+        "[OCIMF-MEG4 2018]",
         "## References",
         "## Disclosure",
         "## Provenance",
