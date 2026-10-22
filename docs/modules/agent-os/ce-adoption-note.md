@@ -11,6 +11,7 @@ permission to roll out the plugin.
 | Revision | Date | What changed and why |
 |---|---|---|
 | Initial | 2026-10-20 | Persist the missing-evidence gate and repository restrictions. |
+| Update | 2026-10-22 | Retain advisory-only restrictions without synchronization implementation details. |
 
 Before any adoption work, read #81–#86 and the decision record. Complete and
 review the actual trial evidence, reassess the dated recommendation and record
@@ -27,9 +28,9 @@ After a ratified decision, retain these restrictions:
 - The private application repository can use the full loop only after full
   adoption and local authorization; reviewed CE documentation may stay private.
 - `workspace-hub` remains advisory/plan-only. Never direct CE commit, push or PR
-  skills there, including `ce-work`, `ce-commit-push-pr` or `lfg`. Its existing
-  synchronization service controls publication. Do not write sensitive plans
-  into public Git.
+  skills there, including `ce-work`, `ce-commit-push-pr` or `lfg`.
+  Maintainer-reviewed publication only; do not write sensitive plans into public
+  Git.
 - Review artifact policy before generating `docs/plans/`, `docs/brainstorms/`,
   `docs/solutions/`, `CONCEPTS.md` or `STRATEGY.md`. Public repositories admit
   reviewed public-only content. The hub uses local exclusion after verifying

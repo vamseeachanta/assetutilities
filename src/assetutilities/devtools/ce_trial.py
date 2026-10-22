@@ -19,8 +19,9 @@ ADVISORY_SKILLS = (
     "ce-simplify-code",
     "ce-doc-review",
 )
-# Issue #85 (2026), "Steps": review also belongs to the end-to-end loop.
+# Issue #85 (2026), "Steps": loop review has a separate assessment, not a new skill.
 PIPELINE_SKILLS = ("ce-plan", "ce-work", "ce-code-review", "ce-compound")
+PIPELINE_ASSESSMENTS = ("ce-plan", "ce-work", "ce-code-review-loop", "ce-compound")
 PREREQUISITES = ("install", "worktree")
 STATUSES = {"PASS", "FAIL", "NOT_EVALUATED"}
 
@@ -66,7 +67,9 @@ def assess(evidence: object) -> dict:
     }:
         raise ValueError("Trial evidence needs prerequisites and skills.")
     prerequisites = _records(evidence["prerequisites"], set(PREREQUISITES))
-    skills = _records(evidence["skills"], set(ADVISORY_SKILLS) | set(PIPELINE_SKILLS))
+    skills = _records(
+        evidence["skills"], set(ADVISORY_SKILLS) | set(PIPELINE_ASSESSMENTS)
+    )
     records = {**prerequisites, **skills}
     failed = sorted(name for name, item in records.items() if item["status"] == "FAIL")
     unknown = sorted(
@@ -80,7 +83,7 @@ def assess(evidence: object) -> dict:
             name for name in ADVISORY_SKILLS if skills[name]["status"] == "PASS"
         )
         if all(item["status"] == "PASS" for item in skills.values()):
-            keep = sorted(skills)
+            keep = sorted(set(ADVISORY_SKILLS) | set(PIPELINE_SKILLS))
             verdict, mode = "adopt", "full"
         elif keep:
             verdict, mode = "adopt-partial", "advisory"
@@ -109,10 +112,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         evidence = json.loads(
-            args.evidence.read_text(encoding="utf-8"), object_pairs_hook=_unique_object
+            args.evidence.read_text(encoding="utf-8").removeprefix("\ufeff"),
+            object_pairs_hook=_unique_object,
         )
         result = assess(evidence)
-    except (OSError, ValueError):
+    except (OSError, ValueError, RecursionError):
         # Do not echo input data or filesystem details into public logs.
         print(
             "Invalid trial evidence. Supply the documented evidence format.",

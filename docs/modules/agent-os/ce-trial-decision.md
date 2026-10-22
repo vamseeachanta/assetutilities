@@ -12,6 +12,7 @@ that the plugin is ineffective or an authorization to begin rollout.
 | Revision | Date | What changed and why |
 |---|---|---|
 | Initial | 2026-10-20 | Record the evidence gap and block rollout pending the trial results. |
+| Update | 2026-10-22 | Separate advisory and loop review evidence, clarify empty keep-lists and remove synchronization details. |
 
 ## Scope and sources
 
@@ -57,9 +58,18 @@ a numerical performance threshold:
   mode `advisory`. An incomplete loop earns no implementation skills.
 - Otherwise, recommend `drop`, keep nothing, mode `none`.
 
-The shared `ce-code-review` assessment covers both report-only value and loop
-review behavior. Passing it requires evidence for both contexts to recommend
-full adoption. The gate never authenticates evidence, approves a decision,
+The `ce-code-review` assessment records report-only value from #84;
+`ce-code-review-loop` separately records loop review behavior from #85. Both
+assessments are required, even when one is `NOT_EVALUATED`. A legacy record
+with only the shared assessment is invalid; no loop result is inferred from it.
+A passing advisory review remains in the advisory keep-list when the loop
+review fails or is not evaluated. A passing loop cannot earn an unassessed or
+failed advisory review, and a loop with no passing advisory skills gives
+`drop`, mode `none`, and an empty keep-list. Full adoption requires both review
+contexts and all other assessments to pass. The loop record is an assessment
+identifier for `ce-code-review`, not an additional skill; the full keep-list
+contains `ce-code-review` once and never `ce-code-review-loop`.
+The gate never authenticates evidence, approves a decision,
 installs skills, changes ignore rules, invokes CE, commits, pushes or opens PRs.
 A computed `adopt` result remains a recommendation for a maintainer to review.
 
@@ -67,9 +77,10 @@ A computed `adopt` result remains a recommendation for a maintainer to review.
 
 **Current keep-list: empty.** Every candidate below is `NOT_EVALUATED`.
 
-| Candidate | Evidence required before keeping | Proposed scope after acceptance |
+| Skill or assessment | Evidence required before keeping | Proposed scope after acceptance |
 |---|---|---|
-| `ce-code-review` | #84 report-only findings and value assessment; #85 review and autofix assessment for full adoption. | Report-only initially; reviewed fixes only in the accepted loop. |
+| `ce-code-review` | #84 report-only findings and value assessment. | Report-only advisory review. |
+| `ce-code-review-loop` assessment | #85 review and autofix assessment, independently of #84. | Enables `ce-code-review` in the loop only after full adoption; no additional skill. |
 | `ce-debug` | #84 debugging result, value assessment and clean-tree evidence. | Advisory diagnosis. |
 | `ce-simplify-code` | #84 soundness assessment and clean-tree evidence. | Suggestions only. |
 | `ce-doc-review` | #84 documentation findings, value assessment and clean-tree evidence. | Advisory review. |
@@ -91,7 +102,7 @@ recommendation. This change configures no other repository.
 | `digitalmodel` | Plan → work → review → PR after full acceptance; advisory only after partial acceptance. | Change directory into this separate repository first; verify repository and branch; protect main; no direct push, force-push or automatic merge. | Commit reviewed public-only artifacts; keep sensitive planning outside public Git. |
 | `worldenergydata` | Plan → work → review → PR after full acceptance; advisory only after partial acceptance. | Change directory into this separate repository first; verify repository and branch; protect main; no direct push, force-push or automatic merge. | Commit reviewed public-only artifacts; keep sensitive planning outside public Git. |
 | Private application repository | Full loop after full acceptance; advisory only after partial acceptance. | Verify the intended private repository locally; feature branch; PR and maintainer review. Its identity is deliberately omitted from this public record. | Commit reviewed plans and solutions in the private repository, subject to its data and rights rules. |
-| `workspace-hub` | Advisory and planning only, under either adoption outcome. | Never target it with commit, push or PR skills, including `ce-work`, `ce-commit-push-pr` and `lfg`; the existing synchronization service retains control. No sensitive planning in public Git. | Gitignore CE-generated plans, brainstorms, solutions, glossary and strategy artifacts locally; retain only reviewed general guidance through the existing synchronization workflow. |
+| `workspace-hub` | Advisory and planning only, under either adoption outcome. | Never target it with commit, push or PR skills, including `ce-work`, `ce-commit-push-pr` and `lfg`. Maintainer-reviewed publication only; no sensitive planning in public Git. | Gitignore CE-generated plans, brainstorms, solutions, glossary and strategy artifacts locally; retain only reviewed general guidance. |
 
 Per #81, the artifact set is `docs/plans/`, `docs/brainstorms/`,
 `docs/solutions/`, `CONCEPTS.md` and `STRATEGY.md`. Apply a reviewed policy in
@@ -135,7 +146,7 @@ candidate is unknown, hence A is empty and T is false. The rule therefore gives:
   "keep": [],
   "failed": [],
   "not_evaluated": [
-    "ce-code-review", "ce-compound", "ce-debug", "ce-doc-review", "ce-plan",
+    "ce-code-review", "ce-code-review-loop", "ce-compound", "ce-debug", "ce-doc-review", "ce-plan",
     "ce-simplify-code", "ce-work", "install", "worktree"
   ]
 }
@@ -147,11 +158,16 @@ error and no recommendation. To reassess, supply a separate reviewed input with
 result references and reasons; do not overwrite this dated observation with
 invented successes.
 
+The input accepts UTF-8 with or without a single byte-order mark. Invalid
+encoding and excessive JSON nesting return the same fixed error without
+echoing input or filesystem details. Evidence files are read without changes.
+
 The regression cases derive expected recommendations by hand from the Boolean
 rule in their docstrings. Successful trial fixtures are synthetic; they do not
 supply real evidence for adoption. Tests cover the missing-results example,
-accepted and partial trials, broken prerequisites and loop members, malformed
-records and read-only CLI behavior. There are no engineering constants or
+accepted and partial trials, empty advisory keep-lists, independent review
+contexts, broken prerequisites and loop members, malformed records and read-only
+CLI behavior. There are no engineering constants or
 unsourced performance limits in this decision.
 
 ## Baseline
@@ -159,9 +175,11 @@ unsourced performance limits in this decision.
 The repository collection hook still uses the removed `path` argument in
 `tests/conftest.py:65`. Unbounded pytest resolution selected an incompatible
 release; focused validation uses pytest 8.4.2 without changing that hook.
-The routing contract also fails because the unchanged `standard_report` entry
-in `docs/registry/module-routing.yaml` is not a top-level package directory.
-Both entries are present on `origin/main`; neither is changed by this decision.
+At the supplied draft head, the routing contract also fails because its
+`standard_report` registry entry is not a top-level package directory. Inspection
+on 2026-10-22 shows `origin/main` already routes it under `common`; that separate
+change is absent from the supplied draft history. This update changes only the
+developer-tool test route and preserves that pre-existing draft-head failure.
 
 ## Hooks that could not run
 
