@@ -41,7 +41,7 @@ code,.digest{overflow-wrap:anywhere}.digest{font:11px var(--mono)}#comments-list
 <li>The module can support the numerical part of a calculation record.
 <ul><li>The source label and operation history do not establish measurement quality or physical validity. Raw numeric inputs at decorated interfaces bypass unit conversion, as described in <a href="#limits">Section 7</a>.</li></ul></li>
 </ul>
-<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First issue: public conversion and force examples are described to distinguish calculation output from engineering acceptance.</td></tr></tbody><caption>Revision history. The initial issue establishes the module description and its limits.</caption></table></div>
+<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First issue: public conversion and force examples are described to distinguish calculation output from engineering acceptance.</td></tr><tr><td>A (draft update)</td><td>22 October 2026</td><td>Dependency versions are retained as provenance without requiring identical rebuild environments; comments entered during saving or loading are protected against note loss.</td></tr></tbody><caption>Revision history. The initial issue establishes the module description and its limits.</caption></table></div>
 </section>
 <section id="introduction">
 <h2>2 Introduction</h2>
@@ -87,7 +87,7 @@ code,.digest{overflow-wrap:anywhere}.digest{font:11px var(--mono)}#comments-list
 </section>
 <section id="method">
 <h2>5 Methodology and Interfaces</h2>
-<p>The quantity interface is applied from explicitly labelled inputs to a force output and calculation record. Pint {{ data.versions.pint }} and NumPy {{ data.versions.numpy }} are the installed calculation dependencies represented by this copy.</p>
+<p>The quantity interface is applied from explicitly labelled inputs to a force output and calculation record. Pint <span data-dependency-version="pint">{{ data.versions.pint }}</span> and NumPy <span data-dependency-version="numpy">{{ data.versions.numpy }}</span> are the installed calculation dependencies represented by this copy.</p>
 <h3>5.1 Inputs and execution</h3>
 <p>A numeric scalar or array, a unit expression and an optional source label are accepted by <code>TrackedQuantity(value, unit, source)</code>. The pressure, area and thickness magnitudes below are read from the public guide rather than duplicated as report constants.</p>
 <pre><code>pressure = TrackedQuantity(pressure_value, "kPa", source="Public guide")
@@ -191,7 +191,7 @@ record = audit.to_dict()</code></pre>
 <p>The repository evidence and the new numerical checks are distinguished here. Software checks establish the behaviours they assert; field agreement and a complete engineering qualification are not established.</p>
 <p>The existing registry and quantity tests assert compatible conversions, arithmetic and incompatible addition. The integration tests exercise configuration parsing, unit policy, round trips, audit serialization, formatting and lineage construction. A round trip is a consistency check; reciprocal conversion errors can cancel. No saved measured benchmark dataset for the selected pressure–area example is identified in these records.</p>
 <p>The report adds hand-calculated pressure, force and length anchors using the external theory in Section 4. The arithmetic is written above each assertion. Separate consistency checks compare every worked-example value and curve point with a fresh module call, and the displayed inputs are multiplied to recover the headline result.</p>
-<p>The rebuild check compares rounded payload values with tolerance and compares the remaining document text with the committed copy. Calculation-source digest differences identify stale evidence and name the rebuild command. UTF-8 and line-feed output are checked, and the report tests are exercised with the Python UTF-8 override unset.</p>
+<p>The rebuild check compares rounded payload values with tolerance and compares the remaining document text with the committed copy. Dependency versions are retained in the calculation record and displayed provenance, but are excluded from rebuild equality so supported environments can be compared. Calculation-source digest differences identify stale evidence and name the rebuild command. UTF-8 and line-feed output are checked, and the report tests are exercised with the Python UTF-8 override unset.</p>
 <p>The delivery checks cover section structure, local pointers, standalone assets, public wording and the comment-save logic. Browser-rendered layout, measured operating data and licensed integration behaviour are not evaluated by these checks.</p>
 <p>Quality pre-flight evidence is held by the report tests in Section 9.2: the inputs have public source locations, the equations have external references, missing physical criteria remain explicit, the summary preserves the surface-force qualifier, and numerical outputs are rebuilt from module calls. Reviewer comments are exported as a separate local JSON file; they are not sent to a service.</p>
 </section>
@@ -217,6 +217,9 @@ const reportData = JSON.parse(document.getElementById("report-data").textContent
 const commentFile = "units-report.comments.json";
 const comments = [];
 let unsaved = false;
+let commentRevision = 0;
+let saving = false;
+let loading = false;
 const byId = id => document.getElementById(id);
 const setStatus = text => { byId("save-status").textContent = text; };
 function renderComments() {
@@ -231,24 +234,28 @@ byId("add-comment").addEventListener("click", () => {
   const text = byId("comment-text").value.trim();
   if (!text) { setStatus("Enter a comment before adding it."); return; }
   comments.push({section: byId("comment-section").value, text});
+  commentRevision += 1;
   byId("comment-text").value = "";
   unsaved = true;
   renderComments();
   setStatus("Comment added. Save the comment file to preserve it.");
 });
 byId("save-comments").addEventListener("click", async () => {
+  if (saving || loading) { setStatus("A comment file operation is already in progress. Save any newer comments afterwards."); return; }
   if (byId("comment-text").value.trim()) {
     setStatus("Add the current comment before saving."); return;
   }
+  const savedRevision = commentRevision;
   const payload = JSON.stringify({document: "Units module analysis", revision: "A", comments}, null, 2) + "\n";
+  saving = true;
   try {
     if (window.showSaveFilePicker) {
       const handle = await window.showSaveFilePicker({suggestedName: commentFile, types: [{description: "Comment file", accept: {"application/json": [".json"]}}]});
       const writable = await handle.createWritable();
       await writable.write(payload);
       await writable.close();
-      unsaved = false;
-      setStatus("Comment file saved. Keep it beside the report.");
+      unsaved = savedRevision !== commentRevision;
+      setStatus(unsaved ? "Comment file saved; newer comments remain unsaved. Save again to preserve them." : "Comment file saved. Keep it beside the report.");
     } else {
       const url = URL.createObjectURL(new Blob([payload], {type: "application/json"}));
       const link = document.createElement("a");
@@ -258,23 +265,35 @@ byId("save-comments").addEventListener("click", async () => {
     }
   } catch (error) {
     setStatus(error.name === "AbortError" ? "Saving cancelled; comments remain on this page." : "Saving failed; comments remain on this page.");
+  } finally {
+    saving = false;
   }
 });
 byId("load-comments").addEventListener("change", async event => {
   const file = event.target.files[0];
+  event.target.value = "";
   if (!file) return;
+  if (saving || loading) { setStatus("A comment file operation is already in progress. Try loading again afterwards."); return; }
   if (unsaved || byId("comment-text").value.trim()) {
     setStatus("Save the current comments before loading another file."); return;
   }
+  const loadRevision = commentRevision;
+  loading = true;
   try {
-    const loaded = JSON.parse(await file.text());
+    const text = await file.text();
+    if (loadRevision !== commentRevision || unsaved || byId("comment-text").value.trim()) {
+      setStatus("Comments changed while loading. Save the current comments before loading another file."); return;
+    }
+    const loaded = JSON.parse(text);
     if (loaded.document !== "Units module analysis" || loaded.revision !== "A" || !Array.isArray(loaded.comments) || !loaded.comments.every(item => item && typeof item.section === "string" && typeof item.text === "string")) {
       throw new Error("Invalid comment file");
     }
     comments.splice(0, comments.length, ...loaded.comments);
+    commentRevision += 1;
     renderComments();
     setStatus("Existing comments loaded. Save again after adding notes.");
   } catch (error) { setStatus("The selected file is not a comment file for this report revision."); }
+  finally { loading = false; }
 });
 document.querySelectorAll("[data-point]").forEach(point => {
   const show = () => {
