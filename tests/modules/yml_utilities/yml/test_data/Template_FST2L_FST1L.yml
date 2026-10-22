@@ -10,14 +10,14 @@ VesselTypes:
     Strt1_FST2type:
         Draughts:
             Light:
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST2L.yml
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST2L.yml
+                includefile: fixtures/reference-102.yml
+                includefile: fixtures/reference-103.yml
     Strt2_FST1type:
         Draughts:
             Light:
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST1L.yml
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST1L.yml
-includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Mooring_stiffness.yml
+                includefile: fixtures/reference-104.yml
+                includefile: fixtures/reference-105.yml
+includefile: fixtures/reference-101.yml
 General:
   StaticsMinDamping: 200
   StageDuration[1]: 1000
