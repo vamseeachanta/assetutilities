@@ -295,3 +295,52 @@ def test_worked_example_preserves_an_existing_output_directory(tmp_path: Path) -
     assert "output directory already exists" in result.stderr
     assert sentinel.read_text() == "existing data\n"
     assert not (tmp_path / "before").exists()
+
+
+@pytest.mark.skipif(
+    os.name == "nt" or os.geteuid() == 0,
+    reason="requires unprivileged POSIX directory permissions",
+)
+def test_unreadable_nested_directory_fails(source_tree: Path) -> None:
+    nested = source_tree / "src/assetutilities/nested"
+    nested.mkdir()
+    write_source(source_tree, 'print("hidden")\n', "nested/example.py")
+    assert "PY-PRINT" in run_checker(source_tree).stdout
+    permissions = nested.stat().st_mode
+    try:
+        nested.chmod(0)
+        result = run_checker(source_tree)
+    finally:
+        nested.chmod(permissions)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "src/assetutilities/nested:0: SOURCE" in result.stdout
+    assert "PASS" not in result.stdout
+    assert "Traceback" not in result.stderr
+    assert "PY-PRINT" in run_checker(source_tree).stdout
+
+
+@pytest.mark.parametrize("operation", ["iterdir", "stat"])
+def test_source_inspection_errors_fail(
+    source_tree: Path, monkeypatch: pytest.MonkeyPatch, operation: str
+) -> None:
+    """Report enumeration and metadata errors even with privileged access."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("hygiene_checker", CHECKER)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    nested = source_tree / "src/assetutilities/nested"
+    nested.mkdir()
+    path = write_source(source_tree, '"""Clean source."""\n', "nested/example.py")
+    target = nested if operation == "iterdir" else path
+    original = getattr(Path, operation)
+
+    def unavailable(self: Path, *args, **kwargs):
+        if self == target:
+            raise PermissionError("inspection unavailable")
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, operation, unavailable)
+    findings = checker.check(source_tree)
+    relative = target.relative_to(source_tree).as_posix()
+    assert any(finding.startswith(f"{relative}:0: SOURCE") for finding in findings)

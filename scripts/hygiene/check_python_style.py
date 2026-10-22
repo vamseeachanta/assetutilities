@@ -9,6 +9,7 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import re
+import stat
 
 
 SOURCE = "src/assetutilities"
@@ -86,27 +87,60 @@ def check_file(path: Path, relative: str, baseline: dict[str, str]) -> list[str]
 def check(root: Path) -> list[str]:
     """Return policy violations in the canonical source package."""
     source_root = root / SOURCE
-    if not source_root.is_dir():
+    try:
+        parent_mode = (root / "src").lstat().st_mode
+        source_mode = source_root.lstat().st_mode
+    except FileNotFoundError:
         return [f"{SOURCE}:0: SOURCE required package directory is missing"]
-    if (root / "src").is_symlink() or source_root.is_symlink():
+    except OSError:
+        return [f"{SOURCE}:0: SOURCE cannot inspect package directory"]
+    if stat.S_ISLNK(parent_mode) or stat.S_ISLNK(source_mode):
         return [f"{SOURCE}:0: SOURCE symbolic source directories are not supported"]
+    if not stat.S_ISDIR(source_mode):
+        return [f"{SOURCE}:0: SOURCE required package directory is missing"]
     try:
         baseline = load_baseline(root)
     except (OSError, ValueError):
         return [f"{BASELINE}:0: BASELINE missing or invalid configuration"]
     findings = []
     visited = set()
-    paths = sorted(source_root.rglob("*"))
-    if (root / "pyproject.toml").exists():
-        paths.append(root / "pyproject.toml")
-    for path in paths:
+    paths = [source_root]
+    metadata = root / "pyproject.toml"
+    try:
+        metadata.lstat()
+    except FileNotFoundError:
+        pass  # Project metadata is optional in standalone source trees.
+    except OSError:
+        findings.append("pyproject.toml:0: SOURCE cannot inspect source entry")
+    else:
+        paths.insert(0, metadata)
+    while paths:
+        path = paths.pop()
         relative = path.relative_to(root).as_posix()
-        if path.is_symlink():
+        try:
+            mode = path.lstat().st_mode
+        except OSError:
+            findings.append(f"{relative}:0: SOURCE cannot inspect source entry")
+            continue
+        if stat.S_ISLNK(mode):
             findings.append(
                 f"{relative}:0: SOURCE symbolic source entries are not supported"
             )
             continue
-        if not path.is_file() or path.suffix not in {".py", ".yaml", ".yml", ".toml"}:
+        if stat.S_ISDIR(mode):
+            try:
+                paths.extend(sorted(path.iterdir(), reverse=True))
+            except OSError:
+                findings.append(
+                    f"{relative}:0: SOURCE cannot enumerate source directory"
+                )
+            continue
+        if not stat.S_ISREG(mode) or path.suffix not in {
+            ".py",
+            ".yaml",
+            ".yml",
+            ".toml",
+        }:
             continue
         if path.suffix == ".py":
             visited.add(relative)
