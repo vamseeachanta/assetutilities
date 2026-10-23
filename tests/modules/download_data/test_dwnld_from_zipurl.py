@@ -1,4 +1,5 @@
 import os
+import pytest
 from assetutilities.engine import engine
 
 
@@ -20,6 +21,7 @@ def run_process(input_file):
     return cfg
 
 
+@pytest.mark.live_data
 def test_run_process():
     input_file = "dwnld_from_zipurl.yml"
     result = run_process(input_file)

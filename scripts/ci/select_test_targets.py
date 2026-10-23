@@ -53,7 +53,7 @@ ALWAYS_XDIST = [
 
 # Module domains that are WIP staging areas, not gating suites — never shard
 # them into the CI matrix. `tests_wip` is a holding pen for not-yet-stable tests
-# (e.g. plotly polar viz that errors in the engine). See issue #99.
+# (e.g. plotly polar viz that errors in the engine).
 MATRIX_IGNORE_DOMAINS = {
     "tests_wip",
 }
