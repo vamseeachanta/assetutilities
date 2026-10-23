@@ -21,7 +21,7 @@ data:
     input_format: csv
     groups:
       -
-        label: {{label}}
+        label: "{{ label }}"
         target:
           template: collated\template_WLNG_FSTs_LNGC.xlsx
           filename: collated\WLNG_dm_fsts_lngc_label.xlsx

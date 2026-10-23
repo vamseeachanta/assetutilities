@@ -47,6 +47,7 @@ def engine(
       logging) -- the embeddable run path #3282 consumes.
     """
     cfg_argv_dict = {}
+    loaded_from_file = cfg is None
     if cfg is None:
         inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
         cfg = wwyaml.ymlInput(inputfile, updateYml=None)
@@ -67,7 +68,11 @@ def engine(
         # customYaml/CustomInputs). Dispatches the caller cfg directly under the
         # injected root; raises ValueError if cfg/root_folder missing.
         cfg_base = ConfigureApplicationInputs().configure_embed(
-            cfg, basename, root_folder, log_to_file=log_to_file
+            cfg,
+            basename,
+            root_folder,
+            log_to_file=log_to_file,
+            placeholders_resolved=loaded_from_file,
         )
         fm = FileManagement()
         cfg_base = fm.router(cfg_base)
