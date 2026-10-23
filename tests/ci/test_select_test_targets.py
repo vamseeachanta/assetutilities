@@ -209,3 +209,26 @@ def test_data_store_is_collected_for_contract_and_full_changes(changed):
         target for shard in matrix["include"] for target in shard["targets"].split()
     }
     assert "tests/data_store" in targets
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "tests/modules/yml_utilities/yml/test_data/Template_example.yml",
+        "examples/workflows/excel_utilities/input_data/inputs.csv",
+        "tests/hygiene/test_yaml_fixture_header_privacy.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_array.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_2d_array.py",
+        "tests/modules/file_management/test_file_management_file_size.py",
+        "tests/modules/file_management/test_file_management_regex.py",
+        "docs/example.md",
+        "pyproject.toml",
+    ],
+)
+def test_privacy_guard_is_always_selected(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = [
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    ]
+    assert targets.count("tests/hygiene") == 1
+    assert targets.count("tests/ci") == 1
