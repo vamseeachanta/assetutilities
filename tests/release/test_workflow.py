@@ -55,11 +55,53 @@ def test_release_build_disables_restored_uv_cache():
     assert setup.get("with", {}).get("enable-cache") is False
 
 
+@pytest.fixture
+def release_history(tmp_path):
+    """Create complete synthetic history without borrowing caller Git objects."""
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+
+    def git(*args, input=None):
+        return subprocess.run(
+            ["git", *args],
+            cwd=tmp_path,
+            env=env,
+            input=input,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+    git("init")
+    tree = git("mktree", input="")
+    parent = ""
+    for message in ("base", "tip"):
+        commit = git(
+            "hash-object",
+            "-t",
+            "commit",
+            "-w",
+            "--stdin",
+            input=(
+                f"tree {tree}\n{parent}"
+                "author Fixture <fixture> 0 +0000\n"
+                "committer Fixture <fixture> 0 +0000\n"
+                f"\n{message}\n"
+            ),
+        )
+        parent = f"parent {commit}\n"
+    git("update-ref", "HEAD", commit)
+    return git, env
+
+
 @pytest.mark.parametrize(
-    ("release_ref", "main_ref", "allowed"),
-    [("HEAD", "HEAD", True), ("HEAD^", "HEAD", True), ("HEAD", "HEAD^", False)],
+    ("release_ref", "main_ref", "expected_status"),
+    [("HEAD", "HEAD", 0), ("HEAD^", "HEAD", 0), ("HEAD", "HEAD^", 1)],
 )
-def test_release_requires_main_ancestry(tmp_path, release_ref, main_ref, allowed):
+def test_release_requires_main_ancestry(
+    tmp_path, release_history, release_ref, main_ref, expected_status
+):
     steps = workflow()["jobs"]["build"]["steps"]
     guards = [step for step in steps if step.get("name") == "Require release on main"]
     assert len(guards) == 1, "Release builds must reject commits outside main"
@@ -70,28 +112,9 @@ def test_release_requires_main_ancestry(tmp_path, release_ref, main_ref, allowed
     assert checkout["with"]["fetch-depth"] == 0
     assert steps.index(checkout) < steps.index(guard) < 2
     assert guard["env"] == {"RELEASE_COMMIT": "${{ github.sha }}"}
-    env = {
-        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
-    }
-
-    def git(*args, cwd=tmp_path):
-        return subprocess.run(
-            ["git", *args],
-            cwd=cwd,
-            env=env,
-            encoding="utf-8",
-            capture_output=True,
-            check=True,
-        ).stdout.strip()
-
-    release = git("rev-parse", release_ref, cwd=ROOT)
-    main = git("rev-parse", main_ref, cwd=ROOT)
-    objects = Path(git("rev-parse", "--git-path", "objects", cwd=ROOT))
-    git("init")
-    # Share immutable objects; all fixture refs stay in the disposable repository.
-    (tmp_path / ".git/objects/info/alternates").write_text(
-        (ROOT / objects).resolve().as_posix() + "\n", encoding="utf-8", newline="\n"
-    )
+    git, env = release_history
+    release = git("rev-parse", release_ref)
+    main = git("rev-parse", main_ref)
     git("update-ref", "refs/remotes/origin/main", main)
     result = subprocess.run(
         ["bash", "-e", "-o", "pipefail", "-c", guard["run"]],
@@ -101,7 +124,7 @@ def test_release_requires_main_ancestry(tmp_path, release_ref, main_ref, allowed
         capture_output=True,
         check=False,
     )
-    assert (result.returncode == 0) is allowed
+    assert result.returncode == expected_status
 
 
 def test_only_version_tags_trigger_release():
