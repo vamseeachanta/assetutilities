@@ -139,6 +139,34 @@ def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "src/assetutilities/devtools/modernize_deps.py",
+        "tests/modules/devtools/test_devtools_coverage.py",
+        "tests/modules/devtools/test_devtools_report.py",
+        "docs/sub_utilities/assets/style.css",
+        "scripts/reporting/generate_devtools_report.py",
+        "docs/reports/modules/adevtools/index.html",
+        "docs/reports/modules/adevtools/changes.json",
+    ],
+)
+def test_report_inputs_select_devtools_freshness_check(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "modules-devtools"}
+    assert [
+        shard for shard in matrix["include"] if shard["name"] == "modules-devtools"
+    ] == [
+        {
+            "name": "modules-devtools",
+            "targets": "tests/modules/devtools",
+            "mode": "xdist",
+        }
+    ]
+    assert (REPO_ROOT / "tests/modules/devtools/test_devtools_report.py").is_file()
+
+
 def test_matrix_module_scope_one_shard_per_domain():
     m = to_matrix(
         [

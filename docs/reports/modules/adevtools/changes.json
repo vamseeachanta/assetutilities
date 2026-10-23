@@ -1,0 +1,22 @@
+{
+  "revision": "C",
+  "date": "2026-10-22",
+  "changes": [
+    {
+      "section": "Validation and CI routing",
+      "description": "The rebuild check moves into the devtools test domain; report inputs select that domain, and all table counts and headline values have hand-counted anchors."
+    },
+    {
+      "section": "Dependency format limits",
+      "description": "Quoted markers and continuation lines can produce invalid TOML; hash options and alternate package spellings remain literal strings, as shown by characterization probes."
+    },
+    {
+      "section": "Stylesheet attribution",
+      "description": "The complete documentation stylesheet is inlined, preserving its source attribution."
+    },
+    {
+      "section": "Browser evidence",
+      "description": "Browser evidence is limited to the headless Chrome chart-name check; the marked check skips when Chrome cannot launch."
+    }
+  ]
+}
