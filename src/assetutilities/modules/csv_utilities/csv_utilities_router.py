@@ -1,11 +1,48 @@
-from assetutilities.modules.csv_utilities.csv_utilities import CSVUtilities
+"""Standalone path-based CSV normalization; zip helpers remain independent."""
 
-csv_utilities = CSVUtilities()
+from pathlib import Path
+
+import pandas as pd
+import yaml
 
 
 class CSVUtilitiesRouter:
     def router(self, cfg):
-        if cfg["csv_utilities"]["encoding"] == "latin1":
-            pass
-
+        options = cfg["csv_utilities"]
+        source_name = options.get("input_file") or options.get("txt_file")
+        if not source_name:
+            raise ValueError("csv_utilities requires input_file (or txt_file)")
+        source = Path(source_name)
+        if not source.is_absolute():
+            source = Path(cfg["Analysis"]["analysis_root_folder"]) / source
+        delimiter = options.get("delimiter", ",")
+        encoding = options.get("encoding") or "utf-8"
+        kwargs = {"sep": delimiter, "nrows": options.get("nrows")}
+        # pandas read_csv API: encoding errors are strict by default; retry only
+        # decoding errors, never parse errors or a missing file.
+        try:
+            frame = pd.read_csv(source, encoding=encoding, **kwargs)
+        except UnicodeDecodeError:
+            if options.get("encoding"):
+                raise
+            encoding = "latin1"
+            frame = pd.read_csv(source, encoding=encoding, **kwargs)
+        folder = Path(cfg["Analysis"]["result_folder"])
+        folder.mkdir(parents=True, exist_ok=True)
+        normalized = folder / f"{source.stem}_normalized.csv"
+        summary_path = folder / f"{source.stem}_summary.yml"
+        frame.to_csv(normalized, index=False, encoding="utf-8")
+        summary = {
+            "input_file": str(source),
+            "encoding_used": encoding,
+            "delimiter": delimiter,
+            "n_rows": len(frame),
+            "n_columns": len(frame.columns),
+            "columns": list(frame.columns),
+        }
+        summary_path.write_text(yaml.safe_dump(summary), encoding="utf-8")
+        options["results"] = {
+            "normalized_file": str(normalized),
+            "summary_file": str(summary_path),
+        }
         return cfg

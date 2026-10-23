@@ -105,3 +105,56 @@ workflows:
       - examples/workflows/reportgen/outputs/sample-report.out.md
     test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
     runtime: fast
+
+  # PDF/CSV inputs are generated, never downloaded or committed. Preparation
+  # preserves existing files. See examples/workflows/deferred-workflows.md.
+  - id: read_pdf
+    basename: read_pdf
+    input: examples/workflows/read_pdf/input.yml
+    outputs:
+      - examples/workflows/read_pdf/results/read_pdf_alpha_0.txt
+      - examples/workflows/read_pdf/results/read_pdf_beta_1.txt
+    result:
+      kind: files
+    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/read_pdf/input.yml
+    runtime: fast
+
+  - id: edit_pdf
+    basename: edit_pdf
+    input: examples/workflows/edit_pdf/input.yml
+    outputs:
+      - examples/workflows/read_pdf/outputs/input.pdf_page_1-1.pdf
+      - examples/workflows/read_pdf/outputs/input.pdf_page_2-2.pdf
+    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
+    runtime: fast
+
+  - id: csv_utilities
+    basename: csv_utilities
+    input: examples/workflows/csv_utilities/input.yml
+    outputs:
+      - examples/workflows/csv_utilities/results/input_normalized.csv
+      - examples/workflows/csv_utilities/results/input_summary.yml
+    result:
+      kind: files
+    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
+    runtime: fast
+
+  - id: text_analytics
+    basename: text_analytics
+    input: examples/workflows/text_analytics/input.yml
+    outputs:
+      - examples/workflows/text_analytics/results/text_analytics_comparison.yml
+    result:
+      kind: files
+    test: uv run python -m assetutilities examples/workflows/text_analytics/input.yml
+    runtime: fast
+
+  - id: gitpython
+    basename: gitpython
+    input: examples/workflows/gitpython/input.yml
+    outputs:
+      - examples/workflows/gitpython/results/gitpython_report.yml
+    result:
+      kind: files
+    test: uv run python -m assetutilities examples/workflows/gitpython/input.yml
+    runtime: fast
