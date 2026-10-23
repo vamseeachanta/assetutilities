@@ -32,3 +32,9 @@ P6 Word and PDF output is implemented in
 `tests/modules/reportgen/test_standard_report.py`, and documented in
 `docs/modules/documentation/standard-report.md`. The neutral input example is
 `examples/workflows/reportgen/standard-report.json`.
+
+## Package release tooling
+
+Release helpers live in `scripts/release/`, with tests in `tests/release/`
+and setup and reuse instructions in `docs/sub_release/pypi.md`. The publishing
+workflow is `.github/workflows/release.yml`.
