@@ -3,8 +3,8 @@
 """Render an X-Y plot from two plain arrays using the existing visualization template.
 
 This is intentionally thin: rather than re-deriving the (many) matplotlib/plotly
-settings, it loads the canonical XY template that already ships with the test
-suite (``tests/modules/visualization/template_xy_line_input.yml``), injects the
+settings, it loads the canonical XY template bundled in the package
+(``base_configs/modules/visualization/template_xy_line_input.yml``), injects the
 caller's ``x``/``y`` arrays, output location and labels, then hands the resulting
 cfg to :class:`VisualizationComponents`. This keeps a single source of truth for
 plot styling and matches how other plot paths build their cfg.
@@ -12,29 +12,21 @@ plot styling and matches how other plot paths build their cfg.
 
 import copy
 import os
+import pkgutil
+
+import yaml
 
 from assetutilities.common.update_deep import AttributeDict
 from assetutilities.common.visualization_components import VisualizationComponents
 
-# Canonical XY line template bundled with the test suite. Resolved relative to the
-# repository root so the helper works from an installed package or a checkout.
-_REPO_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-)
-_TEMPLATE_PATH = os.path.join(
-    _REPO_ROOT,
-    "tests",
-    "modules",
-    "visualization",
-    "template_xy_line_input.yml",
-)
+_TEMPLATE_RESOURCE = "base_configs/modules/visualization/template_xy_line_input.yml"
 
 
 def _load_template():
-    from assetutilities.common.yml_utilities import WorkingWithYAML
-
-    wwyaml = WorkingWithYAML()
-    return wwyaml.ymlInput(_TEMPLATE_PATH, updateYml=None)
+    data = pkgutil.get_data("assetutilities", _TEMPLATE_RESOURCE)
+    if data is None:
+        raise FileNotFoundError("The packaged XY plotting template is missing")
+    return yaml.safe_load(data)
 
 
 def plot_xy_from_arrays(
