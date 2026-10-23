@@ -19,6 +19,10 @@ This is the canonical documentation entry point for issue routing in
 
 ## Curated Routing Surfaces
 
+The [workflow core guide](modules/core-hardening.md) documents handler
+registration, safe YAML streams, optional placeholders, logging and a runnable
+example with independently checked synthetic data.
+
 These files are trusted routing surfaces:
 
 - `AGENTS.md`

@@ -1,33 +1,8 @@
-# ABOUTME: Loguru-based logging setup shim for assetutilities (issue #28).
-# ABOUTME: Reproduces the existing run-log FILE behavior; lazy-imports loguru with a stdlib fallback.
-"""Loguru-based logging setup shim.
+"""One logging pipeline for native loguru and legacy stdlib emitters.
 
-This module is the forward-looking replacement for the stdlib `logging`
-configuration performed by ``common.set_logging.set_logging``. It exposes a
-single :data:`logger` object and a :func:`setup_logging` function that
-reproduces *exactly* the run-log file the repo writes today:
-
-* file path  : ``<log_folder>/<file_name>.log``
-* file mode  : ``w`` (truncate/overwrite per run — matches ``logging.basicConfig(filemode="w")``)
-* line format: ``MM/DD/YYYY HH:MM:SS AM - <name> - <LEVEL> - <message>``
-  (the human-readable format the stdlib handler wrote, *not* loguru's default)
-* level      : driven by ``cfg["default"]["log_level"]``
-
-Backward compatibility / no hard dependency on import
------------------------------------------------------
-``loguru`` is declared in ``pyproject.toml`` and is the intended runtime
-dependency. However, importing this module must never fail if loguru happens
-to be absent (e.g. a stripped test environment). We therefore:
-
-* import loguru lazily inside :func:`setup_logging` (not at module import), and
-* fall back to a thin stdlib-``logging`` shim (:data:`logger`) that supports the
-  same ``.info()/.debug()/...`` call surface when loguru is unavailable.
-
-Existing ``logging``-based code keeps working: loguru records are propagated
-back into the stdlib hierarchy via a ``PropagateHandler`` (re-used from
-``set_logging``) so module-level ``logging.getLogger(__name__)`` loggers still
-emit. This module does not remove or alter ``set_logging``; both can coexist
-during the migration.
+Both setup_logging and set_logging configure this pipeline. Stdlib records
+flow into loguru; no reverse propagation sink is installed, avoiding loops and
+multiple writes. Without loguru, a stdlib fallback preserves the run-log API.
 """
 
 from __future__ import annotations
@@ -40,9 +15,7 @@ import sys
 # loguru uses {time}/{level}/{message}; map the stdlib format onto loguru tokens.
 _STDLIB_FILE_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 _STDLIB_DATEFMT = "%m/%d/%Y %I:%M:%S %p"
-_LOGURU_FILE_FORMAT = (
-    "{time:MM/DD/YYYY hh:mm:ss A} - {name} - {level} - {message}"
-)
+_LOGURU_FILE_FORMAT = "{time:MM/DD/YYYY hh:mm:ss A} - {name} - {level} - {message}"
 
 
 def _resolve_log_file(cfg: dict) -> str:
@@ -100,8 +73,8 @@ def _make_logger():
     Imported lazily so module import never requires loguru.
     """
     try:
-        from loguru import logger as _loguru_logger  # noqa: PLC0415
-    except Exception:  # pragma: no cover - exercised only without loguru
+        from loguru import logger as _loguru_logger
+    except ImportError:  # pragma: no cover - exercised only without loguru
         return _StdlibLoggerShim()
     return _loguru_logger
 
@@ -113,69 +86,71 @@ logger = _make_logger()
 LOGURU_AVAILABLE = not isinstance(logger, _StdlibLoggerShim)
 
 
-def _configure_stdlib_fallback(logfilename: str, level: str) -> None:
-    """Configure stdlib logging to write the run-log file (loguru absent path)."""
+def _reset_root_handlers():
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
+        if getattr(handler, "_assetutilities_handler", False):
+            handler.close()
+
+
+def _configure_stdlib_fallback(logfilename, level: str) -> None:
+    """Configure one stdlib sink per destination when loguru is absent."""
+    handlers = [logging.StreamHandler(sys.stdout)]
+    if logfilename is not None:
+        handlers.append(logging.FileHandler(logfilename, mode="w", encoding="utf-8"))
+    for handler in handlers:
+        handler._assetutilities_handler = True
     logging.basicConfig(
-        level=getattr(logging, level, logging.INFO),
+        level=level,
         format=_STDLIB_FILE_FORMAT,
         datefmt=_STDLIB_DATEFMT,
-        filename=logfilename,
-        filemode="w",
+        handlers=handlers,
         force=True,
     )
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def setup_logging(cfg: dict):
-    """Configure loguru (or a stdlib fallback) to write the repo run-log file.
+    """Write each message once to stdout and optionally the configured run log.
 
-    Reproduces the run-log path/format/overwrite behavior of
-    ``common.set_logging.set_logging`` so downstream consumers see the same
-    ``<log_folder>/<file_name>.log`` output.
-
-    Parameters
-    ----------
-    cfg:
-        Application config dict. Must contain ``cfg["Analysis"]["log_folder"]``
-        and ``cfg["Analysis"]["file_name"]``. ``cfg["default"]["log_level"]`` is
-        optional (defaults to ``INFO``).
-
-    Returns
-    -------
-    The same ``cfg`` (for call-site parity with ``set_logging``).
+    Analysis.log_to_file defaults to True. False creates no log directory.
+    Reconfiguration replaces earlier sinks and truncates the current run log.
+    Exception-local diagnostics are disabled so logs do not expose local values.
     """
     level = _resolve_level(cfg)
-    logfilename = _resolve_log_file(cfg)
+    numeric_level = logging.getLevelName(level)
+    if numeric_level == f"Level {level}":
+        raise ValueError(f"Invalid log level: {level}")
+    level = logging.getLevelName(numeric_level)
+    logfilename = (
+        _resolve_log_file(cfg) if cfg["Analysis"].get("log_to_file", True) else None
+    )
+    _reset_root_handlers()
 
     if not LOGURU_AVAILABLE:
-        # No loguru: write the run-log via stdlib so behavior is preserved.
         _configure_stdlib_fallback(logfilename, level)
         logger.info("Logging started successfully (stdlib fallback) ...")
         return cfg
 
-    # Reset stdlib root handlers so the human-readable file format is the one
-    # loguru writes (avoids the prior double-write of a JSON-serialized file).
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
-
     logger.remove()
-    # Console sink (colorized by loguru when attached to a TTY).
-    logger.add(sys.stdout, level=level)
-    # Run-log FILE sink — human-readable, overwrite per run (mode="w").
-    logger.add(
-        logfilename,
-        level=level,
-        format=_LOGURU_FILE_FORMAT,
-        mode="w",
-    )
+    # Loguru migration guide, "Replacing exception()": disable traceback
+    # expansion and variable inspection for application run logs.
+    sink_options = {"level": level, "backtrace": False, "diagnose": False}
+    logger.add(sys.stdout, **sink_options)
+    if logfilename is not None:
+        logger.add(
+            logfilename,
+            format=_LOGURU_FILE_FORMAT,
+            mode="w",
+            encoding="utf-8",
+            **sink_options,
+        )
 
-    # Keep stdlib-`logging`-based modules working during the migration:
-    # propagate loguru records into the stdlib hierarchy.
-    from assetutilities.common.set_logging import PropagateHandler  # noqa: PLC0415
+    # One-way interception follows Loguru's standard logging integration.
+    from assetutilities.common.set_logging import InterceptHandler
 
-    logger.add(PropagateHandler(), format="{message}")
-
+    intercept = InterceptHandler()
+    intercept._assetutilities_handler = True
+    logging.root.addHandler(intercept)
+    logging.root.setLevel(numeric_level)
     logger.info("Logging started successfully ...")
     return cfg
