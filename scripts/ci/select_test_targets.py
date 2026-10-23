@@ -44,16 +44,17 @@ import re
 import sys
 from pathlib import Path
 
-# Always-on cross-cutting set: the flat common/core unit suite. Runs for every
-# PR (so the matrix is never empty) and is cheap.
+# Always-on cross-cutting set: common/core units and CI contracts. Runs for
+# every PR, including release-workflow and contract-test-only changes.
 ALWAYS_XDIST = [
     "tests/unit",
     "tests/data_store",
+    "tests/ci",
 ]
 
 # Module domains that are WIP staging areas, not gating suites — never shard
 # them into the CI matrix. `tests_wip` is a holding pen for not-yet-stable tests
-# (e.g. plotly polar viz that errors in the engine). See issue #99.
+# (e.g. plotly polar viz that errors in the engine).
 MATRIX_IGNORE_DOMAINS = {
     "tests_wip",
 }

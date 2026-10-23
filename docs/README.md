@@ -19,6 +19,9 @@ This is the canonical documentation entry point for issue routing in
 
 ## Curated Routing Surfaces
 
+Release automation, offline CI and source reuse examples are documented in
+[`sub_release/releasing.md`](sub_release/releasing.md).
+
 These files are trusted routing surfaces:
 
 - `AGENTS.md`
