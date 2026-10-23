@@ -79,8 +79,10 @@ CORE_PREFIXES = (
     "scripts/ci/",  # the selector itself / its tests -> fail safe to full
 )
 
-# Exact non-module paths that should run a specific contract suite.
+# Exact paths that should run an additional suite alongside module tests.
 CONTRACT_ROUTES = {
+    "src/assetutilities/devtools/ce_trial.py": "tests/devtools",
+    "tests/devtools/test_ce_trial.py": "tests/devtools",
     "config/repo_structure.yml": "tests/repo_structure",
     "MODULE_STRUCTURE.md": "tests/docs",
     "docs/maps/assetutilities-operator-map.md": "tests/docs",
@@ -133,7 +135,6 @@ def select(changed: list[str], root: Path) -> dict:
         if p in CONTRACT_ROUTES:
             contracts.add(CONTRACT_ROUTES[p])
             relevant = True
-            continue
         mt = _MODULE_TEST_RE.match(p)
         if mt:
             if mt.group(1) not in MATRIX_IGNORE_DOMAINS:

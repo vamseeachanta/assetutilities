@@ -282,3 +282,9 @@ To contribute to AssetUtilities DevTools:
 ## License
 
 Part of AssetUtilities - MIT License
+
+## Compound Engineering trial assessment
+
+`PYTHONPATH=src uv run --no-project python -m assetutilities.devtools.ce_trial examples/devtools/ce-trial-evidence.json` reads reviewed evidence and prints a recommendation without changing repositories.
+
+See the [decision, input format and worked example](../../../docs/modules/agent-os/ce-trial-decision.md) and [persistent adoption note](../../../docs/modules/agent-os/ce-adoption-note.md). Missing trial results currently block rollout.
