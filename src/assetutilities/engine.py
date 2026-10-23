@@ -1,20 +1,19 @@
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
-# Loguru logging shim (issue #28). Drop-in replacement for `logging.info(...)`;
-# the run-log file is still configured by ApplicationManager via set_logging.
-from assetutilities.common.logging_setup import logger
 from assetutilities.common.download_data.dwnld_from_zipurl import DownloadDataFromURL
 from assetutilities.common.file_edit import FileEdit
 from assetutilities.common.file_management import FileManagement
-from assetutilities.common.text_analytics import TextAnalytics
+
+# Loguru logging shim (issue #28). Drop-in replacement for `logging.info(...)`;
+# the run-log file is still configured by ApplicationManager via set_logging.
+from assetutilities.common.logging_setup import logger
 from assetutilities.common.update_deep import AttributeDict
 from assetutilities.common.utilities import save_application_cfg
 from assetutilities.common.visualization_components import VisualizationComponents
 from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
-from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
+from assetutilities.engine_registry import runner_registry
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
-from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
 
 library_name = "assetutilities"
 
@@ -74,7 +73,11 @@ def engine(
     elif config_flag:
         fm = FileManagement()
         cfg_base = app_manager.configure(
-            cfg, library_name, basename, cfg_argv_dict, inputfile,
+            cfg,
+            library_name,
+            basename,
+            cfg_argv_dict,
+            inputfile,
             root_folder=root_folder,
         )
         cfg_base = fm.router(cfg_base)
@@ -86,7 +89,10 @@ def engine(
 
     logger.info(f"{basename}, application ... START")
 
-    if basename in ["excel_utilities"]:
+    runner_class = runner_registry.get(basename)
+    if runner_class is not None:
+        cfg_base = runner_class().run(cfg_base)
+    elif basename in ["excel_utilities"]:
         # Reader imports
         from assetutilities.modules.excel_utilities.excel_utilities import (
             ExcelUtilities,
@@ -114,18 +120,6 @@ def engine(
             "GitPythonUtilities', which does not exist). Implement that module "
             "and re-wire this branch before using the 'gitpython' workflow."
         )
-    elif basename in ["read_pdf"]:
-        # Reader imports (lazy: pulls optional PDF deps such as tabula/PyPDF2)
-        from assetutilities.modules.pdf_utilities.read_pdf import ReadPDF
-
-        read_pdf = ReadPDF()
-        cfg_base["result"] = read_pdf.read_pdf(cfg_base)
-    elif basename in ["edit_pdf"]:
-        # Reader imports (lazy: pulls optional PDF dep PyPDF2)
-        from assetutilities.modules.pdf_utilities.edit_pdf import EditPDF
-
-        edit_pdf = EditPDF()
-        edit_pdf.edit_pdf(cfg_base)
     elif basename in ["text_analytics"]:
         # The TextAnalytics.router/get_subset_files methods are no-op stubs
         # (`pass`), so dispatching here silently produced no output. Fail loudly
@@ -161,9 +155,6 @@ def engine(
 
         # init and run reportgen using config
         reportgen.run(cfg_base)
-    elif basename == "zip_utilities":
-        zu = ZipUtilities()
-        cfg_base = zu.router(cfg_base)
 
     elif basename == "csv_utilities":
         # CSVUtilitiesRouter.router is a no-op stub (the only branch is `pass`);
