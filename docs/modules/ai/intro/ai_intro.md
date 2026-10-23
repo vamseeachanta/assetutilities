@@ -21,7 +21,7 @@ Create a personal assistant
 
 Check the team's repository for an example journal
 
-## Jitesh's tips for AI use
+## Additional tips for AI use
 
 AI tools can be transformative, but they?re only as effective as the effort and finesse you put in.
 

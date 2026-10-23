@@ -3,7 +3,7 @@
 - Issue: [#31 — tech debt | ACMA | Source Files | Sync vs. Copy](https://github.com/vamseeachanta/assetutilities/issues/31)
 - Status: decided (memo)
 - Date: 2026-06-19
-- Owners: @vamseeachanta (direction), @getsivakumar (architecture + gitignore boilerplate)
+- Owners: Maintainer (direction), contributor (architecture + gitignore boilerplate)
 - Scope of this memo: choose a method for organizing ACMA (WLNG) project source files and ship the **reusable, folder-level `.gitignore` boilerplate** here in `assetutilities`. The ACMA-specific rollout is tracked in the ACMA project repo (`acma-projects`).
 
 ## Background
@@ -95,7 +95,7 @@ gitignore boilerplate from `assetutilities` (this memo + the snippet below).
 
 Rationale, grounded in this repo and the issue's own constraints:
 
-- **It is the issue's stated "Ideal" (M1)** and matches @getsivakumar's settled
+- **It is the issue's stated "Ideal" (M1)** and matches the contributor’s settled
   guidance: *explicit `.gitignore`, documented convention, no implicit `.`/`_`
   naming.* M1 needs exactly one artifact — a good `.gitignore` — and that
   artifact is the thing #31 asks us to make reusable.

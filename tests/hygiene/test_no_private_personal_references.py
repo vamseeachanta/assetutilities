@@ -13,20 +13,29 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 PRIVATE_NAME_DIGEST = "229198ac50189365a5dd6412995ab24b4126c777fd69673153f92a0b1ba46882"
+PRIVATE_SURNAME_DIGEST = (
+    "f520df8438a87c99ba3ea1738359a7118ac5687f8544234da1ad3eacf32463a1"
+)
+PRIVATE_NAME_DIGESTS = ((4, PRIVATE_NAME_DIGEST), (6, PRIVATE_SURNAME_DIGEST))
 RULE = "private-person-name"
 
 
-def _contains_name(data: bytes, digest: str = PRIVATE_NAME_DIGEST) -> bool:
+def _contains_name(
+    data: bytes, digests: tuple[tuple[int, str], ...] = PRIVATE_NAME_DIGESTS
+) -> bool:
     if b"\0" in data:
         return False
     text = data.decode("utf-8", errors="surrogateescape")
     return any(
-        hashlib.sha256(word.casefold().encode("utf-8")).hexdigest() == digest
-        for word in set(re.findall(r"\w+", text))
+        hashlib.sha256(word.casefold()[:length].encode("utf-8")).hexdigest() == digest
+        for word in set(re.findall(r"[^\W_]+", text))
+        for length, digest in digests
     )
 
 
-def _private_name_files(root: Path, digest: str = PRIVATE_NAME_DIGEST) -> list[str]:
+def _private_name_files(
+    root: Path, digests: tuple[tuple[int, str], ...] = PRIVATE_NAME_DIGESTS
+) -> list[str]:
     environment = os.environ.copy()
     for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
         environment.pop(key, None)
@@ -49,7 +58,7 @@ def _private_name_files(root: Path, digest: str = PRIVATE_NAME_DIGEST) -> list[s
             data = path.read_bytes()
         else:
             continue
-        if _contains_name(data, digest):
+        if _contains_name(data, digests):
             matches.append(relative)
     return sorted(matches)
 
@@ -67,15 +76,42 @@ def test_tracked_text_has_no_private_name() -> None:
         (b"RESTRICTED's note", True),
         (b"a/restricted/file", True),
         (b"prestricted", False),
-        (b"restricted_suffix", False),
-        ("restricted\u00e9".encode(), False),
+        (b"restricted_suffix", True),
+        ("restricted\u00e9".encode(), True),
+        (b"RESTRICTEDcompound", True),
+        (b"13_RESTRICTED_tag", True),
+        (b"restricted2", True),
+        (b"suffix_restricted", True),
+        (b"unrestricted", False),
+        (b"restrict", False),
         (b"\xff restricted", True),
         (b"\0restricted", False),
     ],
 )
-def test_private_name_rule_uses_whole_words(data: bytes, expected: bool) -> None:
+def test_private_name_rule_matches_token_prefixes(data: bytes, expected: bool) -> None:
     digest = hashlib.sha256(b"restricted").hexdigest()
-    assert _contains_name(data, digest) is expected
+    assert _contains_name(data, ((10, digest),)) is expected
+
+
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (b"restricted", True),
+        (b"sealed", True),
+        (b"SEALEDsuffix", True),
+        (b"13_sealed_tag", True),
+        (b"unsealed", False),
+        (b"seale", False),
+    ],
+)
+def test_private_name_rule_checks_both_name_digests(
+    data: bytes, expected: bool
+) -> None:
+    digests = (
+        (10, hashlib.sha256(b"restricted").hexdigest()),
+        (6, hashlib.sha256(b"sealed").hexdigest()),
+    )
+    assert _contains_name(data, digests) is expected
 
 
 def test_rule_needs_no_source_tag_and_ignores_inherited_git_bindings(
@@ -95,5 +131,5 @@ def test_rule_needs_no_source_tag_and_ignores_inherited_git_bindings(
 
     monkeypatch.setattr(subprocess, "run", tracked_files)
     digest = hashlib.sha256(b"restricted").hexdigest()
-    assert _private_name_files(tmp_path, digest) == ["tracked.md"]
+    assert _private_name_files(tmp_path, ((10, digest),)) == ["tracked.md"]
     assert all(os.environ[key] == "unrelated-checkout" for key in keys)

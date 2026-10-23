@@ -8,7 +8,7 @@ It is used to generate an explanation document for engineering calculations bein
 
 moved code over from aeCon
 
-### Maintainer open items
+### Open items
 
 - [ ] #todo build 20in-report manually from run method
 	- [ ] flesh out implementation 

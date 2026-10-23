@@ -6,8 +6,8 @@
 # 2. python 
 # 3. miniconda 
 
-conda_home="/c/Users/sivak/miniconda3/"
-#conda_home="/c/Users/sivakumarp/AppData/Local/anaconda3"
+conda_home="$HOME/miniconda3/"
+#conda_home="$HOME/AppData/Local/anaconda3"
 #conda_home="/c/ProgramData/miniconda3"
 
 # shell script to perform daily git operations
