@@ -40,7 +40,7 @@ def explain_function(purpose: Optional[str] = None) -> Callable:
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
-            # - [ ] #todo #11_siva #acma_consultation have to clean up inputs processing
+            # - [ ] #todo have to clean up inputs processing
             params_text = (
                 "no input parameters\n" if not bound_args.arguments else "- Inputs : \n"
             )
@@ -55,7 +55,7 @@ def explain_function(purpose: Optional[str] = None) -> Callable:
                         )
                     params_text += f"\t- {param_name}: {param_value}\n"
 
-            # - [ ] #todo #11_siva #acma_consultation not really sure this ought to be
+            # - [ ] #todo not really sure this ought to be
             # converted to latex here . i think i should be able to just add a sympy expression or
             # sympy symbol to dom directly.
             # let the writers figure out how to flush to docx or markdown as appropriate.
@@ -67,7 +67,7 @@ def explain_function(purpose: Optional[str] = None) -> Callable:
             # Execute function and capture result
             result = func(*args, **kwargs)
 
-            # - [ ] #todo #11_siva #acma_consultation - review this.. this is not exactly like the input value printing above.
+            # - [ ] #todo - review this.. this is not exactly like the input value printing above.
             # Document output with multiple return values support
             output_text = "- Output : \n"
             if isinstance(result, tuple):
