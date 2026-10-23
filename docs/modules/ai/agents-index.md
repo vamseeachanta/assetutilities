@@ -39,7 +39,9 @@ definition are not executable specifications.
 Duplicate mapping keys, duplicate agent names, unsafe YAML tags, recursive
 structures, non-string mapping keys, timestamps and non-finite numbers are
 rejected. Dates intended as metadata must be quoted strings. YAML merge keys
-are unsupported. Use reviewed local configuration; the parser is not a
+are unsupported. Strings and mapping keys must be encodable as UTF-8;
+unpaired surrogates are rejected in catalogs and prompt requests, including
+direct Python API arguments. Use reviewed local configuration; the parser is not a
 resource-isolation boundary for arbitrary large or adversarial documents.
 
 A prompt request has exactly `agent`, `template` and `inputs`. Templates use

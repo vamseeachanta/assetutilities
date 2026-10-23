@@ -83,6 +83,72 @@ def test_invalid_catalog_rejected(text):
         parse_agents(text)
 
 
+@pytest.mark.parametrize("surrogate", ["\ud800", "\udfff"], ids=["high", "low"])
+@pytest.mark.parametrize("location", ["value", "key"])
+@pytest.mark.parametrize("syntax", ["json", "yaml"])
+@pytest.mark.parametrize("from_file", [False, True], ids=["memory", "file"])
+def test_catalog_rejects_surrogates(
+    agents, tmp_path, surrogate, location, syntax, from_file
+):
+    agents[0]["metadata"] = {
+        "nested": [{surrogate: "text"} if location == "key" else surrogate]
+    }
+    text = json.dumps(agents)
+    if syntax == "yaml":
+        text = "agents: " + text
+    with pytest.raises(ValueError, match="UTF-8"):
+        if from_file:
+            load_agents(write_yaml(tmp_path, text))
+        else:
+            parse_agents(text)
+
+
+@pytest.mark.parametrize("operation", ["bundle", "render"])
+@pytest.mark.parametrize("field", ["role", "principles", "metadata"])
+def test_direct_catalog_apis_reject_surrogates(agents, operation, field):
+    agents[0][field] = {
+        "role": "test\ud800",
+        "principles": ["test\udfff"],
+        "metadata": {"nested": [{"\ud800": "text"}]},
+    }[field]
+    with pytest.raises(ValueError, match="UTF-8"):
+        if operation == "bundle":
+            bundle_agents(agents)
+        else:
+            render_prompt(agents, "python_programmer", "Task", {})
+
+
+@pytest.mark.parametrize("surrogate", ["\ud800", "\udfff"], ids=["high", "low"])
+@pytest.mark.parametrize("location", ["template", "input_value", "input_key"])
+def test_direct_prompt_rejects_surrogates(agents, surrogate, location):
+    template, inputs = {
+        "template": ("Task " + surrogate, {}),
+        "input_value": ("Task $task", {"task": surrogate}),
+        "input_key": ("Task $task", {surrogate: "text"}),
+    }[location]
+    with pytest.raises(ValueError, match="UTF-8"):
+        render_prompt(agents, "python_programmer", template, inputs)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        r'[{"name":"a","role":"\ud83d\ude80","metadata":{"\ud83d\ude80":"text"}}]',
+        'agents: [{name: a, role: "\\U0001F680", metadata: {"\\U0001F680": text}}]',
+    ],
+    ids=["json", "yaml"],
+)
+def test_supplementary_strings_and_keys_remain_portable(text):
+    agents = parse_agents(text)
+    assert agents == [
+        {"name": "a", "role": "\U0001f680", "metadata": {"\U0001f680": "text"}}
+    ]
+    assert parse_agents(bundle_agents(agents)) == agents
+    assert render_prompt(
+        agents, "a", "Task $task \U0001f680", {"task": "\U0001f680"}
+    ) == ("# a\n\nRole: \U0001f680\n\nTask \U0001f680 \U0001f680\n")
+
+
 def test_render_exact_prompt(agents):
     """Manual substitution: $task -> repair parser, $evidence -> failing test.
 
@@ -140,7 +206,7 @@ def test_portable_bundle_round_trip(agents):
 
 
 @pytest.mark.parametrize(
-    "value", [1e-7, 1e20, "before\u0085after", "before\u2028after"]
+    "value", [1e-7, 1e20, "before\u0085after", "before\u2028after", "\U0001f680"]
 )
 @pytest.mark.parametrize("from_file", [False, True], ids=["memory", "file"])
 def test_bundle_preserves_metadata(agents, tmp_path, value, from_file):
@@ -227,7 +293,11 @@ def test_cli_validate_and_bundle(capsys):
     assert json.loads(capsys.readouterr().out)["agents"] == load_agents(source)
 
 
-@pytest.mark.parametrize("value", ["caf\u00e9", "\u2192"], ids=["accent", "arrow"])
+@pytest.mark.parametrize(
+    "value",
+    ["caf\u00e9", "\u2192", "\U0001f680"],
+    ids=["accent", "arrow", "supplementary"],
+)
 def test_cli_redirected_bundle_is_utf8(tmp_path, agents, value):
     agents[0]["metadata"] = {"text": value}
     source = write_yaml(tmp_path, json.dumps(agents, ensure_ascii=False))
@@ -245,7 +315,11 @@ def test_cli_redirected_bundle_is_utf8(tmp_path, agents, value):
     assert validated.stderr == b""
 
 
-@pytest.mark.parametrize("value", ["caf\u00e9", "\u2192"], ids=["accent", "arrow"])
+@pytest.mark.parametrize(
+    "value",
+    ["caf\u00e9", "\u2192", "\U0001f680"],
+    ids=["accent", "arrow", "supplementary"],
+)
 def test_cli_redirected_prompt_is_utf8(tmp_path, value):
     request = write_yaml(
         tmp_path,
@@ -278,6 +352,56 @@ def run_legacy_cli(*args):
         env=env,
         cwd=ROOT,
     )
+
+
+@pytest.mark.parametrize("syntax", ["json", "yaml"])
+@pytest.mark.parametrize("location", ["value", "key"])
+@pytest.mark.parametrize("command", ["validate", "bundle", "render"])
+def test_cli_rejects_catalog_surrogates(tmp_path, agents, syntax, location, command):
+    agents[0]["metadata"] = {"\ud800": "text"} if location == "key" else "\ud800"
+    text = json.dumps(agents)
+    if syntax == "yaml":
+        text = "agents: " + text
+    source = write_yaml(tmp_path, text)
+    args = [command, source]
+    if command == "render":
+        args.append(ROOT / "examples/agent_prompt.yaml")
+    result = run_legacy_cli(*args)
+    assert result.returncode == 1
+    assert result.stdout == b""
+    assert result.stderr.startswith(b"Invalid configuration:")
+    assert b"UTF-8" in result.stderr
+    assert b"Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("syntax", ["json", "yaml"])
+@pytest.mark.parametrize(
+    "location", ["agent", "template", "input_value", "input_key", "request_key"]
+)
+def test_cli_rejects_request_surrogates(tmp_path, syntax, location):
+    request = {
+        "agent": "python_programmer",
+        "template": "Task $task",
+        "inputs": {"task": "text"},
+    }
+    if location in {"agent", "template"}:
+        request[location] = "\udfff"
+    elif location == "request_key":
+        request["\udfff"] = "text"
+    else:
+        request["inputs"] = (
+            {"\udfff": "text"} if location == "input_key" else {"task": "\udfff"}
+        )
+    text = json.dumps(request)
+    if syntax == "yaml":
+        text = "---\n" + text
+    source = write_yaml(tmp_path, text)
+    result = run_legacy_cli("render", CATALOG / "multi_agent.yaml", source)
+    assert result.returncode == 1
+    assert result.stdout == b""
+    assert result.stderr.startswith(b"Invalid configuration:")
+    assert b"UTF-8" in result.stderr
+    assert b"Traceback" not in result.stderr
 
 
 def test_cli_worked_example(capsys):

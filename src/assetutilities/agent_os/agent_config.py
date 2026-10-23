@@ -42,14 +42,23 @@ def _json_data(value: Any, ancestors: tuple = ()) -> None:
             raise ValueError("Recursive data is not supported")
         ancestors = (*ancestors, id(value))
         if isinstance(value, dict):
-            if any(not isinstance(key, str) for key in value):
-                raise ValueError("Mapping keys must be strings")
+            for key in value:
+                if not isinstance(key, str):
+                    raise ValueError("Mapping keys must be strings")
+                _json_data(key)
             value = value.values()
         for item in value:
             _json_data(item, ancestors)
+    elif isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise ValueError(
+                "Strings and mapping keys must be valid UTF-8 text"
+            ) from exc
     elif (
         value is None
-        or isinstance(value, (str, bool, int))
+        or isinstance(value, (bool, int))
         or isinstance(value, float)
         and math.isfinite(value)
     ):
@@ -150,6 +159,8 @@ def _catalog(data: Any) -> list[dict[str, Any]]:
 def _substitute(template: str, inputs: dict[str, str]) -> str:
     if not _text(template) or not isinstance(inputs, dict):
         raise ValueError("A nonempty template and input mapping are required")
+    _json_data(template)
+    _json_data(inputs)
     if any(not _text(key) or not _text(value) for key, value in inputs.items()):
         raise ValueError("Input keys and values must be nonempty strings")
     required = set()
