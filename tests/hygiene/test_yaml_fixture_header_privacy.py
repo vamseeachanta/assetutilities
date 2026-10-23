@@ -44,7 +44,8 @@ PRIVATE_PATTERNS = (
     (
         "mount path",
         re.compile(
-            r"(?<![\w:/])/(?:mnt|media|Volumes|srv|net)(?:/|(?=$|[\s\"']))",
+            r"(?:(?<![\w:/])|(?<=file://))"
+            r"/(?:mnt|media|Volumes|srv|net)(?:/|(?=$|[\s\"']))",
             re.I,
         ),
     ),
@@ -407,7 +408,9 @@ def test_batch_placeholders_keep_a_command_and_argument(name):
 
 
 @pytest.mark.parametrize("directory", ["mnt", "media", "Volumes", "srv", "net"])
-@pytest.mark.parametrize("prefix", ["# File: ", "path: ", 'path: "', "path: '"])
+@pytest.mark.parametrize(
+    "prefix", ["# File: ", "path: ", 'path: "', "path: '", "path: file://"]
+)
 def test_absolute_mount_paths_are_rejected(directory, prefix):
     path = "/" + directory + "/example/fixture.yml"
     kinds = {"mount path"}
@@ -462,17 +465,128 @@ def test_example_csv_paths_match_sanitized_test_fixtures(name):
         ROOT / "examples/workflows/excel_utilities/input_data" / name
     ).read_bytes()
     expected = (FIXTURES / relative).read_bytes()
-    assert actual.splitlines() == expected.splitlines()
-    assert b"\r" not in actual
+    assert actual == expected
 
 
-def test_concatenate_import_does_not_run_engine(monkeypatch):
+@pytest.mark.parametrize("variant", ["array", "2d_array"])
+def test_concatenate_import_does_not_run_engine(monkeypatch, variant):
     calls = []
     module = types.ModuleType("assetutilities.engine")
     module.engine = lambda *args, **kwargs: calls.append((args, kwargs))
     monkeypatch.setitem(sys.modules, "assetutilities.engine", module)
     monkeypatch.setattr(sys, "argv", ["pytest"])
     runpy.run_path(
-        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_array.py")
+        str(FIXTURES / f"modules/file_edit/test_file_edit_concatenate_{variant}.py")
     )
     assert calls == []
+
+
+@pytest.mark.parametrize("kind", ["file_size", "regex"])
+def test_file_management_snapshots_reference_existing_files(kind):
+    import yaml
+
+    root = FIXTURES / "modules/file_management"
+    snapshot = root / "results" / f"test_file_management_{kind}_pytest.yml"
+    expected = yaml.safe_load(snapshot.read_text(encoding="utf-8"))
+    names = {
+        "file_size": [
+            "2023_report_us_weather.yml",
+            "clientA_report_final.yml",
+            "system_error_logs.yml",
+        ],
+        "regex": ["us_2023_sales.yml"],
+    }
+    assert expected == {"yml": ["test_files/" + name for name in names[kind]]}
+    assert all((root / name).is_file() for name in expected["yml"])
+
+
+@pytest.mark.parametrize("corruption", ["input-files", "batch-content"])
+def test_array_expectations_do_not_trust_returned_config(
+    tmp_path, monkeypatch, corruption
+):
+    import importlib
+
+    engine_module = importlib.import_module("assetutilities.engine")
+    real_engine = engine_module.engine
+
+    def corrupted_engine(*args, **kwargs):
+        result = real_engine(*args, **kwargs)
+        if corruption == "input-files":
+            group = result["input"][0]["input_files"][0]
+            group.pop()
+            (tmp_path / "no_load_09moors.dat").write_bytes(
+                b"".join((tmp_path / name).read_bytes() for name in group)
+            )
+        else:
+            result["input"][0]["batch"]["content"] = "incorrect-command"
+            (tmp_path / "file_edit_concatenate_array_0.bat").write_text(
+                "\n".join(
+                    "incorrect-command " + str(tmp_path / label)
+                    for label in ["no_load_09moors", "no_load_10moors"]
+                )
+                + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+        return result
+
+    monkeypatch.setattr(engine_module, "engine", corrupted_engine)
+    module = runpy.run_path(
+        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_array.py")
+    )
+    with pytest.raises(AssertionError):
+        module["test_file_run"](tmp_path, monkeypatch)
+
+
+@pytest.mark.parametrize(
+    ("directory", "name", "entry_point"),
+    [
+        ("file_edit", "file_edit_concatenate_array", "test_file_run"),
+        ("file_edit", "file_edit_concatenate_2d_array", "test_file_run"),
+        ("file_management", "file_management_file_size", "test_run_process"),
+        ("file_management", "file_management_regex", "test_run_process"),
+    ],
+)
+def test_portable_fixture_consumers_preserve_tracked_inputs(
+    tmp_path, monkeypatch, directory, name, entry_point
+):
+    """Run portable consumers in the always-on suite, including on Linux."""
+    source = FIXTURES / "modules" / directory
+    tracked = [
+        path for path in _tracked_fixture_paths(FIXTURES) if source in path.parents
+    ]
+    before = {path: hashlib.sha256(path.read_bytes()).digest() for path in tracked}
+    module = runpy.run_path(str(source / f"test_{name}.py"))
+    module[entry_point](tmp_path, monkeypatch)
+    after = {path: hashlib.sha256(path.read_bytes()).digest() for path in tracked}
+    assert after == before, "Portable consumers changed tracked fixture bytes"
+
+
+def test_2d_consumer_requires_generated_outputs(tmp_path, monkeypatch):
+    import importlib
+
+    import yaml
+
+    engine_module = importlib.import_module("assetutilities.engine")
+
+    def batch_only(input_file, **kwargs):
+        inputs = yaml.safe_load(Path(input_file).read_text(encoding="utf-8"))["input"][
+            0
+        ]
+        output_dir = tmp_path / inputs["output_dir"]
+        labels = ["D_no_tug_000MPH000WD_10moors", "D_no_tug_100MPH000WD_10moors"]
+        (tmp_path / "file_edit_concatenate_2d_array_0.bat").write_text(
+            "".join(
+                inputs["batch"]["content"] + " " + str(output_dir / label) + "\n"
+                for label in labels
+            ),
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    monkeypatch.setattr(engine_module, "engine", batch_only)
+    module = runpy.run_path(
+        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_2d_array.py")
+    )
+    with pytest.raises(AssertionError):
+        module["test_file_run"](tmp_path, monkeypatch)
