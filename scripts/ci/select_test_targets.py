@@ -88,6 +88,10 @@ CONTRACT_ROUTES = {
     "docs/README.md": "tests/docs",
     "README.md": "tests/docs",
     "AGENTS.md": "tests/docs",
+    "scripts/operations/workspace_ops.py": "tests/operations",
+    "tests/operations/test_workspace_ops.py": "tests/operations",
+    "docs/operations/workspace-operations.md": "tests/operations",
+    "examples/operations/workspace-operations.json": "tests/operations",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST

@@ -32,3 +32,10 @@ P6 Word and PDF output is implemented in
 `tests/modules/reportgen/test_standard_report.py`, and documented in
 `docs/modules/documentation/standard-report.md`. The neutral input example is
 `examples/workflows/reportgen/standard-report.json`.
+
+## Workspace operations
+
+Read-only repository inventory and operations evidence assessment are in
+`scripts/operations/workspace_ops.py`, tested in `tests/operations/` and
+documented in `docs/operations/workspace-operations.md`. This standalone script
+keeps operational checklists outside the library API.

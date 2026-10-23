@@ -209,3 +209,22 @@ def test_data_store_is_collected_for_contract_and_full_changes(changed):
         target for shard in matrix["include"] for target in shard["targets"].split()
     }
     assert "tests/data_store" in targets
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "scripts/operations/workspace_ops.py",
+        "tests/operations/test_workspace_ops.py",
+        "docs/operations/workspace-operations.md",
+        "examples/operations/workspace-operations.json",
+    ],
+)
+def test_operations_inputs_select_the_operations_suite(changed: str) -> None:
+    """Each operations input adds its suite alongside the always-on checks."""
+    result = select([changed], REPO_ROOT)
+    assert result["scope"] == "modules"
+    assert "tests/operations" in result["xdist"]
+    matrix = to_matrix([changed], REPO_ROOT)
+    assert "operations" in _names(matrix)
+    assert "_always" in _names(matrix)
