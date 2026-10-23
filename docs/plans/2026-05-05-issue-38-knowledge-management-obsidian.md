@@ -8,7 +8,7 @@
 ## Context
 
 Issue #38 is a stub asking to:
-- Read Obsidian YouTube resources from Siva.
+- Read Obsidian YouTube resources from the team.
 - Install Obsidian packages across machines.
 
 There is no deliverable in assetutilities. Knowledge-management tooling

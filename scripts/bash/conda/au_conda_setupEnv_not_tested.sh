@@ -40,11 +40,11 @@ conda init
 
 # List conda environments and check if env_name exists
 if conda env list | grep -q "$env_name"; then
-    echo "Siva - Environment $env_name found. Updating environment."
+    echo "Environment $env_name found. Updating environment."
     conda env update --file "$env_file" --prune 
 else
-    echo "Siva - Environment $env_name not found. Creating environment."
-    echo "Siva - Creating environment $env_name."
+    echo "Environment $env_name not found. Creating environment."
+    echo "Creating environment $env_name."
     conda env create --file "$env_file"
 fi
 
