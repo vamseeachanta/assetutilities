@@ -21,8 +21,9 @@ Decision tree (first match wins):
     ``src/modules/<m>/``) — but only keep ones with a real
     ``tests/modules/<m>/`` dir — and route exact contract paths (e.g.
     ``config/repo_structure.yml`` -> ``tests/repo_structure``) ->
-    ``scope=modules``.
-  * if nothing test-relevant changed (docs / reports / notebooks only)
+    ``scope=modules``. Documentation and report assets also select
+    ``tests/reports`` so report-only edits retain executable coverage.
+  * if nothing test-relevant changed (unrelated reports / notebooks only)
     -> ``scope=skip`` — still runs the cheap always-on cross-cutting set so the
     required check passes fast, never the full tree.
 
@@ -90,6 +91,9 @@ CONTRACT_ROUTES = {
     "AGENTS.md": "tests/docs",
 }
 
+# Report inputs, generated documents, templates, styles and guard tests.
+REPORT_PREFIXES = ("docs/", "scripts/reports/", "tests/reports/")
+
 # A module's source can live under any of these prefixes; the canonical TEST
 # home is always tests/modules/<m>/ (we only shard a module that has one).
 _MODULE_SRC_RES = (
@@ -130,6 +134,9 @@ def select(changed: list[str], root: Path) -> dict:
     relevant = False
 
     for p in changed:
+        if p.startswith(REPORT_PREFIXES):
+            contracts.add("tests/reports")
+            relevant = True
         if p in CONTRACT_ROUTES:
             contracts.add(CONTRACT_ROUTES[p])
             relevant = True
@@ -148,7 +155,7 @@ def select(changed: list[str], root: Path) -> dict:
                     modules.add(ms.group(1))
                     relevant = True
                 break
-        # anything else (reports/, notebooks/, *.md, docs/, scripts/ non-ci,
+        # anything else (reports/, notebooks/, *.md, other scripts/,
         # examples/) is not test-relevant.
 
     xdist = list(ALWAYS_XDIST)
