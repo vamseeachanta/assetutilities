@@ -114,6 +114,44 @@ def test_private_name_rule_checks_both_name_digests(
     assert _contains_name(data, digests) is expected
 
 
+@pytest.mark.parametrize(
+    ("parts", "expected"),
+    [
+        (("RESTRICTEDcompound", "miniconda3"), ["tracked.md"]),
+        (("restricted2", "AppData", "Local", "anaconda3"), ["tracked.md"]),
+        (("13_RESTRICTED_tag",), ["tracked.md"]),
+        (("SEALED",), ["tracked.md"]),
+        (("sealedsuffix",), ["tracked.md"]),
+        (("13_SEALED_tag",), ["tracked.md"]),
+        (("unrestricted", "unsealed"), []),
+        (("restrict", "seale"), []),
+    ],
+)
+def test_tracked_scanner_detects_compound_paths_and_tags(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    parts: tuple[str, ...],
+    expected: list[str],
+) -> None:
+    # Build path-like content at runtime so no host directory is embedded here.
+    (tmp_path / "tracked.md").write_text(
+        str(tmp_path.joinpath(*parts)), encoding="utf-8"
+    )
+    (tmp_path / "untracked.md").write_text("restricted sealed", encoding="utf-8")
+
+    def tracked_files(command: list[str], **kwargs: object):
+        assert command == ["git", "ls-files", "-z"]
+        assert kwargs["cwd"] == tmp_path
+        return subprocess.CompletedProcess(command, 0, stdout=b"tracked.md\0")
+
+    monkeypatch.setattr(subprocess, "run", tracked_files)
+    digests = (
+        (10, hashlib.sha256(b"restricted").hexdigest()),
+        (6, hashlib.sha256(b"sealed").hexdigest()),
+    )
+    assert _private_name_files(tmp_path, digests) == expected
+
+
 def test_rule_needs_no_source_tag_and_ignores_inherited_git_bindings(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
