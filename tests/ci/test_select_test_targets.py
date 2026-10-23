@@ -231,3 +231,4 @@ def test_privacy_guard_is_always_selected(changed):
         target for shard in matrix["include"] for target in shard["targets"].split()
     ]
     assert targets.count("tests/hygiene") == 1
+    assert targets.count("tests/ci") == 1

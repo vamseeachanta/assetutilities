@@ -10,10 +10,11 @@ import hashlib
 import os
 import re
 import runpy
+import shutil
 import subprocess
 import sys
 import types
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -44,7 +45,8 @@ PRIVATE_PATTERNS = (
     (
         "mount path",
         re.compile(
-            r"(?:(?<![\w:/])|(?<=file://))"
+            # Bind the whole URI prefix; suffix lookbehinds also match profile:.
+            r"(?<![\w:/])(?:file:(?://localhost|/{0,3}))?"
             r"/(?:mnt|media|Volumes|srv|net)(?:/|(?=$|[\s\"']))",
             re.I,
         ),
@@ -409,7 +411,17 @@ def test_batch_placeholders_keep_a_command_and_argument(name):
 
 @pytest.mark.parametrize("directory", ["mnt", "media", "Volumes", "srv", "net"])
 @pytest.mark.parametrize(
-    "prefix", ["# File: ", "path: ", 'path: "', "path: '", "path: file://"]
+    "prefix",
+    [
+        "# File: ",
+        "path: ",
+        'path: "',
+        "path: '",
+        "path: file://",
+        "path: file:",
+        "path: file://localhost",
+        "path: file:///",
+    ],
 )
 def test_absolute_mount_paths_are_rejected(directory, prefix):
     path = "/" + directory + "/example/fixture.yml"
@@ -426,6 +438,8 @@ def test_absolute_mount_paths_are_rejected(directory, prefix):
         "path: /mnt-relative/example.yml",
         "source: https://example.invalid/srv/example.yml",
         "source: https://example.invalid/Volumes/example.yml",
+        "source: https://example.invalid/profile:/srv/example.yml",
+        "source: https://example.invalid/file:/srv/example.yml",
     ],
 )
 def test_relative_mount_names_and_urls_are_allowed(value):
@@ -483,6 +497,16 @@ def test_concatenate_import_does_not_run_engine(monkeypatch, variant):
 
 @pytest.mark.parametrize("kind", ["file_size", "regex"])
 def test_file_management_snapshots_reference_existing_files(kind):
+    """Derive the snapshots from the tracked inputs and selector configuration.
+
+    Size filtering divides bytes by 1024 and accepts the inclusive range 10-40 KiB.
+    The selected files contain 10801, 35729 and 32759 bytes, respectively; the
+    excluded files contain 4040, 6103, 53098 and 84065 bytes. The literal-byte
+    regression below pins these independently of the engine's returned config.
+    The configured regex ^[a-z]{2}_[0-9]{4}_.*$ matches only us_2023_sales.
+    Sources: modules/file_management/test_files and the file_size/regex YAML
+    configurations beside them. Snapshot filenames retain their relative root.
+    """
     import yaml
 
     root = FIXTURES / "modules/file_management"
@@ -498,6 +522,147 @@ def test_file_management_snapshots_reference_existing_files(kind):
     }
     assert expected == {"yml": ["test_files/" + name for name in names[kind]]}
     assert all((root / name).is_file() for name in expected["yml"])
+
+
+@pytest.mark.parametrize("style", ["forward", "backslash", "mixed"])
+def test_2d_batch_paths_accept_windows_separators(style):
+    module = runpy.run_path(
+        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_2d_array.py")
+    )
+    output_dir = PureWindowsPath("Q:" + "/fixtures with spaces/concatenate/dats")
+    labels = ["first", "second"]
+    content = "fixture-command fixtures/reference-1.dat"
+    paths = [str(output_dir / label) for label in labels]
+    if style == "forward":
+        paths = [path.replace(BACKSLASH, "/") for path in paths]
+    elif style == "mixed":
+        paths = [
+            path.replace("concatenate" + BACKSLASH, "concatenate/") for path in paths
+        ]
+    module["_assert_batch_paths"](
+        [content + " " + path for path in paths], content, output_dir, labels
+    )
+
+
+@pytest.mark.parametrize(
+    "corruption", ["command", "target", "missing", "extra", "order", "suffix"]
+)
+def test_2d_batch_paths_reject_wrong_commands_and_targets(corruption):
+    module = runpy.run_path(
+        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_2d_array.py")
+    )
+    output_dir = PureWindowsPath("Q:" + "/fixtures with spaces/concatenate/dats")
+    labels = ["first", "second"]
+    content = "fixture-command fixtures/reference-1.dat"
+    lines = [content + " " + str(output_dir / label) for label in labels]
+    if corruption == "command":
+        lines[0] = "incorrect-command " + str(output_dir / labels[0])
+    elif corruption == "target":
+        lines[0] = content + " " + str(output_dir / "wrong-target")
+    elif corruption == "missing":
+        lines.pop()
+    elif corruption == "extra":
+        lines.append(lines[0])
+    elif corruption == "order":
+        lines.reverse()
+    else:
+        lines[0] += ".dat"
+    with pytest.raises(AssertionError):
+        module["_assert_batch_paths"](lines, content, output_dir, labels)
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "src/assetutilities/base_configs/modules/reportgen/reportgen.yml",
+        "scripts/bash/conda/removeEnv.sh",
+    ],
+)
+def test_named_support_files_have_no_private_paths(relative):
+    text = (ROOT / relative).read_text(encoding="utf-8")
+    findings = [f"{relative}:{number}: {kind}" for number, kind in _private_lines(text)]
+    assert not findings, "\n".join(findings)
+
+
+def test_report_example_todo_tags_are_neutral():
+    example = FIXTURES / "modules/reportgen/test-clients/sympy_function_1.py"
+    text = example.read_text(encoding="utf-8")
+    findings = [
+        f"{example.relative_to(ROOT)}:{number}: non-neutral todo tag"
+        for number, line in enumerate(text.splitlines(), start=1)
+        if "#todo" in line and set(re.findall(r"#[a-zA-Z0-9_]+", line)) - {"#todo"}
+    ]
+    assert not findings, "\n".join(findings)
+
+
+@pytest.mark.parametrize("definition_exists", [False, True])
+def test_environment_script_resolves_its_own_root(tmp_path, definition_exists):
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("Bash is required for the environment-script test")
+    root = tmp_path / "repository with spaces"
+    script = root / "scripts/bash/conda/removeEnv.sh"
+    script.parent.mkdir(parents=True)
+    # Model the LF checkout consumed by Bash; retain the tracked source bytes.
+    script.write_text(
+        (ROOT / "scripts/bash/conda/removeEnv.sh").read_text(encoding="utf-8"),
+        encoding="utf-8",
+        newline="\n",
+    )
+    if definition_exists:
+        definition = root / "dev_tools/environment.yml"
+        definition.parent.mkdir()
+        definition.write_text(
+            "name: fixture-environment\n", encoding="utf-8", newline="\n"
+        )
+    executable = tmp_path / "bin/conda"
+    executable.parent.mkdir()
+    executable.write_text(
+        '#!/usr/bin/env bash\nprintf "%s\\n" "$*" >> "$CONDA_CALL_LOG"\n'
+        'if [[ "$1" == info ]]; then printf "fixture-environment\\n"; fi\n',
+        encoding="utf-8",
+        newline="\n",
+    )
+    executable.chmod(0o755)
+    calls = tmp_path / "conda-calls.txt"
+    env = os.environ.copy()
+    env.update(
+        PATH=str(executable.parent) + os.pathsep + env.get("PATH", ""),
+        CONDA_CALL_LOG=str(calls),
+    )
+    result = subprocess.run(
+        [bash, str(script)], cwd=tmp_path, env=env, capture_output=True, text=True
+    )
+    if definition_exists:
+        assert result.returncode == 0, result.stderr
+        assert calls.read_text(encoding="utf-8").splitlines() == [
+            "info --envs",
+            "deactivate",
+            "env remove -n fixture-environment",
+            "clean --all",
+        ]
+    else:
+        assert result.returncode != 0
+        assert "Environment definition not found." in result.stderr
+        assert not calls.exists()
+
+
+@pytest.mark.parametrize(
+    ("name", "byte_count"),
+    [
+        ("2023_report_us_weather.yml", 10801),
+        ("clientA_report_final.yml", 35729),
+        ("system_error_logs.yml", 32759),
+        ("app_logs_2023.yml", 4040),
+        ("us_2023_sales.yml", 6103),
+        ("report_summary.yml", 53098),
+        ("2023_report_india_weather.yml", 84065),
+    ],
+)
+def test_snapshot_size_basis_matches_literal_bytes(name, byte_count):
+    """Pin the independent byte counts used in the snapshot derivation."""
+    path = FIXTURES / "modules/file_management/test_files" / name
+    assert len(path.read_bytes()) == byte_count
 
 
 @pytest.mark.parametrize("corruption", ["input-files", "batch-content"])

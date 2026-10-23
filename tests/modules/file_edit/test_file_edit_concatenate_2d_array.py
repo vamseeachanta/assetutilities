@@ -8,6 +8,15 @@ from pathlib import Path
 import yaml
 
 
+def _assert_batch_paths(lines, content, output_dir, labels):
+    """Compare the exact command and ordered targets using the output path flavor."""
+    assert len(lines) == len(labels)
+    prefix = content + " "
+    for line, label in zip(lines, labels):
+        assert line.startswith(prefix)
+        assert type(output_dir)(line[len(prefix) :]) == output_dir / label
+
+
 def test_file_run(tmp_path, monkeypatch):
     from assetutilities.engine import engine
 
@@ -37,6 +46,6 @@ def test_file_run(tmp_path, monkeypatch):
     for label, expected in zip(labels, expected_bytes):
         assert (output_dir / (label + ".dat")).read_bytes() == expected
     batch = tmp_path / "file_edit_concatenate_2d_array_0.bat"
-    assert batch.read_text(encoding="utf-8").splitlines() == [
-        content + " " + str(output_dir / label) for label in labels
-    ]
+    _assert_batch_paths(
+        batch.read_text(encoding="utf-8").splitlines(), content, output_dir, labels
+    )
