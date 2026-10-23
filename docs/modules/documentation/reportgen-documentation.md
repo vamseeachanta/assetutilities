@@ -1,5 +1,9 @@
 # ReportGen Module Documentation
 
+Citation-enabled Markdown, Word and HTML inputs are documented in
+[Report citation bindings](report-citations.md), including disclosure, provenance
+and a worked formatting example.
+
 ## Core Module Files
 
 1. **dom.py**
