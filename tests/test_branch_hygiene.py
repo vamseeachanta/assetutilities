@@ -84,6 +84,8 @@ def test_inspection_only_uses_read_commands(monkeypatch):
 
     def fake_git(repo, *args):
         calls.append(args)
+        if args[0] == "remote":
+            return "origin"
         if args[0] == "rev-parse":
             return "a" * 40
         if args[0] == "symbolic-ref":
@@ -97,7 +99,7 @@ def test_inspection_only_uses_read_commands(monkeypatch):
     assert len(report["branches"]) == 3
     assert report["base_commit"] == "a" * 40
     assert report["current"] == "topic/open"
-    assert {call[0] for call in calls} == {"rev-parse", "symbolic-ref", "for-each-ref"}
+    assert {call[0] for call in calls} == {"rev-parse", "remote", "symbolic-ref", "for-each-ref"}
     assert [row["status"] for row in report["branches"]] == [
         "protected", "merged_review", "current"
     ]
@@ -297,13 +299,16 @@ def test_single_component_remote_ref(git_repository, capsys, name, base, status,
 @pytest.mark.parametrize("name", ["develop", "release/integration"])
 @pytest.mark.parametrize("remote_base", [False, True])
 @pytest.mark.parametrize("unrelated", [False, True])
+@pytest.mark.parametrize("remote", ["mirror", "mirror/team", "mirror/team/nested"])
 def test_base_protection_across_namespaces(
-    git_repository, capsys, name, remote_base, unrelated,
+    git_repository, capsys, name, remote_base, unrelated, remote,
 ):
     repo, run_git = git_repository
     commit = run_git("rev-parse", "HEAD")
+    for remote_name in sorted({"origin", "mirror", remote}):
+        run_git("remote", "add", remote_name, ".")
     protected = [f"refs/heads/{name}", f"refs/remotes/origin/{name}",
-                 f"refs/remotes/mirror/{name}"]
+                 f"refs/remotes/{remote}/{name}"]
     expected = {"refs/heads/main": "protected"}
     for ref in protected:
         run_git("update-ref", ref, commit)
@@ -312,9 +317,10 @@ def test_base_protection_across_namespaces(
         ref = "refs/heads/topic/integration"
         run_git("update-ref", ref, commit)
         expected[ref] = "merged_review"
-    base = f"origin/{name}" if remote_base else name
+    base = f"{remote}/{name}" if remote_base else name
     commands = [("status", "--porcelain"), ("rev-parse", "HEAD"),
-                ("for-each-ref", "--format=%(refname) %(objectname)")]
+                ("for-each-ref", "--format=%(refname) %(objectname)"),
+                ("config", "--local", "--list")]
     before = [run_git(*args) for args in commands]
 
     report = module.inspect(repo, base)
@@ -325,6 +331,25 @@ def test_base_protection_across_namespaces(
     ]) == int(unrelated)
     assert json.loads(capsys.readouterr().out) == report
     assert [run_git(*args) for args in commands] == before
+
+
+@pytest.mark.parametrize("name", ["main", "master"])
+@pytest.mark.parametrize("remote", ["mirror/team", "mirror/team/nested"])
+def test_default_names_with_configured_remote_prefix(git_repository, capsys, name, remote):
+    repo, run_git = git_repository
+    for remote_name in ("mirror", "mirror/team", "mirror/team/nested"):
+        run_git("remote", "add", remote_name, ".")
+    ref = f"refs/remotes/{remote}/{name}"
+    run_git("update-ref", ref, run_git("rev-parse", "HEAD"))
+
+    assert module.main([
+        "--repo", repo.as_posix(), "--base", "main", "--fail-on-findings",
+    ]) == 0
+    captured = capsys.readouterr()
+    assert not captured.err
+    assert {row["ref"]: row["status"] for row in json.loads(captured.out)["branches"]} == {
+        "refs/heads/main": "protected", ref: "protected",
+    }
 
 
 @pytest.mark.parametrize("name", ["topic", "topic/nested"])

@@ -48,23 +48,28 @@ def retention_months(month):
     return {month, f"{previous.year:04d}{previous.month:02d}"}
 
 
-def branch_name(ref):
+def branch_name(ref, remotes=()):
     """Remove the namespace and optional remote, preserving nested branch names."""
     if ref.startswith("refs/remotes/"):
         short = ref.removeprefix("refs/remotes/")
+        for remote in sorted(remotes, key=len, reverse=True):
+            prefix = f"{remote}/"
+            if short.startswith(prefix):
+                return short.removeprefix(prefix)
+        # Preserve cached refs without a configured remote and legacy layouts.
         return short.split("/", 1)[1] if "/" in short else short
     return ref.removeprefix("refs/heads/")
 
 
-def classify(refs, merged, current, base, month=None):
+def classify(refs, merged, current, base, month=None, remotes=()):
     """Classify reachability independently of the optional monthly convention."""
     retained = retention_months(month) if month is not None else set()
     merged = set(merged)
-    base_branch = branch_name(base) if base.startswith(("refs/heads/", "refs/remotes/")) else None
+    base_branch = branch_name(base, remotes) if base.startswith(("refs/heads/", "refs/remotes/")) else None
     rows = []
     for ref in refs:
         remote = ref.startswith("refs/remotes/")
-        branch = branch_name(ref)
+        branch = branch_name(ref, remotes)
         if branch in {"main", "master", base_branch} or ref == base:
             status = "protected"
         elif not remote and ref == current:
@@ -92,6 +97,7 @@ def inspect(repo, base, month=None):
     # Commit expressions have no symbolic ref and do not protect other branches.
     base_ref = git(repo, "rev-parse", "--symbolic-full-name", "--verify",
                    "--end-of-options", base)
+    remotes = git(repo, "remote").splitlines()
     try:
         current = git(repo, "symbolic-ref", "--quiet", "HEAD")
     except GitError as error:
@@ -112,7 +118,7 @@ def inspect(repo, base, month=None):
         "base": base, "base_commit": base_commit,
         "current": current.removeprefix("refs/heads/") if current else None,
         "remote_state": "local_cache_only",
-        "branches": classify(refs, merged, current, base_ref, month),
+        "branches": classify(refs, merged, current, base_ref, month, remotes),
     }
 
 
