@@ -1,46 +1,29 @@
-# TODO fix the code
-import os
+"""Exercise array concatenation without writing into the fixture tree."""
 
-from test_utils import get_test_file_path
+import shutil
 import sys
-
-from assetutilities.engine import engine
-
-
-def run_file(input_file, expected_result=None):
-    if expected_result is None:
-        expected_result = {}
-    if input_file is not None and not os.path.isfile(input_file):
-        input_file = get_test_file_path(input_file, os.path.dirname(__file__))
-    engine(input_file)
-
-    # obtained_result = cfg[cfg['basename']]['properties']
-    # expected_result = expected_result[cfg['basename']]['properties'].copy()
-
-    # assert not deepdiff.DeepDiff(obtained_result,
-    #                              expected_result,
-    #                              ignore_order=True,
-    #                              significant_digits=4)
+from pathlib import Path
 
 
-def get_valid_pytest_output_file(pytest_output_file):
-    if pytest_output_file is not None and not os.path.isfile(pytest_output_file):
-        pytest_output_file = get_test_file_path(pytest_output_file, os.path.dirname(__file__))
-    return pytest_output_file
+def test_file_run(tmp_path, monkeypatch):
+    from assetutilities.engine import engine
 
+    source = Path(__file__).parent
+    input_name = "file_edit_concatenate_array.yml"
+    shutil.copyfile(source / input_name, tmp_path / input_name)
+    shutil.copytree(source / "concatenate", tmp_path / "concatenate")
+    monkeypatch.setattr(sys, "argv", ["assetutilities"])
+    monkeypatch.chdir(tmp_path)
 
-def test_file_run():
-    input_file = "file_edit_concatenate_array.yml"
-
-    # pytest_output_file = '../test_data/6d_buoy/buoy_6d_circular_px_0_pytest.yml'
-    # pytest_output_file = get_valid_pytest_output_file(pytest_output_file)
-    expected_result = {}
-    # expected_result = ymlInput(pytest_output_file, updateYml=None)
-
-    if len(sys.argv) > 1:
-        sys.argv.pop()
-
-    run_file(input_file, expected_result)
-
-
-test_file_run()
+    result = engine(str(tmp_path / input_name), root_folder=str(tmp_path))
+    outputs = result["file_edit"]["output_filename"]
+    assert outputs == [["no_load_09moors", "no_load_10moors"]]
+    for label, group in zip(outputs[0], result["input"][0]["input_files"]):
+        expected = b"".join((tmp_path / name).read_bytes() for name in group)
+        assert (tmp_path / (label + ".dat")).read_bytes() == expected
+    batch = tmp_path / "file_edit_concatenate_array_0.bat"
+    assert batch.is_file()
+    content = result["input"][0]["batch"]["content"]
+    assert batch.read_text(encoding="utf-8").splitlines() == [
+        content + " " + str(tmp_path / label) for label in outputs[0]
+    ]

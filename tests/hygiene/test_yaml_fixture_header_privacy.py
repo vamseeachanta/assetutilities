@@ -9,13 +9,17 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import runpy
 import subprocess
+import sys
+import types
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests"
+EXAMPLES = ROOT / "examples"
 EXPORT_ROOT = FIXTURES / "modules/yml_utilities/yml/test_data"
 BACKSLASH = chr(92)
 FIXTURE_SUFFIXES = {
@@ -37,6 +41,13 @@ FIXTURE_SUFFIXES = {
 }
 # Lexical patterns contain no original identifying values.
 PRIVATE_PATTERNS = (
+    (
+        "mount path",
+        re.compile(
+            r"(?<![\w:/])/(?:mnt|media|Volumes|srv|net)(?:/|(?=$|[\s\"']))",
+            re.I,
+        ),
+    ),
     (
         "user-profile path",
         re.compile(
@@ -88,9 +99,13 @@ def _is_link(path: Path) -> bool:
 
 
 def _tracked_fixture_paths(root: Path) -> list[Path]:
+    environment = os.environ.copy()
+    for variable in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+        environment.pop(variable, None)
     result = subprocess.run(
-        ["git", "ls-files", "-z", "--", "tests"],
+        ["git", "ls-files", "-z", "--", root.name],
         cwd=root.parent,
+        env=environment,
         check=True,
         capture_output=True,
     )
@@ -133,8 +148,9 @@ def _fixture_findings(root: Path) -> list[str]:
     return sorted(findings)
 
 
-def test_yaml_fixtures_have_no_private_paths_or_identities():
-    findings = _fixture_findings(FIXTURES)
+@pytest.mark.parametrize("root", [FIXTURES, EXAMPLES], ids=["tests", "examples"])
+def test_yaml_fixtures_have_no_private_paths_or_identities(root):
+    findings = _fixture_findings(root)
     assert not findings, "\n".join(findings)
 
 
@@ -388,3 +404,75 @@ def test_batch_placeholders_keep_a_command_and_argument(name):
         re.fullmatch(r"fixture-command fixtures/reference-\d+\.dat", c)
         for c in commands
     )
+
+
+@pytest.mark.parametrize("directory", ["mnt", "media", "Volumes", "srv", "net"])
+@pytest.mark.parametrize("prefix", ["# File: ", "path: ", 'path: "', "path: '"])
+def test_absolute_mount_paths_are_rejected(directory, prefix):
+    path = "/" + directory + "/example/fixture.yml"
+    kinds = {"mount path"}
+    if prefix == "# File: ":
+        kinds.add("export file metadata")
+    assert _private_lines(prefix + path) == [(1, kind) for kind in sorted(kinds)]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "path: fixtures/" + "mnt/example.yml",
+        "path: /mnt-relative/example.yml",
+        "source: https://example.invalid/srv/example.yml",
+        "source: https://example.invalid/Volumes/example.yml",
+    ],
+)
+def test_relative_mount_names_and_urls_are_allowed(value):
+    assert _private_lines(value) == []
+
+
+@pytest.mark.parametrize("directory", ["tests", "examples"])
+def test_git_listing_uses_requested_root_and_clean_environment(
+    tmp_path, monkeypatch, directory
+):
+    for variable in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+        monkeypatch.setenv(variable, str(tmp_path / "foreign"))
+    monkeypatch.setenv("FIXTURE_GUARD_SENTINEL", "preserved")
+    calls = []
+
+    def tracked(command, **kwargs):
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(
+            command, 0, stdout=f"{directory}/safe.yml\0".encode("utf-8")
+        )
+
+    monkeypatch.setattr(subprocess, "run", tracked)
+    root = tmp_path / directory
+    assert _tracked_fixture_paths(root) == [root / "safe.yml"]
+    command, options = calls[0]
+    assert command == ["git", "ls-files", "-z", "--", directory]
+    assert options["cwd"] == tmp_path
+    assert not {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"} & options["env"].keys()
+    assert options["env"]["FIXTURE_GUARD_SENTINEL"] == "preserved"
+    assert "GIT_DIR" in os.environ
+
+
+@pytest.mark.parametrize("name", ["inputs.csv", "results.csv"])
+def test_example_csv_paths_match_sanitized_test_fixtures(name):
+    relative = Path("modules/excel_utilities/input_data") / name
+    actual = (
+        ROOT / "examples/workflows/excel_utilities/input_data" / name
+    ).read_bytes()
+    expected = (FIXTURES / relative).read_bytes()
+    assert actual.splitlines() == expected.splitlines()
+    assert b"\r" not in actual
+
+
+def test_concatenate_import_does_not_run_engine(monkeypatch):
+    calls = []
+    module = types.ModuleType("assetutilities.engine")
+    module.engine = lambda *args, **kwargs: calls.append((args, kwargs))
+    monkeypatch.setitem(sys.modules, "assetutilities.engine", module)
+    monkeypatch.setattr(sys, "argv", ["pytest"])
+    runpy.run_path(
+        str(FIXTURES / "modules/file_edit/test_file_edit_concatenate_array.py")
+    )
+    assert calls == []
