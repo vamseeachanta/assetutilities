@@ -11,7 +11,7 @@
 YAML-driven runs. Today it is a long if/elif chain that imports each
 module and calls a hard-coded entrypoint based on `basename`. Issue #29
 notes that another internal project (reportgen / writers.py / doris_writer.py
-by Siva) uses a registry pattern: writer class names are read from a YAML
+by the team) uses a registry pattern: writer class names are read from a YAML
 config, the registry resolves the class, the `run()` method is invoked.
 
 Goal: refactor `engine.py` so handlers are looked up via a registry. New

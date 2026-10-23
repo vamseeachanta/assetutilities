@@ -7,7 +7,7 @@ The key things for using AI are:
 - Workflows Refinement
 - Tests for each workflow steps
 
-## Siva's Input
+## Team input
 
 How to use AI tools?
 
@@ -19,9 +19,9 @@ Standardize the questions
 
 Create a personal assistant
 
-Check Siva's repo for example journal
+Check the team's repository for an example journal
 
-## Jitesh's tips for AI use
+## Additional tips for AI use
 
 AI tools can be transformative, but they?re only as effective as the effort and finesse you put in.
 
