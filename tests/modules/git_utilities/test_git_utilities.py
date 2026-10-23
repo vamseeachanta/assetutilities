@@ -23,9 +23,8 @@ def test_temporary_repository_preserves_index(tmp_path, monkeypatch):
 
     monkeypatch.setattr(Repo, "is_dirty", inspect_without_optional_locks)
     with Repo.init(root) as repository:
-        (root / "sample.txt").write_text(
-            "synthetic input\n", encoding="utf-8", newline="\n"
-        )
+        with (root / "sample.txt").open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write("synthetic input\n")
         repository.index.add(["sample.txt"])
         index = Path(repository.git_dir) / "index"
         before = index.read_bytes()

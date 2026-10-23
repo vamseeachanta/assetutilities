@@ -49,9 +49,8 @@ class CSVUtilitiesRouter:
             "n_columns": len(frame.columns),
             "columns": frame.columns.tolist(),
         }
-        summary_file.write_text(
-            yaml.safe_dump(summary, sort_keys=False), encoding="utf-8", newline="\n"
-        )
+        with summary_file.open("w", encoding="utf-8", newline="\n") as stream:
+            yaml.safe_dump(summary, stream, sort_keys=False)
         options["results"] = {
             "normalized": normalized.as_posix(),
             "summary": summary_file.as_posix(),

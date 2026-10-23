@@ -16,7 +16,8 @@ def test_run_process(tmp_path):
     source = directory / cfg["csv_utilities"]["txt_file"]
     shutil.copyfile(source, tmp_path / source.name)
     input_file = tmp_path / "input.yml"
-    input_file.write_text(yaml.safe_dump(cfg), encoding="utf-8", newline="\n")
+    with input_file.open("w", encoding="utf-8", newline="\n") as stream:
+        yaml.safe_dump(cfg, stream)
     result = engine(str(input_file))
     outputs = result["csv_utilities"]["results"]
     assert Path(outputs["normalized"]).is_file()

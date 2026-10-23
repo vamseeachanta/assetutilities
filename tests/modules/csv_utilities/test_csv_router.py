@@ -38,7 +38,8 @@ def test_encoding_fallback_and_alias(tmp_path, legacy):
 def test_explicit_encoding_delimiter_and_row_limit(tmp_path):
     """Two literal input rows truncated to the requested first row."""
     source = tmp_path / "sample.csv"
-    source.write_text("name;value\nred;2\nblue;3\n", encoding="utf-8", newline="\n")
+    with source.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write("name;value\nred;2\nblue;3\n")
     cfg = {
         "Analysis": {"result_folder": str(tmp_path / "out")},
         "csv_utilities": {

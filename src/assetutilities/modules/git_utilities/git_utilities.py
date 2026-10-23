@@ -44,8 +44,7 @@ class GitUtilities:
         folder = Path(analysis["result_folder"])
         folder.mkdir(parents=True, exist_ok=True)
         output = folder / "gitpython_report.yml"
-        output.write_text(
-            yaml.safe_dump(report, sort_keys=False), encoding="utf-8", newline="\n"
-        )
+        with output.open("w", encoding="utf-8", newline="\n") as stream:
+            yaml.safe_dump(report, stream, sort_keys=False)
         cfg["gitpython"] = {"output_file": output.as_posix(), **report}
         return cfg

@@ -21,10 +21,10 @@ class ReadPDF:
                 slug = re.sub(r"[^A-Za-z0-9_-]+", "_", label).strip("_") or "file"
                 name = slug
                 suffix = 1
-                while name in used_names:
+                while name.casefold() in used_names:
                     suffix += 1
                     name = f"{slug}_{suffix}"
-                used_names.add(name)
+                used_names.add(name.casefold())
                 results.append(self.from_pdf_PyPDF2(cfg, index, name))
             elif library in {"tabula", "camelot"}:
                 method = (
@@ -90,7 +90,8 @@ class ReadPDF:
         if output_name is None:
             output_name = re.sub(r"[^A-Za-z0-9_-]+", "_", label).strip("_") or "file"
         output = folder / f"read_pdf_{output_name}.txt"
-        output.write_text(text, encoding="utf-8", newline="\n")
+        with output.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(text)
         return {
             "label": label,
             "page": page,

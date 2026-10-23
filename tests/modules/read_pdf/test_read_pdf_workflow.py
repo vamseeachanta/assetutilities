@@ -88,6 +88,38 @@ def test_safe_unique_labels_and_fallback(tmp_path):
     assert all(p.parent == tmp_path / "results" for p in outputs)
 
 
+@pytest.mark.parametrize(
+    "labels, names",
+    [
+        (["Report", "report"], ["Report", "report_2"]),
+        (["Report", "REPORT", "report"], ["Report", "REPORT_2", "report_3"]),
+        (["Report_2", "report", "REPORT"], ["Report_2", "report", "REPORT_3"]),
+        (["Report", "report", "REPORT_2"], ["Report", "report_2", "REPORT_2_2"]),
+        (["Report", "Archive"], ["Report", "Archive"]),
+    ],
+)
+def test_case_insensitive_output_names_preserve_pages(tmp_path, labels, names):
+    """Case variants and pre-suffixed labels must retain each literal page text."""
+    cfg = {
+        "library": "PyPDF2",
+        "Analysis": {"result_folder": tmp_path.as_posix()},
+        "files": {
+            "from_pdf": [
+                {"io": SAMPLE.as_posix(), "page": page, "label": label}
+                for page, label in enumerate(labels, 1)
+            ]
+        },
+    }
+    rows = ReadPDF().read_pdf(cfg)
+    outputs = [Path(row["output_file"]) for row in rows]
+    assert [output.name for output in outputs] == [
+        f"read_pdf_{name}.txt" for name in names
+    ]
+    assert len({output.name.casefold() for output in outputs}) == len(labels)
+    for page, output in enumerate(outputs, 1):
+        assert f"sample page {page}" in output.read_text(encoding="utf-8")
+
+
 def test_blank_page_has_empty_text(tmp_path):
     """A synthetic page without text objects has exactly zero characters."""
     from PyPDF2 import PdfWriter

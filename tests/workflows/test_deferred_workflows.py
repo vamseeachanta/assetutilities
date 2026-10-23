@@ -15,6 +15,37 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ["read_pdf", "edit_pdf", "csv_utilities", "text_analytics", "gitpython"]
 
 
+@pytest.mark.parametrize("name", ["read_pdf", "csv_utilities", "gitpython"])
+def test_workflow_text_writes_support_python39(name, tmp_path, monkeypatch):
+    """Valid workflows must write outputs with Python 3.9's pathlib signature."""
+    from assetutilities.engine import engine
+
+    def python39_write_text(path, data, encoding=None, errors=None):
+        # Python 3.9 has no newline keyword on Path.write_text; keep real I/O.
+        with path.open("w", encoding=encoding, errors=errors, newline="\n") as stream:
+            return stream.write(data)
+
+    monkeypatch.setattr(Path, "write_text", python39_write_text)
+    base = Path("examples/workflows") / name
+    shutil.copytree(ROOT / base, tmp_path / base)
+    if name == "gitpython":
+        for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+            monkeypatch.delenv(key, raising=False)
+        Repo.init(tmp_path).close()
+    monkeypatch.chdir(tmp_path)
+    engine((base / "input.yml").as_posix())
+
+    registry = yaml.safe_load(
+        (ROOT / "docs/registry/workflows.yaml").read_text(encoding="utf-8")
+    )
+    row = next(row for row in registry["workflows"] if row["id"] == name)
+    assert row["outputs"]
+    for output in row["outputs"]:
+        data = (tmp_path / output).read_bytes()
+        assert data.decode("utf-8")
+        assert b"\r" not in data
+
+
 @pytest.mark.parametrize("name", WORKFLOWS)
 def test_registered_cli_example(name, tmp_path, monkeypatch):
     """Expected outputs are hand-enumerated from each committed synthetic input.
