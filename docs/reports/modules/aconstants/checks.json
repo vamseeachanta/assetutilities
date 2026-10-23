@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-22",
+  "python": "3.11.17",
+  "pytest": "8.4.2",
+  "tree_state": "uncommitted",
+  "existing_selection": {
+    "command": "uv run --no-project --with 'pytest>=7.4,<9' python -m pytest tests/unit/test_constants.py tests/unit/test_seawater.py tests/unit/test_materials.py tests/test_casing_grades.py -q -rA -p no:cacheprovider --override-ini addopts= --basetemp=<scratch>",
+    "passed": 126,
+    "failed": 0,
+    "skipped": 0
+  },
+  "report_selection": {
+    "command": "uv run --no-project --with 'pytest>=7.4,<9' python -m pytest tests/reports/test_constants_report.py -q -rA -p no:cacheprovider --override-ini addopts= --basetemp=<scratch>",
+    "python_utf8_environment": "unset",
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "not_run": [
+    "The complete repository test suite: outside the selected module assessment.",
+    "Interactive browser behaviour: not exercised by the numerical and document tests."
+  ],
+  "compatibility": "The unpinned pytest command selected version 9 and failed before collection because the existing pytest_ignore_collect hook uses its removed path argument. The same hook is present on the base reference."
+}
