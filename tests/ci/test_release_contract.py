@@ -2,6 +2,8 @@
 
 import importlib.util
 import io
+import re
+import shlex
 import tarfile
 import zipfile
 from pathlib import Path
@@ -20,11 +22,15 @@ spec.loader.exec_module(release)
 def _source(tmp_path):
     """Synthetic version strings exercise exact equality, not version arithmetic."""
     (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname="assetutilities"\nversion="1.2.3"\n'
+        '# café\n[project]\nname="assetutilities"\nversion="1.2.3"\n',
+        encoding="utf-8",
+        newline="\n",
     )
     package = tmp_path / "src/assetutilities"
     package.mkdir(parents=True)
-    (package / "__init__.py").write_text('__version__ = "1.2.3"\n')
+    (package / "__init__.py").write_text(
+        '# café\n__version__ = "1.2.3"\n', encoding="utf-8", newline="\n"
+    )
     return tmp_path
 
 
@@ -55,7 +61,9 @@ def test_wrong_tag_is_rejected(tmp_path, tag):
 
 def test_source_version_drift_is_rejected(tmp_path):
     root = _source(tmp_path)
-    (root / "src/assetutilities/__init__.py").write_text('__version__ = "old"\n')
+    (root / "src/assetutilities/__init__.py").write_text(
+        '__version__ = "old"\n', encoding="utf-8", newline="\n"
+    )
     with pytest.raises(ValueError, match="__version__"):
         release.validate_source(root)
 
@@ -76,19 +84,24 @@ def test_missing_distribution_is_rejected(tmp_path):
 
 def test_uv_output_directory_ignore_file_is_allowed(tmp_path):
     _distributions(tmp_path / "dist")
-    (tmp_path / "dist/.gitignore").write_text("*\n")
+    (tmp_path / "dist/.gitignore").write_text("*\n", encoding="utf-8", newline="\n")
     release.validate_distributions(tmp_path / "dist", "1.2.3")
 
 
 def test_unexpected_distribution_file_is_rejected(tmp_path):
     _distributions(tmp_path / "dist")
-    (tmp_path / "dist/unexpected.txt").write_text("unexpected")
+    (tmp_path / "dist/unexpected.txt").write_text(
+        "unexpected", encoding="utf-8", newline="\n"
+    )
     with pytest.raises(ValueError, match="wheel.*sdist"):
         release.validate_distributions(tmp_path / "dist", "1.2.3")
 
 
 def test_release_workflow_has_isolated_publish_permissions():
-    workflow = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    with (ROOT / ".github/workflows/release.yml").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        workflow = yaml.safe_load(stream)
     events = workflow.get("on", workflow.get(True))
     assert events["push"] == {"tags": ["v*"]}
     assert "workflow_dispatch" in events
@@ -110,3 +123,52 @@ def test_release_workflow_has_isolated_publish_permissions():
         step.get("uses", "").startswith("pypa/gh-action-pypi-publish@")
         for step in publish["steps"]
     )
+
+
+def test_release_actions_are_pinned_with_version_comments():
+    with (ROOT / ".github/workflows/release.yml").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        uses = [line.strip() for line in stream if "uses:" in line]
+    assert len(uses) == 6
+    for line in uses:
+        assert re.search(r"@[0-9a-f]{40} # v\d+\.\d+\.\d+$", line), line
+
+
+def test_release_tool_requirements_are_exact_versions():
+    with (ROOT / ".github/workflows/release.yml").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        workflow = yaml.safe_load(stream)
+    requirements = []
+    uv_step = next(
+        step
+        for step in workflow["jobs"]["build"]["steps"]
+        if step.get("uses", "").startswith("astral-sh/setup-uv@")
+    )
+    assert uv_step["with"]["version"] == "0.13.1"
+    for step in workflow["jobs"]["build"]["steps"]:
+        tokens = shlex.split(step.get("run", ""))
+        requirements.extend(
+            tokens[index + 1] for index, token in enumerate(tokens) if token == "--with"
+        )
+    assert requirements
+    assert all(re.fullmatch(r"[\w-]+==\d+\.\d+\.\d+", r) for r in requirements)
+    assert "pytest==8.4.2" in requirements
+    assert "twine==6.2.0" in requirements
+
+
+def test_source_reads_binary_toml_and_utf8_python(tmp_path, monkeypatch):
+    root = _source(tmp_path)
+    path_open = Path.open
+
+    def explicit_open(path, mode="r", *args, **kwargs):
+        if path.name == "pyproject.toml":
+            assert mode == "rb"
+        elif path.name == "__init__.py":
+            assert kwargs.get("encoding") == "utf-8"
+            assert kwargs.get("newline") == "\n"
+        return path_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", explicit_open)
+    assert release.validate_source(root, "v1.2.3") == "1.2.3"

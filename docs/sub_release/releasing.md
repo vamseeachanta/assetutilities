@@ -10,6 +10,7 @@ require an explicit selection. No release is created by running the local exampl
 | Revision | Date | Change and reason |
 |---|---|---|
 | Initial | 2026-10-20 | Add tag release safeguards, offline test guidance and source reuse examples. |
+| Update | 2026-10-22 | Pin release actions and tools, run CI contracts once per matrix, and clarify live-test and branch-policy limits. |
 
 ## What is implemented
 
@@ -66,6 +67,13 @@ its result as evidence that other domains are broken. The Scrapy router still
 does not launch a crawler; passing configuration tests establish no live-data
 capability.
 
+The three quarantined live-service tests were re-gated, not repaired: they
+still contact external services. The offline replacements exercise synthetic
+inputs only. Any explicit `-m` expression replaces the default expression in
+`addopts`, including the PDF exclusion. For example, `-m "not pdf_integration"`
+can run live-service tests again. Keep both exclusions when selecting another
+offline subset: `-m "not pdf_integration and not live_data"`.
+
 The scraper input method overlays `settings_master`, then `input_settings`,
 then each `input` item, at the top-level key boundary. This repairs the key
 mismatch between the packaged defaults and consumers without changing the
@@ -115,6 +123,11 @@ fail the pull-request contribution check. Existing topic branch workflows
 remain supported. No automation in this change creates, merges, pushes or
 deletes a branch.
 
+The source-branch check applies equally to forks: a pull request opened from a
+fork branch named `main` is rejected intentionally. Outside contributors must
+create a topic branch in their fork before opening a pull request. This is a
+contribution naming rule; it does not restrict the pull request's target branch.
+
 Run `uv run python scripts/ci/branch_policy.py --audit` in a contributor checkout
 to report stale monthly refs and local branches without an upstream, ahead of
 their upstream, or tracking a missing remote ref. The audit reads available
@@ -123,6 +136,9 @@ decisions. The daily hosted audit produces a `branch-audit` artifact; it cannot
 see unpublished work in another checkout. Maintainers review the report, push
 work that must be retained, and prune only after confirming it is merged and
 no contributor still needs it. Scheduled reports do not enforce cleanup.
+On a fresh hosted checkout, the audit therefore covers remote monthly refs;
+`unpublished_local` is normally empty. The fixed daily time, 09:00 UTC, provides
+a predictable reporting cadence and carries no age or service-level guarantee.
 
 Keep source inputs in one version-controlled tree and execute beside them.
 Ignore generated outputs explicitly at folder level; avoid an unmanaged second

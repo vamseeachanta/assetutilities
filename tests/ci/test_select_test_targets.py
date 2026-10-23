@@ -209,3 +209,22 @@ def test_data_store_is_collected_for_contract_and_full_changes(changed):
         target for shard in matrix["include"] for target in shard["targets"].split()
     }
     assert "tests/data_store" in targets
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "docs/sub_release/releasing.md",
+        ".github/workflows/release.yml",
+        ".github/workflows/branch-audit.yml",
+        "tests/ci/test_release_contract.py",
+        "scripts/ci/validate_release.py",
+        ".github/workflows/tests.yml",
+    ],
+)
+def test_release_contracts_run_once_in_every_matrix_scope(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = [
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    ]
+    assert targets.count("tests/ci") == 1

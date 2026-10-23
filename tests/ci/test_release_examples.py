@@ -22,7 +22,7 @@ def test_offline_config_example():
     ]
 
 
-def test_folder_ignore_template():
+def test_folder_ignore_template(monkeypatch):
     """Git's pattern rules predict only generated/non-YAML paths are ignored.
 
     Source: gitignore manual, Pattern format, negation and directory patterns.
@@ -37,12 +37,22 @@ def test_folder_ignore_template():
         "outputs/result.csv",
         "logs/run.log",
     ]
+    git_run = subprocess.run
+
+    def run_binary_git(command, **kwargs):
+        # Binary pipes preserve LF on Windows as well as on Unix.
+        assert isinstance(kwargs["input"], bytes)
+        assert not kwargs.get("text", False)
+        return git_run(command, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", run_binary_git)
     result = subprocess.run(
         ["git", "check-ignore", "--no-index", "--stdin"],
         cwd=ROOT,
-        input="".join(prefix + path + "\n" for path in candidates),
-        text=True,
+        input="".join(prefix + path + "\n" for path in candidates).encode("utf-8"),
         capture_output=True,
         check=True,
     )
-    assert result.stdout.splitlines() == [prefix + path for path in candidates[-3:]]
+    assert result.stdout.decode("utf-8").splitlines() == [
+        prefix + path for path in candidates[-3:]
+    ]

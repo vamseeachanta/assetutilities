@@ -2,6 +2,7 @@ name: Branch audit
 
 on:
   # Daily reporting implements issue #19 without modifying remote branches.
+  # 09:00 UTC is a fixed reporting time, not a branch-age threshold or SLA.
   schedule:
     - cron: '0 9 * * *'
   workflow_dispatch:
@@ -20,6 +21,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Report branch state
+        # A fresh hosted checkout audits remote monthly refs only in practice.
+        # unpublished_local cannot report work in contributor checkouts.
         run: python scripts/ci/branch_policy.py --audit > branch-audit.json
       - uses: actions/upload-artifact@v4
         with:

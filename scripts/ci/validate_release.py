@@ -15,9 +15,13 @@ from pathlib import Path
 
 
 def validate_source(root: Path, tag: str | None = None) -> str:
-    project = tomllib.loads((root / "pyproject.toml").read_text())["project"]
+    with (root / "pyproject.toml").open("rb") as stream:
+        project = tomllib.load(stream)["project"]
     version = project["version"]
-    source = ast.parse((root / "src/assetutilities/__init__.py").read_text())
+    with (root / "src/assetutilities/__init__.py").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        source = ast.parse(stream.read())
     versions = [
         ast.literal_eval(node.value)
         for node in source.body

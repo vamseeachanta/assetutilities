@@ -74,7 +74,10 @@ def test_audit_reports_stale_and_unpublished_without_mutation(monkeypatch):
 def test_policy_checks_are_added_to_the_existing_gate():
     import yaml
 
-    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    with (ROOT / ".github/workflows/tests.yml").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        workflow = yaml.safe_load(stream)
     steps = workflow["jobs"]["gates"]["steps"]
     policy_step = next(
         step
@@ -83,13 +86,17 @@ def test_policy_checks_are_added_to_the_existing_gate():
     )
     assert policy_step["if"] == "github.event_name == 'pull_request'"
     assert policy_step["env"]["SOURCE_BRANCH"] == "${{ github.head_ref }}"
-    assert any("tests/ci" in step.get("run", "") for step in steps)
+    # The domain matrix owns the contract suite; Gates must not run it twice.
+    assert not any("pytest tests/ci" in step.get("run", "") for step in steps)
 
 
 def test_daily_audit_is_read_only():
     import yaml
 
-    workflow = yaml.safe_load((ROOT / ".github/workflows/branch-audit.yml").read_text())
+    with (ROOT / ".github/workflows/branch-audit.yml").open(
+        encoding="utf-8", newline="\n"
+    ) as stream:
+        workflow = yaml.safe_load(stream)
     events = workflow.get("on", workflow.get(True))
     assert events["schedule"] == [{"cron": "0 9 * * *"}]
     assert workflow["permissions"] == {"contents": "read"}
