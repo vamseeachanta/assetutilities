@@ -268,7 +268,8 @@ class DefaultHTMLWriter(ReportWriter):
                 parts.append(f"<h3>{escape(subsection['name'])}</h3>\n")
                 parts.extend(self._paragraph(p) for p in subsection["paragraphs"])
         parts.append("</body></html>\n")
-        output_path.write_text("".join(parts), encoding="utf-8", newline="\n")
+        with output_path.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write("".join(parts))
 
 
 # Register the writers

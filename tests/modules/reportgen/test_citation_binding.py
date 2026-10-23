@@ -420,6 +420,20 @@ def test_html_escapes_headings_text_citations_and_table_cells(config, tmp_path):
     assert "&lt;tag&gt;" in content
 
 
+def test_html_output_uses_utf8_and_lf(config, tmp_path):
+    config["report_details"].update(
+        name="Résumé – Δ", target_report_type="html", timestamped_filename=False
+    )
+    config["sections_L1"] = [{"name": "Results", "paragraphs": [["Café\nSecond line"]]}]
+    run(config)
+    raw = (tmp_path / "outputs/report.out.html").read_bytes()
+    assert raw.startswith(b"<!doctype html>\n")
+    assert b"\r" not in raw
+    document = BeautifulSoup(raw.decode("utf-8"), "html.parser")
+    assert document.title.string == "Résumé – Δ"
+    assert document.find("p", string="Café\nSecond line") is not None
+
+
 def test_default_filename_remains_timestamped(config):
     generator = ReportGenerator()
     generator.initialize_from_config(config)
