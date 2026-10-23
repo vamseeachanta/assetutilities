@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Source hygiene worked example</title>
+  <style>
+    body { max-width: 60rem; margin: auto; padding: 2rem; font: 1rem/1.6 system-ui, sans-serif; color: #172333; }
+    pre { background: #f1f4f7; padding: 1rem; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #bdc9d5; padding: .6rem; text-align: left; }
+    caption { caption-side: bottom; text-align: left; padding: .5rem 0; }
+    a { color: #174c83; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Source hygiene worked example</h1>
+  <h2>Summary</h2>
+  <p>A disposable input containing a direct print call and a bare exception
+    handler produces two findings. Replacing the print with a logger call and
+    specifying the exception type produces zero findings. These results satisfy
+    the example's hand-counted criteria; they do not qualify an engineering calculation.</p>
+
+  <h2>Revision history</h2>
+  <table>
+    <thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
+    <tbody><tr><td>Initial</td><td>2026-10-20</td><td>Add standalone inputs and hand counts to explain the source gate.</td></tr></tbody>
+    <caption>Table 1. Initial issue of the worked example.</caption>
+  </table>
+
+  <h2>Inputs</h2>
+  <p>The baseline is an empty JSON object in each input tree. No legacy exception
+    applies. Neither input is imported or executed.</p>
+  <h3>Before</h3>
+  <pre><code>try:
+    print("Process START")
+except:
+    pass</code></pre>
+  <h3>After</h3>
+  <pre><code>import logging
+
+logger = logging.getLogger(__name__)
+try:
+    logger.info("Process START")
+except ValueError:
+    raise</code></pre>
+
+  <h2>Method and expected answer</h2>
+  <p>The source is parsed into an abstract syntax tree and compiled in memory
+    without execution. A direct call named <code>print</code> is counted once;
+    an <code>ExceptHandler</code> whose <code>type</code> is absent is counted once.
+    Comments and quoted spellings contribute no nodes of those kinds.</p>
+  <table>
+    <thead><tr><th>Input</th><th>Hand calculation (findings)</th><th>Expected exit code</th></tr></thead>
+    <tbody>
+      <tr><td>Before</td><td>One print + one bare handler = 2</td><td>1</td></tr>
+      <tr><td>After</td><td>Zero prints + zero bare handlers = 0</td><td>0</td></tr>
+    </tbody>
+    <caption>Table 2. Expected values are calculated by inspection of the inputs, independently of the checker.</caption>
+  </table>
+
+  <h2>Reproduce</h2>
+  <p>From the repository root, select an unused output directory outside the checkout:</p>
+  <pre><code>python3 examples/hygiene/clean_code.py --output-dir "$TMPDIR/hygiene-example"</code></pre>
+  <p>Expected output: <code>PASS: before has 2 findings; after has 0 findings</code>.
+    The command exits with zero only when both observations match Table 2.
+    An existing output directory is refused without overwriting its files.</p>
+  <p>The output directory retains <code>before/</code> and <code>after/</code> source
+    trees, each checker's <code>checker.txt</code>, and a combined
+    <code>results.json</code>. No generated output needs to be committed.</p>
+
+  <h2>Sources and limits</h2>
+  <p>The Python documentation, version 3.9, defines
+    <a href="https://docs.python.org/3.9/library/ast.html#ast.Call">Call</a> and
+    <a href="https://docs.python.org/3.9/library/ast.html#ast.ExceptHandler">ExceptHandler</a>.
+    The <a href="https://docs.python.org/3.9/library/ast.html#ast.parse">parse warning</a>
+    requires additional compilation for contextual syntax errors. No physical
+    equation, engineering coefficient or acceptance limit is used here.</p>
+  <p>The syntactic check does not resolve aliases or determine whether a logger
+    message or exception choice is appropriate. The replacement handler illustrates
+    syntax only; it does not imply that logging raises this exception.</p>
+  <p><a href="../clean_code.md">Conventions and legacy policy</a> ·
+    <a href="../../examples/hygiene/clean_code.py">Executable example</a></p>
+</main>
+</body>
+</html>
