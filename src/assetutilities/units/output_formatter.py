@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 from assetutilities.units.quantity import TrackedQuantity
 from assetutilities.units.traceability import CalculationAuditLog
@@ -36,15 +36,15 @@ class UnitFormatter:
     def __init__(self) -> None:
         self._templates: dict[str, FormatTemplate] = {}
 
-    def register_template(
-        self, quantity_type: str, template: FormatTemplate
-    ) -> None:
+    def register_template(self, quantity_type: str, template: FormatTemplate) -> None:
         """Register a format template for a quantity type.
 
         Parameters
         ----------
         quantity_type:
-            Dimension name to match (e.g. ``"pressure"``, ``"length"``).
+            Pint dimension name to match (e.g. ``"pressure"``, ``"length"``).
+            Matches the complete dimensionality, including derived dimensions.
+            Unknown names do not match; unit-name substrings are not matched.
         template:
             Formatting rules to apply for this quantity type.
         """
@@ -59,15 +59,15 @@ class UnitFormatter:
         if template is not None:
             return template
 
-        dimensionality = str(tracked_quantity._quantity.dimensionality)
+        dimensionality = tracked_quantity._quantity.dimensionality
+        registry = tracked_quantity.units._REGISTRY
         for qty_type, registered in self._templates.items():
-            if qty_type in dimensionality:
-                return registered
-
-        # Check unit string for registered quantity types
-        unit_str = str(tracked_quantity.units)
-        for qty_type, registered in self._templates.items():
-            if qty_type in unit_str:
+            try:
+                registered_dimensionality = registry.get_dimensionality(f"[{qty_type}]")
+            except ValueError:
+                # An undefined dimension cannot select a template.
+                continue
+            if registered_dimensionality == dimensionality:
                 return registered
 
         return FormatTemplate()
@@ -178,6 +178,4 @@ class UnitFormatter:
         elif format == "text":
             return audit_log.summary()
         else:
-            raise ValueError(
-                f"Unsupported format '{format}'. Use 'json' or 'text'."
-            )
+            raise ValueError(f"Unsupported format '{format}'. Use 'json' or 'text'.")
