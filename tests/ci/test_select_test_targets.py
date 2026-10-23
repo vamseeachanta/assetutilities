@@ -67,6 +67,43 @@ def test_src_module_change_maps_to_test_home():
         assert "tests/modules/csv_utilities" in r["xdist"]
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [
+        ["src/assetutilities/devtools/ce_trial.py"],
+        ["tests/devtools/test_ce_trial.py"],
+        [
+            "src/assetutilities/devtools/ce_trial.py",
+            "tests/devtools/test_ce_trial.py",
+        ],
+    ],
+)
+def test_ce_changes_select_regressions_and_preserve_module_tests(changed):
+    """CE source and test edits must run the CE suite in both CI outputs."""
+    targets = [*ALWAYS_XDIST]
+    if "src/assetutilities/devtools/ce_trial.py" in changed:
+        targets.append("tests/modules/devtools")
+    targets.append("tests/devtools")
+
+    result = select(changed, REPO_ROOT)
+    assert result == {"scope": "modules", "xdist": targets, "seq": []}
+
+    matrix = to_matrix(changed, REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert [shard for shard in matrix["include"] if shard["name"] == "devtools"] == [
+        {"name": "devtools", "targets": "tests/devtools", "mode": "xdist"}
+    ]
+    expected_names = {"_always", "devtools"}
+    if "src/assetutilities/devtools/ce_trial.py" in changed:
+        expected_names.add("modules-devtools")
+        assert {
+            "name": "modules-devtools",
+            "targets": "tests/modules/devtools",
+            "mode": "xdist",
+        } in matrix["include"]
+    assert {shard["name"] for shard in matrix["include"]} == expected_names
+
+
 def test_noncode_only_change_skips_full_tree():
     for path in ("reports/x.html", "notebooks/demo.ipynb", "docs/x.md"):
         r = select([path], REPO_ROOT)
