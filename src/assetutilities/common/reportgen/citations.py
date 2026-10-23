@@ -83,7 +83,11 @@ def appendix_sections(references, config):
             "Package version": version["package_version"],
             "Git SHA": version["git_sha"],
             "Input sha256": envelope.input_hash(
-                {key: value for key, value in config.items() if key != "important_paths"}
+                {
+                    key: value
+                    for key, value in config.items()
+                    if key != "important_paths"
+                }
             ),
             "Generated (UTC)": envelope.utc_now_iso(),
         }

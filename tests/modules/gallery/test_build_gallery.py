@@ -73,7 +73,7 @@ def test_hand_calculated_answers():
         '<div style="background:u\\72l(image.png)"></div>',
         '<div style="background:u/**/rl(image.png)"></div>',
         '<style>@im\\70ort "theme.css";</style>',
-        '<style>body{background:u/**/rl(image.png)}</style>',
+        "<style>body{background:u/**/rl(image.png)}</style>",
     ],
 )
 def test_external_resources_fail_closed(html):
@@ -107,7 +107,9 @@ def test_external_resources_fail_closed(html):
 @pytest.mark.parametrize("attribute", ["href", "xlink:href"])
 def test_svg_external_resources_fail_closed(tag, attribute):
     with pytest.raises(ValueError, match="resource"):
-        api().check_self_contained(f'<svg><{tag} {attribute}="resource.svg#shape"/></svg>')
+        api().check_self_contained(
+            f'<svg><{tag} {attribute}="resource.svg#shape"/></svg>'
+        )
 
 
 @pytest.mark.parametrize(
@@ -131,7 +133,7 @@ def test_svg_resource_attribute_normalization(html):
         '<nav><a href="index.html">Gallery</a><a href="#answer">Answer</a></nav>',
         '<svg><use href="#shape"/><image xlink:href="#image"/></svg>',
         '<svg><a href="references.html">References</a></svg>',
-        '<div style>Text</div><meta http-equiv>',
+        "<div style>Text</div><meta http-equiv>",
     ],
 )
 def test_self_contained_resources_and_navigation_allowed(html):
@@ -225,9 +227,15 @@ def test_gallery_build(tmp_path):
             assert marker in text
         api().check_self_contained(text)
         assert str(tmp_path) not in text
-    assert "NOT_EVALUATED" in (tmp_path / "pipeline_dnv.html").read_text(encoding="utf-8")
-    assert "NOT_EVALUATED" in (tmp_path / "scr_fatigue.html").read_text(encoding="utf-8")
-    assert "Plotly.newPlot" in (tmp_path / "visualization.html").read_text(encoding="utf-8")
+    assert "NOT_EVALUATED" in (tmp_path / "pipeline_dnv.html").read_text(
+        encoding="utf-8"
+    )
+    assert "NOT_EVALUATED" in (tmp_path / "scr_fatigue.html").read_text(
+        encoding="utf-8"
+    )
+    assert "Plotly.newPlot" in (tmp_path / "visualization.html").read_text(
+        encoding="utf-8"
+    )
     visualization = (tmp_path / "visualization.html").read_text(encoding="utf-8")
     assert "synthetic-polar" in visualization
     assert visualization.count('src="data:image/png;base64,') == 2
@@ -235,7 +243,9 @@ def test_gallery_build(tmp_path):
     assert envelope["status"] == "ok"
     assert envelope["result"]["outputs"]
     assert envelope["determinism"]["reproducible"] is None
-    assert "not checked" in (tmp_path / "workflow_envelope.html").read_text(encoding="utf-8")
+    assert "not checked" in (tmp_path / "workflow_envelope.html").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_ci_builds_and_selects_gallery():

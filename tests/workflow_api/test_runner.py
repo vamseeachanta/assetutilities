@@ -40,6 +40,7 @@ def _snapshot(path: Path) -> dict:
 
 # --- registry / schema (no engine) -----------------------------------------
 
+
 def test_registry_schema_v2_invocation_and_optional_result():
     reg = load_registry()
     assert reg["schema_version"] == 2
@@ -61,9 +62,13 @@ def test_build_cfg_merges_params_over_example():
 
 # --- locator unit (no engine) ----------------------------------------------
 
+
 def test_locator_from_row_defaults_to_files():
     assert ResultLocator.from_row(None).kind == "files"
-    assert ResultLocator.from_row({"result": {"kind": "in_memory", "key": "k"}}).kind == "in_memory"
+    assert (
+        ResultLocator.from_row({"result": {"kind": "in_memory", "key": "k"}}).kind
+        == "in_memory"
+    )
 
 
 def test_locator_in_memory_missing_key_warns_not_silent():
@@ -77,7 +82,9 @@ def test_locator_files_emits_no_files_warns(tmp_path):
     results = tmp_path / "results"
     results.mkdir()
     cfg_base = {"Analysis": {"result_folder": str(results), "file_name": "x"}}
-    payload, warns = extract_result(cfg_base, ResultLocator(kind="files"), str(tmp_path))
+    payload, warns = extract_result(
+        cfg_base, ResultLocator(kind="files"), str(tmp_path)
+    )
     assert payload == {"kind": "files", "outputs": []}
     assert warns and "no files" in warns[0]
 
@@ -85,9 +92,15 @@ def test_locator_files_emits_no_files_warns(tmp_path):
 def test_extract_result_excludes_cfg_dump(tmp_path):
     results = tmp_path / "results"
     results.mkdir()
-    (results / "data_exploration_FST1.csv").write_text("a,b\n1,2\n", encoding="utf-8", newline="\n")
-    (results / "data_exploration.yml").write_text("Analysis: {}\n", encoding="utf-8", newline="\n")  # the save_cfg dump
-    cfg_base = {"Analysis": {"result_folder": str(results), "file_name": "data_exploration"}}
+    (results / "data_exploration_FST1.csv").write_text(
+        "a,b\n1,2\n", encoding="utf-8", newline="\n"
+    )
+    (results / "data_exploration.yml").write_text(
+        "Analysis: {}\n", encoding="utf-8", newline="\n"
+    )  # the save_cfg dump
+    cfg_base = {
+        "Analysis": {"result_folder": str(results), "file_name": "data_exploration"}
+    }
     payload, _ = extract_result(cfg_base, ResultLocator(kind="files"), str(tmp_path))
     names = {f["basename"] for f in payload["outputs"]}
     assert names == {"data_exploration_FST1.csv"}
@@ -95,6 +108,7 @@ def test_extract_result_excludes_cfg_dump(tmp_path):
 
 
 # --- error envelopes (no engine) -------------------------------------------
+
 
 def test_run_workflow_unknown_id_error_envelope():
     env = run_workflow("nope_not_a_workflow")
@@ -105,6 +119,7 @@ def test_run_workflow_unknown_id_error_envelope():
 
 
 # --- engine-backed (embed path) --------------------------------------------
+
 
 def test_run_workflow_by_id_returns_envelope():
     env = run_workflow("data_exploration")
@@ -158,7 +173,9 @@ def test_extract_result_includes_nested_plot(tmp_path):
     plot = results / "Plot" / "curve.png"
     plot.parent.mkdir(parents=True)
     plot.write_bytes(b"synthetic image bytes")
-    (results / "run.yml").write_text("runtime configuration", encoding="utf-8", newline="\n")
+    (results / "run.yml").write_text(
+        "runtime configuration", encoding="utf-8", newline="\n"
+    )
     payload, warnings = extract_result(
         {"Analysis": {"result_folder": str(results), "file_name": "run"}},
         ResultLocator(),
@@ -184,7 +201,8 @@ def test_extract_result_preserves_relative_paths_for_duplicate_names(tmp_path):
     payload, warnings = extract_result({}, ResultLocator(), str(tmp_path))
     assert not warnings
     assert [row["basename"] for row in payload["outputs"]] == [
-        "Data/same.txt", "Plot/same.txt"
+        "Data/same.txt",
+        "Plot/same.txt",
     ]
 
 
@@ -256,7 +274,9 @@ def test_extract_result_rejects_reparse_points(
     monkeypatch.setattr(Path, "lstat", lstat)
     if not target_exists:
         monkeypatch.setattr(
-            Path, "exists", lambda path: False if path == reparse else original_exists(path)
+            Path,
+            "exists",
+            lambda path: False if path == reparse else original_exists(path),
         )
     with pytest.raises(ValueError, match="link"):
         extract_result({}, ResultLocator(), str(tmp_path))

@@ -145,7 +145,8 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
     emitted = []
     walk = (
         os.walk(results_root, onerror=_raise_walk_error)
-        if results_root.exists() else ()
+        if results_root.exists()
+        else ()
     )
     for directory, subdirs, filenames in walk:
         for name in subdirs + filenames:
@@ -254,7 +255,9 @@ def run_workflow(
         else:
             cfg = copy.deepcopy(cfg)
             row = lookup_row_for_cfg(cfg)
-            locator = ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            locator = (
+                ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            )
 
         ihash = input_hash(cfg)
         payload, warns, rhash = _run_once(cfg, locator)

@@ -94,9 +94,7 @@ def test_citation_locations_are_trimmed():
 
     refs = [{"code_id": "example", "revision": "2026"}]
     assert (
-        render_citation(
-            {"code_id": "example", "section": " A.1 ", "page": " 2 "}, refs
-        )
+        render_citation({"code_id": "example", "section": " A.1 ", "page": " 2 "}, refs)
         == "[example 2026 §A.1 p.2]"
     )
 
@@ -139,7 +137,9 @@ def test_report_hash_ignores_output_location_but_tracks_inputs(tmp_path):
     def digest_row(cfg):
         section = appendix_sections(parse_references(cfg), cfg)[-1]
         text = section.paragraphs[0]["content"]
-        return next(row for row in text.splitlines() if row.startswith("| Input sha256"))
+        return next(
+            row for row in text.splitlines() if row.startswith("| Input sha256")
+        )
 
     cfg = config(tmp_path)
     original = copy.deepcopy(cfg)
