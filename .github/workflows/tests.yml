@@ -6,7 +6,7 @@ on:
   pull_request:
     # All edits rerun gates: conditional skips could mask an earlier failure.
     # Retargeting needs a fresh merge against the new base, not an old run retry.
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
 
 concurrency:
@@ -21,6 +21,7 @@ jobs:
   # they keep gating without coupling to the per-domain test fan-out.
   gates:
     name: Gates
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +97,9 @@ jobs:
       - name: Test workflow triggers
         run: uv run python -m pytest tests/workflows/test_ci_triggers.py
 
+      - name: Test draft pull request policy
+        run: uv run python -m pytest tests/workflows/test_ci_draft_policy.py
+
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh
 
@@ -125,6 +129,7 @@ jobs:
   # branch protection is ever enabled (currently unprotected, so the rename is
   # harmless).
   domain-tests:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     uses: vamseeachanta/workspace-hub/.github/workflows/domain-matrix.yml@main
     with:
       install-cmd: "uv sync --group test"

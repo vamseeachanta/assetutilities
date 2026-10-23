@@ -74,7 +74,7 @@ def test_pull_request_activity_types_include_retargeting() -> None:
     events = _workflow().get("on", _workflow().get(True))
     assert events["pull_request"] == {
         "branches": ["main"],
-        "types": ["opened", "synchronize", "reopened", "edited"],
+        "types": ["opened", "synchronize", "reopened", "edited", "ready_for_review"],
     }
     assert events["push"]["branches"] == ["main"]
     assert "workflow_dispatch" in events
