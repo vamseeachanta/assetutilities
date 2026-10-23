@@ -60,4 +60,10 @@ else
   printf 'PASS: .gitignore contains *.orig\n'
 fi
 
+# The Python checker uses only the standard library and never imports src.
+# PYTHON permits a job-local interpreter without changing tool configuration.
+if ! "${PYTHON:-python}" scripts/hygiene/check_clean_code.py; then
+  failures=$((failures + 1))
+fi
+
 exit "$failures"
