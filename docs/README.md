@@ -54,3 +54,11 @@ surface and update it if it is stale.
   for focused validation.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
+
+## Module Reports
+
+The [common-module data transformation analysis](reports/modules/acommon/index.html)
+describes the numerical interfaces, a published length-conversion example,
+validation evidence and limits of use. Its rebuild command is
+`python scripts/reports/build_common_report.py`; the page includes section comments
+and an engineering change panel.

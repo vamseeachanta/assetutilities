@@ -9,7 +9,7 @@ human-readable companion to `docs/registry/module-routing.yaml`.
 | `base_configs` | `src/assetutilities/base_configs/` | Config consumer tests under `tests/modules/` | `docs/README.md` | `cat:configuration`, `cat:maintenance` | YAML utilities, common file loading |
 | `calculations` | `src/assetutilities/calculations/` | `tests/benchmarks/`, calculation-focused tests | `docs/README.md` | `cat:engineering-calculations`, `cat:engineering` | constants, units, common data helpers |
 | `cli` | `src/assetutilities/cli/` | `tests/bash-setup/`, focused CLI tests when added | `docs/commands/` | `cat:automation`, `cat:harness` | agent_os, devtools |
-| `common` | `src/assetutilities/common/` | `tests/unit/test_common_*.py`, `tests/modules/` | `docs/modules/` | `cat:engineering`, `cat:data-pipeline` | pandas, YAML, file system, visualization dependencies |
+| `common` | `src/assetutilities/common/` | `tests/unit/test_common_*.py`, `tests/modules/`, `tests/docs/test_common_module_report.py` | `docs/modules/`, [data transformation analysis](../reports/modules/acommon/index.html) | `cat:engineering`, `cat:data-pipeline` | pandas, YAML, file system, visualization dependencies |
 | `constants` | `src/assetutilities/constants/` | `tests/unit/test_constants.py`, `tests/test_casing_grades.py` | `docs/README.md` | `cat:engineering-calculations`, `cat:maintenance` | units, calculations |
 | `devtools` | `src/assetutilities/devtools/` | focused devtool tests when added | `src/assetutilities/devtools/README.md` | `cat:maintenance`, `cat:harness` | pyproject, CLI entry points |
 | `modules` | `src/assetutilities/modules/` | `tests/modules/`, related unit tests | `docs/modules/` | `cat:data-pipeline`, `cat:automation` | common helpers, pandas, Excel/YAML/zip dependencies |
