@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculations module analysis</title>
+<style>{{ style | safe }}</style>
+<style>
+/* Report controls inherit the shared calculation-report palette and typography. */
+body{margin:0} .shell{padding:0 24px} .main{padding-bottom:40px}
+code{overflow-wrap:anywhere} pre.formula{white-space:pre-wrap}
+h2{margin-bottom:14px} h3{margin:24px 0 10px} caption{caption-side:bottom;text-align:left;padding:10px;color:var(--ink-2)}
+figure{margin:20px 0} figcaption{font-size:14px;color:var(--ink-2)}
+svg{width:100%;height:auto} .chart text,.timeline text{font:14px var(--sans);fill:var(--ink)}
+.chart .grid{stroke:var(--hairline)} .chart .curve{fill:none;stroke:var(--cfd);stroke-width:3}
+.chart circle{fill:var(--cfd);stroke:var(--surface);stroke-width:2;cursor:pointer}
+.chart circle:focus{outline:3px solid var(--ro)} .timeline line,.timeline path{stroke:var(--ink-muted);stroke-width:2;fill:none}
+.timeline rect{fill:var(--surface-2);stroke:var(--hairline)}
+button,input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--hairline);border-radius:5px;padding:6px;max-width:100%}
+button{cursor:pointer} textarea{display:block;width:100%;min-height:80px} label{display:block;margin-top:12px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0} .table-wrap{overflow-x:auto}
+td,th{padding:10px;text-align:left;border-bottom:1px solid var(--hairline)}
+.note{border-left:3px solid var(--proj);padding:12px;background:var(--proj-soft)}
+#chart-detail{min-height:85px} #comment-list li{overflow-wrap:anywhere} .digest{overflow-wrap:anywhere;font:11px var(--mono)}
+@media print{.masthead,.toc,.controls,#comments{display:none}.shell{display:block;padding:0}.main{padding:0}body.doc{background:white;color:black}.main>section{break-inside:auto}h2,h3,figcaption{break-after:avoid}tr{break-inside:avoid}}
+</style>
+</head>
+<body class="hs-doc doc" id="top">
+<header class="masthead"><div class="wrap"><span class="brand">Engineering calculations</span><span class="lg">Draft for maintainer review</span></div></header>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">Module analysis · Revision A · 22 October 2026</p>
+<h1>Calculations module analysis</h1>
+<p class="lede">Public-example discounting, calculation interfaces and evidence required before engineering use.</p>
+<p>Prepared: documentation basis. Checked: pending. Approved: pending. Project reference: not applicable to this public module description.</p>
+</div></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents"><p class="tt">Contents</p><ol>
+{% for title in ['Executive Summary','Introduction','Summary of Results','Basis and Criteria','Methodology','Worked Example','Validation Evidence','Limits and Recommendations','References','Appendices'] %}
+<li><a href="#s{{ loop.index }}">{{ title }}</a></li>{% endfor %}
+</ol><p><a href="#comments">Comments</a> · <a href="#changes">Changes</a></p></nav>
+<main class="main">
+{% macro n(key) -%}<span data-number="{{ key }}">{{ number(key) }}</span>{%- endmacro %}
+<section id="s1">
+<h2>1 Executive Summary</h2>
+<p>The calculations module is a collection of engineering and lifecycle-cost functions. Analysis is performed to determine how its documented interfaces support a public cost-discounting example, and the key results are summarized below.</p>
+<ul>
+<li>The public replacement and maintenance examples are calculated separately and combined as an illustration.
+<ul><li>The combined present cost is {{ n('combined_pv') }} USD at the source example rate of {{ n('rate_percent') }} % over {{ n('years') }} years. Its equivalent annual cost is {{ n('annual_cost') }} USD/year. The calculation basis is given in <a href="#s4">Section 4</a>.</li></ul></li>
+<li>Cost timing can be checked using the reported inputs and the cumulative-cost chart.
+<ul><li>Budget acceptance is not evaluated because no budget or competing design is specified. Structural qualification is not established by this example; the additional evidence is identified in <a href="#s8">Section 8</a>.</li></ul></li>
+</ul>
+<h3>Revision history</h3>
+<p>The revision record is presented below.</p>
+<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First module description with public cost examples, explicit timing and bounded validation evidence.</td></tr></tbody><caption>Revision history. The initial issue establishes the calculation basis.</caption></table></div>
+</section>
+<section id="s2">
+<h2>2 Introduction</h2>
+<p>The implemented calculation areas and the selected workflow are described in this section. Direct function calls are provided for scalar and list calculations; a complete design model is not assembled by the module.</p>
+<p>The lifecycle-cost workflow is covered in full from timed cash inputs through present cost to annual equivalent cost. It is selected because its documented interfaces, numerical tests and public reference examples permit a readable arithmetic check without material coefficients or licensed design tables.</p>
+<h3>2.1 Not covered</h3>
+<p>The remaining areas are identified without extending the worked-example conclusion to their results.</p>
+<p>Riser vibration, array interference, riser dynamics, drilling-riser tension and integrity, wellhead fatigue, steel catenary riser fatigue, tension-leg platform geometry, pipeline resistance and casing ratings are not evaluated here. The polynomial evaluator is a placeholder that returns no numerical value. The source and test inventory is provided in <a href="#s9-2">Section 9.2</a>.</p>
+<p>Within lifecycle costing, levelized output cost, event-based maintenance, transport, downtime and installed-cost summation are additional callable utilities. Their input contracts are listed in <a href="#s10-contract">Appendix 10.2</a>; their use in an asset forecast is outside the selected discounting example.</p>
+</section>
+<section id="s3">
+<h2>3 Summary of Results</h2>
+<p>The time-dependent present cost of the combined illustration is presented below. Each point is calculated from the costs incurred up to that year, discounted to the same base date.</p>
+<p>The combined present cost is {{ n('combined_pv') }} USD at the source example rate of {{ n('rate_percent') }} % over {{ n('years') }} years. Its equivalent annual cost is {{ n('annual_cost') }} USD/year. The replacement payment occurs at the final year end; maintenance occurs at each year end.</p>
+<figure>
+<svg class="chart" viewBox="0 0 720 360" role="group" aria-label="Cumulative present cost against year; focus a point for values">
+<line class="grid" x1="90" y1="280" x2="660" y2="280"/><line class="grid" x1="90" y1="45" x2="90" y2="280"/>
+<text x="90" y="25">Cumulative present cost (USD)</text><text x="325" y="345">Year from base date</text>
+<text x="28" y="285">0</text><text x="6" y="50">{{ number('combined_pv') }}</text>
+{% for row in data.rows %}
+{% set x=90+row.year*114 %}{% set y=280-235*row.cumulative_pv/data['values'].combined_pv %}
+{% if not loop.first %}{% set previous=data.rows[loop.index0-1] %}<path class="curve" d="M {{ x-114 }} {{ '%.2f'|format(280-235*previous.cumulative_pv/data['values'].combined_pv) }} H {{ x }} V {{ '%.2f'|format(y) }}"/>{% endif %}
+<circle cx="{{ x }}" cy="{{ '%.2f'|format(y) }}" r="7" tabindex="0" data-point="{{ loop.index0 }}" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year {{ row.year }}; cumulative present cost {{ '%.2f'|format(row.cumulative_pv) }} USD; limit not specified.</title></circle>
+<text x="{{ x-4 }}" y="305">{{ row.year }}</text>
+{% endfor %}
+</svg>
+<p id="chart-detail" aria-live="polite">Hover over or focus a point to inspect the case, component, present cost and units. No acceptance limit is specified.</p>
+<figcaption>Figure 1. Cumulative present cost increases as maintenance and the final replacement payment are included. Horizontal steps denote discrete payments, without a continuous expenditure model.</figcaption>
+</figure>
+<p>Budget acceptance is not evaluated because no budget or competing design is specified. The source examples demonstrate discounting; the combined illustration is not a published asset benchmark.</p>
+</section>
+<section id="s4">
+<h2>4 Basis and Criteria</h2>
+<p>The public source examples and numerical comparison criteria are defined here. NIST Handbook 135, August 2025 edition, is used for discounting theory and example inputs, as identified in <a href="#ref-nist">Reference 1</a>.</p>
+<p>The replacement example uses {{ n('replacement') }} USD at the end of year {{ n('years') }}. The maintenance example uses {{ n('maintenance') }} USD at each year end over the same period. Both use an annual discount rate of {{ n('rate_percent') }} %. This rate is an example input, not a statement of the current rate required for an investment decision.</p>
+<p>Each published example is compared with the module result to the displayed cent. The report tests additionally use a tighter arithmetic tolerance for the hand-worked anchors. This is a reporting-accuracy criterion, without a structural resistance criterion or an investment-acceptance threshold.</p>
+<p>No material strength, load factor, design fatigue factor or environmental limit is selected. These quantities remain required inputs for a future structural assessment. No numerical design requirement is taken from a licensed publication.</p>
+</section>
+<section id="s5">
+<h2>5 Methodology</h2>
+<p>The present cost is calculated by discounting each dated payment and summing the resulting base-date values. The equivalent annual cost is calculated from that present cost using the same annual rate and study period.</p>
+<h3>5.1 Governing equations</h3>
+<p>The single-payment relation in <a href="#ref-nist">Reference 1</a>, section 3.2.1, equation (3−6), is applied to each payment.</p>
+<p class="formula">P = Σ C<sub>t</sub> / (1 + r)<sup>t</sup></p>
+<p>For equal end-of-year maintenance payments, the finite geometric sum is the uniform-present-value relation in section 3.2.2.1, equation (3−7).</p>
+<p class="formula">P<sub>maintenance</sub> = M [(1 + r)<sup>n</sup> − 1] / [r (1 + r)<sup>n</sup>]</p>
+<p>The annual-value relation in section 17.4, equation (12−17), is applied to the combined present cost.</p>
+<p class="formula">A = P r / [1 − (1 + r)<sup>−n</sup>]</p>
+<p>The symbols are defined in <a href="#s10-symbols">Appendix 10.1</a>. The unit terms in the equations follow the cited mathematical definitions; no empirical coefficient is introduced.</p>
+<h3>5.2 Timing boundary</h3>
+<p>The example cash flow is represented on an annual timeline. This is an economic model, so no structural geometry, support conditions or mesh is implied.</p>
+<figure>
+<svg class="timeline" viewBox="0 0 720 195" role="img" aria-label="Cash-flow boundary: annual maintenance at year ends and replacement at the final year end">
+<rect x="8" y="8" width="704" height="175" rx="10"/>
+<text x="28" y="36">Base date → end-of-year payments → present cost</text>
+<line x1="65" y1="92" x2="665" y2="92"/>
+{% for row in data.rows %}{% set x=65+row.year*116 %}<line x1="{{ x }}" y1="85" x2="{{ x }}" y2="100"/>
+<text x="{{ x-4 }}" y="120">{{ row.year }}</text>
+{% if row.year %}<path d="M {{ x }} 48 V 79 l -5 -6 m 5 6 l 5 -6"/>{% endif %}{% endfor %}
+<text x="28" y="153">Maintenance: {{ number('maintenance') }} USD/year; replacement: {{ number('replacement') }} USD at final year end</text>
+</svg>
+<figcaption>Figure 2. Payment timing is mapped to the array index used by the cost-discounting function. The first array element represents the base date.</figcaption>
+</figure>
+</section>
+<section id="s6">
+<h2>6 Worked Example</h2>
+<p>The published replacement and maintenance cases are calculated separately before their cash flows are combined. The combined case is an illustration constructed from those two examples; it is not presented as a third published benchmark.</p>
+<p>The input replacement is {{ n('replacement') }} USD at the end of year {{ n('years') }}. The input maintenance is {{ n('maintenance') }} USD at each year end. The annual discount rate is {{ n('rate_percent') }} %, and the duration is {{ n('years') }} years. The source is <a href="#ref-nist">the NIST handbook reference</a>.</p>
+<p>The replacement present cost returned by the module is {{ n('replacement_pv') }} USD. The maintenance present cost returned by the module is {{ n('maintenance_pv') }} USD. Each agrees with its published example to the displayed cent.</p>
+<p>The combined present cost returned by the module is {{ n('combined_pv') }} USD. The equivalent annual cost returned by the module is {{ n('annual_cost') }} USD/year. The replacement contributes {{ n('replacement_annual') }} USD/year and maintenance contributes {{ n('maintenance_annual') }} USD/year to that annual equivalent.</p>
+<p>No initial purchase, revenue, tax, escalation or residual value is included. An asset-level economic decision is not established by this limited cash-flow illustration.</p>
+</section>
+<section id="s7">
+<h2>7 Validation Evidence</h2>
+<p>The existing repository tests and the additional report checks are distinguished here. The inspected calculation test files contain {{ existing_tests }} test functions; this inventory describes the evidence available, without converting the count into a physical-validation claim.</p>
+<p>The existing cost tests exercise a timed cost stream, levelized output cost, equivalent annual cost, maintenance cost, transport cost, downtime adjustment and installed-cost addition. Empty cash streams and selected invalid denominators are also covered. The cost-test assertions and the source inventory are located in <a href="#s9-2">Section 9.2</a>.</p>
+<p>The report tests add hand-worked anchors for replacement present cost, maintenance present cost and combined annual cost. Consistency checks compare the displayed values and chart data with fresh module calls. A rebuild comparison checks the committed document, its change panel and calculation-source digests.</p>
+<p>The public NIST examples establish arithmetic agreement for the stated timing and inputs. Field validation, a complete asset cost estimate and qualification of the structural routines are not established by those checks. The inspected cost tests contain illustrative values rather than a measured cost dataset or a whole-asset published benchmark.</p>
+</section>
+<section id="s8">
+<h2>8 Limits and Recommendations</h2>
+<p>The limits affecting interpretation and the required next evidence are stated below. Budget acceptance is not evaluated, and structural qualification is not established by the selected cost example.</p>
+<ul>
+<li>Restrict this example to deterministic, annually dated cost arithmetic.
+<ul><li>Supply a complete cost register, a stated currency and price date, consistent escalation and discounting, and comparable service before selecting an asset alternative. This follows the study-basis and discounting treatment in <a href="#ref-nist">Reference 1</a>, chapters 2 and 3.</li></ul></li>
+<li>Check input domains before using the cost utilities.
+<ul><li>The annual-cost function divides by zero for a zero discount rate or zero duration. Levelized cost divides by zero for zero discounted output and does not reject unequal stream lengths. Event-based maintenance divides by the supplied mean time between failures. Add explicit domain handling and tests before exposing these inputs to an unattended decision tool.</li></ul></li>
+<li>Resolve the structural calculation basis before design use.
+<ul><li>The natural-frequency, cross-flow response and buckle-arrest expressions contain dimensional inconsistencies with their stated output units. Casing collapse includes approximate regime selection. These routines require dimensional correction, edition-specific source checking and reference cases before their outputs are used as design evidence. Source locations are given in <a href="#s9-2">Section 9.2</a>.</li></ul></li>
+<li>Complete the public interface where numerical behavior is absent.
+<ul><li>The polynomial evaluator requires a defined coefficient order, units, input domain and value assertions before a polynomial result is reported.</li></ul></li>
+</ul>
+</section>
+<section id="s9">
+<h2>9 References</h2>
+<p>The public theory source and the inspected repository evidence are identified here. Numerical design provisions from unread or licensed publications are not reproduced.</p>
+<h3>9.1 Public source</h3>
+<p id="ref-nist">Reference 1. <a href="{{ nist_url }}">NIST HB 135e2025, Life Cycle Costing Manual for the Federal Energy Management Program</a>, August 2025 edition. Sections 3.2.1 and 3.2.2.1 provide the replacement and maintenance examples; section 17.4 provides annual value. Chapters 2 and 3 define the study basis and discounting assumptions. The public publication was accessed on 22 October 2026.</p>
+<h3 id="s9-2">9.2 Repository evidence</h3>
+<p>The calculation sources and existing test inventory are listed below. The cost entry points are <code>net_present_value(costs, discount_rate)</code> and <code>annual_equivalent_cost(npv, discount_rate, life_years)</code>, both documented in the cost source.</p>
+<p>The existing cost evidence is <code>tests/modules/calculations/test_lifecycle_cost.py</code>. The report checks are <code>tests/modules/calculations/test_module_report.py</code>. The module overview is <code>src/assetutilities/calculations/docs/agent-pack.md</code>. Its documented dimensional concerns are checked against the inspected function bodies rather than used as numerical input.</p>
+<div class="table-wrap"><table><thead><tr><th>Calculation source</th><th>Existing test functions</th></tr></thead><tbody>
+{% for source in data.sources %}<tr><td><code>{{ source.path }}</code></td><td>{{ source.tests }}</td></tr>{% endfor %}
+</tbody><caption>Table 1. Existing test-function inventory by calculation source. Corresponding test files use the same module name with a test prefix.</caption></table></div>
+<p>The dimensional limitations concern <code>riser_natural_frequency</code> in <code>riser_viv.py</code>, <code>crossflow_psd_amplitude</code> in <code>riser_dynamics.py</code>, and <code>buckle_arrest_capacity</code> in <code>pipeline_dnv.py</code>. With the documented inputs, their expressions have dimensions of length per time, length per time and force, respectively, rather than the stated frequency, displacement and pressure.</p>
+<p>The calculation is repeated using the documented public entry points as follows. Cost lists begin at the base date; the first nonzero payment is therefore preceded by a zero.</p>
+<pre class="formula"><code>from assetutilities.calculations.lifecycle_cost import (
+    net_present_value, annual_equivalent_cost,
+)
+replacement = [0] * {{ number('years') }} + [{{ number('replacement')|replace(',', '') }}]
+maintenance = [0] + [{{ number('maintenance') }}] * {{ number('years') }}
+costs = [a + b for a, b in zip(replacement, maintenance)]
+rate = {{ data['values'].rate_percent / 100 }}
+present_cost = net_present_value(costs, rate)
+annual_cost = annual_equivalent_cost(present_cost, rate, {{ number('years') }})</code></pre>
+<p>The exact rebuild command is <code>PYTHONPATH=src python scripts/reports/build_calculations_report.py</code>.</p>
+<p>The inlined shared presentation source is <code>digitalmodel:src/digitalmodel/reporting/assets/calc_report_format.html</code>; its stylesheet is preserved without changes. No report using the requested body class existed in this repository at the inspected base.</p>
+</section>
+<section id="s10">
+<h2>10 Appendices</h2>
+<p>The symbols, input contracts, cash-flow details and missing-data register are provided for calculation checking. The quality checks are stated with their evidence and limits.</p>
+<h3 id="s10-symbols">10.1 Acronyms and symbols</h3>
+<p>The notation used in the equations is defined here.</p>
+<div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Definition</th><th>Unit</th></tr></thead><tbody>
+<tr><td>P</td><td>Present cost at the base date</td><td>USD</td></tr><tr><td>C<sub>t</sub></td><td>Payment at time t</td><td>USD</td></tr><tr><td>M</td><td>Equal annual maintenance payment</td><td>USD/year</td></tr><tr><td>A</td><td>Equivalent annual cost</td><td>USD/year</td></tr><tr><td>r</td><td>Annual discount rate as a decimal</td><td>Dimensionless</td></tr><tr><td>t, n</td><td>Elapsed years and total study period</td><td>year</td></tr><tr><td>USD</td><td>United States dollar, as used in the federal handbook example</td><td>Currency</td></tr><tr><td>NIST</td><td>National Institute of Standards and Technology</td><td>Not applicable</td></tr></tbody><caption>Table 2. Symbols and abbreviations used in this report.</caption></table></div>
+<h3 id="s10-contract">10.2 Input and output contracts</h3>
+<p>The selected functions consume caller-defined cash streams and return scalar values. No unit conversion, price-date reconciliation or source lookup is performed by those functions.</p>
+<div class="table-wrap"><table><thead><tr><th>Function</th><th>Inputs</th><th>Output and domain concern</th></tr></thead><tbody>
+<tr><td>Present cost</td><td>Annual cost list, base-date element first; decimal annual rate</td><td>Caller currency. An empty list returns zero; the caller establishes valid finite rates and costs.</td></tr>
+<tr><td>Annual equivalent cost</td><td>Present cost, decimal annual rate, integer duration in years</td><td>Currency/year. Zero rate and zero duration are not handled.</td></tr>
+<tr><td>Levelized output cost</td><td>Costs, outputs and annual rate</td><td>Currency/output unit. Equal timing and nonzero discounted output are caller obligations.</td></tr>
+<tr><td>Event-based maintenance</td><td>Cost per event, mean time between failures in years, elapsed years</td><td>Currency. Positive mean time between failures and an appropriate event-rate model are required.</td></tr>
+<tr><td>Transport and installed cost</td><td>Cost components, day rate and days where applicable</td><td>Currency. Matching currency and price date are required.</td></tr>
+<tr><td>Effective transit duration</td><td>Nominal days and downtime fraction</td><td>Days. A fraction below zero or at least unity is rejected; a negative nominal duration is not rejected.</td></tr>
+</tbody><caption>Table 3. Lifecycle-cost input contracts and enforced or caller-supplied restrictions.</caption></table></div>
+<h3>10.3 Cash-flow detail and data register</h3>
+<p>The dated payments and their present values are presented below. True zero entries represent the absence of a payment in this illustration, without describing omitted asset costs.</p>
+<div class="table-wrap"><table><thead><tr><th>Year</th><th>Payment (USD)</th><th>Present value (USD)</th><th>Cumulative present value (USD)</th><th>Source</th></tr></thead><tbody>
+{% for row in data.rows %}<tr><td>{{ n('year_' ~ row.year) }}</td><td>{{ n('payment_' ~ row.year) }}</td><td>{{ n('present_' ~ row.year) }}</td><td>{{ n('cumulative_' ~ row.year) }}</td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr>{% endfor %}
+</tbody><caption>Table 4. Module-calculated cash-flow detail for Figure 1.</caption></table></div>
+<div class="table-wrap"><table><thead><tr><th>Data item</th><th>Readiness</th><th>Basis or action</th></tr></thead><tbody>
+<tr><td>Replacement, maintenance, rate and duration</td><td>Public example inputs</td><td>Reference 1, sections 3.2.1 and 3.2.2.1; illustration use only.</td></tr>
+<tr><td>Combined timing</td><td>Illustration constructed here</td><td>Both source examples use the same rate and duration; no currency conversion is applied.</td></tr>
+<tr><td>Current project rate, price date and complete cost forecast</td><td>NOT_EVALUATED</td><td>Required before an asset decision; the teaching rate is not substituted.</td></tr>
+<tr><td>Budget, alternatives and investment criterion</td><td>NOT_EVALUATED</td><td>Required before an economic acceptance conclusion.</td></tr>
+<tr><td>Structural coefficients and qualification evidence</td><td>NOT_EVALUATED</td><td>Not selected or inferred for this cost example.</td></tr>
+</tbody><caption>Table 5. Data readiness and evidence required for broader use. No assumed engineering input is introduced.</caption></table></div>
+<h3>10.4 Quality pre-flight evidence</h3>
+<p>The delivered report is checked by the companion report tests. Their scope is numerical consistency, literal hand anchors, calculation-source freshness, output encoding, local references and report structure; those checks do not establish engineering acceptance.</p>
+<p>Replacement and maintenance are checked separately against the public examples. Displayed headline values are recalculated from the displayed inputs. The chart values are calculated by the module, without a browser-side cost formula. Source digests cover the calculation files only and are embedded in the document data.</p>
+<p>Test results and checks attempted for the delivered revision are stated with the accompanying change description. The rebuild command is provided in <a href="#s9-2">Section 9.2</a>.</p>
+</section>
+<aside id="changes"><h3>Changes since the previous issue</h3><p>This is the first issue. The engineering additions are listed below.</p><ul>{% for change in changes.changes %}<li><a href="#{{ change.section }}">{{ change.description }}</a> {{ change.reason }}</li>{% endfor %}</ul></aside>
+<aside id="comments"><h3>Comments</h3><p>Choose a section, select text if needed, then add a comment. Save the comment file beside this HTML document. Save As is used where available; otherwise the browser downloads the file to Downloads. Load restores a previously saved comment file.</p>
+<label for="comment-section">Section</label><select id="comment-section">{% for i in range(1,11) %}<option value="s{{ i }}">Section {{ i }}</option>{% endfor %}</select>
+<label for="comment-text">Comment</label><textarea id="comment-text"></textarea>
+<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save comments</button><label>Load comments <input id="load-comments" type="file" accept=".json,application/json"></label></div>
+<p id="comment-status" role="status">Comments remain in this page until saved.</p><ol id="comment-list"></ol>
+</aside>
+</main></div>
+<script id="report-data" type="application/json">{{ data | tojson }}</script>
+<script id="changes-data" type="application/json">{{ changes | tojson }}</script>
+<script>
+'use strict';
+const reportData = JSON.parse(document.getElementById('report-data').textContent);
+const reportDigest = '{{ report_id }}';
+const comments = [];
+function describePoint(index) {
+  const row = reportData.rows[index];
+  document.getElementById('chart-detail').textContent =
+    `Case: combined illustration. Component: cost stream. Year: ${row.year}. Demand: ${row.cumulative_pv.toFixed(2)} USD present cost. Limit: not specified. No acceptance limit is specified.`;
+}
+document.querySelectorAll('[data-point]').forEach(point => {
+  ['pointerenter', 'focus', 'click'].forEach(event => point.addEventListener(event, () => describePoint(Number(point.dataset.point))));
+});
+function renderComments() {
+  const list = document.getElementById('comment-list');
+  list.replaceChildren();
+  comments.forEach(comment => {
+    const item = document.createElement('li');
+    item.textContent = `${comment.section}: ${comment.quote ? '“' + comment.quote + '” — ' : ''}${comment.text}`;
+    list.appendChild(item);
+  });
+}
+let selectedQuote = '';
+document.querySelector('main').addEventListener('mouseup', () => { selectedQuote = window.getSelection().toString().trim(); });
+document.getElementById('add-comment').addEventListener('click', () => {
+  const text = document.getElementById('comment-text').value.trim();
+  if (!text) { document.getElementById('comment-status').textContent = 'Enter a comment before adding it.'; return; }
+  comments.push({section: document.getElementById('comment-section').value, quote: selectedQuote, text});
+  document.getElementById('comment-text').value = '';
+  selectedQuote = '';
+  renderComments();
+  document.getElementById('comment-status').textContent = 'Comment added. Save the comment file to keep it.';
+});
+function commentDocument() { return {revision: reportData.revision, report_digest: reportDigest, comments}; }
+document.getElementById('save-comments').addEventListener('click', async () => {
+  const text = JSON.stringify(commentDocument(), null, 2) + '\n';
+  const status = document.getElementById('comment-status');
+  try {
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({suggestedName: 'report.comments.json', types: [{description: 'Comment file', accept: {'application/json': ['.json']}}]});
+      const writable = await handle.createWritable();
+      await writable.write(text); await writable.close();
+      status.textContent = 'Comment file saved to the selected location.';
+    } else {
+      const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+      const link = document.createElement('a'); link.href = url; link.download = 'report.comments.json'; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      status.textContent = 'Comment file downloaded. Move it from Downloads beside this HTML document.';
+    }
+  } catch (error) { status.textContent = error.name === 'AbortError' ? 'Save cancelled; comments remain in this page.' : 'The file was not saved. ' + error.message; }
+});
+document.getElementById('load-comments').addEventListener('change', async event => {
+  const status = document.getElementById('comment-status');
+  try {
+    const file = event.target.files[0]; if (!file) return;
+    const saved = JSON.parse(await file.text());
+    if (saved.report_digest !== reportDigest || saved.revision !== reportData.revision) throw new Error('The comment file belongs to another report revision.');
+    if (!Array.isArray(saved.comments) || !saved.comments.every(item => /^s(?:[1-9]|10)$/.test(item.section) && typeof item.text === 'string' && typeof item.quote === 'string')) throw new Error('The comment file format is invalid.');
+    comments.splice(0, comments.length, ...saved.comments); renderComments();
+    status.textContent = 'Comments loaded for this report revision.';
+  } catch (error) { status.textContent = 'Comments were not loaded. ' + error.message; }
+});
+</script>
+</body>
+</html>
