@@ -483,14 +483,14 @@ def main() -> None:
     args = parser.parse_args()
     data = calculate()
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "index.html").write_text(
-        render(data), encoding="utf-8", newline="\n"
-    )
-    (args.output_dir / "changes.json").write_text(
-        json.dumps(CHANGES, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    with (args.output_dir / "index.html").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as output:
+        output.write(render(data))
+    with (args.output_dir / "changes.json").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as output:
+        output.write(json.dumps(CHANGES, ensure_ascii=False, indent=2) + "\n")
 
 
 if __name__ == "__main__":

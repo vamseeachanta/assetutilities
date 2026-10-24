@@ -196,6 +196,7 @@ def test_utf8_lf_and_house_stylesheet(builder, rebuilt):
         content = path.read_bytes()
         content.decode("utf-8")
         assert b"\r" not in content, path.name
+        assert all(line == line.rstrip(b" \t") for line in content.splitlines()), path.name
     assert (DESTINATION / "house-style.css").read_text(encoding="utf-8") in rebuilt
 
 
