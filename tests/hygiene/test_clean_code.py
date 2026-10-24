@@ -1,5 +1,6 @@
 """Independent source fixtures specify the clean-code gate's expected findings."""
 
+import ast
 import hashlib
 import importlib.util
 import json
@@ -291,6 +292,48 @@ def test_parser_resource_errors_are_syntax_findings(
     assert len(findings) == 1
     assert findings[0]["rule"] == "syntax"
     assert findings[0]["fingerprint"] == "?"
+
+
+def test_cli_fingerprint_exhaustion_has_relative_diagnostic(tree):
+    """Valid, compilable Python can exhaust recursive AST serialization."""
+    root, source, baseline = tree
+    payload = "print(" + "-" * 500 + "0)\n"
+    compile(ast.parse(payload), "<fixture>", "exec", dont_inherit=True)
+    source.write_bytes(payload.encode("utf-8"))
+    baseline.write_bytes(b"[]")
+    result = run_checker(root, baseline)
+    assert result.returncode == 1
+    assert result.stderr == (
+        "FAIL: src/assetutilities/sample.py: unable to fingerprint source "
+        "(RecursionError)\n"
+    )
+    assert result.stdout == ""
+    assert str(root) not in result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("failure", [MemoryError, RecursionError])
+@pytest.mark.parametrize("phase", ["canonicalize", "serialize"])
+def test_fingerprint_resource_errors_have_relative_diagnostic(
+    checker, tree, monkeypatch, capsys, failure, phase
+):
+    root, _, baseline = tree
+    baseline.write_bytes(b"[]")
+
+    def exhausted(*args, **kwargs):
+        raise failure(str(root))
+
+    if phase == "canonicalize":
+        monkeypatch.setattr(checker, "canonical_ast", exhausted)
+    else:
+        monkeypatch.setattr(checker.json, "dumps", exhausted)
+    assert checker.main(["--root", str(root), "--baseline", str(baseline)]) == 1
+    result = capsys.readouterr()
+    assert result.err == (
+        "FAIL: src/assetutilities/sample.py: unable to fingerprint source "
+        f"({failure.__name__})\n"
+    )
+    assert result.out == ""
+    assert str(root) not in result.out + result.err
 
 
 @pytest.mark.parametrize("kind", ["file", "directory", "source-root"])

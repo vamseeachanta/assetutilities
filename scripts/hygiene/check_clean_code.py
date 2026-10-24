@@ -123,7 +123,14 @@ def scan_tree(root: Path) -> list[dict[str, str]]:
                 f"{path.relative_to(root).as_posix()}: "
                 f"unable to read source ({type(error).__name__})"
             ) from None
-        for item in inspect_source(source):
+        try:
+            items = inspect_source(source)
+        except (MemoryError, RecursionError) as error:
+            raise ValueError(
+                f"{path.relative_to(root).as_posix()}: "
+                f"unable to fingerprint source ({type(error).__name__})"
+            ) from None
+        for item in items:
             findings.append({"path": path.relative_to(root).as_posix(), **item})
     return findings
 
