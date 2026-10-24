@@ -1,6 +1,7 @@
 """Contract examples for the portable, offline agent configuration consumer."""
 
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -285,12 +286,13 @@ def test_bundle_rejects_invalid_agents(data):
         bundle_agents(data)
 
 
-def test_cli_validate_and_bundle(capsys):
+def test_cli_validate_and_bundle(capsys, caplog):
     source = str(CATALOG / "multi_agent.yaml")
     assert main(["validate", source]) == 0
     assert "python_programmer" in capsys.readouterr().out
     assert main(["bundle", source]) == 0
     assert json.loads(capsys.readouterr().out)["agents"] == load_agents(source)
+    assert not caplog.records
 
 
 @pytest.mark.parametrize(
@@ -433,14 +435,39 @@ def test_cli_worked_example(capsys):
         "agent: python_programmer\ntemplate: test\ninputs: {}\nignored: value",
     ],
 )
-def test_cli_bad_request(tmp_path, capsys, text):
+def test_cli_bad_request(tmp_path, capsys, caplog, text):
     request = write_yaml(tmp_path, text)
     assert main(["render", str(CATALOG / "multi_agent.yaml"), str(request)]) == 1
     captured = capsys.readouterr()
     assert not captured.out
-    assert captured.err.startswith("Invalid configuration:")
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.name == "assetutilities.agent_os.agent_config"
+    assert record.levelno == logging.ERROR
+    assert record.getMessage().startswith("Invalid configuration:")
 
 
-def test_missing_source(tmp_path, capsys):
+def test_missing_source(tmp_path, capsys, caplog):
     assert main(["validate", str(tmp_path / "missing.yaml")]) == 1
     assert not capsys.readouterr().out
+    assert caplog.record_tuples == [
+        (
+            "assetutilities.agent_os.agent_config",
+            logging.ERROR,
+            "Invalid configuration: cannot read input file",
+        )
+    ]
+
+
+@pytest.mark.parametrize("command", ["validate", "bundle", "render", "request"])
+def test_cli_missing_input_reports_stderr(tmp_path, command):
+    missing = tmp_path / "missing.yaml"
+    args = [command, missing]
+    if command == "render":
+        args.append(ROOT / "examples/agent_prompt.yaml")
+    elif command == "request":
+        args = ["render", CATALOG / "multi_agent.yaml", missing]
+    result = run_legacy_cli(*args)
+    assert result.returncode == 1
+    assert result.stdout == b""
+    assert result.stderr == b"Invalid configuration: cannot read input file\n"

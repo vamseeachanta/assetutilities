@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import math
 import re
 import sys
@@ -16,6 +17,8 @@ from string import Template
 from typing import Any
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 class _UniqueLoader(yaml.SafeLoader):
@@ -243,10 +246,10 @@ def main(argv: list[str] | None = None) -> int:
         else:
             output = "\n".join(agent["name"] for agent in agents) + "\n"
     except OSError:
-        print("Invalid configuration: cannot read input file", file=sys.stderr)
+        logger.error("Invalid configuration: cannot read input file")
         return 1
     except (ValueError, RecursionError) as exc:
-        print(f"Invalid configuration: {exc}", file=sys.stderr)
+        logger.error("Invalid configuration: %s", exc)
         return 1
     sys.stdout.buffer.write(output.encode("utf-8"))
     return 0
