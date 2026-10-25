@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflow API module analysis</title>
+<style>:root{
+
+  --ground:#eef3fa; --panel:#ffffff; --panel-2:#f3f6fc; --edge:#dbe4f0;
+
+  --ink:#13233f; --muted:#5b6b86; --faint:#8593ab; --grid:rgba(19,35,63,.09);
+
+  --brand:#0b3d91; --accent:#0f8a7e;
+
+  --go:#12905a; --caution:#c07d12; --nogo:#d8443f;
+
+  --shadow:0 1px 2px rgba(19,35,63,.06), 0 10px 26px rgba(19,35,63,.09);
+  --r:12px; --wrap:1240px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --ground:#0b1826; --panel:#10222f; --panel-2:#16293733; --edge:rgba(120,160,190,.17);
+    --ink:#e6eef6; --muted:#93a8bd; --faint:#66809a; --grid:rgba(140,170,200,.12);
+    --brand:#84a9e8; --accent:#3fb6c9;
+    --go:#2fce8f; --caution:#f4b93a; --nogo:#ff6b6b;
+    --shadow:0 1px 0 rgba(255,255,255,.03), 0 12px 30px rgba(0,0,0,.4);
+  }
+}
+
+
+:root[data-theme="light"]{
+  --ground:#eef3fa; --panel:#ffffff; --panel-2:#f3f6fc; --edge:#dbe4f0;
+  --ink:#13233f; --muted:#5b6b86; --faint:#8593ab; --grid:rgba(19,35,63,.09);
+  --brand:#0b3d91; --accent:#0f8a7e;
+  --go:#12905a; --caution:#c07d12; --nogo:#d8443f;
+  --shadow:0 1px 2px rgba(19,35,63,.06), 0 10px 26px rgba(19,35,63,.09);
+}
+:root[data-theme="dark"]{
+  --ground:#0b1826; --panel:#10222f; --panel-2:#16293733; --edge:rgba(120,160,190,.17);
+  --ink:#e6eef6; --muted:#93a8bd; --faint:#66809a; --grid:rgba(140,170,200,.12);
+  --brand:#84a9e8; --accent:#3fb6c9;
+  --go:#2fce8f; --caution:#f4b93a; --nogo:#ff6b6b;
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 12px 30px rgba(0,0,0,.4);
+}
+
+
+:root{
+  --navy:var(--brand);  --teal:var(--accent);
+  --line:var(--edge);   --soft:var(--panel-2);  --bg:var(--ground);
+  --mut:var(--muted);   --good:var(--go);  --warn:var(--caution);  --red:var(--nogo);
+}
+
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums}
+.lbl{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600}
+
+
+a.brandmark{text-decoration:none; color:inherit; display:inline-flex; align-items:center; border-radius:6px}
+a.brandmark:hover .lbl{color:var(--ink)}
+a.brandmark:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.sr-only{
+  position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+*{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.6;margin:0;background:var(--bg);}
+.wrap{max-width:920px;margin:0 auto;padding:0 24px 80px;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.04);}
+header{border-bottom:3px solid var(--accent);padding:38px 0 22px;margin-bottom:8px}
+.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--accent);font-weight:700}
+h1{font-size:1.8rem;line-height:1.2;margin:.3em 0 .15em} h2{font-size:1.25rem;margin:2.2em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.4em 0 .4em;color:var(--accent)} .sub{color:var(--mut);font-size:.95rem}
+.badge{display:inline-block;background:var(--good);color:#fff;font-weight:700;font-size:.8rem;padding:5px 12px;border-radius:4px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
+.meta div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.meta b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)} .meta span{font-size:.95rem;font-weight:600}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem} th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{background:var(--bg);font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)} td.good{color:var(--good);font-weight:700} td.warn{color:var(--warn);font-weight:700}
+figure{margin:18px 0;text-align:center} figure img{max-width:100%;border:1px solid var(--line);border-radius:6px} figcaption{font-size:.84rem;color:var(--mut);margin-top:8px}
+.eq{background:var(--bg);border-left:3px solid var(--accent);padding:10px 16px;margin:12px 0;font-family:'Cambria Math',Georgia,serif;font-size:1.05rem;overflow-x:auto}
+.callout{background:#eef6fb;border:1px solid #cce3f0;border-radius:8px;padding:14px 18px;margin:16px 0} .callout.key{background:#eefaf2;border-color:#bfe6cd}
+code{background:var(--bg);padding:1px 6px;border-radius:4px;font-size:.88em} footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.82rem;color:var(--mut)}
+.refs li{font-size:.86rem;margin:.35em 0}
+</style>
+<style>
+pre,td code{white-space:pre-wrap;overflow-wrap:anywhere} pre{padding:12px;background:var(--bg)}
+svg{width:100%;height:auto} svg text{font:14px sans-serif;fill:var(--ink)}
+button,input,select,textarea{font:inherit} button{cursor:pointer;padding:5px 10px}
+textarea{display:block;width:100%;min-height:90px} .review{border:1px solid var(--line);padding:14px}
+.chart-point{fill:var(--brand);cursor:pointer} .chart-point:focus{stroke:var(--accent);stroke-width:4}
+.diagram{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.diagram span{border:1px solid var(--line);background:var(--bg);padding:12px}
+</style></head>
+<body class="hs-doc"><main class="wrap">
+<header><div class="kicker">Engineering software · module analysis</div>
+<h1>Workflow API module analysis</h1>
+<p class="sub">Draft for maintainer review</p>
+<p>Revision A · 22 October 2026</p></header>
+
+<section id="summary"><h2>1 Executive summary</h2>
+<p>The workflow application programming interface is an in-process execution and evidence interface.
+Analysis is performed to determine how a registered calculation is called and which evidence is returned;
+key results are summarized below.</p>
+<ul><li>Run the public CSV example through the typed interface.
+<ul><li>The registered example returns <span data-number="file_count">2</span> output files and equal output hashes on repetition.
+This equality is limited to the executed example and its current environment.</li></ul></li>
+<li>Inspect returned status and warnings before consuming output metadata.
+<ul><li>Content hashing is distinguished from engineering acceptance. No physical acceptance limit is supplied by this interface.</li></ul></li>
+<li>Select explicit records when durable identity or publication is required.
+<ul><li>The envelope alone does not freeze input-file bytes or enforce a clean source revision.</li></ul></li></ul>
+<h3>Revision history</h3>
+<table><thead><tr><th>Revision</th><th>Date</th><th>Change and cause</th></tr></thead>
+<tbody><tr><td>A</td><td>22 October 2026</td><td>The callable workflow and evidence boundaries are documented to support integration decisions.</td></tr></tbody></table>
+</section>
+
+<section id="purpose"><h2>2 Purpose and system boundary</h2>
+<p>A workflow configuration is dispatched through the existing calculation engine.
+A result envelope is returned so that calling software is separated from command-line execution.</p>
+<p>The main path is <code>run_workflow</code>. Registry resolution, configuration merging,
+temporary output discovery and hashing are provided by that path. Identity, input admission,
+artifact, output, metric and publication contracts are supplied as additional interfaces;
+they are not automatically applied by the runner. <a href="#source-runner">[4]</a></p>
+<figure><div class="diagram" role="img" aria-label="Configuration enters the registry resolver and engine. Temporary files are inspected, hashed and removed. A result envelope returns file metadata to the caller.">
+<span>Caller configuration</span> → <span>Registry and engine</span> →
+<span>Temporary files → metadata</span> → <span>Result envelope</span></div>
+<figcaption>Software data flow. The temporary directory is removed by the runner; the returned file list is metadata, rather than a persistent download location.</figcaption></figure>
+<p>A physical geometry, mesh or structural boundary condition is not represented by this interface.
+Such inputs belong to the selected calculation and are outside this software diagram.</p>
+</section>
+
+<section id="basis"><h2>3 Basis and theory</h2>
+<p>Stored-byte identity is formed by hashing the bytes supplied to the artifact interface.
+The hash algorithm is specified externally; the composition of workflow records is specified by the implementation.</p>
+<h3>Stored bytes and canonical serialization</h3>
+<p class="eq"><var>d</var> = SHA-256(<var>B</var>)</p>
+<p><var>B</var> denotes the stored byte sequence and <var>d</var> its content digest.
+SHA-256 is specified by FIPS 180-4, August 2015, sections 5.1.1 and 6.2.
+Compression is descriptive metadata and is not decoded before hashing by the artifact interface.
+Hash equality is evidence of byte agreement under that digest, rather than a mathematical proof that collisions are impossible.
+<a href="#ref-fips">[1]</a> <a href="#source-artifact">[4]</a></p>
+<p>For the small integer objects used here, compact JSON punctuation and ordered keys are used.
+Whitespace, key sorting and UTF-8 generation are described in RFC 8785, June 2020,
+sections 3.2.1, 3.2.3 and 3.2.4. UTF-8 encoding for ASCII characters is specified in
+RFC 3629, November 2003, section 3. <a href="#ref-jcs">[2]</a> <a href="#ref-utf8">[3]</a></p>
+<p>The identity serializer differs from RFC 8785 for general data: Unicode normalization is applied,
+and decimal values are rendered without the RFC's required number conversion rules.
+RFC conformance is therefore not claimed. The ASCII integer examples do not exercise these differences.
+<a href="#ref-jcs">[2]</a> <a href="#source-identity">[4]</a></p>
+<h3>Runner evidence and acceptance criteria</h3>
+<p>Runner input hashing serializes configuration after removing volatile top-level settings.
+Runner result hashing serializes the sorted output-name and file-digest pairs.
+These operations use the envelope serializer, separately from the identity serializer.
+Repeat equality means the result hashes from separate executions compare equal.
+The documented example is accepted here only when its status is <code>ok</code>, warnings are absent,
+and the opt-in repeat check returns true. These are software criteria, with no engineering capacity interpretation.
+<a href="#source-envelope">[4]</a> <a href="#source-runner">[4]</a></p>
+</section>
+
+<section id="interface"><h2>4 Inputs and outputs</h2>
+<p>A registered workflow identifier or a complete configuration dictionary is supplied by the caller.
+The returned envelope is inspected before downstream use.</p>
+<h3>Caller inputs</h3>
+<p><code>workflow_id</code> selects a registry entry. <code>params</code> recursively overrides its loaded example
+configuration. <code>cfg</code> supplies a full configuration and takes precedence over registry example loading;
+in that branch, <code>params</code> is not merged. The workflow identifier still labels the envelope.
+<code>verify_reproducible</code> defaults to false; setting it to true requests a fresh repeat execution.
+Relative CSV paths in the documented example are resolved from the repository root.
+<a href="#source-runner">[4]</a></p>
+<h3>Envelope outputs</h3>
+<p><code>status</code> is <code>ok</code> or <code>error</code>. A successful file result contains
+basenames, byte sizes and content digests. Provenance contains a best-effort code version,
+configuration hash, time and standards list; the runner does not populate engineering standards.
+Determinism contains the result hash and a repeat flag that is null unless requested.
+Confidence remains null. Warnings contain discovery discrepancies or caught error text.
+Unknown identifiers and caught exceptions return error envelopes. <a href="#source-envelope">[4]</a></p>
+<p>Only direct files in the resolved result directory are discovered. The saved configuration dump is excluded.
+Registry output names are documentary: their count is cross-checked when declared, but the actual filenames are used.
+An empty file list can accompany an <code>ok</code> status and a warning; status alone is insufficient.
+<a href="#source-runner">[4]</a></p>
+</section>
+
+<section id="worked"><h2>5 Worked public workflow example</h2>
+<p>The registered descriptive-statistics example is executed by calling the module.
+Its repository sample CSV groups are processed without a physical design interpretation.</p>
+<pre><code>from assetutilities.workflow_api import run_workflow
+
+result = run_workflow("data_exploration", verify_reproducible=True)
+assert result.status == "ok"
+assert not result.warnings
+assert result.determinism["reproducible"] is True
+print(len(result.result["outputs"]))</code></pre>
+<p>The module returns <span data-number="file_count">2</span> output files. Each declared input group generates its own statistics file;
+the saved configuration dump is omitted by the locator. The repeat flag is true because the separate
+executions return equal content-based result hashes. Output locations and basenames are recorded in section 9.2.
+<a href="#source-example">[4]</a></p>
+<p>Numeric statistics are not carried in the envelope: the returned payload lists output metadata.
+Access to the generated CSV values requires an output capture or persistence mechanism before temporary cleanup.
+No coefficient from the sample CSV files is interpreted as a physical performance limit.</p>
+</section>
+
+<section id="bytes"><h2>6 Stored-byte worked anchors</h2>
+<p>Small byte sequences and structured objects are passed to the artifact constructors.
+The returned byte counts are checked against hand-counted punctuation and ASCII characters.</p>
+<p>The stored ASCII sequence <code>abc</code> returns <span data-number="ascii_bytes">3</span> bytes.
+The object <code>{"a":1}</code> returns <span data-number="structured_bytes">7</span> bytes.
+The object supplied as <code>{"b":2,"a":1}</code> is stored as
+<code>{"a":1,"b":2}</code> and returns <span data-number="two_member_bytes">13</span> bytes.
+These byte counts are module outputs; their hand calculations are supplied with the report tests.
+<a href="#ref-jcs">[2]</a> <a href="#ref-utf8">[3]</a> <a href="#source-artifact">[4]</a></p>
+<figure><svg id="byte-chart" viewBox="0 0 640 260" role="img" aria-label="Stored bytes against ASCII prefix length. Points are selectable by keyboard or pointer."></svg>
+<figcaption>Stored byte length against ASCII prefix length. Select a point for its case, component,
+demand, limit status and units. No maximum artifact size is enforced by this constructor;
+an operational size limit is NOT_EVALUATED. This chart is not a throughput benchmark.</figcaption></figure>
+<p id="chart-detail" aria-live="polite">Select a chart point to inspect its measured byte count.</p>
+<noscript><p>Interactive inspection requires JavaScript. The worked byte counts are stated in the preceding paragraph.</p></noscript>
+</section>
+
+<section id="evidence"><h2>7 Validation evidence</h2>
+<p>Existing tests are mapped to their software contracts.
+The map is a source inventory, rather than a statement of engineering accuracy or an executed test count.</p>
+<p>The existing suite contains <span data-number="test_definitions">113</span> test definitions in <span data-number="test_files">9</span> files,
+counted from source before parameter expansion. Envelope round-tripping, hash sensitivity,
+registry merging, real engine execution, temporary-output isolation and opt-in repeat equality are exercised.
+Artifact tests cover byte integrity and storage-location binding. Identity and input tests cover explicit
+record membership and rejection of inadmissible inputs. <a href="#source-tests">[5]</a></p>
+<p>Output and metric tests cover publication-surface restrictions, definitions and population eligibility.
+Publication tests use an in-memory port and a mocked external adapter. Those tests do not demonstrate
+live service access, credential configuration or successful external publication. No timing benchmark
+or field measurement is included in the cited workflow example. <a href="#source-tests">[5]</a></p>
+<p>The report checks add literal hand-count anchors and consistency checks against fresh module calls.
+Counts are exact integers; floating point tolerances are unnecessary for the reported measurements.
+Only stable counts and names are embedded for the CSV example, so environment-sensitive CSV formatting
+and runtime timestamps are not presented as portable byte digests. <a href="#source-rebuild">[5]</a></p>
+</section>
+
+<section id="limits"><h2>8 Findings, limits and recommendations</h2>
+<p>Execution repeatability is demonstrated for the included example by the returned repeat flag.
+Durable input identity and physical acceptance remain separate responsibilities.</p>
+<h3>Limits of use</h3>
+<p>The runner configuration hash includes CSV path strings, rather than the referenced file bytes.
+Volatile top-level configuration settings are removed from that hash, even though changing a default setting
+can change execution. Provenance does not establish a clean source revision or an environment pin.
+Relative example paths require the repository context. The embedded engine path redirects ordinary outputs,
+but it is not a security sandbox for arbitrary configurations or plugins. <a href="#source-runner">[4]</a></p>
+<p>The separate identity gate accepts caller-supplied cleanliness and revision evidence; it does not inspect
+the working tree itself. Its serializer is not general RFC 8785 conformance evidence.
+The architecture contract referred to by module docstrings is absent from the current checkout;
+implementation and tests are the available local contract evidence. <a href="#source-identity">[4]</a></p>
+<h3>Recommendations</h3>
+<p>Inspect status, warnings and expected outputs together, and request the repeat check for calculations that need
+repeat evidence. Materialize referenced input bytes and record explicit schema and environment evidence before
+using the separate identity and publication contracts. Capture output bytes before cleanup when persistent results
+are required. Test non-ASCII and decimal interoperability before exchanging canonical records with other implementations.
+These actions address the implementation boundaries described above. <a href="#source-runner">[4]</a>
+<a href="#source-identity">[4]</a> <a href="#ref-jcs">[2]</a></p>
+<p>Supply the selected engineering method, input units, acceptance criteria and method-specific validation
+before treating a successful software status as acceptance of a physical design. No safety factor,
+capacity threshold or operating envelope is supplied or inferred by this report.</p>
+<h3>Not covered</h3>
+<p>Live publication, promotion recovery, metric population design, external credentials and the other registered
+engine routes are inventoried through tests but are not worked examples here. No external publication is performed.</p>
+</section>
+
+<section id="references"><h2>9 References and source register</h2>
+<p>Public standards and repository records are identified for the claims made above.
+Source locations and calculation fingerprints are collected here.</p>
+<h3>9.1 Public documents</h3>
+<ol class="refs"><li id="ref-fips"><a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS 180-4, Secure Hash Standard, August 2015</a>,
+sections 5.1.1 and 6.2. Open copy read on 22 October 2026; HTTP status 200. Used for the stored-byte hash algorithm.</li>
+<li id="ref-jcs"><a href="https://www.rfc-editor.org/rfc/rfc8785">RFC 8785, JSON Canonicalization Scheme, June 2020</a>,
+sections 3.1 and 3.2.1 to 3.2.4. Open copy read on 22 October 2026; HTTP status 200.
+Used for compact JSON, sorting, encoding and the stated interoperability differences.</li>
+<li id="ref-utf8"><a href="https://www.rfc-editor.org/rfc/rfc3629">RFC 3629, UTF-8, November 2003</a>,
+section 3, encoding table. Open copy read on 22 October 2026; HTTP status 200. Used for ASCII byte counting.</li></ol>
+<h3>9.2 Repository evidence and locations</h3>
+<table><thead><tr><th>Record</th><th>Location</th><th>Use</th></tr></thead><tbody>
+<tr id="source-runner"><td>[4] Public interface and runner</td><td><code>src/assetutilities/workflow_api/__init__.py</code><br><code>src/assetutilities/workflow_api/runner.py</code></td><td>Entry point, overrides, temporary cleanup and output discovery.</td></tr>
+<tr id="source-envelope"><td>[4] Envelope</td><td><code>src/assetutilities/workflow_api/envelope.py</code></td><td>Input and result hashes; provenance and repeat semantics.</td></tr>
+<tr id="source-artifact"><td>[4] Artifacts</td><td><code>src/assetutilities/workflow_api/artifact.py</code></td><td>Physical and structured byte counts, integrity and storage binding.</td></tr>
+<tr id="source-identity"><td>[4] Identity and related contracts</td><td><code>src/assetutilities/workflow_api/identity.py</code><br><code>src/assetutilities/workflow_api/inputs.py</code><br><code>src/assetutilities/workflow_api/output_contract.py</code><br><code>src/assetutilities/workflow_api/metrics.py</code><br><code>src/assetutilities/workflow_api/publication/</code></td><td>Separate admission, identity, metric and publication requirements.</td></tr>
+<tr id="source-example"><td>[4] Public example</td><td><a href="../../../../examples/workflows/data_exploration/input.yml">examples/workflows/data_exploration/input.yml</a><br><code>docs/registry/workflows.yaml</code></td><td>Documented sample CSV groups and registry entry.</td></tr>
+<tr><td>[4] Returned basenames</td><td><code>data_exploration_FST1.csv</code>, <code>data_exploration_FST2.csv</code></td><td>Computed file list; persistent locations are not returned.</td></tr>
+<tr id="source-tests"><td>[5] Existing tests</td><td><code>tests/workflow_api/</code></td><td>Source inventory follows; pass counts are supplied separately with check results.</td></tr>
+<tr id="source-rebuild"><td>[5] Report checks and rebuild</td><td><code>tests/workflow_api/test_module_report.py</code><br><code>python scripts/reports/build_workflow_api_report.py</code></td><td>Hand anchors, module consistency, rebuild comparison and visible-text checks.</td></tr>
+<tr><td>House-style exemplar</td><td>Companion calculation documentation: <code>docs/api/cfd/turbulent-flat-plate-verification.html</code> and <code>docs/api/_assets/brand.css</code></td><td>The established palette and layout are copied and inlined. No matching house-style page exists in this repository at the report basis. The body uses <code>hs-doc</code>.</td></tr>
+</tbody></table>
+<details><summary>Existing test definitions by source file</summary>
+<table><thead><tr><th>File</th><th>Definitions</th><th>Source</th></tr></thead><tbody><tr><td><code>tests/workflow_api/test_artifact.py</code></td><td>13</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_envelope.py</code></td><td>9</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_hf_port_real.py</code></td><td>9</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_identity.py</code></td><td>15</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_inputs.py</code></td><td>11</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_metrics.py</code></td><td>11</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_output_contract.py</code></td><td>14</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_publication.py</code></td><td>20</td><td>Source definition count; parameter expansions are excluded.</td></tr>
+<tr><td><code>tests/workflow_api/test_runner.py</code></td><td>11</td><td>Source definition count; parameter expansions are excluded.</td></tr></tbody></table></details>
+<details><summary>Calculation source fingerprints</summary><p>The digests cover module and calculation source files,
+rather than test files or document formatting. A changed fingerprint requires rebuilding the report.</p>
+<table><thead><tr><th>Calculation source</th><th>SHA-256</th></tr></thead><tbody><tr><td><code>src/assetutilities/workflow_api/__init__.py</code></td><td><code>32dd6683a79a6b300ef99003c7176b3763255e9061d8030accb50a8be6b70bc0</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/artifact.py</code></td><td><code>1344465beff71df7c181f28a86a9aa7195066f9392aba1f8467351db4572e32e</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/envelope.py</code></td><td><code>ef33ff778f32427fe86c18e721881659b9b1438649e4bb4f5779bbed5c5686d2</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/identity.py</code></td><td><code>70d38ea9314b6286b7982d2f9dbd1cb60c80be80cd2109e16c801f37e919bc97</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/inputs.py</code></td><td><code>a959581569e78c9b5bf6896412e8d78a5554f9c03ea8c9199a9ede65a98823c4</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/metrics.py</code></td><td><code>3601db637613aaf719eaa9b130b8bf7971a85946936da3706f4b7e697c8acbce</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/output_contract.py</code></td><td><code>e9a114c88bd5609168e6466283088e271e2c1cbe6d05f88f3305b68d10bd3f26</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/__init__.py</code></td><td><code>4caa093c8e6d34f410eb7e42e9fe7f47942a713ca7f108598f252bffe2f2672e</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/egress.py</code></td><td><code>fd61391974eef19bbb2218499c1a54a3f670d64f615fc434983858eb75e3367f</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/hf_port.py</code></td><td><code>94dbf68cdcdc62fc623aa6db9741956a388c762197ee251a8806d58f4b369bdf</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/ledger.py</code></td><td><code>a7da5b4b643c022c4e3b88947d8140586e478379e4329ff5b8a118a064d4ef8d</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/projection.py</code></td><td><code>53e8a41f89cd8d90ba8b6084497aadd1378e42eb596261d23989f32ad4742b6a</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/publication/promotion.py</code></td><td><code>9a1dcd18b09190b7c0e7fb90995e3e5eb1b4c7ba90265b05e3805702d139457c</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/report.py</code></td><td><code>f7cb55b6864bcd43552945038523e904dfd7fa25d8b0b43e2c487991f76e556e</code></td></tr>
+<tr><td><code>src/assetutilities/workflow_api/runner.py</code></td><td><code>8a9a651d2e0671d711acda8ec1bb49ddd5b109e3f1655d08b1d82800f8afff21</code></td></tr>
+<tr><td><code>src/assetutilities/engine.py</code></td><td><code>74bcef6e89b0836e7bfbebff5ae449ec0289740cd6661db77cd6c176f10f3408</code></td></tr>
+<tr><td><code>src/assetutilities/modules/data_exploration/data_exploration.py</code></td><td><code>1211c2b729fd57c0a715b47af3b17e308da37c63aea9db70288abf02387281a9</code></td></tr></tbody></table></details>
+</section>
+
+<section id="appendix"><h2>10 Appendix: data register and review</h2>
+<p>Unspecified application requirements are recorded separately from the worked software inputs.
+Comments are attached to report sections and saved as a companion file.</p>
+<h3>Data register and quality checks</h3>
+<table><thead><tr><th>Item</th><th>Basis or state</th><th>Effect</th><th>Source</th></tr></thead><tbody>
+<tr><td>Registered workflow</td><td>Public repository example</td><td>File count is calculated by the runner.</td><td>Section 9.2, public example.</td></tr>
+<tr><td>Byte inputs</td><td>Explicit ASCII and integer-object inputs</td><td>Counts are exact and hand-checkable.</td><td>Section 6 and reference [3].</td></tr>
+<tr><td>Physical units and design acceptance</td><td>NOT_EVALUATED; required from the selected calculation</td><td>No physical operating limit is inferred.</td><td>Section 8.</td></tr>
+<tr><td>Operational size and performance limit</td><td>NOT_EVALUATED; required from the consuming application</td><td>No throughput or memory-capacity claim is made.</td><td>Section 6.</td></tr>
+<tr><td>Application suitability</td><td>ASSUMED - to be confirmed: the registered example represents the intended integration pattern.</td><td>Application-specific coverage is required before use beyond this example.</td><td>Sections 5 and 8.</td></tr>
+</tbody></table>
+<p>Quality checks cover hand-counted anchors, fresh module consistency, report rebuild equality, internal reference
+targets, source inventory, UTF-8 encoding and LF line endings. The page contains its styles and interactive code;
+no remote chart library is loaded. Full application testing and external-service testing are outside the report checks.</p>
+<details id="change-panel"><summary>Engineering changes</summary><div id="change-content"></div></details>
+<h3>Section comments</h3>
+<div class="review"><label for="comment-section">Section</label><select id="comment-section"></select>
+<label for="comment-text">Comment text</label><textarea id="comment-text"></textarea>
+<p><button id="comment-add" type="button">Add comment</button>
+<button id="comment-save" type="button">Save comments beside report</button>
+<button id="comment-download" type="button">Download comments</button></p>
+<label for="comment-load">Load saved comments</label><input id="comment-load" type="file" accept="application/json">
+<p id="comment-status" aria-live="polite">Comments remain in this page until saved. Select the report folder when saving;
+otherwise download the companion comments file and place it beside this HTML.</p>
+<ol id="comment-list"></ol></div>
+</section>
+<footer>Workflow API module analysis · Draft for maintainer review</footer>
+</main>
+<script id="report-data" type="application/json">{"anchors": {"ascii_bytes": 3, "structured_bytes": 7, "two_member_bytes": 13}, "curve": [{"bytes": 0, "characters": 0}, {"bytes": 1, "characters": 1}, {"bytes": 2, "characters": 2}, {"bytes": 3, "characters": 3}], "example": {"file_count": 2, "outputs": ["data_exploration_FST1.csv", "data_exploration_FST2.csv"], "repeat_equal": true, "status": "ok", "workflow": "data_exploration"}, "source_digests": {"src/assetutilities/engine.py": "74bcef6e89b0836e7bfbebff5ae449ec0289740cd6661db77cd6c176f10f3408", "src/assetutilities/modules/data_exploration/data_exploration.py": "1211c2b729fd57c0a715b47af3b17e308da37c63aea9db70288abf02387281a9", "src/assetutilities/workflow_api/__init__.py": "32dd6683a79a6b300ef99003c7176b3763255e9061d8030accb50a8be6b70bc0", "src/assetutilities/workflow_api/artifact.py": "1344465beff71df7c181f28a86a9aa7195066f9392aba1f8467351db4572e32e", "src/assetutilities/workflow_api/envelope.py": "ef33ff778f32427fe86c18e721881659b9b1438649e4bb4f5779bbed5c5686d2", "src/assetutilities/workflow_api/identity.py": "70d38ea9314b6286b7982d2f9dbd1cb60c80be80cd2109e16c801f37e919bc97", "src/assetutilities/workflow_api/inputs.py": "a959581569e78c9b5bf6896412e8d78a5554f9c03ea8c9199a9ede65a98823c4", "src/assetutilities/workflow_api/metrics.py": "3601db637613aaf719eaa9b130b8bf7971a85946936da3706f4b7e697c8acbce", "src/assetutilities/workflow_api/output_contract.py": "e9a114c88bd5609168e6466283088e271e2c1cbe6d05f88f3305b68d10bd3f26", "src/assetutilities/workflow_api/publication/__init__.py": "4caa093c8e6d34f410eb7e42e9fe7f47942a713ca7f108598f252bffe2f2672e", "src/assetutilities/workflow_api/publication/egress.py": "fd61391974eef19bbb2218499c1a54a3f670d64f615fc434983858eb75e3367f", "src/assetutilities/workflow_api/publication/hf_port.py": "94dbf68cdcdc62fc623aa6db9741956a388c762197ee251a8806d58f4b369bdf", "src/assetutilities/workflow_api/publication/ledger.py": "a7da5b4b643c022c4e3b88947d8140586e478379e4329ff5b8a118a064d4ef8d", "src/assetutilities/workflow_api/publication/projection.py": "53e8a41f89cd8d90ba8b6084497aadd1378e42eb596261d23989f32ad4742b6a", "src/assetutilities/workflow_api/publication/promotion.py": "9a1dcd18b09190b7c0e7fb90995e3e5eb1b4c7ba90265b05e3805702d139457c", "src/assetutilities/workflow_api/report.py": "f7cb55b6864bcd43552945038523e904dfd7fa25d8b0b43e2c487991f76e556e", "src/assetutilities/workflow_api/runner.py": "8a9a651d2e0671d711acda8ec1bb49ddd5b109e3f1655d08b1d82800f8afff21"}, "test_inventory": {"tests/workflow_api/test_artifact.py": 13, "tests/workflow_api/test_envelope.py": 9, "tests/workflow_api/test_hf_port_real.py": 9, "tests/workflow_api/test_identity.py": 15, "tests/workflow_api/test_inputs.py": 11, "tests/workflow_api/test_metrics.py": 11, "tests/workflow_api/test_output_contract.py": 14, "tests/workflow_api/test_publication.py": 20, "tests/workflow_api/test_runner.py": 11}}</script>
+<script id="change-data" type="application/json">{"changes": [{"change": "The registered CSV workflow and stored-byte examples are calculated through the module.", "reason": "Execution evidence is separated from acceptance of engineering results.", "section": "3 to 7"}, {"change": "Input-file identity, serialization differences and publication boundaries are identified.", "reason": "Repeat equality alone does not establish a durable calculation record.", "section": "8"}], "date": "2026-10-22", "document": "Workflow API module analysis", "revision": "A"}</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("report-data").textContent);
+const changeData = JSON.parse(document.getElementById("change-data").textContent);
+const chart = document.getElementById("byte-chart");
+const ns = "http://www.w3.org/2000/svg";
+function svgElement(tag, attrs, text) {
+  const element = document.createElementNS(ns, tag);
+  for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value);
+  if (text !== undefined) element.textContent = text;
+  chart.appendChild(element);
+  return element;
+}
+svgElement("path", {d:"M70 25V210H600", fill:"none", stroke:"currentColor"});
+svgElement("text", {x:260,y:250}, "Input prefix (characters)");
+svgElement("text", {x:10,y:18}, "Stored bytes");
+const extent = Math.max(...data.curve.map(point => point.characters));
+for (const point of data.curve) {
+  const x = 70 + point.characters / extent * 500;
+  const y = 210 - point.bytes / extent * 170;
+  svgElement("text", {x:x-4,y:232}, String(point.characters));
+  svgElement("text", {x:43,y:y+5}, String(point.bytes));
+  const detail = "Case: ASCII prefix " + point.characters + "; component: stored artifact; demand: " +
+    point.bytes + " bytes; limit: NOT_EVALUATED; units: bytes.";
+  const dot = svgElement("circle", {cx:x,cy:y,r:7,tabindex:0,role:"button",class:"chart-point","aria-label":detail});
+  const title = document.createElementNS(ns, "title"); title.textContent = detail; dot.appendChild(title);
+  const inspect = () => {document.getElementById("chart-detail").textContent = detail;};
+  dot.addEventListener("focus", inspect); dot.addEventListener("mouseenter", inspect);
+  dot.addEventListener("click", inspect);
+  dot.addEventListener("keydown", event => {if (["Enter", " "].includes(event.key)) {event.preventDefault(); inspect();}});
+}
+for (const entry of changeData.changes) {
+  const p = document.createElement("p");
+  p.textContent = "Sections " + entry.section + ": " + entry.change + " " + entry.reason;
+  document.getElementById("change-content").appendChild(p);
+}
+const sections = Array.from(document.querySelectorAll("main > section"));
+const selector = document.getElementById("comment-section");
+for (const section of sections) {
+  const option = document.createElement("option"); option.value = section.id;
+  option.textContent = section.querySelector("h2").textContent; selector.appendChild(option);
+}
+let comments = [];
+function status(text) {document.getElementById("comment-status").textContent = text;}
+function refreshComments() {
+  const list = document.getElementById("comment-list"); list.replaceChildren();
+  for (const entry of comments) {
+    const item = document.createElement("li"); item.textContent = entry.section + ": " + entry.text; list.appendChild(item);
+  }
+}
+function commentsText() {
+  return JSON.stringify({document:changeData.document,revision:changeData.revision,comments:comments}, null, 2) + "\n";
+}
+document.getElementById("comment-add").addEventListener("click", () => {
+  const input = document.getElementById("comment-text"); const text = input.value.trim();
+  if (!text) {status("Enter a comment before adding it."); return;}
+  comments.push({section:selector.value,text:text}); input.value = ""; refreshComments();
+  status("Comment added. Save the companion file to preserve it.");
+});
+document.getElementById("comment-save").addEventListener("click", async () => {
+  if (!window.showDirectoryPicker) {status("Folder saving is unavailable. Download comments and place the file beside this HTML."); return;}
+  try {
+    const directory = await window.showDirectoryPicker({mode:"readwrite"});
+    const file = await directory.getFileHandle("comments.json", {create:true});
+    const writable = await file.createWritable(); await writable.write(commentsText()); await writable.close();
+    status("Comments saved in the selected report folder.");
+  } catch (error) {status("Comments were not saved. Select a writable report folder or use Download comments.");}
+});
+document.getElementById("comment-download").addEventListener("click", () => {
+  const url = URL.createObjectURL(new Blob([commentsText()], {type:"application/json;charset=utf-8"}));
+  const link = document.createElement("a"); link.href = url; link.download = "comments.json"; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000); status("Place the downloaded comments file beside this HTML.");
+});
+document.getElementById("comment-load").addEventListener("change", async event => {
+  const file = event.target.files[0]; if (!file) return;
+  try {
+    const saved = JSON.parse(await file.text());
+    const valid = saved.document === changeData.document && saved.revision === changeData.revision &&
+      Array.isArray(saved.comments) && saved.comments.every(entry => entry && typeof entry.text === "string" &&
+        sections.some(section => section.id === entry.section));
+    if (!valid) throw new Error("Invalid comment document");
+    comments = saved.comments; refreshComments(); status("Saved comments loaded.");
+  } catch (error) {status("The selected file is not a comment file for this report revision.");}
+});
+</script></body></html>
