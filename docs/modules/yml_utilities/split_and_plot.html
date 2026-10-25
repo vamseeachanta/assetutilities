@@ -24,9 +24,24 @@ dimensionless values; no engineering qualification is established.</p>
 <h2>Revision history</h2>
 <table>
 <thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
-<tbody><tr><td>1</td><td>2026-10-20</td><td>Add a reproducible split-and-plot example to demonstrate lossless section output.</td></tr></tbody>
+<tbody><tr><td>1</td><td>2026-10-20</td><td>Add a reproducible split-and-plot example to demonstrate lossless section output.</td></tr>
+<tr><td>2</td><td>2026-10-25</td><td>State the intended behavior, focused tests and integration boundary together so the scope can be checked.</td></tr></tbody>
 <caption>Table 1. Document revisions.</caption>
 </table>
+<h2>Plan-lite</h2>
+<ul>
+<li>Intended behavior: preserve parsed YAML values, comments, tags and merge
+semantics in independently readable sections; apply optional row shaping without
+changing values, and plot supplied arrays with the packaged X-Y defaults.</li>
+<li>Focused tests:
+<a href="../../../tests/modules/yml_utilities/test_yaml_split_roundtrip.py">split round trips</a>,
+<a href="../../../tests/modules/yml_utilities/test_yaml_shaping.py">row shaping</a>,
+<a href="../../../tests/modules/yml_utilities/test_packaged_yaml_plot.py">packaged plotting and the worked example</a>,
+and <a href="../../../tests/modules/yml_utilities/test_split_and_plot_issue52.py">existing split, save and plot integration</a>.</li>
+<li>Integration boundary: split/save, packaged plotting and this synthetic example
+form one connected scope. The interfaces consume supplied YAML, arrays and output
+paths; solver application opening and model validation require separate integration.</li>
+</ul>
 <h2>Input and independent answer</h2>
 <p>The example source is <a href="../../../examples/yaml_split_plot/input.yml">input.yml</a>.
 The relation is defined as <code>y = x*x</code>. Direct multiplication gives the
