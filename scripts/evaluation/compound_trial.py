@@ -64,6 +64,8 @@ def verify_evidence(evidence, root):
         )
         require(relative not in seen, "duplicate evidence path")
         seen.add(relative)
+        # FIPS 180-4, section 6.2.2: SHA-256 produces 256 bits, hence 64 hex digits.
+        # https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         require(
             isinstance(item["sha256"], str)
             and re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) is not None,
@@ -74,6 +76,8 @@ def verify_evidence(evidence, root):
         require(artifact.is_file(), "evidence must be a regular file")
         with artifact.open("rb") as stream:
             digest = hashlib.sha256()
+            # A 64 KiB buffer bounds memory while streaming large evidence files.
+            # This is an implementation choice, not an acceptance threshold.
             for block in iter(lambda: stream.read(65536), b""):
                 digest.update(block)
         if digest.hexdigest() != item["sha256"]:
@@ -93,6 +97,9 @@ def evaluate(record, root):
     require_keys(record["plugin"], ("version", "revision"))
     require_text(record["plugin"]["version"])
     revision = record["plugin"]["revision"]
+    # This record format supports full SHA-1 Git IDs (40 hex digits) only.
+    # Git's "Object names" documents SHA-1 and SHA-256 (64 hex digits):
+    # https://git-scm.com/docs/hash-function-transition#_object_names
     require(
         revision is None
         or (isinstance(revision, str) and re.fullmatch(r"[0-9a-f]{40}", revision)),
