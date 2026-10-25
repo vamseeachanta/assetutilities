@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from html.parser import HTMLParser
 
@@ -128,7 +129,7 @@ def test_hash_read_failure_keeps_metadata_but_no_duplicate_claim(tmp_path, monke
     assert report["duplicate_groups"] == []
 
 
-def test_file_changed_during_read_is_not_fingerprinted(tmp_path, monkeypatch):
+def test_file_changed_before_read_is_not_fingerprinted(tmp_path, monkeypatch):
     """A changed length invalidates the fingerprint; no value is guessed."""
     path = tmp_path / "changing"
     path.write_bytes(b"abc")
@@ -145,6 +146,74 @@ def test_file_changed_during_read_is_not_fingerprinted(tmp_path, monkeypatch):
     assert report["status"] == "PARTIAL"
     assert report["errors"] == [{"path": "changing", "error": "ESTALE"}]
     assert "sha256" not in report["files"][0]
+    assert report["duplicate_status"] == "NOT_EVALUATED"
+    assert report["duplicate_groups"] == []
+
+
+def test_file_changed_during_read_is_not_fingerprinted(tmp_path, monkeypatch):
+    """A read-time append must be detected by the post-read descriptor check."""
+    path = tmp_path / "changing"
+    for name in ("changing", "copy", "original"):
+        (tmp_path / name).write_bytes(b"abc")
+    real_open = Path.open
+    changed = False
+
+    def open_file(target, *args, **kwargs):
+        stream = real_open(target, *args, **kwargs)
+        if target == path and args == ("rb",):
+            real_read = stream.read
+
+            def read(size):
+                nonlocal changed
+                chunk = real_read(size)
+                if not changed:
+                    with real_open(target, "ab") as writer:
+                        writer.write(b"x")
+                    changed = True
+                return chunk
+
+            monkeypatch.setattr(stream, "read", read)
+        return stream
+
+    monkeypatch.setattr(Path, "open", open_file)
+    report = inventory(tmp_path, hash_contents=True)
+    assert changed
+    assert report["status"] == "PARTIAL"
+    assert report["errors"] == [{"path": "changing", "error": "ESTALE"}]
+    assert "sha256" not in report["files"][0]
+    assert report["duplicate_status"] == "NOT_EVALUATED"
+    assert report["duplicate_groups"] == []
+
+
+def test_path_replaced_after_read_is_not_fingerprinted(tmp_path, monkeypatch):
+    """Replace after closing so only the final path signature check can fail."""
+    root = tmp_path / "data"
+    root.mkdir()
+    path = root / "changing"
+    for name in ("changing", "copy", "original"):
+        (root / name).write_bytes(b"abc")
+    replacement = tmp_path / "replacement"
+    replacement.write_bytes(b"xyz")
+    real_open = Path.open
+    replaced = False
+
+    @contextmanager
+    def open_file(target, *args, **kwargs):
+        nonlocal replaced
+        with real_open(target, *args, **kwargs) as stream:
+            yield stream
+        if target == path and args == ("rb",):
+            replacement.replace(path)
+            replaced = True
+
+    monkeypatch.setattr(Path, "open", open_file)
+    report = inventory(root, hash_contents=True)
+    assert replaced
+    assert report["status"] == "PARTIAL"
+    assert report["errors"] == [{"path": "changing", "error": "ESTALE"}]
+    assert "sha256" not in report["files"][0]
+    assert report["duplicate_status"] == "NOT_EVALUATED"
+    assert report["duplicate_groups"] == []
 
 
 def test_links_are_skipped_and_hardlinks_are_logical_paths(tmp_path):
@@ -290,6 +359,7 @@ def test_same_length_replacement_invalidates_hash(tmp_path, monkeypatch):
     assert {"path": "changing", "error": "ESTALE"} in report["errors"]
     assert "sha256" not in report["files"][0]
     assert report["duplicate_status"] == "NOT_EVALUATED"
+    assert report["duplicate_groups"] == []
 
 
 def test_documented_worked_example(tmp_path, monkeypatch, capsys):
