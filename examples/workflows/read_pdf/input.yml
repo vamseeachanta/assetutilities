@@ -2,9 +2,9 @@ basename: read_pdf
 library: PyPDF2
 files:
   from_pdf:
-    - io: examples/workflows/read_pdf/outputs/input.pdf
+    - io: examples/workflows/read_pdf/input_data/input.pdf
       page: 1
       label: alpha
-    - io: examples/workflows/read_pdf/outputs/input.pdf
+    - io: examples/workflows/read_pdf/input_data/input.pdf
       page: 2
       label: beta

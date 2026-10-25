@@ -155,9 +155,7 @@ def test_git_read_only_with_inherited_write_flags(tmp_path, monkeypatch):
     with git.Repo.init(repo_path) as repo:
         (repo_path / "tracked.txt").write_text("synthetic\n")
         repo.index.add(["tracked.txt"])
-        commit = repo.index.commit(
-            "Synthetic read-only workflow test\n\nCo-Authored-By: Codex <noreply@openai.com>"
-        )
+        commit = repo.index.commit("Synthetic read-only workflow test")
         repo.head.reference = commit  # Exercise the detached CI case.
         (repo_path / "untracked.txt").write_text("new\n")
         before = repo.head.commit.hexsha
@@ -244,6 +242,38 @@ def test_table_workflow_is_serializable(monkeypatch):
     )
     cfg = {"library": "tabula", "files": {"from_pdf": [{"io": "unused", "page": 1}]}}
     assert yaml.safe_load(yaml.safe_dump(ReadPDF().read_pdf(cfg))) == [[[{"value": 7}]]]
+
+
+@pytest.mark.parametrize("library", ["tabula", "camelot"])
+def test_table_timestamps_are_saved_as_native_values(tmp_path, monkeypatch, library):
+    """Both table backends preserve dates and nulls in the saved workflow cfg."""
+    from types import SimpleNamespace
+
+    import pandas as pd
+
+    table = pd.DataFrame(
+        {"date": [pd.Timestamp("2026-01-02"), pd.NaT], "value": [7.0, float("nan")]}
+    )
+    tables = [table] if library == "tabula" else [SimpleNamespace(df=table)]
+    monkeypatch.setattr(ReadPDF, f"from_pdf_{library}", lambda *args: tables)
+    result = run_config(
+        tmp_path,
+        {
+            "basename": "read_pdf",
+            "library": library,
+            "files": {"from_pdf": [{"io": "unused", "page": 1}]},
+        },
+    )
+    expected = [
+        [
+            [
+                {"date": "2026-01-02T00:00:00.000", "value": 7.0},
+                {"date": None, "value": None},
+            ]
+        ]
+    ]
+    saved = yaml.safe_load((tmp_path / "results/input.yml").read_text(encoding="utf-8"))
+    assert result["result"] == saved["result"] == expected
 
 
 def test_csv_explicit_encoding_does_not_silently_fallback(tmp_path):

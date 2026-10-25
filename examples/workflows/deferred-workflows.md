@@ -1,7 +1,8 @@
 # PDF, CSV, text comparison and repository workflows
 
-The five formerly deferred basenames have offline examples. PDF and CSV inputs
-are authored by a small Python generator; no sample data files are committed.
+The five formerly deferred basenames have offline examples. Small synthetic
+ASCII PDF and UTF-8 CSV inputs are committed alongside their configurations.
+Each registered invocation runs directly from a fresh checkout.
 No engineering coefficients or acceptance limits are used.
 
 ## Revision history
@@ -9,13 +10,13 @@ No engineering coefficients or acceptance limits are used.
 | Revision | Date | Change and reason |
 | --- | --- | --- |
 | Initial | 2026-10-19 | Add worked examples for the newly implemented registry workflows. |
+| Update | 2026-10-24 | Commit independent inputs so registry invocations need no preparation; serialize table dates and nulls before saving configuration. |
 
 ## Run the examples
 
-From the repository root, prepare synthetic inputs:
+From the repository root, run the registered examples directly:
 
 ```sh
-uv run python examples/workflows/prepare_deferred_inputs.py
 uv run python -m assetutilities examples/workflows/read_pdf/input.yml
 uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
 uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
@@ -23,8 +24,9 @@ uv run python -m assetutilities examples/workflows/text_analytics/input.yml
 uv run python -m assetutilities examples/workflows/gitpython/input.yml
 ```
 
-Preparation preserves existing files and writes only under the examples'
-ignored `outputs/` directories. Other generated results and logs are ignored.
+The optional `prepare_deferred_inputs.py` helper regenerates missing synthetic
+inputs and preserves existing files. Read-PDF and edit-PDF have independent
+`input_data/` directories. Generated split PDFs, results and logs are ignored.
 The PDF paths resolve from the process working directory, as in the existing
 PDF API. CSV and Git paths resolve from the input YAML directory. Each example
 replaces the legacy base configuration's complete input lists.
@@ -34,8 +36,8 @@ replaces the legacy base configuration's complete input lists.
 | Workflow | Input | Method | Expected answer |
 | --- | --- | --- | --- |
 | `read_pdf` | Authored PDF pages containing `alpha page` and `beta page` | Extract one-based pages 1 and 2 independently | Two UTF-8 text files containing those respective strings |
-| `edit_pdf` | The same PDF; inclusive ranges `[1,1]` and `[2,2]` | Copy each selected page | Two single-page PDFs containing `alpha page` and `beta page` respectively |
-| `csv_utilities` | Latin-1 text `name,value`, then `café,7` and `tea,9` | Try UTF-8; on decode failure retry Latin-1; write UTF-8 without a dataframe index | Two records, two columns (`name`, `value`), with the accented text preserved |
+| `edit_pdf` | An independent copy of the authored PDF; inclusive ranges `[1,1]` and `[2,2]` | Copy each selected page | Two single-page PDFs containing `alpha page` and `beta page` respectively |
+| `csv_utilities` | UTF-8 text `name,value`, then `café,7` and `tea,9` | Read and write UTF-8 without a dataframe index | Two records, two columns (`name`, `value`), with the accented text preserved |
 | `text_analytics` | `[alpha,beta,alpha]` and `[beta,gamma]` | Ordered unique intersection and differences | Common `[beta]`; first only `[alpha]`; second only `[gamma]`; raw input sizes 3 and 2 |
 | `gitpython` | Current checkout, at most 5 recent commits | Read branch, HEAD, porcelain status and log | YAML report with checkout-dependent facts; write operations explicitly skipped |
 
@@ -79,6 +81,8 @@ contain repository facts and commit subjects; review them before sharing.
 PDF extraction is text-only, without OCR. Tabula and Camelot remain optional
 backends; neither Java nor native table extraction is exercised by these
 examples. Direct table-backend helpers keep their dataframe/table return types;
-workflow dispatch converts them to records for configuration serialization.
+workflow dispatch converts them through JSON to native records for configuration
+serialization, with dates as ISO strings and missing values as nulls. The
+Latin-1 fallback is exercised separately with synthetic unit-test inputs.
 Git operations that mutate a repository and network-backed scraping/download
 workflows remain outside this change.

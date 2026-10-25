@@ -106,8 +106,8 @@ workflows:
     test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
     runtime: fast
 
-  # PDF/CSV inputs are generated, never downloaded or committed. Preparation
-  # preserves existing files. See examples/workflows/deferred-workflows.md.
+  # Small synthetic text inputs are committed; no preparation is required.
+  # See examples/workflows/deferred-workflows.md.
   - id: read_pdf
     basename: read_pdf
     input: examples/workflows/read_pdf/input.yml
@@ -116,16 +116,18 @@ workflows:
       - examples/workflows/read_pdf/results/read_pdf_beta_1.txt
     result:
       kind: files
-    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/read_pdf/input.yml
+    test: uv run python -m assetutilities examples/workflows/read_pdf/input.yml
     runtime: fast
 
   - id: edit_pdf
     basename: edit_pdf
     input: examples/workflows/edit_pdf/input.yml
     outputs:
-      - examples/workflows/read_pdf/outputs/input.pdf_page_1-1.pdf
-      - examples/workflows/read_pdf/outputs/input.pdf_page_2-2.pdf
-    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
+      - examples/workflows/edit_pdf/input_data/input.pdf_page_1-1.pdf
+      - examples/workflows/edit_pdf/input_data/input.pdf_page_2-2.pdf
+    result:
+      kind: files
+    test: uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
     runtime: fast
 
   - id: csv_utilities
@@ -136,7 +138,7 @@ workflows:
       - examples/workflows/csv_utilities/results/input_summary.yml
     result:
       kind: files
-    test: uv run python examples/workflows/prepare_deferred_inputs.py && uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
+    test: uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
     runtime: fast
 
   - id: text_analytics

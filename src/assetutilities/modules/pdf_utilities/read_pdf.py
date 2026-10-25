@@ -1,5 +1,6 @@
 """PDF extraction with serializable workflow results."""
 
+import json
 from pathlib import Path
 import re
 
@@ -17,12 +18,12 @@ class ReadPDF:
                 result = self.from_pdf_PyPDF2(cfg, index)
             elif library == "tabula":
                 result = [
-                    table.to_dict(orient="records")
+                    json.loads(table.to_json(orient="records", date_format="iso"))
                     for table in self.from_pdf_tabula(cfg, index)
                 ]
             elif library == "camelot":
                 result = [
-                    table.df.to_dict(orient="records")
+                    json.loads(table.df.to_json(orient="records", date_format="iso"))
                     for table in self.from_pdf_camelot(cfg, index)
                 ]
             else:
