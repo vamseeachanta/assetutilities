@@ -9,6 +9,7 @@ from the repository root; generated files are excluded from version control.
 | Revision | Date | What changed and why |
 |---|---|---|
 | Initial | 2026-10-19 | Added worked examples for the newly usable offline workflows. |
+| Update 1 | 2026-10-25 | Corrected the validation description to match disposable Git repository discovery. |
 
 ## PDF extraction and splitting
 
@@ -136,7 +137,8 @@ Reports can include repository history subjects; inspect their contents before s
 `tests/workflows/test_deferred_workflows.py` runs every example through the real
 CLI twice, checks each registry-listed output, and safely loads the saved YAML.
 It copies example inputs to temporary storage so generated outputs stay outside
-the checkout; the Git copy inspects the checkout through an explicit path.
+the checkout; the Git test initializes a disposable repository in temporary
+storage and discovers it from the copied example subdirectory.
 Focused module tests cover invalid/blank PDF pages, duplicate labels, CSV alias,
 encoding and row limits, duplicate/empty text sets, and Git HEAD states.
 
