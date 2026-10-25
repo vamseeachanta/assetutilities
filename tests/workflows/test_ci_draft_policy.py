@@ -61,6 +61,43 @@ def test_heavy_jobs_skip_draft_pull_requests(filename: str, job_id: str) -> None
     assert job.get("if") == DRAFT_GUARD, f"{filename}:{job_id} lacks draft guard"
 
 
+@pytest.mark.parametrize(
+    "guard", [None, DRAFT_GUARD + " || true"], ids=["missing", "weakened"]
+)
+def test_invalid_draft_guard_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, guard: str | None
+) -> None:
+    """Exercise the live policy assertion against corrupted workflow copies."""
+    workflow = _workflow(WORKFLOWS / "docs.yml")
+    job = workflow["jobs"]["docs"]
+    if guard is None:
+        job.pop("if")
+    else:
+        job["if"] = guard
+    (tmp_path / "docs.yml").write_text(yaml.safe_dump(workflow), encoding="utf-8")
+    monkeypatch.setitem(globals(), "WORKFLOWS", tmp_path)
+
+    with pytest.raises(AssertionError, match=r"docs\.yml:docs lacks draft guard"):
+        test_heavy_jobs_skip_draft_pull_requests("docs.yml", "docs")
+
+
+@pytest.mark.parametrize("renamed", ["workflow", "job-id", "check-name"])
+def test_renamed_workflow_or_check_is_rejected(tmp_path: Path, renamed: str) -> None:
+    """The snapshot assertion must reject workflow, job id and check name drift."""
+    workflow = _workflow(WORKFLOWS / "docs.yml")
+    if renamed == "workflow":
+        workflow["name"] = "Renamed workflow"
+    elif renamed == "job-id":
+        workflow["jobs"]["renamed"] = workflow["jobs"].pop("docs")
+    else:
+        workflow["jobs"]["docs"]["name"] = "Renamed check"
+    path = tmp_path / "docs.yml"
+    path.write_text(yaml.safe_dump(workflow), encoding="utf-8")
+
+    with pytest.raises(AssertionError):
+        test_workflow_and_job_names_are_preserved(path)
+
+
 @pytest.mark.parametrize("path", WORKFLOW_PATHS, ids=lambda path: path.name)
 def test_manual_runs_remain_available(path: Path) -> None:
     assert "workflow_dispatch" in _workflow(path)["on"]
