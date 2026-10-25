@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Common module: data transformation analysis</title>
+<style>.container {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.column,
+.columns {
+    width: 100%;
+    float: left;
+    box-sizing: border-box;
+}
+
+
+@media (min-width: 400px) {
+    .container {
+        width: 85%;
+        padding: 0;
+    }
+}
+
+
+@media (min-width: 550px) {
+    .container {
+        width: 80%;
+    }
+
+    .column,
+    .columns {
+        margin-left: 4%;
+    }
+
+    .column:first-child,
+    .columns:first-child {
+        margin-left: 0;
+    }
+
+    .one.column,
+    .one.columns {
+        width: 4.66666666667%;
+    }
+
+    .two.columns {
+        width: 13.3333333333%;
+    }
+
+    .three.columns {
+        width: 22%;
+    }
+
+    .four.columns {
+        width: 30.6666666667%;
+    }
+
+    .five.columns {
+        width: 39.3333333333%;
+    }
+
+    .six.columns {
+        width: 48%;
+    }
+
+    .seven.columns {
+        width: 56.6666666667%;
+    }
+
+    .eight.columns {
+        width: 65.3333333333%;
+    }
+
+    .nine.columns {
+        width: 74.0%;
+    }
+
+    .ten.columns {
+        width: 82.6666666667%;
+    }
+
+    .eleven.columns {
+        width: 91.3333333333%;
+    }
+
+    .twelve.columns {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .one-third.column {
+        width: 30.6666666667%;
+    }
+
+    .two-thirds.column {
+        width: 65.3333333333%;
+    }
+
+    .one-half.column {
+        width: 48%;
+    }
+
+
+    .offset-by-one.column,
+    .offset-by-one.columns {
+        margin-left: 8.66666666667%;
+    }
+
+    .offset-by-two.column,
+    .offset-by-two.columns {
+        margin-left: 17.3333333333%;
+    }
+
+    .offset-by-three.column,
+    .offset-by-three.columns {
+        margin-left: 26%;
+    }
+
+    .offset-by-four.column,
+    .offset-by-four.columns {
+        margin-left: 34.6666666667%;
+    }
+
+    .offset-by-five.column,
+    .offset-by-five.columns {
+        margin-left: 43.3333333333%;
+    }
+
+    .offset-by-six.column,
+    .offset-by-six.columns {
+        margin-left: 52%;
+    }
+
+    .offset-by-seven.column,
+    .offset-by-seven.columns {
+        margin-left: 60.6666666667%;
+    }
+
+    .offset-by-eight.column,
+    .offset-by-eight.columns {
+        margin-left: 69.3333333333%;
+    }
+
+    .offset-by-nine.column,
+    .offset-by-nine.columns {
+        margin-left: 78.0%;
+    }
+
+    .offset-by-ten.column,
+    .offset-by-ten.columns {
+        margin-left: 86.6666666667%;
+    }
+
+    .offset-by-eleven.column,
+    .offset-by-eleven.columns {
+        margin-left: 95.3333333333%;
+    }
+
+    .offset-by-one-third.column,
+    .offset-by-one-third.columns {
+        margin-left: 34.6666666667%;
+    }
+
+    .offset-by-two-thirds.column,
+    .offset-by-two-thirds.columns {
+        margin-left: 69.3333333333%;
+    }
+
+    .offset-by-one-half.column,
+    .offset-by-one-half.columns {
+        margin-left: 52%;
+    }
+}
+
+
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.5em;
+
+    line-height: 1.6;
+    font-weight: 400;
+    color: #000000;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 300;
+}
+
+h1 {
+    font-size: 4.5rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
+    margin-bottom: 2rem;
+}
+
+h2 {
+    font-size: 3.6rem;
+    line-height: 1.25;
+    letter-spacing: -.1rem;
+    margin-bottom: 1.8rem;
+    margin-top: 1.8rem;
+}
+
+h3 {
+    font-size: 3.0rem;
+    line-height: 1.3;
+    letter-spacing: -.1rem;
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+h4 {
+    font-size: 2.6rem;
+    line-height: 1.35;
+    letter-spacing: -.08rem;
+    margin-bottom: 1.2rem;
+    margin-top: 1.2rem;
+}
+
+h5 {
+    font-size: 2.2rem;
+    line-height: 1.5;
+    letter-spacing: -.05rem;
+    margin-bottom: 0.6rem;
+    margin-top: 0.6rem;
+}
+
+h6 {
+    font-size: 2.0rem;
+    line-height: 1.6;
+    letter-spacing: 0;
+    margin-bottom: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+p {
+    margin-top: 0;
+}
+
+
+blockquote {
+    border-left: 4px lightgrey solid;
+    padding-left: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    margin-left: 0rem;
+}
+
+
+a {
+    color: #1EAEDB;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+a:hover {
+    color: #0FA0CE;
+}
+
+
+.rc-slider-track {
+    background-color: #007eff
+}
+
+.rc-slider-rail {
+    background-color: #505050
+}
+
+
+.main-svg {
+    font-family: "Open Sans Semi Bold"
+}
+
+.gtitle {
+    font-family: "Open Sans Semi Bold" !important
+}
+
+.g-title {
+    font-family: "Open Sans Semi Bold"
+}
+
+
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+    display: inline-block;
+    height: 38px;
+    padding: 0 30px;
+    color: #555;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 38px;
+    letter-spacing: .1rem;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border-radius: 4px;
+    border: 1px solid #bbb;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+    color: #333;
+    border-color: #888;
+    outline: 0;
+}
+
+.button.button-primary,
+button.button-primary,
+input[type="submit"].button-primary,
+input[type="reset"].button-primary,
+input[type="button"].button-primary {
+    color: #000000;
+    background-color: #33C3F0;
+    border-color: #33C3F0;
+}
+
+.button.button-primary:hover,
+button.button-primary:hover,
+input[type="submit"].button-primary:hover,
+input[type="reset"].button-primary:hover,
+input[type="button"].button-primary:hover,
+.button.button-primary:focus,
+button.button-primary:focus,
+input[type="submit"].button-primary:focus,
+input[type="reset"].button-primary:focus,
+input[type="button"].button-primary:focus {
+    color: #FFF;
+    background-color: #1EAEDB;
+    border-color: #1EAEDB;
+}
+
+
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+    height: 38px;
+    padding: 6px 10px;
+
+    background-color: #ffffff;
+    border: 1px solid #D1D1D1;
+    border-radius: 4px;
+    box-shadow: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+
+}
+
+
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+textarea {
+    min-height: 65px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+    border: 1px solid #33C3F0;
+    outline: 0;
+}
+
+label,
+legend {
+    display: block;
+    margin-bottom: 0px;
+}
+
+fieldset {
+    padding: 0;
+    border-width: 0;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    display: inline;
+}
+
+label>.label-body {
+    display: inline-block;
+    margin-left: .5rem;
+    font-weight: normal;
+}
+
+
+ul {
+    list-style: circle inside;
+}
+
+ol {
+    list-style: decimal inside;
+}
+
+ol,
+ul {
+    padding-left: 0;
+    margin-top: 0;
+}
+
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+    margin: 1.5rem 0 1.5rem 3rem;
+    font-size: 90%;
+}
+
+li {
+    margin-bottom: 1rem;
+}
+
+
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #E1E1E1;
+}
+
+th:first-child,
+td:first-child {
+    padding-left: 0;
+}
+
+th:last-child,
+td:last-child {
+    padding-right: 0;
+}
+
+
+button,
+.button {
+    margin-bottom: 0rem;
+}
+
+input,
+textarea,
+select,
+fieldset {
+    margin-bottom: 0rem;
+}
+
+pre,
+dl,
+figure,
+table,
+form {
+    margin-bottom: 0rem;
+}
+
+p,
+ul,
+ol {
+    margin-bottom: 0.75rem;
+}
+
+
+.u-full-width {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.u-max-full-width {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.u-pull-right {
+    float: right;
+}
+
+.u-pull-left {
+    float: left;
+}
+
+
+hr {
+    margin-top: 3rem;
+    margin-bottom: 3.5rem;
+    border-width: 0;
+    border-top: 1px solid #E1E1E1;
+}
+
+
+
+.container:after,
+.row:after,
+.u-cf {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+
+
+@media (min-width: 400px) {}
+
+
+@media (min-width: 550px) {}
+
+
+@media (min-width: 750px) {}
+
+
+@media (min-width: 1000px) {}
+
+
+@media (min-width: 1200px) {}
+
+
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background-color: #ffffff;
+    color: #000000;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.react-entry-point {
+    height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: "Open Sans Semi Bold";
+    letter-spacing: 2.1px;
+    font-size: 21px;
+    padding-left: 12px;
+}
+
+p {
+    font-family: "Open Sans Light";
+    font-weight: 400;
+    font-size: 14px;
+    padding-left: 12px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.bg-grey {
+    background-color: #ffffff;
+}
+
+.text-padding {
+    padding: 5px;
+}
+
+
+.div-for-charts {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+#histogram {
+    flex-grow: 1
+}
+
+#map-graph {
+    flex-grow: 2
+}
+
+.mapboxgl-canvas,
+.mapboxgl-map {
+    min-width: 100%;
+}
+
+
+.div-user-controls {
+    padding-left: 55px;
+    padding-top: 64px;
+}
+
+.div-for-dropdown {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.div-for-slider {
+    width: 97%;
+    text-align: center;
+}
+
+.logo {
+    height: 50px;
+    padding-bottom: 12px;
+}
+
+.Select-control,
+.Select-menu-outer,
+.Select-multi-value-wrapper,
+.select-up,
+.is-open .Select-control {
+    background-color: #faf6f6f3;
+    color: black;
+
+}
+
+#modelselector .Select-control {
+    max-height: 82px;
+    overflow-y: auto;
+    margin: 0px 0px -3px 0px;
+    border: 0.5px solid #dbdbdb44;
+}
+
+.Select-control {
+    border: 0.5px solid #dbdbdb44;
+}
+
+.has-value.Select--single>.Select-control .Select-value .Select-value-label,
+.has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-label {
+    color: white;
+    background: #ffffff;
+    background-color: #ffffff;
+}
+
+._dash-app-content {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+}
+
+.has-value.Select--single>.Select-control .Select-value .Select-value-label,
+.has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-labeln {
+    color: #d8d8d8;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.Input.DateInput_1 {
+    background-color: #1e1e1e;
+}
+
+#date {
+    background-color: #1e1e1e;
+    font-family: "Open Sans Light";
+    font-weight: 400;
+    color: #dbdbdb;
+    border: 0.5px solid #dbdbdb44;
+}
+
+#date-picker {
+    width: 100%;
+}
+
+._dash-undo-redo {
+    display: none;
+}
+
+.DateInput.DateInput_1 {
+    width: 100%;
+}
+
+.SingleDatePickerInput__withBorder {
+    border: none;
+}
+
+.DateInput.DateInput_1 {
+    background-color: #1e1e1e;
+}
+
+.SingleDatePickerInput__withBorder {
+    border-radius: 3px;
+    color: #dbdbdb;
+    background: #1e1e1e;
+    background-color: #1e1e1e;
+}
+
+.SingleDatePickerInput.SingleDatePickerInput_1.SingleDatePickerInput__withBorder.SingleDatePickerInput__withBorder_2 {
+    border: 0.0px solid #dbdbdb;
+    display: block;
+}
+
+.SingleDatePicker_1 {
+    border: 0.0px solid #dbdbdb;
+    display: block;
+}
+
+.SingleDatePicker_picker,
+.SingleDatePicker_picker_1,
+.SingleDatePicker_picker__directionLeft,
+.SingleDatePicker_picker__directionLeft_2 {
+    filter: invert(100%);
+}
+
+
+@media only screen and (max-width: 768px) {
+
+    .four,
+    .eight {
+        min-width: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+        text-align: center;
+    }
+
+    body {
+        display: block;
+        margin: 0px;
+        overflow-y: scroll;
+    }
+
+    .div-for-charts {
+        padding: 0px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .div-user-controls {
+        padding: 32px;
+    }
+
+    .side-by-side {
+        display: inline-block;
+        width: 48%;
+    }
+
+
+    .side-by-side-right {
+        display: inline-block;
+        width: 48%;
+        float: right;
+    }
+
+    .div-for-charts {
+        margin: 0px;
+    }
+}
+
+
+::-webkit-scrollbar {
+    width: 10px !important;
+    display: block !important;
+}
+
+
+::-webkit-scrollbar-track {
+    background: #ffffff !important;
+    border-radius: 10px !important;
+    display: block !important;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d8d8d870 !important;
+}</style>
+</head>
+<body class="hs-doc"><main class="container">
+<header><h1>Common module: data transformation analysis</h1>
+<p>Draft for maintainer review</p></header>
+<section id="summary"><h2>1 Executive Summary</h2>
+<p>The common module is a collection of shared configuration, data, file and presentation utilities.
+Analysis is performed to determine how a sourced length conversion is applied by its data-transformation interfaces;
+key results are summarized below.</p>
+<ul><li>Length values are converted using an explicit international-foot basis.
+<ul><li>The published input of 36 ft returns 10.9728 m before reporting precision is applied.
+The reported result is 11.0 m under the rounding treatment in Reference 1, B.7.2.</li></ul></li>
+<li>Data handling is selected according to the required mutation behaviour.
+<ul><li>The DataFrame route returns a copy; the scalar and list route replaces data in the supplied configuration.
+Neither route applies a physical acceptance limit or checks the unit basis.</li></ul></li></ul>
+</section>
+<section aria-label="Revision history"><h2>Revision history</h2>
+<table><thead><tr><th>Revision</th><th>Date</th><th>What changed and why</th></tr></thead>
+<tbody><tr><td>1</td><td>2026-10-21</td>
+<td>Initial description of the transformation contract, public calculation and limits of use.</td></tr></tbody></table>
+</section>
+<nav aria-label="Contents"><p>
+<a href="#summary">1 Summary</a> · <a href="#introduction">2 Introduction</a> ·
+<a href="#basis">3 Basis</a> · <a href="#method">4 Method</a> ·
+<a href="#results">5 Results</a> · <a href="#validation">6 Validation</a> ·
+<a href="#limits">7 Limits</a> · <a href="#recommendations">8 Recommendations</a> ·
+<a href="#references">9 References</a> · <a href="#symbols">10 Symbols</a> ·
+<a href="#appendix">Appendix</a></p></nav>
+<section id="introduction"><h2>2 Introduction</h2>
+<p>The common module is used to support application inputs, data preparation and output production.
+The selected workflow is bounded to numerical scaling and record export, with the surrounding utilities listed separately.</p>
+<p>A full report is provided because callable interfaces and existing tests are present. Public usage is documented for
+the validation class and structured-report functions; the numerical transformation contract is described here and is exercised by existing tests.
+This report assesses a data operation, rather than installation feasibility or structural performance.</p>
+<h3>2.1 Workflow and interfaces</h3>
+<p>Input values and conversion settings are supplied by the caller. The output unit is attached by the caller after conversion.</p>
+<figure><pre aria-label="Data flow">Numeric length values in ft + explicit scale and shift
+                     ↓
+         Scalar or list configuration → linear → same configuration, data replaced
+                     or
+         DataFrame + column settings → transform → new DataFrame in m
+                                                     ↓
+                                               record export</pre>
+<figcaption>Figure 2.1. Data flow and mutation boundary. A physical-system schematic is inapplicable to this software operation.</figcaption></figure>
+<p>The scalar and list entry point is <code>TransformData.linear(cfg)</code>, which returns the supplied dictionary after replacing
+<code>data</code>. Its keys are <code>data</code>, <code>scale</code> and <code>shift</code>.
+The DataFrame entry point is <code>Transform.get_transformed_df(settings, frame)</code>;
+each setting supplies <code>column</code>, <code>scale</code> and <code>shift</code>.
+Record export is provided by <code>dataframe_to_dict(frame, {"orient": "records"})</code>, returning a list of row dictionaries for this orientation.</p>
+</section>
+<section id="basis"><h2>3 Design Data and Criteria</h2>
+<p>The international foot is adopted from Reference 1, B.8. The published example and its rounding interval are taken from Reference 1, B.7.2.</p>
+<p>The input is 36 ft; the exact conversion scale is 0.3048 m/ft.
+The selected shift is 0 m because length conversion preserves the origin.
+The source discusses inputs from 35.5 to 36.5 ft as a rounding interval;
+the endpoints are displayed as bounds, without assigning a probability distribution.</p>
+<p>No structural, thermal, operational or instrument limit is specified.
+Acceptance for this example is numerical agreement at displayed precision with the public conversion and agreement among the called interfaces.
+The rounding bounds are not acceptance limits. Measurement uncertainty is not estimated from these bounds.</p>
+</section>
+<section id="method"><h2>4 Analysis Methodology</h2>
+<p>An affine transformation is applied to each selected value. The scaling interpretation follows Reference 1, B.3;
+an offset conversion is illustrated there by the Celsius relation in 4.2.1.1, but no temperature calculation is assessed here.</p>
+<p><code>y = a x + b</code>, where <code>x</code> is the input numerical value in ft, <code>y</code> is the output numerical value in m,
+<code>a</code> is the scale in m/ft and <code>b</code> is the shift in m.
+For the selected length conversion, <code>y = 0.3048 x + 0</code> (Reference 1, B.3 and B.8).</p>
+<p>The same source inputs are passed to scalar, list and DataFrame calls. The DataFrame is then exported as row records.
+The public reporting precision is applied separately from the transformation. Intermediate arithmetic is displayed to preserve the exact converted values
+for the stated decimal inputs; it does not imply measurement precision.</p>
+<h3>4.1 Executable use</h3>
+<p>The following call is made in the report generator. The source dictionary is replaced in place by the scalar result.</p>
+<pre><code>from assetutilities.common.transform import TransformData
+cfg = {"data": 36, "scale": 0.3048, "shift": 0}
+result = TransformData().linear(cfg)
+length_m = result["data"]</code></pre>
+</section>
+<section id="results"><h2>5 Detailed Results</h2>
+<p>The scalar conversion returns 10.9728 m. The reported measurement is 11.0 m,
+following Reference 1, B.7.2, and is kept separate from the arithmetic result.</p>
+<p>The converted rounding bounds are 10.8204 m and 11.1252 m.
+All displayed results, bounds and plot ordinates are produced by module calls. The per-case values are listed in Appendix A.1.</p>
+<figure>
+<label for="case-index">Inspect length conversion</label>
+<input id="case-index" type="range" min="0" max="20" value="10" step="1">
+<output id="chart-readout" aria-live="polite"></output>
+<p><button id="zoom-chart" type="button">Zoom to centre</button>
+<button id="reset-chart" type="button">Reset view</button>
+<button id="toggle-bounds" type="button" aria-pressed="true">Show rounding bounds</button>
+<button id="export-chart" type="button">Export chart</button></p>
+<svg id="conversion-chart" viewBox="0 0 800 380" role="img" aria-label="Converted length in metres against input length in international feet" width="100%"></svg>
+<figcaption>Figure 5.1. Converted length against input length. Hover or focus a point, or move the inspection control.
+The dashed lines show the published rounding bounds. No acceptance limit is supplied.</figcaption>
+</figure>
+<noscript><p>Interactive inspection requires JavaScript. The full numerical results remain available in Appendix A.1.</p></noscript>
+</section>
+<section id="validation"><h2>6 Validation Evidence</h2>
+<p>Existing transformation tests are held in the repository. Their selected inventory contains 5 tests across scalar, list and DataFrame behaviour;
+the inventory is not a statement about whole-module coverage.</p>
+<p>The existing assertions cover scale and shift, an absent target column and preservation of the original DataFrame.
+The added report checks compare each generated value with fresh module calls and include hand-worked anchors at both rounding bounds and the published central input.
+These comparisons establish the example calculation and the interfaces exercised; they do not qualify unrelated utilities.</p>
+<p>The published example is a numerical reference, not experimental benchmark data.
+No physical benchmark dataset is used in this report. An execution record is provided in Appendix A.3.</p>
+</section>
+<section id="limits"><h2>7 Limits of Use</h2>
+<p>Unit selection and data validity are delegated to the caller. Missing target columns are silently skipped by the DataFrame transformation.</p>
+<p>The scalar and list route mutates the configuration; repeat application converts already converted data again.
+Its dispatch wrapper mutates the input and returns no result. The list branch requires an actual list;
+tuples and arrays are not assessed by this example. The DataFrame route copies its input and preserves the target column name,
+so the caller is responsible for labelling the output unit. Multiple settings for the same column are applied in sequence.</p>
+<p>No finite-number, unit-dimension, uncertainty or engineering acceptance check is performed by these transformation methods.
+Generic scale and shift settings are not a replacement for a unit registry.
+Record export requires unambiguous column names; duplicate names return an empty dictionary in the inspected implementation.</p>
+<h3>7.1 Not covered</h3>
+<p>Configuration merging, path resolution, file copying and editing, spreadsheet and document operations, database access,
+web retrieval, validation scoring, logging, plotting and geographic conversion are outside the assessed workflow.
+Their presence is established by source inventory, without asserting their readiness.</p>
+<p>Interpolation and inverse geographic conversion contain unimplemented methods in the transformation source.
+The CSV reader wrapper returns an undefined name in the inspected source.
+These interfaces are excluded from the example; the documented structured-report entry point is present but is not called here.</p>
+</section>
+<section id="recommendations"><h2>8 Recommendations</h2>
+<p>Explicit unit and column checks are recommended before transformation. The method is selected according to whether configuration mutation is intended.</p>
+<p>Use the exact international-foot conversion only when that input basis is established, and apply reporting precision after the arithmetic
+(Reference 1, B.7.2 and B.8). Preserve the original readings and write the output unit alongside the converted data.
+Reject absent target columns before the DataFrame call, because the implementation skips them.</p>
+<p>The next bounded extension is a checked transformation adapter with declared input units, output units and required columns.
+Its first acceptance cases are a missing column, a non-finite value and repeated conversion.
+For the excluded CSV wrapper, return-value repair and a file-reading test are recommended before adoption;
+the interpolation and inverse-geographic placeholders require implemented behaviour and tests before use.</p>
+<p>No failing physical result is reported. Numerical agreement is limited to the selected reference and calls;
+engineering limits require a separate, sourced acceptance basis.</p>
+</section>
+<section id="references"><h2>9 References</h2>
+<p>The conversion basis is taken from an open institutional publication. Repository records identify interfaces and test assertions rather than establish physical conversion factors.</p>
+<h3>9.1 Published reference</h3>
+<p id="ref-1">Reference 1. NIST Special Publication 811, Guide for the Use of the International System of Units, 2008 edition:
+4.2.1.1 (temperature offset relation), B.3 (conversion-factor use), B.7.2 (rounding converted values, published length example),
+and B.8 (international-foot conversion). <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf">Open publication</a>.
+The conversion clauses are used; the publication's historical definitions of base units are not adopted as current definitions.</p>
+<h3>9.2 Repository records and rebuild</h3>
+<p>Calculation source: <code>src/assetutilities/common/transform.py</code>.
+Compatibility exports: <code>src/assetutilities/common/data.py</code>.
+Existing tests: <code>tests/unit/test_common_data.py</code>, classes <code>TestTransformGetTransformedDf</code> and <code>TestTransformDataLinear</code>.</p>
+<p>Documented entry points: <code>src/assetutilities/common/validation.py</code> (class usage) and
+<code>docs/modules/documentation/standard-report.md</code> (structured reports).
+Excluded CSV implementation: <code>src/assetutilities/common/readers/csv_reader.py</code>.
+Module inventory: <code>MODULE_STRUCTURE.md</code> and <code>docs/maps/assetutilities-operator-map.md</code>.</p>
+<p>Presentation basis: the inlined stylesheet is copied from <code>docs/sub_utilities/assets/style.css</code>, with comments removed.
+No existing page with the requested body class was found in the inspected documentation; <code>hs-doc</code> is applied here with the existing container layout.</p>
+<p>Rebuild command: <code>python scripts/reports/build_common_report.py</code>.
+Report checks: <code>python -m pytest tests/docs/test_common_module_report.py -q -p no:cacheprovider</code>.
+The check compares fresh and committed structure after masking numerical payloads, then compares the payloads at displayed precision.
+The calculation digest is checked separately and gives the rebuild command on mismatch.</p>
+</section>
+<section id="symbols"><h2>10 Acronyms and Symbols</h2>
+<p>Symbols are defined for the selected length transformation. No domain-specific shorthand is required to interpret the result.</p>
+<p><code>x</code>: input numerical length in ft; <code>y</code>: output numerical length in m;
+<code>a</code>: scale in m/ft; <code>b</code>: shift in m.
+The symbol ft denotes the international foot; m denotes the metre.
+A DataFrame is a labelled table, and a record is a row represented as a dictionary.</p>
+</section>
+<section id="appendix"><h2>Appendix A Supporting Data and Review</h2>
+<p>Per-case arithmetic, data provenance and pre-flight evidence are collected here. The rounding range is descriptive and has no pass or fail classification.</p>
+<h3>A.1 Calculation and data register</h3>
+<table id="example-table"><thead><tr><th>Input (ft)</th><th>Arithmetic output (m)</th><th>Source</th></tr></thead><tbody>
+<tr><td>35.5</td><td>10.8204</td><td>Reference 1, B.7.2; module call</td></tr>
+<tr><td>36</td><td>10.9728</td><td>Reference 1, B.7.2; module call</td></tr>
+<tr><td>36.5</td><td>11.1252</td><td>Reference 1, B.7.2; module call</td></tr>
+</tbody></table>
+<p>Input values and their rounding interpretation: Reference 1, B.7.2.
+Conversion scale: Reference 1, B.8. Shift: selected as zero for an origin-preserving length conversion under B.3.
+Plot sampling is a display choice; it does not add measured data.</p>
+<p>Physical acceptance limit: NOT_EVALUATED, because none is supplied.
+Instrument calibration and measurement uncertainty: NOT_EVALUATED, because neither is part of the public example.
+No assumed engineering value is required. Application-specific limits remain required inputs for a separate engineering assessment.</p>
+<h3>A.2 Review comments and changes</h3>
+<p>Comments are attached to a section and kept in this page until exported. Select “Save beside report” to choose the report folder
+in browsers that support folder access. Other browsers download the comment file; place it beside the report.
+Import that file to continue reviewing. No server or account is used.</p>
+<label for="comment-section">Section</label><select id="comment-section"></select>
+<label for="comment-text">Comment</label><textarea id="comment-text" class="u-full-width"></textarea>
+<button id="add-comment" type="button">Add comment</button>
+<button id="save-comments" type="button">Save beside report</button>
+<label for="load-comments">Import saved comments</label><input id="load-comments" type="file" accept="application/json,.json">
+<p id="comment-status" role="status"></p><ul id="comments"></ul>
+<details><summary>Engineering changes</summary><ul id="changes"></ul></details>
+<h3>A.3 Pre-flight evidence</h3>
+<p>The report checks exercise the published conversion, hand arithmetic, mutation and missing-column behaviour,
+record export, chart bounds, references, public wording and rebuild structure.
+Test execution totals and tool versions are recorded with the accompanying change description.
+The source inventory establishes test presence only.</p>
+<p>Browser execution and visual inspection are not performed by these checks. Comment export uses a permission-controlled folder selector
+with a download fallback. Numerical and document checks do not establish browser rendering or physical adequacy.</p>
+</section>
+<script id="example-data" type="application/json">{"chart_ft": [35.5, 35.55, 35.6, 35.65, 35.7, 35.75, 35.8, 35.85, 35.9, 35.95, 36.0, 36.05, 36.1, 36.15, 36.2, 36.25, 36.3, 36.35, 36.4, 36.45, 36.5], "chart_m": [10.8204, 10.83564, 10.85088, 10.86612, 10.88136, 10.8966, 10.91184, 10.92708, 10.94232, 10.95756, 10.9728, 10.98804, 11.00328, 11.01852, 11.03376, 11.049, 11.06424, 11.07948, 11.09472, 11.10996, 11.1252], "frame_m": [10.8204, 10.9728, 11.1252], "inputs_ft": [35.5, 36, 36.5], "list_m": [10.8204, 10.9728, 11.1252], "records": [{"length": 10.8204}, {"length": 10.9728}, {"length": 11.1252}], "reported_m": "11.0", "scalar_m": 10.9728, "scale_m_per_ft": 0.3048, "shift_m": 0, "source_frame_ft": [35.5, 36.0, 36.5]}</script>
+<script id="change-data" type="application/json">[
+  {
+    "revision": "1",
+    "date": "2026-10-21",
+    "changes": [
+      "The data-transformation interface is described using a published length conversion.",
+      "Arithmetic values and rounding bounds are separated from the reported measurement.",
+      "Mutation, missing-column behaviour and the unassessed utility areas are identified."
+    ]
+  }
+]
+</script>
+<script id="calculation-record" type="application/json">{"digest": "9469eee52c517fb3a1f7641645abc8a540759c4b939f0fa3903af84c0c9ecd87", "source": "src/assetutilities/common/transform.py"}</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("example-data").textContent);
+const revisions = JSON.parse(document.getElementById("change-data").textContent);
+const svg = document.getElementById("conversion-chart");
+const control = document.getElementById("case-index");
+let zoom = false, boundsVisible = true;
+const download = (text, name, type) => {
+  const url = URL.createObjectURL(new Blob([text], {type}));
+  const link = document.createElement("a");
+  link.href = url; link.download = name; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+const svgNode = (name, attributes, text) => {
+  const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+  if (text !== undefined) node.textContent = text;
+  svg.appendChild(node); return node;
+};
+function readout(index) {
+  document.getElementById("chart-readout").textContent =
+    `Length conversion; input ${data.chart_ft[index].toFixed(2)} ft; ` +
+    `output ${data.chart_m[index].toFixed(4)} m; rounding bounds ` +
+    `${data.list_m[0].toFixed(4)}–${data.list_m[2].toFixed(4)} m; acceptance limit not supplied.`;
+}
+function draw() {
+  svg.replaceChildren();
+  const first = zoom ? 5 : 0, last = zoom ? 15 : data.chart_ft.length - 1;
+  const xmin = data.chart_ft[first], xmax = data.chart_ft[last];
+  const ymin = data.chart_m[0], ymax = data.chart_m[data.chart_m.length - 1];
+  const px = x => 100 + 580 * (x - xmin) / (xmax - xmin);
+  const py = y => 290 - 240 * (y - ymin) / (ymax - ymin);
+  svgNode("rect", {x: 0, y: 0, width: 800, height: 380, fill: "white"});
+  svgNode("path", {d: "M100 40V300H690", stroke: "#333", fill: "none"});
+  if (boundsVisible) {
+    for (const value of [ymin, ymax]) {
+      svgNode("path", {d: `M100 ${py(value)}H690`, stroke: "#555", "stroke-dasharray": "6 4"});
+      svgNode("text", {x: 8, y: py(value) + 4, "font-size": 14}, value.toFixed(4));
+    }
+  }
+  const points = data.chart_ft.slice(first, last + 1).map((x, i) => `${px(x)},${py(data.chart_m[first + i])}`);
+  svgNode("polyline", {points: points.join(" "), fill: "none", stroke: "#1f77b4", "stroke-width": 2});
+  for (let i = first; i <= last; i++) {
+    const point = svgNode("circle", {cx: px(data.chart_ft[i]), cy: py(data.chart_m[i]), r: 5,
+      fill: "#1f77b4", tabindex: 0, role: "img"});
+    const label = `Length conversion; input ${data.chart_ft[i].toFixed(2)} ft; output ${data.chart_m[i].toFixed(4)} m; ` +
+      `rounding bounds ${ymin.toFixed(4)}–${ymax.toFixed(4)} m; acceptance limit not supplied.`;
+    point.setAttribute("aria-label", label);
+    const title = document.createElementNS(svg.namespaceURI, "title"); title.textContent = label; point.appendChild(title);
+    for (const event of ["mouseenter", "focus"]) point.addEventListener(event, () => {control.value = i; readout(i);});
+  }
+  svgNode("text", {x: 100, y: 325, "font-size": 14}, xmin.toFixed(2));
+  svgNode("text", {x: 650, y: 325, "font-size": 14}, xmax.toFixed(2));
+  svgNode("text", {x: 250, y: 365, "font-size": 16}, "Input length (international ft)");
+  svgNode("text", {x: 100, y: 25, "font-size": 16}, "Converted length (m); dashed lines are rounding bounds");
+  readout(Number(control.value));
+}
+control.addEventListener("input", () => readout(Number(control.value)));
+document.getElementById("zoom-chart").addEventListener("click", () => {zoom = true; draw();});
+document.getElementById("reset-chart").addEventListener("click", () => {zoom = false; draw();});
+document.getElementById("toggle-bounds").addEventListener("click", event => {
+  boundsVisible = !boundsVisible; event.target.setAttribute("aria-pressed", String(boundsVisible)); draw();
+});
+document.getElementById("export-chart").addEventListener("click", () => {
+  const copy = svg.cloneNode(true); copy.setAttribute("xmlns", svg.namespaceURI);
+  download(new XMLSerializer().serializeToString(copy), "length-conversion.svg", "image/svg+xml");
+});
+draw();
+const sectionSelect = document.getElementById("comment-section");
+const sectionNames = new Map();
+for (const section of document.querySelectorAll("section[id]")) {
+  const title = section.querySelector("h2").textContent;
+  sectionNames.set(section.id, title);
+  const option = document.createElement("option"); option.value = section.id; option.textContent = title;
+  sectionSelect.appendChild(option);
+}
+let comments = [];
+const status = text => {document.getElementById("comment-status").textContent = text;};
+function showComments() {
+  const list = document.getElementById("comments"); list.replaceChildren();
+  for (const comment of comments) {
+    const item = document.createElement("li");
+    item.textContent = `${sectionNames.get(comment.section)}: ${comment.text}`; list.appendChild(item);
+  }
+}
+document.getElementById("add-comment").addEventListener("click", () => {
+  const input = document.getElementById("comment-text"), text = input.value.trim();
+  if (!text) {status("Enter a comment before adding it."); return;}
+  comments.push({section: sectionSelect.value, text}); input.value = ""; showComments();
+  status("Comment added in memory. Save before closing this page.");
+});
+document.getElementById("save-comments").addEventListener("click", async () => {
+  const text = JSON.stringify({revision: revisions[0].revision, comments}, null, 2) + "\n";
+  try {
+    if (window.showDirectoryPicker) {
+      const folder = await window.showDirectoryPicker({mode: "readwrite"});
+      const file = await folder.getFileHandle("common-module.comments.json", {create: true});
+      const stream = await file.createWritable(); await stream.write(text); await stream.close();
+      status("Comments saved in the selected folder.");
+    } else {
+      download(text, "common-module.comments.json", "application/json");
+      status("Comments downloaded. Place the file beside the report.");
+    }
+  } catch (error) {status("Comments remain in memory. Save was cancelled or unavailable.");}
+});
+document.getElementById("load-comments").addEventListener("change", async event => {
+  const file = event.target.files[0]; if (!file) return;
+  try {
+    const saved = JSON.parse(await file.text());
+    if (saved.revision !== revisions[0].revision || !Array.isArray(saved.comments) ||
+      saved.comments.some(item => !item || !sectionNames.has(item.section) || typeof item.text !== "string")) {
+      throw new Error("Invalid comment file");
+    }
+    comments = saved.comments; showComments(); status("Saved comments imported; existing in-memory comments replaced.");
+  } catch (error) {status("Comment file was not accepted; existing comments are unchanged.");}
+});
+for (const revision of revisions) {
+  for (const change of revision.changes) {
+    const item = document.createElement("li"); item.textContent = `Revision ${revision.revision}: ${change}`;
+    document.getElementById("changes").appendChild(item);
+  }
+}
+</script>
+</main></body></html>
