@@ -1,5 +1,12 @@
 name: Tests
 
+# PR_GATE_RUNNER accepts self-hosted-arm64 (Actions compares without case).
+# Only same-repository pull_request events may use [self-hosted, Linux, ARM64].
+# Unset, empty or other values, forks and other events use ubuntu-latest.
+# Keep the default hosted: black/debugpy ARM64 installation is unverified.
+# Enable only after native qualification on an ephemeral runner without ambient
+# credentials or privileged access; contents: read is not runner isolation.
+
 on:
   push:
     branches: [main]
@@ -8,6 +15,9 @@ on:
     # Retargeting needs a fresh merge against the new base, not an old run retry.
     types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
@@ -21,14 +31,19 @@ jobs:
   # they keep gating without coupling to the per-domain test fan-out.
   gates:
     name: Gates
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
-    runs-on: ${{ vars.PR_GATE_RUNNER && fromJSON(vars.PR_GATE_RUNNER) || 'ubuntu-latest' }}
+    runs-on: >-
+      ${{ github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && vars.PR_GATE_RUNNER == 'self-hosted-arm64'
+          && fromJSON('["self-hosted", "Linux", "ARM64"]') || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           fetch-depth: 50
+          persist-credentials: false
 
       - name: Build and guard local merge
         id: local_merge
@@ -126,7 +141,6 @@ jobs:
   # branch protection is ever enabled (currently unprotected, so the rename is
   # harmless).
   domain-tests:
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     uses: vamseeachanta/workspace-hub/.github/workflows/domain-matrix.yml@main
     with:
       install-cmd: "uv sync --group test"

@@ -1,6 +1,8 @@
 """Pin pull-request coverage and preserve the existing test gate contract."""
 
 from pathlib import Path
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -55,20 +57,151 @@ def test_concurrency_cancels_pull_request_runs_only() -> None:
 
 
 def _evaluate_expression(expression: str, context: dict) -> object:
-    """Evaluate the workflow's equality and short-circuit expression subset."""
+    """Evaluate the YAML's quoted literals, equality and short-circuit subset."""
     expression = expression.strip()
+    if expression.startswith("${{") and expression.endswith("}}"):
+        expression = expression[3:-2].strip()
+    if re.fullmatch(r"'(?:[^']|'')*'", expression):
+        return expression[1:-1].replace("''", "'")
     for operator in ("||", "&&", "=="):
-        if operator in expression:
-            left, right = expression.split(operator, 1)
+        parts = re.split(r"('(?:[^']|'')*')", expression)
+        for index in range(0, len(parts), 2):
+            if operator not in parts[index]:
+                continue
+            left, right = parts[index].split(operator, 1)
+            left = "".join(parts[:index]) + left
+            right += "".join(parts[index + 1 :])
             value = _evaluate_expression(left, context)
             if operator == "||":
                 return value or _evaluate_expression(right, context)
             if operator == "&&":
                 return value and _evaluate_expression(right, context)
-            return value == _evaluate_expression(right, context)
-    if expression.startswith("'") and expression.endswith("'"):
-        return expression[1:-1]
-    return context[expression]
+            other = _evaluate_expression(right, context)
+            if isinstance(value, str) and isinstance(other, str):
+                return value.casefold() == other.casefold()
+            return value == other
+    literal_json = re.fullmatch(r"fromJSON\(('(?:[^']|'')*')\)", expression)
+    if literal_json:
+        return json.loads(_evaluate_expression(literal_json[1], context))
+    if expression in context:
+        return context[expression]
+    raise ValueError(f"Unsupported expression: {expression}")
+
+
+@pytest.mark.parametrize(
+    "expression", ["unknown.context", "fromJSON(vars.PR_GATE_RUNNER)", "!true"]
+)
+def test_expression_evaluator_rejects_unsupported_syntax(expression: str) -> None:
+    """An evaluator error must not masquerade as a successful hosted fallback."""
+    with pytest.raises(ValueError, match="Unsupported expression"):
+        _evaluate_expression(expression, {})
+
+
+@pytest.mark.parametrize(
+    "selector",
+    [
+        None,
+        "",
+        "[",
+        "unknown",
+        '["self-hosted", "Linux", "ARM64"]',
+        "self-hosted-arm64",
+        "SELF-HOSTED-ARM64",
+    ],
+    ids=["unset", "empty", "malformed", "unknown", "old-json", "token", "case"],
+)
+@pytest.mark.parametrize(
+    "event,head_repository,draft,action,eligible",
+    [
+        ("pull_request", "target/repository", False, "opened", True),
+        ("pull_request", "target/repository", True, "opened", True),
+        ("pull_request", "target/repository", True, "edited", True),
+        ("pull_request", "fork/repository", False, "opened", False),
+        ("pull_request", "", False, "opened", False),
+        ("push", "target/repository", False, "", False),
+        ("workflow_dispatch", "target/repository", False, "", False),
+        ("pull_request_target", "target/repository", False, "opened", False),
+    ],
+    ids=[
+        "same-repo",
+        "draft",
+        "edited-draft",
+        "fork",
+        "missing-head",
+        "push",
+        "dispatch",
+        "other-event",
+    ],
+)
+def test_gates_runner_routing(
+    selector: str | None,
+    event: str,
+    head_repository: str,
+    draft: bool,
+    action: str,
+    eligible: bool,
+) -> None:
+    """Evaluate the exact YAML expression for trusted and untrusted inputs."""
+    context = {
+        "github.event_name": event,
+        "github.repository": "target/repository",
+        "github.event.pull_request.head.repo.full_name": head_repository,
+        "github.event.pull_request.draft": draft,
+        "github.event.action": action,
+    }
+    if selector is not None:
+        context["vars.PR_GATE_RUNNER"] = selector
+    else:
+        # Missing Actions properties evaluate as an empty string.
+        context["vars.PR_GATE_RUNNER"] = ""
+    expected = "ubuntu-latest"
+    if eligible and selector and selector.casefold() == "self-hosted-arm64":
+        expected = ["self-hosted", "Linux", "ARM64"]
+    assert (
+        _evaluate_expression(_workflow()["jobs"]["gates"]["runs-on"], context)
+        == expected
+    )
+
+
+def test_runner_json_is_a_fixed_label_list() -> None:
+    """Only literal labels may be decoded; repository variables are selectors."""
+    expression = _workflow()["jobs"]["gates"]["runs-on"]
+    assert re.findall(r"fromJSON\(([^)]*)\)", expression) == [
+        '\'["self-hosted", "Linux", "ARM64"]\''
+    ]
+
+
+def test_workflow_has_read_only_permissions() -> None:
+    """Jobs inherit only read access to repository contents."""
+    workflow = _workflow()
+    assert workflow.get("permissions") == {"contents": "read"}
+    for job in workflow["jobs"].values():
+        assert "permissions" not in job
+        assert "secrets" not in job
+
+
+def test_checkouts_do_not_persist_credentials() -> None:
+    """Dependency and test commands must not inherit checkout credentials."""
+    checkouts = [
+        step
+        for job in _workflow()["jobs"].values()
+        for step in job.get("steps", [])
+        if step.get("uses", "").startswith("actions/checkout@")
+    ]
+    assert checkouts
+    for checkout in checkouts:
+        assert checkout["with"].get("persist-credentials") is False
+
+
+def test_domain_runner_configuration_is_not_implied_by_the_caller() -> None:
+    """Keep the existing call; runner support needs an external contract."""
+    domain = _workflow()["jobs"]["domain-tests"]
+    assert "runs-on" not in domain
+    # Pin the complete existing repository, workflow path and revision.
+    assert hashlib.sha256(domain["uses"].encode()).hexdigest() == (
+        "0f1dd51a56024d84c031ac0c3003f0d858779237e51111c82c040478e2989ce7"
+    )
+    assert domain["with"] == {"install-cmd": "uv sync --group test"}
 
 
 def _concurrency_for(event: str, ref: str, run_id: str) -> tuple[str, bool]:
@@ -128,14 +261,29 @@ def test_pull_request_activity_types_include_retargeting() -> None:
     }
 
 
-def test_draft_pull_requests_skip_every_job() -> None:
-    """Drafts do not queue gate jobs; ready_for_review runs them."""
-    draft_skip = (
-        "(github.event_name != 'pull_request' || "
-        "github.event.pull_request.draft == false)"
-    )
-    for job_id, job in _workflow()["jobs"].items():
-        assert str(job.get("if", "")).startswith(draft_skip), job_id
+@pytest.mark.parametrize("draft", [True, False])
+@pytest.mark.parametrize(
+    "action", ["opened", "synchronize", "reopened", "edited", "ready_for_review"]
+)
+def test_draft_and_edited_pull_requests_keep_every_gate(
+    draft: bool, action: str
+) -> None:
+    """Every subscribed PR activity must retain both gates, including drafts."""
+    workflow = _workflow()
+    events = workflow.get("on", workflow.get(True))
+    assert action in events["pull_request"]["types"]
+    context = {
+        "github.event_name": "pull_request",
+        "github.event.action": action,
+        "github.event.pull_request.draft": draft,
+    }
+    for job_id, job in workflow["jobs"].items():
+        for node in [job, *job.get("steps", [])]:
+            assert "draft" not in str(node.get("if", "")), job_id
+        condition = job.get("if", True)
+        if isinstance(condition, str):
+            condition = _evaluate_expression(condition, context)
+        assert condition is True, job_id
 
 
 def test_edit_events_cannot_skip_jobs_or_steps() -> None:
