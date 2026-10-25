@@ -1,4 +1,10 @@
 basename: text_analytics
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
 data:
   set1: [alpha, beta, alpha]
   set2: [beta, gamma]

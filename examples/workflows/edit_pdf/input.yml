@@ -1,4 +1,10 @@
 basename: edit_pdf
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
 library: PyPDF2
 files:
   - io: examples/workflows/edit_pdf/input_data/input.pdf

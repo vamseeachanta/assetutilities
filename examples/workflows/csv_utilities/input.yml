@@ -1,4 +1,10 @@
 basename: csv_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
 csv_utilities:
   input_file: input_data/input.csv
   delimiter: ','

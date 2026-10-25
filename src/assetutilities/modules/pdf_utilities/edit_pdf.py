@@ -1,4 +1,9 @@
+import logging
+from pathlib import Path
+
 import PyPDF2
+
+logger = logging.getLogger(__name__)
 
 
 class EditPDF:
@@ -23,10 +28,12 @@ class EditPDF:
         file_name = cfg["files"][file_index]["io"]
         pages_groups = cfg["files"][file_index]["pages"]
 
-        import os
-
-        file_path = os.path.join(os.getcwd(), file_name)
-        pdf_reader = PyPDF2.PdfReader(file_path)
+        source = Path(file_name)
+        pdf_reader = PyPDF2.PdfReader(source)
+        folder = Path(
+            cfg.get("Analysis", {}).get("result_folder", source.parent / "results")
+        )
+        folder.mkdir(parents=True, exist_ok=True)
 
         for pages in pages_groups:
             pdf_writer = PyPDF2.PdfWriter()
@@ -36,9 +43,10 @@ class EditPDF:
                 if page_num in page_range:
                     pdf_writer.add_page(page)
 
-            with open(f"{file_name}_page_{pages[0]}-{pages[1]}.pdf", "wb") as out:
+            output = folder / f"{source.name}_page_{pages[0]}-{pages[1]}.pdf"
+            with output.open("wb") as out:
                 pdf_writer.write(out)
 
-            print(f"Created: {file_name}_page_{pages[0]}-{pages[1]}.pdf")
+            logger.info("Created: %s", output.as_posix())
 
         # TODO Add results to cfg for tests

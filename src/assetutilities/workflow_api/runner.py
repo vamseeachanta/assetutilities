@@ -49,7 +49,7 @@ def registry_path() -> Path:
 
 
 def load_registry() -> dict:
-    with open(registry_path()) as fh:
+    with open(registry_path(), encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 
@@ -58,7 +58,9 @@ def resolve_registry_row(workflow_id: str) -> dict:
     for row in registry.get("workflows", []):
         if row.get("id") == workflow_id:
             return row
-    raise KeyError(f"unknown workflow_id '{workflow_id}' (not in {registry_path()})")
+    raise KeyError(
+        f"unknown workflow_id '{workflow_id}' (not in {registry_path().as_posix()})"
+    )
 
 
 def lookup_row_for_cfg(cfg: dict) -> dict | None:
@@ -152,7 +154,9 @@ def extract_result(cfg_base: dict, locator: ResultLocator, root_folder: str):
             }
         )
     if not files:
-        warns.append(f"declared kind:files workflow emitted no files under {results_dir}")
+        warns.append(
+            f"declared kind:files workflow emitted no files under {Path(results_dir).as_posix()}"
+        )
     elif locator.outputs and len(files) != len(locator.outputs):
         # Documentary count cross-check only; names are NOT compared (embed
         # file_name != registry CLI-path names).
@@ -174,9 +178,11 @@ def build_cfg(row: dict, params: dict | None) -> dict:
     input_rel = row.get("input")
     if input_rel:
         example_path = resolve_example_path(input_rel)
-        with open(example_path) as fh:
+        with open(example_path, encoding="utf-8") as fh:
             example_cfg = yaml.safe_load(fh) or {}
         cfg = update_deep_dictionary(cfg, example_cfg)
+        # Inputs retain their source directory when embed mode injects outputs.
+        cfg.setdefault("Analysis", {})["input_folder"] = example_path.parent.as_posix()
     if params:
         cfg = update_deep_dictionary(cfg, copy.deepcopy(params))
     return cfg
@@ -222,7 +228,9 @@ def run_workflow(
         else:
             cfg = copy.deepcopy(cfg)
             row = lookup_row_for_cfg(cfg)
-            locator = ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            locator = (
+                ResultLocator.from_row(row) if row else ResultLocator.default_for(cfg)
+            )
 
         ihash = input_hash(cfg)
         payload, warns, rhash = _run_once(cfg, locator)

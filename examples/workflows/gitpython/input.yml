@@ -1,4 +1,10 @@
 basename: gitpython
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
 repos:
   - io: .
 max_count: 5

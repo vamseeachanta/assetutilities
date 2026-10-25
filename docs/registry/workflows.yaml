@@ -123,8 +123,8 @@ workflows:
     basename: edit_pdf
     input: examples/workflows/edit_pdf/input.yml
     outputs:
-      - examples/workflows/edit_pdf/input_data/input.pdf_page_1-1.pdf
-      - examples/workflows/edit_pdf/input_data/input.pdf_page_2-2.pdf
+      - examples/workflows/edit_pdf/results/input.pdf_page_1-1.pdf
+      - examples/workflows/edit_pdf/results/input.pdf_page_2-2.pdf
     result:
       kind: files
     test: uv run python -m assetutilities examples/workflows/edit_pdf/input.yml

@@ -21,7 +21,14 @@ class GitUtilities:
         for entry in cfg["repos"]:
             path = Path(entry["io"])
             if not path.is_absolute():
-                path = Path(cfg["Analysis"]["analysis_root_folder"]) / path
+                path = (
+                    Path(
+                        cfg["Analysis"].get(
+                            "input_folder", cfg["Analysis"]["analysis_root_folder"]
+                        )
+                    )
+                    / path
+                )
             with (
                 Repo(path, search_parent_directories=True) as repo,
                 # Git environment documentation: GIT_OPTIONAL_LOCKS=0 prevents
@@ -31,7 +38,7 @@ class GitUtilities:
                 valid = repo.head.is_valid()
                 rows.append(
                     {
-                        "input": entry["io"],
+                        "input": Path(entry["io"]).as_posix(),
                         "current_branch": "DETACHED"
                         if repo.head.is_detached
                         else repo.active_branch.name,
@@ -54,6 +61,6 @@ class GitUtilities:
         folder = Path(cfg["Analysis"]["result_folder"])
         folder.mkdir(parents=True, exist_ok=True)
         output = folder / "gitpython_report.yml"
-        output.write_text(yaml.safe_dump(report), encoding="utf-8")
-        cfg["gitpython"] = {**report, "output_file": str(output)}
+        output.write_text(yaml.safe_dump(report), encoding="utf-8", newline="\n")
+        cfg["gitpython"] = {**report, "output_file": output.as_posix()}
         return cfg

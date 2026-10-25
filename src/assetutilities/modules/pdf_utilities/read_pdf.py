@@ -65,10 +65,10 @@ class ReadPDF:
         slug = re.sub(r"[^A-Za-z0-9_-]+", "_", label).strip("_") or "page"
         # Include the entry index so repeated labels cannot overwrite earlier text.
         output = folder / f"read_pdf_{slug}_{file_index}.txt"
-        output.write_text(text, encoding="utf-8")
+        output.write_text(text, encoding="utf-8", newline="\n")
         return {
             "label": label,
             "page": page,
-            "output_file": str(output),
+            "output_file": output.as_posix(),
             "n_chars": len(text),
         }

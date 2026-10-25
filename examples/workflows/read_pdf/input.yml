@@ -1,4 +1,10 @@
 basename: read_pdf
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: true
 library: PyPDF2
 files:
   from_pdf:

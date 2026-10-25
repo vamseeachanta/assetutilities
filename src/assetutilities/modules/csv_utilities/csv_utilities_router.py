@@ -14,7 +14,14 @@ class CSVUtilitiesRouter:
             raise ValueError("csv_utilities requires input_file (or txt_file)")
         source = Path(source_name)
         if not source.is_absolute():
-            source = Path(cfg["Analysis"]["analysis_root_folder"]) / source
+            source = (
+                Path(
+                    cfg["Analysis"].get(
+                        "input_folder", cfg["Analysis"]["analysis_root_folder"]
+                    )
+                )
+                / source
+            )
         delimiter = options.get("delimiter", ",")
         encoding = options.get("encoding") or "utf-8"
         kwargs = {"sep": delimiter, "nrows": options.get("nrows")}
@@ -31,18 +38,18 @@ class CSVUtilitiesRouter:
         folder.mkdir(parents=True, exist_ok=True)
         normalized = folder / f"{source.stem}_normalized.csv"
         summary_path = folder / f"{source.stem}_summary.yml"
-        frame.to_csv(normalized, index=False, encoding="utf-8")
+        frame.to_csv(normalized, index=False, encoding="utf-8", lineterminator="\n")
         summary = {
-            "input_file": str(source),
+            "input_file": source.as_posix(),
             "encoding_used": encoding,
             "delimiter": delimiter,
             "n_rows": len(frame),
             "n_columns": len(frame.columns),
             "columns": list(frame.columns),
         }
-        summary_path.write_text(yaml.safe_dump(summary), encoding="utf-8")
+        summary_path.write_text(yaml.safe_dump(summary), encoding="utf-8", newline="\n")
         options["results"] = {
-            "normalized_file": str(normalized),
-            "summary_file": str(summary_path),
+            "normalized_file": normalized.as_posix(),
+            "summary_file": summary_path.as_posix(),
         }
         return cfg

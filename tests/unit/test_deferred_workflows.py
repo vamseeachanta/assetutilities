@@ -31,9 +31,9 @@ def pdf_input(tmp_path):
 
 def run_config(tmp_path, cfg):
     path = tmp_path / "input.yml"
-    path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+    path.write_text(yaml.safe_dump(cfg), encoding="utf-8", newline="\n")
     result = engine(str(path))
-    saved = yaml.safe_load((tmp_path / "results/input.yml").read_text())
+    saved = yaml.safe_load((tmp_path / "results/input.yml").read_text(encoding="utf-8"))
     assert saved["basename"] == cfg["basename"]
     return result
 
@@ -94,6 +94,8 @@ def test_read_pdf_labels_cannot_escape_output(tmp_path, pdf_input):
 
 def test_edit_pdf_page_contents(tmp_path, pdf_input):
     """Inclusive range [2,2] contains one page: the authored beta page."""
+    external = Path(f"{pdf_input}_page_2-2.pdf")
+    external.write_bytes(b"existing destination\n")
     run_config(
         tmp_path,
         {
@@ -102,7 +104,8 @@ def test_edit_pdf_page_contents(tmp_path, pdf_input):
             "files": [{"io": str(pdf_input), "pages": [[2, 2]]}],
         },
     )
-    reader = PdfReader(f"{pdf_input}_page_2-2.pdf")
+    assert external.read_bytes() == b"existing destination\n"
+    reader = PdfReader(tmp_path / "results/input.pdf_page_2-2.pdf")
     assert len(reader.pages) == 1
     assert reader.pages[0].extract_text().strip() == "beta page"
 
@@ -122,7 +125,7 @@ def test_csv_normalization(tmp_path, encoding):
         Path(outputs["normalized_file"]).read_text(encoding="utf-8")
         == "name,value\ncafé,7\ntea,9\n"
     )
-    summary = yaml.safe_load(Path(outputs["summary_file"]).read_text())
+    summary = yaml.safe_load(Path(outputs["summary_file"]).read_text(encoding="utf-8"))
     assert summary["n_rows"] == 2
     assert summary["n_columns"] == 2
     assert summary["columns"] == ["name", "value"]
@@ -131,7 +134,9 @@ def test_csv_normalization(tmp_path, encoding):
 
 def test_csv_alias_delimiter_and_limit(tmp_path):
     """A semicolon header and two rows, limited to one, yields café,7 only."""
-    (tmp_path / "input.csv").write_text("name;value\ncafé;7\ntea;9\n", encoding="utf-8")
+    (tmp_path / "input.csv").write_text(
+        "name;value\ncafé;7\ntea;9\n", encoding="utf-8", newline="\n"
+    )
     result = run_config(
         tmp_path,
         {
@@ -153,11 +158,15 @@ def test_git_read_only_with_inherited_write_flags(tmp_path, monkeypatch):
         monkeypatch.delenv(key, raising=False)
     repo_path = tmp_path / "repo"
     with git.Repo.init(repo_path) as repo:
-        (repo_path / "tracked.txt").write_text("synthetic\n")
+        (repo_path / "tracked.txt").write_text(
+            "synthetic\n", encoding="utf-8", newline="\n"
+        )
         repo.index.add(["tracked.txt"])
         commit = repo.index.commit("Synthetic read-only workflow test")
         repo.head.reference = commit  # Exercise the detached CI case.
-        (repo_path / "untracked.txt").write_text("new\n")
+        (repo_path / "untracked.txt").write_text(
+            "new\n", encoding="utf-8", newline="\n"
+        )
         before = repo.head.commit.hexsha
         index_before = (repo_path / ".git/index").read_bytes()
         result = run_config(
@@ -169,7 +178,9 @@ def test_git_read_only_with_inherited_write_flags(tmp_path, monkeypatch):
                 "max_count": 1,
             },
         )
-        report = yaml.safe_load(Path(result["gitpython"]["output_file"]).read_text())
+        report = yaml.safe_load(
+            Path(result["gitpython"]["output_file"]).read_text(encoding="utf-8")
+        )
         row = report["repos"][0]
         assert row["current_branch"] == "DETACHED"
         assert row["head"] == before
@@ -211,7 +222,7 @@ def test_pdf_explicit_index_and_fallback(tmp_path, pdf_input):
     assert len(summaries) == 1
     output = Path(summaries[0]["output_file"])
     assert output.parent == tmp_path / "results"
-    assert output.read_text().strip() == "beta page"
+    assert output.read_text(encoding="utf-8").strip() == "beta page"
 
 
 def test_pdf_duplicate_labels_keep_both_pages(tmp_path, pdf_input):
@@ -227,7 +238,10 @@ def test_pdf_duplicate_labels_keep_both_pages(tmp_path, pdf_input):
             },
         }
     )
-    assert [Path(row["output_file"]).read_text().strip() for row in summaries] == [
+    assert [
+        Path(row["output_file"]).read_text(encoding="utf-8").strip()
+        for row in summaries
+    ] == [
         "alpha page",
         "beta page",
     ]
