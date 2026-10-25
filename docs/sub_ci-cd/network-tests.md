@@ -9,6 +9,7 @@ service checks require an explicit selection.
 | Revision | Date | Change and reason |
 |---|---|---|
 | Initial | 2026-10-19 | Add offline examples and live-data selection guidance to remove network-dependent quarantine entries. |
+| Update | 2026-10-24 | Describe selection without fixed case counts and document timeout and no-op routing coverage. |
 
 ## Default and explicit selection
 
@@ -18,8 +19,8 @@ Run the domains without contacting external services:
 uv run pytest tests/modules/web_scraping tests/modules/download_data
 ```
 
-The expected result is four offline cases passing and three live cases
-deselected. The default expression in `pytest.ini` is
+The offline cases run while the live-data cases are deselected.
+The default expression in `pytest.ini` is
 `not live_data and not pdf_integration`. Mark new external-service tests with
 `@pytest.mark.live_data`; keep offline tests unmarked.
 
@@ -60,9 +61,10 @@ uv run pytest tests/modules/download_data/test_zip_offline.py
 ```
 
 The companion failure case verifies that an HTTP error propagates without
-writing output. Both cases reject unmocked HTTP requests. The router tests
-replace both scraper backends and check that only the selected backend receives
-the original configuration.
+writing output. Both cases require a timeout and reject unmocked HTTP requests.
+The router tests replace both scraper backends and check that only the selected
+backend receives the original configuration. The `selenium` and unknown-engine
+cases return that configuration without calling either backend.
 
 ## Limits
 

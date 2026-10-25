@@ -60,11 +60,18 @@ def test_http_failure_writes_no_output(monkeypatch, tmp_path):
         def raise_for_status(self):
             raise requests.HTTPError("synthetic response failure")
 
-    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: FailedResponse())
+    url = "https://example.invalid/archive.zip"
+
+    def fake_get(request_url, *, timeout):
+        assert request_url == url
+        assert timeout is not None
+        return FailedResponse()
+
+    monkeypatch.setattr(requests, "get", fake_get)
     cfg = {"input_data": {"out_directory": str(tmp_path)}}
     with pytest.raises(requests.HTTPError, match="synthetic response failure"):
         DownloadDataFromURL().download_and_process_zip(
-            "https://example.invalid/archive.zip",
+            url,
             cfg,
         )
     assert list(tmp_path.iterdir()) == []

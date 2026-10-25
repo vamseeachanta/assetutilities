@@ -21,10 +21,14 @@ LIVE_TESTS = (
 def test_network_entry_point_is_explicitly_marked(path):
     tree = ast.parse((ROOT / path).read_text())
     function = next(
-        node
-        for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "test_run_process"
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "test_run_process"
+        ),
+        None,
     )
+    assert function is not None, path
     assert "pytest.mark.live_data" in {
         ast.unparse(decorator) for decorator in function.decorator_list
     }
