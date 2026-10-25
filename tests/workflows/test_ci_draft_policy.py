@@ -9,7 +9,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / ".github" / "workflows"
 WORKFLOW_PATHS = sorted((*WORKFLOWS.glob("*.yml"), *WORKFLOWS.glob("*.yaml")))
-SNAPSHOT = json.loads(Path(__file__).with_name("workflow_job_names.json").read_text())
+SNAPSHOT = json.loads(
+    Path(__file__).with_name("workflow_job_names.json").read_text(encoding="utf-8")
+)
 DRAFT_GUARD = (
     "github.event_name != 'pull_request' || github.event.pull_request.draft == false"
 )
@@ -74,7 +76,9 @@ def test_invalid_draft_guard_is_rejected(
         job.pop("if")
     else:
         job["if"] = guard
-    (tmp_path / "docs.yml").write_text(yaml.safe_dump(workflow), encoding="utf-8")
+    (tmp_path / "docs.yml").write_text(
+        yaml.safe_dump(workflow), encoding="utf-8", newline="\n"
+    )
     monkeypatch.setitem(globals(), "WORKFLOWS", tmp_path)
 
     with pytest.raises(AssertionError, match=r"docs\.yml:docs lacks draft guard"):
@@ -92,7 +96,7 @@ def test_renamed_workflow_or_check_is_rejected(tmp_path: Path, renamed: str) -> 
     else:
         workflow["jobs"]["docs"]["name"] = "Renamed check"
     path = tmp_path / "docs.yml"
-    path.write_text(yaml.safe_dump(workflow), encoding="utf-8")
+    path.write_text(yaml.safe_dump(workflow), encoding="utf-8", newline="\n")
 
     with pytest.raises(AssertionError):
         test_workflow_and_job_names_are_preserved(path)

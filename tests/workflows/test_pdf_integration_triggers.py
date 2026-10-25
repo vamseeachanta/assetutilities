@@ -63,6 +63,18 @@ def test_pull_request_concurrency_groups() -> None:
     assert first[0] != other[0]
 
 
+@pytest.mark.parametrize("action", ["ready_for_review", "converted_to_draft"])
+def test_readiness_transitions_cancel_previous_runs(action: str) -> None:
+    """Readiness changes must cancel earlier runs of the same pull request."""
+    workflow = _workflow()
+    events = workflow.get("on", workflow.get(True))
+    assert action in events["pull_request"]["types"]
+    # Both actions retain the pull_request event name and the same merge ref.
+    previous = _concurrency_for("pull_request", "refs/pull/1/merge", "101")
+    transition = _concurrency_for("pull_request", "refs/pull/1/merge", "102")
+    assert previous == transition == ("PDF integration-refs/pull/1/merge", True)
+
+
 @pytest.mark.parametrize("event", ["push", "workflow_dispatch"])
 def test_non_pull_request_runs_have_unique_groups(event: str) -> None:
     """Three quick runs cannot replace each other's pending work."""
@@ -74,7 +86,14 @@ def test_pull_request_activity_types_include_retargeting() -> None:
     events = _workflow().get("on", _workflow().get(True))
     assert events["pull_request"] == {
         "branches": ["main"],
-        "types": ["opened", "synchronize", "reopened", "edited", "ready_for_review"],
+        "types": [
+            "opened",
+            "synchronize",
+            "reopened",
+            "edited",
+            "ready_for_review",
+            "converted_to_draft",
+        ],
     }
     assert events["push"]["branches"] == ["main"]
     assert "workflow_dispatch" in events

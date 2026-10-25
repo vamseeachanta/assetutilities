@@ -103,6 +103,18 @@ def test_pull_request_concurrency_groups() -> None:
     assert first[0] != other[0]
 
 
+@pytest.mark.parametrize("action", ["ready_for_review", "converted_to_draft"])
+def test_readiness_transitions_cancel_previous_runs(action: str) -> None:
+    """Readiness changes must cancel earlier runs of the same pull request."""
+    workflow = _workflow()
+    events = workflow.get("on", workflow.get(True))
+    assert action in events["pull_request"]["types"]
+    # Both actions retain the pull_request event name and the same merge ref.
+    previous = _concurrency_for("pull_request", "refs/pull/1/merge", "101")
+    transition = _concurrency_for("pull_request", "refs/pull/1/merge", "102")
+    assert previous == transition == ("Tests-refs/pull/1/merge", True)
+
+
 @pytest.mark.parametrize("event", ["push", "workflow_dispatch", "schedule"])
 def test_non_pull_request_runs_have_unique_groups(event: str) -> None:
     """Every non-PR event uses its run id without cancelling other runs."""
@@ -124,7 +136,14 @@ def test_pull_request_activity_types_include_retargeting() -> None:
     workflow = _workflow()
     events = workflow.get("on", workflow.get(True))
     assert events["pull_request"] == {
-        "types": ["opened", "synchronize", "reopened", "edited", "ready_for_review"]
+        "types": [
+            "opened",
+            "synchronize",
+            "reopened",
+            "edited",
+            "ready_for_review",
+            "converted_to_draft",
+        ]
     }
 
 
@@ -302,6 +321,6 @@ def test_local_merge_behaviour(tmp_path: Path, case: str) -> None:
         f"tested={tested} first_parent={tip} second_parent={head} "
         f"tip={tip} event_base={event_base} tree={tree}"
     ) in result.stdout
-    assert (tmp_path / "output").read_text() == f"tip={tip}\n"
+    assert (tmp_path / "output").read_text(encoding="utf-8") == f"tip={tip}\n"
     if case == "shallow":
         assert _git(runner, "merge-base", tip, head) == event_base

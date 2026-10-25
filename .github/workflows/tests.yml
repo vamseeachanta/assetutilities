@@ -4,9 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
-    # All edits rerun gates: conditional skips could mask an earlier failure.
+    # Drafts skip gates; readiness reruns them. A draft edit can replace a failure
+    # with a skipped result until the pull request is ready again.
     # Retargeting needs a fresh merge against the new base, not an old run retry.
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
   workflow_dispatch:
 
 concurrency:
@@ -128,6 +129,7 @@ jobs:
   # "domain-tests / Aggregate domain results" — the required check to wire if
   # branch protection is ever enabled (currently unprotected, so the rename is
   # harmless).
+  # Keep any required aggregate unguarded; never require the skipped caller.
   domain-tests:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     uses: vamseeachanta/workspace-hub/.github/workflows/domain-matrix.yml@main
