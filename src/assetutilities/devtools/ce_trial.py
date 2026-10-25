@@ -118,12 +118,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = assess(evidence)
     except (OSError, ValueError, RecursionError):
         # Do not echo input data or filesystem details into public logs.
-        print(
-            "Invalid trial evidence. Supply the documented evidence format.",
-            file=sys.stderr,
+        sys.stderr.write(
+            "Invalid trial evidence. Supply the documented evidence format.\n"
         )
         return 2
-    print(json.dumps(result, indent=2, sort_keys=True))
+    sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
     return 0
 
 

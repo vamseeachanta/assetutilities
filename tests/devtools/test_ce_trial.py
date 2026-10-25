@@ -228,8 +228,9 @@ def test_assessment_does_not_modify_input():
 def test_example_cli_is_read_only(capsys):
     before = EXAMPLE.read_bytes()
     assert main([EXAMPLE.as_posix()]) == 0
-    result = json.loads(capsys.readouterr().out)
-    assert result == assess(snapshot())
+    output = capsys.readouterr()
+    assert output.out == json.dumps(assess(snapshot()), indent=2, sort_keys=True) + "\n"
+    assert output.err == ""
     assert EXAMPLE.read_bytes() == before
 
 
