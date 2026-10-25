@@ -103,6 +103,7 @@ def build() -> tuple[str, str]:
     # from the rendered asset. Its repository locator is recorded in section 9.2.
     css = (ROOT / "docs/sub_utilities/assets/style.css").read_text(encoding="utf-8")
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S).strip()
+    css = "\n".join(line.rstrip() for line in css.splitlines())
     rows = "\n".join(
         f"<tr><td>{x:g}</td><td>{number(y)}</td><td>Reference 1, B.7.2; module call</td></tr>"
         for x, y in zip(data["inputs_ft"], data["list_m"])

@@ -141,6 +141,12 @@ def test_cli_rebuild_uses_selected_destination(tmp_path):
     ]
 
 
+def test_generated_report_has_no_trailing_whitespace():
+    document, _ = builder.build()
+    for text in (document, REPORT.read_text(encoding="utf-8")):
+        assert all(line == line.rstrip() for line in text.splitlines()), REBUILD
+
+
 def test_calculation_source_record_and_selected_test_inventory():
     document = REPORT.read_text(encoding="utf-8")
     assert (
