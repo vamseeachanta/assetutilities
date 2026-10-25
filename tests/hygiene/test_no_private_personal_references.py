@@ -133,10 +133,11 @@ def test_tracked_scanner_detects_compound_paths_and_tags(
     parts: tuple[str, ...],
     expected: list[str],
 ) -> None:
+    # A matching directory name must not contaminate the negative controls.
+    tmp_path = tmp_path / "restricted"
+    tmp_path.mkdir()
     # Build path-like content at runtime so no host directory is embedded here.
-    (tmp_path / "tracked.md").write_text(
-        str(tmp_path.joinpath(*parts)), encoding="utf-8"
-    )
+    (tmp_path / "tracked.md").write_text("/".join(parts), encoding="utf-8")
     (tmp_path / "untracked.md").write_text("restricted sealed", encoding="utf-8")
 
     def tracked_files(command: list[str], **kwargs: object):
