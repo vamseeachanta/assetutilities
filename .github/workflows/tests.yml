@@ -2,8 +2,9 @@ name: Tests
 
 # PR_GATE_RUNNER configures Gates only; the reusable domain jobs are unchanged.
 # It accepts self-hosted-arm64 (Actions compares without case).
-# Only same-repository pull_request events may use [self-hosted, Linux, ARM64].
-# Unset, empty or other values, forks and other events use ubuntu-latest.
+# Same-repository pull_request, push and workflow_dispatch events may use
+# [self-hosted, Linux, ARM64]. Unset, empty or other values, forks and other
+# events use ubuntu-latest. Draft and edited pull requests retain every gate.
 # This repository is not ARM64-eligible until native installation and Gates
 # completion are demonstrated. Locked black/debugpy have no Linux aarch64-specific
 # wheels; universal wheels and source distributions exist. No install failure
@@ -36,10 +37,12 @@ jobs:
   gates:
     name: Gates
     runs-on: >-
-      ${{ github.event_name == 'pull_request'
-          && github.event.pull_request.head.repo.full_name
-          && github.event.pull_request.head.repo.full_name == github.repository
-          && vars.PR_GATE_RUNNER == 'self-hosted-arm64'
+      ${{ vars.PR_GATE_RUNNER == 'self-hosted-arm64'
+          && ((github.event_name == 'pull_request'
+               && github.event.pull_request.head.repo.full_name
+               && github.event.pull_request.head.repo.full_name == github.repository)
+              || github.event_name == 'push'
+              || github.event_name == 'workflow_dispatch')
           && fromJSON('["self-hosted", "Linux", "ARM64"]') || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4

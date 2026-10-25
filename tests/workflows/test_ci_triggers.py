@@ -1,6 +1,7 @@
 """Pin pull-request coverage and preserve the existing test gate contract."""
 
 from pathlib import Path
+import ast
 import hashlib
 import json
 import os
@@ -61,31 +62,54 @@ def _evaluate_expression(expression: str, context: dict) -> object:
     expression = expression.strip()
     if expression.startswith("${{") and expression.endswith("}}"):
         expression = expression[3:-2].strip()
-    if re.fullmatch(r"'(?:[^']|'')*'", expression):
-        return expression[1:-1].replace("''", "'")
-    for operator in ("||", "&&", "=="):
-        parts = re.split(r"('(?:[^']|'')*')", expression)
-        for index in range(0, len(parts), 2):
-            if operator not in parts[index]:
-                continue
-            left, right = parts[index].split(operator, 1)
-            left = "".join(parts[:index]) + left
-            right += "".join(parts[index + 1 :])
-            value = _evaluate_expression(left, context)
-            if operator == "||":
-                return value or _evaluate_expression(right, context)
-            if operator == "&&":
-                return value and _evaluate_expression(right, context)
-            other = _evaluate_expression(right, context)
+    parts = re.split(r"('(?:[^']|'')*')", expression)
+    for index, part in enumerate(parts):
+        if index % 2:
+            parts[index] = repr(part[1:-1].replace("''", "'"))
+        else:
+            parts[index] = part.replace("&&", " and ").replace("||", " or ")
+
+    def visit(node: ast.AST) -> object:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, (ast.Attribute, ast.Name)):
+            key = ast.unparse(node)
+            if key in context:
+                return context[key]
+        if isinstance(node, ast.BoolOp):
+            value = visit(node.values[0])
+            for operand in node.values[1:]:
+                if isinstance(node.op, ast.Or) and value:
+                    return value
+                if isinstance(node.op, ast.And) and not value:
+                    return value
+                value = visit(operand)
+            return value
+        if (
+            isinstance(node, ast.Compare)
+            and len(node.ops) == 1
+            and isinstance(node.ops[0], ast.Eq)
+        ):
+            value, other = visit(node.left), visit(node.comparators[0])
             if isinstance(value, str) and isinstance(other, str):
                 return value.casefold() == other.casefold()
             return value == other
-    literal_json = re.fullmatch(r"fromJSON\(('(?:[^']|'')*')\)", expression)
-    if literal_json:
-        return json.loads(_evaluate_expression(literal_json[1], context))
-    if expression in context:
-        return context[expression]
-    raise ValueError(f"Unsupported expression: {expression}")
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "fromJSON"
+            and len(node.args) == 1
+            and isinstance(node.args[0], ast.Constant)
+            and not node.keywords
+        ):
+            return json.loads(visit(node.args[0]))
+        raise ValueError(f"Unsupported expression: {expression}")
+
+    try:
+        tree = ast.parse("(" + "".join(parts) + ")", mode="eval")
+    except SyntaxError as error:
+        raise ValueError(f"Unsupported expression: {expression}") from error
+    return visit(tree.body)
 
 
 @pytest.mark.parametrize(
@@ -95,6 +119,25 @@ def test_expression_evaluator_rejects_unsupported_syntax(expression: str) -> Non
     """An evaluator error must not masquerade as a successful hosted fallback."""
     with pytest.raises(ValueError, match="Unsupported expression"):
         _evaluate_expression(expression, {})
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("('' || 'yes') && 'selected' || 'fallback'", "selected"),
+        ("'yes'\n    && ('selected' || 'fallback')", "selected"),
+        ("'' && ('yes' || 'selected') || 'fallback'", "fallback"),
+        ("'yes' || unknown.context", "yes"),
+        ("'' && unknown.context", ""),
+        ("'literal && || (text)'", "literal && || (text)"),
+        ("'it''s a literal'", "it's a literal"),
+    ],
+)
+def test_expression_evaluator_grouping_and_literals(
+    expression: str, expected: str
+) -> None:
+    """Preserve grouping, short-circuiting and quoted text during evaluation."""
+    assert _evaluate_expression(expression, {}) == expected
 
 
 @pytest.mark.parametrize(
@@ -117,20 +160,30 @@ def test_expression_evaluator_rejects_unsupported_syntax(expression: str) -> Non
         ("pull_request", "target/repository", True, "opened", True),
         ("pull_request", "target/repository", True, "edited", True),
         ("pull_request", "fork/repository", False, "opened", False),
+        ("pull_request", "fork/repository", True, "opened", False),
         ("pull_request", "", False, "opened", False),
-        ("push", "target/repository", False, "", False),
-        ("workflow_dispatch", "target/repository", False, "", False),
+        ("push", "target/repository", False, "", True),
+        ("workflow_dispatch", "target/repository", False, "", True),
+        ("push", "", False, "", True),
+        ("workflow_dispatch", "", False, "", True),
         ("pull_request_target", "target/repository", False, "opened", False),
+        ("schedule", "", False, "", False),
+        ("workflow_call", "", False, "", False),
     ],
     ids=[
         "same-repo",
         "draft",
         "edited-draft",
         "fork",
+        "draft-fork",
         "missing-head",
         "push",
         "dispatch",
+        "push-without-pr",
+        "dispatch-without-pr",
         "other-event",
+        "schedule",
+        "workflow-call",
     ],
 )
 def test_gates_runner_routing(
