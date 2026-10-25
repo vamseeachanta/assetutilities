@@ -58,9 +58,7 @@ def ymlInput(
     )
 
 
-def update_deep(
-    d: MutableMapping[str, Any], u: Mapping[str, Any]
-) -> MutableMapping[str, Any]:
+def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return WorkingWithYAML().update_deep(d, u)
 
 
