@@ -100,6 +100,70 @@ def test_inventory_rejects_missing_or_file_root(tmp_path):
         ops.inventory([file])
 
 
+@pytest.mark.parametrize("marker_link", [False, True])
+def test_inventory_excludes_junctions_when_detection_is_available(
+    tmp_path, monkeypatch, marker_link
+):
+    candidate = tmp_path / "candidate"
+    marker = candidate / ".git"
+    marker.mkdir(parents=True)
+    junction = marker if marker_link else candidate
+    monkeypatch.setattr(
+        Path, "is_junction", lambda path: path == junction, raising=False
+    )
+    assert ops.inventory([tmp_path])["repositories"] == []
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32" or not hasattr(Path, "is_junction"),
+    reason="Requires Windows junction support in Python 3.12 or later",
+)
+@pytest.mark.parametrize("marker_link", [False, True])
+def test_inventory_excludes_real_windows_junctions(tmp_path, marker_link):
+    outside = tmp_path / "outside"
+    (outside / ".git").mkdir(parents=True)
+    root = tmp_path / "root"
+    root.mkdir()
+    candidate = root / "candidate"
+    if marker_link:
+        candidate.mkdir()
+    junction = candidate / ".git" if marker_link else candidate
+    target = outside / ".git" if marker_link else outside
+    subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(junction), str(target)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert junction.is_junction()
+    assert ops.inventory([root])["repositories"] == []
+
+
+@pytest.mark.parametrize("operation", ["iterdir", "is_dir"])
+def test_inventory_permission_errors_produce_no_partial_output(
+    tmp_path, monkeypatch, capsys, operation
+):
+    (tmp_path / ".git").mkdir()
+    child = tmp_path / "unreadable"
+    child.mkdir()
+    original = getattr(Path, operation)
+    unreadable = tmp_path if operation == "iterdir" else child
+
+    def deny_access(path):
+        if path == unreadable:
+            raise PermissionError(str(path))
+        return original(path)
+
+    monkeypatch.setattr(Path, operation, deny_access)
+    with pytest.raises(SystemExit) as error:
+        ops.main(["inventory", str(tmp_path)])
+    assert error.value.code == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "invalid or unreadable input" in captured.err
+    assert str(tmp_path) not in captured.err
+
+
 def test_empty_manifest_cannot_claim_readiness():
     """#122 lists ten children: zero pass, zero fail, ten unevaluated."""
     report = ops.assess(manifest())
@@ -218,6 +282,25 @@ def test_markdown_escapes_evidence_and_role_text():
     assert "&lt;example&gt;&amp;record\\|tail" in text
     assert "Revision history" in text
     assert "NOT_EVALUATED" in text
+
+
+@pytest.mark.parametrize(
+    ("observed", "expiry", "expected"),
+    [
+        ("", "", "- / -"),
+        ("2026-10-19", "", "2026-10-19 / -"),
+        ("", "2026-10-21", "- / 2026-10-21"),
+        ("2026-10-19", "2026-10-21", "2026-10-19 / 2026-10-21"),
+    ],
+)
+def test_markdown_marks_each_missing_review_date(observed, expiry, expected):
+    record = complete_record()
+    record.update(observed_on=observed, valid_until=expiry)
+    text = ops.render_markdown(ops.assess(manifest({"repositories": record})))
+    row = next(
+        line for line in text.splitlines() if line.startswith("| repositories |")
+    )
+    assert f"| {expected} |" in row
 
 
 def run_cli(*args):

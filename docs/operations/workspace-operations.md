@@ -13,6 +13,7 @@ before accepting an operational outcome.
 | Revision | Date | What changed and why |
 |---|---|---|
 | Initial | 2026-10-20 | Add an inventory and evidence workflow to make outstanding operations work explicit. |
+| 1 | 2026-10-24 | Exclude detectable junctions, document inventory errors and mark missing report dates explicitly. |
 
 ## Scope and sources
 
@@ -54,13 +55,18 @@ Supply a checkout root, a directory containing checkouts, or several such roots.
 The script examines each supplied root and its immediate children. A `.git`
 directory or regular marker file is reported, which includes ordinary checkouts,
 worktrees and submodules. Overlapping roots are deduplicated. Child and marker
-symlinks are excluded; an explicitly supplied symlink root is resolved.
+symlinks are excluded; directory junctions are also excluded when Python exposes
+`Path.is_junction()` (Python 3.12 or later). Earlier Python versions cannot detect
+junctions. An explicitly supplied symlink or junction root is resolved.
 
 Each result contains a zero-based `root_index`, a path relative to that root, and
 `marker` set to `directory` or `file`. Root paths and marker contents are omitted.
 A marker identifies a candidate, not a healthy Git repository. No recursive
 search, branch inspection, remote request, data hashing or modification occurs.
 An unavailable root is an input error; the script does not return partial output.
+Filesystem errors raised while listing a root or inspecting a child or marker
+also abort the entire inventory with exit status two and no partial output.
+The error message omits filesystem paths.
 
 Review candidates against the existing repository inventory. Record branch and
 issue destinations there. Preserve original data and history, identify consumers
@@ -123,6 +129,7 @@ The example commands intentionally return one. The Markdown report includes a
 summary, revision history, per-requirement evidence and dates, outstanding actions
 and limits. Each generated snapshot is a new document. Retain prior snapshots;
 append a row to their revision history if a retained report is reissued.
+Each absent review date is rendered as `-`, including when only one date is known.
 
 For an onboarding handoff, the maintainer and new team member can follow this
 sequence without relying on an undocumented setup:

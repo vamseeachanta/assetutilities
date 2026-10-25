@@ -216,8 +216,13 @@ def test_data_store_is_collected_for_contract_and_full_changes(changed):
     [
         "scripts/operations/workspace_ops.py",
         "tests/operations/test_workspace_ops.py",
+        "tests/operations/test_another.py",
+        "tests/operations/conftest.py",
+        "tests/operations/fixtures/input.json",
         "docs/operations/workspace-operations.md",
         "examples/operations/workspace-operations.json",
+        "examples/operations/another.json",
+        "examples/operations/nested/input.json",
     ],
 )
 def test_operations_inputs_select_the_operations_suite(changed: str) -> None:
@@ -228,3 +233,11 @@ def test_operations_inputs_select_the_operations_suite(changed: str) -> None:
     matrix = to_matrix([changed], REPO_ROOT)
     assert "operations" in _names(matrix)
     assert "_always" in _names(matrix)
+
+
+@pytest.mark.parametrize(
+    "changed",
+    ["tests/operations_extra/test_other.py", "examples/operations_extra/input.json"],
+)
+def test_operations_prefixes_require_a_directory_boundary(changed: str) -> None:
+    assert select([changed], REPO_ROOT)["scope"] == "skip"

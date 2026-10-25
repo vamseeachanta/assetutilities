@@ -87,7 +87,8 @@ def inventory(roots: Sequence[Path]) -> dict:
 
     Both checkout directories and worktree/submodule marker files are candidates.
     Markers are not opened, and their contents or Git health are not verified.
-    Child and marker symlinks are excluded. Overlapping roots are deduplicated.
+    Child and marker symlinks and detectable junctions are excluded.
+    Overlapping roots are deduplicated. Filesystem errors abort the inventory.
     """
     repositories = []
     seen = set()
@@ -100,10 +101,10 @@ def inventory(roots: Sequence[Path]) -> dict:
             raise ValueError("inventory root is unavailable or is not a directory")
         children = sorted(root.iterdir(), key=lambda path: path.name)
         for candidate in [root, *children]:
-            if candidate.is_symlink() or not candidate.is_dir() or candidate in seen:
+            if _is_link(candidate) or not candidate.is_dir() or candidate in seen:
                 continue
             marker = candidate / ".git"
-            if marker.is_symlink():
+            if _is_link(marker):
                 continue
             if marker.is_dir():
                 kind = "directory"
@@ -124,6 +125,10 @@ def inventory(roots: Sequence[Path]) -> dict:
         "coverage": "Explicit roots and immediate children; Git markers only. "
         "Nested repositories, Git health, branches and data are not verified.",
     }
+
+
+def _is_link(path: Path) -> bool:
+    return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
 
 
 def _date(value: object, field: str) -> date:
@@ -264,7 +269,7 @@ def render_markdown(report: dict) -> str:
             check["status"],
             check["responsible_role"],
             check["evidence_ref"],
-            f"{check['observed_on']} / {check['valid_until']}",
+            f"{check['observed_on'] or '-'} / {check['valid_until'] or '-'}",
             check["reason"],
         )
         lines.append("| " + " | ".join(map(_cell, cells)) + " |")
