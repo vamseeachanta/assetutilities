@@ -47,7 +47,14 @@ class UnitFormatter:
             Unknown names do not match; unit-name substrings are not matched.
         template:
             Formatting rules to apply for this quantity type.
+
+        Raises
+        ------
+        ValueError
+            If *quantity_type* is empty or contains only whitespace.
         """
+        if not quantity_type.strip():
+            raise ValueError("quantity_type must be nonblank")
         self._templates[quantity_type] = template
 
     def _resolve_template(
@@ -60,7 +67,7 @@ class UnitFormatter:
             return template
 
         dimensionality = tracked_quantity._quantity.dimensionality
-        registry = tracked_quantity.units._REGISTRY
+        registry = tracked_quantity._quantity._REGISTRY
         for qty_type, registered in self._templates.items():
             try:
                 registered_dimensionality = registry.get_dimensionality(f"[{qty_type}]")

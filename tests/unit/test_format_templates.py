@@ -1,6 +1,7 @@
 # ABOUTME: Tests for FormatTemplate and template-based formatting in UnitFormatter.
 # ABOUTME: Verifies precision, notation, suffix, and template registration features.
 
+import pint
 import pytest
 
 from assetutilities.units.output_formatter import FormatTemplate, UnitFormatter
@@ -90,6 +91,37 @@ class TestFormatterWithTemplate:
 
 
 class TestFormatterTemplateRegistration:
+    @pytest.mark.parametrize(
+        "quantity_type, unit",
+        [("", "dimensionless"), (" ", "dimensionless"), ("\t\n", "dimensionless")],
+    )
+    def test_blank_name_is_rejected(self, formatter, quantity_type, unit):
+        """Rejected names leave the four-place default for unitless values."""
+        with pytest.raises(ValueError, match="nonblank"):
+            formatter.register_template(
+                quantity_type, FormatTemplate(precision=2, suffix=" (incorrect)")
+            )
+
+        assert (
+            formatter.format_quantity(TrackedQuantity(1.25, unit))
+            == "1.2500 dimensionless"
+        )
+
+    def test_template_uses_quantity_registry(self, formatter):
+        """Resolve a custom dimension in the registry that defines the quantity."""
+        registry = pint.UnitRegistry()
+        registry.define("custom_unit = [custom_dimension]")
+        formatter.register_template(
+            "custom_dimension", FormatTemplate(precision=2, suffix=" (custom)")
+        )
+
+        assert (
+            formatter.format_quantity(
+                TrackedQuantity(1.25, "custom_unit", registry=registry)
+            )
+            == "1.25 custom_unit (custom)"
+        )
+
     def test_formatter_register_template(self, formatter, tq_pressure):
         """Hand calculation: fixture input 101325 gains .00 at two places.
 
@@ -161,8 +193,18 @@ class TestFormatterTemplateRegistration:
             == "1.25 pascal (explicit)"
         )
 
-    @pytest.mark.parametrize("quantity_type", ["unknown", "met"])
-    def test_unknown_name_does_not_match_unit_substring(self, formatter, quantity_type):
+    @pytest.mark.parametrize(
+        "quantity_type, unit, unit_text",
+        [
+            ("unknown", "m", "meter"),
+            ("met", "m", "meter"),
+            ("pascal", "Pa", "pascal"),
+            ("psi", "psi", "pound_force_per_square_inch"),
+        ],
+    )
+    def test_unknown_name_does_not_match_unit_substring(
+        self, formatter, quantity_type, unit, unit_text
+    ):
         """Hand calculation: chosen input 1.25 plus two zeros gives 1.2500.
 
         An unrecognized dimension name must retain the four-place default;
@@ -172,4 +214,7 @@ class TestFormatterTemplateRegistration:
             quantity_type, FormatTemplate(suffix=" (incorrect)")
         )
 
-        assert formatter.format_quantity(TrackedQuantity(1.25, "m")) == "1.2500 meter"
+        assert (
+            formatter.format_quantity(TrackedQuantity(1.25, unit))
+            == f"1.2500 {unit_text}"
+        )
