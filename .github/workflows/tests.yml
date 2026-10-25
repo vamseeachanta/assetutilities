@@ -1,11 +1,15 @@
 name: Tests
 
-# PR_GATE_RUNNER accepts self-hosted-arm64 (Actions compares without case).
+# PR_GATE_RUNNER configures Gates only; the reusable domain jobs are unchanged.
+# It accepts self-hosted-arm64 (Actions compares without case).
 # Only same-repository pull_request events may use [self-hosted, Linux, ARM64].
 # Unset, empty or other values, forks and other events use ubuntu-latest.
-# Keep the default hosted: black/debugpy ARM64 installation is unverified.
-# Enable only after native qualification on an ephemeral runner without ambient
-# credentials or privileged access; contents: read is not runner isolation.
+# This repository is not ARM64-eligible until native installation and Gates
+# completion are demonstrated. Locked black/debugpy have no Linux aarch64-specific
+# wheels; universal wheels and source distributions exist. No install failure
+# has been demonstrated. Keep PR_GATE_RUNNER unset until qualification and
+# credential-free ephemeral runner isolation without privileged access are proven;
+# contents: read is not runner isolation. Unset it again to roll back routing.
 
 on:
   push:
