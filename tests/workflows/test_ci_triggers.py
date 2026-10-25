@@ -120,12 +120,22 @@ def test_trigger_contract_runs_in_gates() -> None:
 
 
 def test_pull_request_activity_types_include_retargeting() -> None:
-    """Retargeting must start fresh gates against the new base."""
+    """Retargeting must start fresh gates; leaving draft must start them too."""
     workflow = _workflow()
     events = workflow.get("on", workflow.get(True))
     assert events["pull_request"] == {
-        "types": ["opened", "synchronize", "reopened", "edited"]
+        "types": ["opened", "synchronize", "reopened", "edited", "ready_for_review"]
     }
+
+
+def test_draft_pull_requests_skip_every_job() -> None:
+    """Drafts do not queue gate jobs; ready_for_review runs them."""
+    draft_skip = (
+        "(github.event_name != 'pull_request' || "
+        "github.event.pull_request.draft == false)"
+    )
+    for job_id, job in _workflow()["jobs"].items():
+        assert str(job.get("if", "")).startswith(draft_skip), job_id
 
 
 def test_edit_events_cannot_skip_jobs_or_steps() -> None:
