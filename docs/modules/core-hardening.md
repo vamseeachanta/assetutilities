@@ -1,9 +1,14 @@
 # Workflow core
 
-The engine selects explicit handlers, loads configuration without Python object
-construction, resolves optional mapping placeholders, and sends native and
-standard-library log messages through one output pipeline. These changes address
-the dispatch, YAML and logging parts of #120.
+This change defines one workflow execution contract: safely load and prepare a
+configuration mapping, select an explicit handler, and route the run's messages
+through one logging pipeline. Optional mapping placeholders are resolved before
+dispatch. The registry, YAML boundaries and logging entry points implement this
+shared contract within #120.
+
+The scope includes regression tests, migration guidance and a runnable example
+for that contract. Standalone legacy workflows, PDF extraction improvements,
+HTML plotting reports and broader cleanup remain separate work.
 
 ## Revision history
 
@@ -11,6 +16,7 @@ the dispatch, YAML and logging parts of #120.
 |---|---|---|
 | Initial | 2026-10-20 | Document explicit dispatch, YAML boundaries and one logging pipeline so consumers can reproduce the supported behavior. |
 | 1 | 2026-10-22 | Correct compatibility claims and describe migration steps for logging, YAML placeholders and engine imports. |
+| 2 | 2026-10-25 | State the shared workflow execution contract and distinguish its scope from remaining work. |
 
 ## Handler registry
 
@@ -153,6 +159,7 @@ See [the logging guide](../logging_loguru_migration.md) for integration details.
 
 Standalone implementations and runnable examples for the excluded legacy names,
 PDF extraction improvements, self-contained HTML plotting reports and broad
-clean-code work remain separate child-issue work. This change does not claim
-that every child of #120 is complete. Existing database and CLI security tests
-are rerun to check that the earlier remediation remains intact.
+clean-code work remain separate child-issue work rather than later slices of
+this change. This change does not claim that every child of #120 is complete.
+Existing database and CLI security tests are rerun to check that the earlier
+remediation remains intact.
