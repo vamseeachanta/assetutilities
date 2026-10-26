@@ -50,6 +50,92 @@ def test_null_yaml_options_leave_config_unchanged():
     assert cfg["label"] == "{{ name }}"
 
 
+@pytest.mark.parametrize(
+    "method, cfg, value, message",
+    [
+        (
+            "test_single_variable",
+            {"data": {"groups": [{"label": "sample"}]}},
+            "sample",
+            "Label is reusable: sample",
+        ),
+        (
+            "test_variable_placeholder",
+            {"name": "sample", "placeholder_tests": {"method": "{{ name }}"}},
+            "sample",
+            "yml key placeholder is reusable: sample",
+        ),
+    ],
+)
+def test_yaml_reuse_diagnostics_use_logging(
+    method, cfg, value, message, capsys, isolated_logging
+):
+    messages = []
+    logger.add(messages.append, level="INFO")
+    assert getattr(WorkingWithYAML(), method)(cfg) == (True, value)
+    assert capsys.readouterr().out == ""
+    assert [
+        (item.record["level"].name, item.record["message"]) for item in messages
+    ] == [("INFO", message)]
+
+
+def test_update_file_failure_uses_error_logging(tmp_path, capsys, isolated_logging):
+    from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
+
+    base = tmp_path / "base.yml"
+    base.write_text("value: original\n", encoding="utf-8", newline="\n")
+    manager = ConfigureApplicationInputs()
+    manager.ApplicationInputFile = str(base)
+    manager.customYaml = str(tmp_path / "missing.yml")
+    messages = []
+    logger.add(messages.append, level="ERROR")
+    with pytest.raises(ValueError, match="Update Input file") as failure:
+        manager.generateYMLInput(None, {})
+    assert isinstance(failure.value.__cause__, FileNotFoundError)
+    assert capsys.readouterr().out == ""
+    assert [
+        (item.record["level"].name, item.record["message"]) for item in messages
+    ] == [
+        ("ERROR", "Update Input file could not be loaded successfully."),
+        ("ERROR", f"Error is : {failure.value.__cause__}"),
+    ]
+
+
+def test_missing_update_argument_uses_logging(monkeypatch, capsys, isolated_logging):
+    from types import SimpleNamespace
+
+    from assetutilities.common import ApplicationManager
+
+    class MissingArgument(list):
+        def __getitem__(self, key):
+            if key == 1:
+                raise IndexError("Argument unavailable")
+            return super().__getitem__(key)
+
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(
+        ApplicationManager,
+        "sys",
+        SimpleNamespace(argv=MissingArgument(["runner", "update.yml"]), modules={}),
+    )
+    manager = ApplicationManager.ConfigureApplicationInputs()
+    manager.ApplicationInputFile = "base.yml"
+    messages = []
+    logger.add(messages.append, level="WARNING")
+    manager.get_custom_file()
+    assert manager.customYaml is None
+    assert manager.CustomInputs is None
+    assert capsys.readouterr().out == ""
+    assert [
+        (item.record["level"].name, item.record["message"]) for item in messages
+    ] == [
+        (
+            "WARNING",
+            "No update values file is provided. Running program default values from base.yml",
+        )
+    ]
+
+
 def test_stream_error_does_not_return_partial_config(tmp_path):
     path = tmp_path / "invalid.yml"
     path.write_text("valid: yes\n---\ninvalid: [\n", encoding="utf-8", newline="\n")

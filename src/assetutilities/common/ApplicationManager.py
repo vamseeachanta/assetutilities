@@ -237,9 +237,9 @@ class ConfigureApplicationInputs:
             logger.debug(f"Custom yaml could not be resolved from argv: {e}")
             self.customYaml = None
             if not is_pytest:
-                print(
+                logger.warning(
                     "No update values file is provided. Running program default values "
-                    f"from {self.ApplicationInputFile}"
+                    f"from {Path(self.ApplicationInputFile).as_posix()}"
                 )
 
         # Only override customYaml if run_dict has CustomInputs
@@ -270,8 +270,8 @@ class ConfigureApplicationInputs:
                 # need to catch this, emit a summary carrying screening_status
                 # and record the failure in their provenance block. Raising
                 # preserves the original message and the cause (issue #80).
-                print("Update Input file could not be loaded successfully.")
-                print(f"Error is : {e}")
+                logger.error("Update Input file could not be loaded successfully.")
+                logger.error("Error is : {}", e)
                 raise ValueError(
                     f"Update Input file could not be loaded successfully: "
                     f"{self.customYaml}"
