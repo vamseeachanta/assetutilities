@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(git rev-parse --show-toplevel)"
+# Resolve this checkout, not a caller's inherited repository bindings.
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
 
 failures=0
@@ -11,7 +13,11 @@ check_empty() {
   shift
 
   local output
-  output="$("$@" || true)"
+  if ! output="$("$@" 2>&1)"; then
+    printf 'FAIL: %s (command failed)\n%s\n' "$description" "$output" >&2
+    failures=$((failures + 1))
+    return
+  fi
   if [[ -n "$output" ]]; then
     printf 'FAIL: %s\n%s\n' "$description" "$output" >&2
     failures=$((failures + 1))
@@ -58,6 +64,10 @@ if ! grep -qxF "*.orig" .gitignore; then
   failures=$((failures + 1))
 else
   printf 'PASS: .gitignore contains *.orig\n'
+fi
+
+if ! "${PYTHON:-python3}" scripts/hygiene/check_python_style.py; then
+  failures=$((failures + 1))
 fi
 
 exit "$failures"
