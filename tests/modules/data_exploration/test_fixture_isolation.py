@@ -112,3 +112,45 @@ def test_data_exploration_runs_retain_equivalent_outputs(
     for name, first_table in first_tables.items():
         assert not first_table.empty
         assert_frame_equal(first_table, second_tables[name], check_exact=True)
+
+
+@pytest.mark.parametrize("input_file", FIXTURES)
+def test_data_exploration_heading_statistics_match_hand_calculation(
+    input_file, data_exploration_run
+):
+    # Source: csv/test_1.csv and csv/test_2.csv, Heading, rows 2 through 26.
+    # Both contain 25 values from 0 to 360 in steps of 15: min=0, max=360.
+    # Mean: sum=4500, 4500/25=180. Sample variance about that mean:
+    # 15**2 * 2 * (1**2 + ... + 12**2) / 24 = 225*1300/24 = 12187.5.
+    # Sample stdev is sqrt(12187.5); expectations do not use engine output.
+    # Basis: OpenStax, Introductory Statistics, 2nd ed., sections 2.5 and 2.7.
+    expected = {
+        "min": 0.0,
+        "max": 360.0,
+        "mean": 180.0,
+        "stdev": 110.39701082909808,
+    }
+    cfg = data_exploration_run(input_file)
+    tables = _csv_tables(cfg)
+    prefix = cfg["Analysis"]["file_name"]
+
+    if cfg["type"]["df_statistics"]["flag"]:
+        columns = tables[Path(f"{prefix}_column.csv")]
+        assert len(columns.columns) == 2
+        for statistic, value in expected.items():
+            summary = tables[Path(f"{prefix}_{statistic}.csv")]
+            for label in columns:
+                heading = summary.loc[columns[label] == "Heading", label]
+                assert heading.tolist() == pytest.approx([value], rel=1e-12, abs=1e-12)
+            transposed = tables[Path(f"{prefix}_{statistic}_T.csv")]
+            heading = transposed.set_index("input_file")["Heading"]
+            assert heading.to_dict() == pytest.approx(
+                {label: value for label in columns}, rel=1e-12, abs=1e-12
+            )
+    else:
+        assert len(tables) == 2
+        for table in tables.values():
+            statistics = table.dropna(subset=["statistic"]).set_index("statistic")
+            assert statistics["Heading"].to_dict() == pytest.approx(
+                expected, rel=1e-12, abs=1e-12
+            )
