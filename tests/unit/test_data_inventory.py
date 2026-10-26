@@ -84,6 +84,46 @@ def test_module_cli_json_and_source_preservation(tmp_path):
     assert [(root / name).read_bytes() for name in ("a", "b")] == [b"abc", b"abc"]
 
 
+@pytest.mark.parametrize("kind", ["complete", "partial", "invalid"])
+def test_cli_writes_to_streams_without_print(tmp_path, kind, monkeypatch, capsys):
+    """All exit paths retain newline-terminated output without print calls."""
+    root = tmp_path / "data"
+    if kind != "invalid":
+        root.mkdir()
+        blocked = root / "blocked"
+        blocked.write_bytes(b"abc")
+    if kind == "partial":
+        real_lstat = Path.lstat
+
+        def lstat(path, *args, **kwargs):
+            if path == blocked:
+                raise PermissionError(errno.EACCES, "denied", str(path))
+            return real_lstat(path, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "lstat", lstat)
+
+    def forbid_print(*args, **kwargs):
+        raise AssertionError("CLI output must use stream writes")
+
+    monkeypatch.setattr("builtins.print", forbid_print)
+    assert main([str(root)]) == {"complete": 0, "partial": 1, "invalid": 2}[kind]
+    captured = capsys.readouterr()
+    if kind == "invalid":
+        assert captured.out == ""
+        assert captured.err == (
+            "input root must be an existing directory, not a symlink\n"
+        )
+    else:
+        assert captured.err == ""
+        report = json.loads(captured.out)
+        assert report["status"] == kind.upper()
+        assert report["errors"] == (
+            [{"path": "blocked", "error": "EACCES"}] if kind == "partial" else []
+        )
+        assert captured.out == json.dumps(report, indent=2, sort_keys=True) + "\n"
+    assert str(tmp_path) not in captured.out + captured.err
+
+
 def test_unreadable_subdirectory_is_partial(tmp_path, monkeypatch, capsys):
     """Hand calculation: readable b'abc' contributes 3; unreadable is unknown."""
     (tmp_path / "visible").write_bytes(b"abc")

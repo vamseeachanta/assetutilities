@@ -147,9 +147,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = inventory(args.root, hash_contents=args.hash)
     except ValueError as exc:
-        print(str(exc), file=sys.stderr)
+        sys.stderr.write(str(exc) + "\n")
         return 2  # Command-line input error convention, not an engineering limit.
-    print(json.dumps(report, indent=2, sort_keys=True))
+    sys.stdout.write(json.dumps(report, indent=2, sort_keys=True) + "\n")
     return 1 if report["status"] == "PARTIAL" else 0
 
 
