@@ -9,6 +9,7 @@ criteria that lack qualified source evidence remain `NOT_EVALUATED`.
 | Revision | Date | What changed and why |
 |---|---|---|
 | 1 | 2026-10-20 | Added reproducible examples and explicit source limits. |
+| 2 | 2026-10-25 | Separated report citation work to keep this change focused on the gallery. |
 
 ## Build and inspect
 
@@ -17,7 +18,7 @@ From a development checkout with the documentation dependencies available:
 ```sh
 uv run --group docs mkdocs build --strict
 uv run python scripts/build_gallery.py --out site/gallery
-uv run python -m pytest tests/modules/gallery tests/modules/reportgen -q
+uv run python -m pytest tests/modules/gallery tests/workflow_api/test_runner.py -q
 ```
 
 The Pages and documentation workflows run both build commands. Pages deployment

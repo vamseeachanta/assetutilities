@@ -9,8 +9,7 @@ calculation tables, interactive and static charts, traceable units, and YAML
 workflow evidence. The gallery uses synthetic inputs and distinguishes arithmetic
 examples from checks whose criteria remain unevaluated.
 
-See the [worked example and build instructions](library-gallery.md) and the
-[report citation contract](report-citations.md).
+See the [worked example and build instructions](library-gallery.md).
 
 ## Engine
 

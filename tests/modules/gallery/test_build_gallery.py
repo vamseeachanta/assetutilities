@@ -144,10 +144,8 @@ def test_self_contained_resources_and_navigation_allowed(html):
     "filename",
     [
         "scripts/build_gallery.py",
-        "src/assetutilities/common/reportgen/citations.py",
         "src/assetutilities/workflow_api/runner.py",
         "tests/modules/gallery/test_build_gallery.py",
-        "tests/modules/reportgen/test_citation_binding.py",
         "tests/workflow_api/test_runner.py",
     ],
 )
