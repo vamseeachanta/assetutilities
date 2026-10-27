@@ -12,9 +12,12 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 # This file is in tests/devtools, two directory levels below the repository root.
-COMMAND = Path(__file__).resolve().parents[2] / "scripts/diagnostics/explain_test_targets.py"
+COMMAND = (
+    Path(__file__).resolve().parents[2] / "scripts/diagnostics/explain_test_targets.py"
+)
 
 
 @pytest.fixture
@@ -45,11 +48,15 @@ def tree(tmp_path):
         (tmp_path / directory).mkdir(parents=True, exist_ok=True)
     # A root-level pytest file belongs in full selection. A decoy selector must
     # never be loaded: --root supplies selection directories, not executable code.
-    (tmp_path / "tests/test_root.py").write_text("# fixture\n", encoding="utf-8")
+    (tmp_path / "tests/test_root.py").write_text(
+        "# fixture\n", encoding="utf-8", newline="\n"
+    )
     (tmp_path / "src/assetutilities/orphan/code.py").write_bytes(b"# source\n")
     (tmp_path / "docs/guide.md").write_bytes(b"fixture documentation\n")
     (tmp_path / "scripts/ci/select_test_targets.py").write_text(
-        "raise RuntimeError('fixture selector must not execute')\n", encoding="utf-8"
+        "raise RuntimeError('fixture selector must not execute')\n",
+        encoding="utf-8",
+        newline="\n",
     )
     return tmp_path
 
@@ -268,3 +275,21 @@ def test_cli_requires_changed_paths(tree):
     assert result.returncode != 0
     assert result.stdout == ""
     assert "required" in result.stderr
+
+
+def test_focused_suites_run_unconditionally_in_gates():
+    """Keep diagnostic and selector regressions covered even for skip selection."""
+    workflow_path = COMMAND.parents[2] / ".github/workflows/tests.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    gates = workflow["jobs"]["gates"]
+    command = (
+        "uv run python -m pytest tests/devtools/test_test_target_explain.py "
+        "tests/ci/test_select_test_targets.py"
+    )
+    matching_steps = [
+        step for step in gates["steps"] if step.get("run", "").strip() == command
+    ]
+    assert matching_steps, "Gates must run the diagnostic and selector suites"
+    for node in [gates, *matching_steps]:
+        assert "if" not in node, "Focused regressions must run unconditionally"
+        assert not node.get("continue-on-error", False)
