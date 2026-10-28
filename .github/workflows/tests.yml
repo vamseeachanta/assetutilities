@@ -119,6 +119,12 @@ jobs:
       - name: Test workflow triggers
         run: uv run python -m pytest tests/workflows/test_ci_triggers.py
 
+      - name: Check contribution branch
+        if: github.event_name == 'pull_request'
+        env:
+          SOURCE_BRANCH: ${{ github.head_ref }}
+        run: uv run python scripts/ci/branch_policy.py --branch "$SOURCE_BRANCH"
+
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh
 

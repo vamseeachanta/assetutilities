@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Style
 from colorama import init as colorama_init
 
+from assetutilities.common.webscraping.input_settings import iter_input_items
+
 colorama_init()
 
 # (connect, read) timeout in seconds for all HTTP calls. Without a timeout a
@@ -24,9 +26,7 @@ class BS4Scraper:
         return cfg
 
     def input_data(self, cfg):
-        input_settings = cfg["input_settings"]
-        for input_item in cfg["input"]:
-            input_item = {**input_settings, **input_item}
+        for input_item in iter_input_items(cfg):
             self.get_data(cfg, input_item)
 
     def get_data(self, cfg, input_item):
@@ -34,7 +34,9 @@ class BS4Scraper:
 
         session = requests.Session()
 
-        response = session.get(url, timeout=HTTP_TIMEOUT)  # GET request to the form page
+        response = session.get(
+            url, timeout=HTTP_TIMEOUT
+        )  # GET request to the form page
         soup = BeautifulSoup(response.content, "html.parser")
 
         viewstate = soup.find("input", {"name": "__VIEWSTATE"})["value"]

@@ -2,6 +2,7 @@
 import io
 import os
 import zipfile
+from collections.abc import Mapping
 from urllib.parse import urlparse
 
 import pandas as pd
@@ -15,7 +16,20 @@ class DownloadDataFromURL:
     def router(self, cfg):
         urls = cfg["input_data"]["urls"]
 
-        for url in urls.values():
+        if isinstance(urls, Mapping):
+            entries = list(urls.values())
+        elif isinstance(urls, list):
+            entries = [
+                item.get("url") if isinstance(item, Mapping) else item for item in urls
+            ]
+        else:
+            raise ValueError("input_data.urls must be a mapping or a list")
+        if any(not isinstance(url, str) or not url.strip() for url in entries):
+            raise ValueError(
+                "input_data.urls entries must contain nonempty URL strings"
+            )
+
+        for url in entries:
             self.download_and_process_zip(url, cfg)
 
         return cfg
