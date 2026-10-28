@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engine runner registry</title>
+<style>
+body { font: 1rem/1.6 system-ui, sans-serif; max-width: 58rem; margin: 3rem auto; padding: 0 1rem; color: #182a37; }
+pre { background: #eef3f5; padding: 1rem; overflow: auto; }
+td, th { padding: .5rem; border-bottom: 1px solid #bccbd2; text-align: left; }
+</style>
+<h1>Engine runner registry</h1>
+<p>The engine resolves a configuration basename to a registered class, constructs
+a new instance, and calls <code>run(cfg)</code>. Registration follows the existing
+<code>ReportWriterRegistry</code> pattern. Unregistered names still enter the
+legacy dispatch branches.</p>
+<h2>Extension contract</h2>
+<pre>from assetutilities.engine_registry import EngineRunner, register_runner
+
+@register_runner("uppercase_example")
+class UppercaseRunner(EngineRunner):
+    def run(self, cfg):
+        cfg["answer"] = cfg["text"].upper()
+        return cfg</pre>
+<p>Import the extension module once during application startup, before invoking
+the engine. Names are exact and case-sensitive. The decorator accepts additional
+names as aliases. Empty names, repeated aliases, duplicate registrations and
+abstract or unrelated classes are rejected. Registration of aliases is atomic:
+a conflict leaves all new names unregistered. The runner constructor must accept
+no arguments, and <code>run</code> must return the configuration to save.</p>
+<p>Registration is explicit trusted Python code. YAML cannot select arbitrary
+import paths. Registered runners take precedence over legacy handlers; choose a
+new basename for extensions. Built-in registered names cannot be replaced.
+Register during startup, before concurrent dispatch. No plugin discovery,
+unregistration or hot-reload mechanism is provided.</p>
+<h2>Compatibility</h2>
+<table>
+<tr><th>Registered basename</th><th>Preserved behavior</th></tr>
+<tr><td>read_pdf</td><td>Stores the handler return value in cfg["result"].</td></tr>
+<tr><td>edit_pdf</td><td>Retains cfg after the handler runs; ignores its return value.</td></tr>
+<tr><td>zip_utilities</td><td>Uses the configuration returned by the router.</td></tr>
+</table>
+<p>Table: migrated workflows and their original return conventions.</p>
+<p>Handler imports remain lazy. Handler and constructor errors propagate; they
+never trigger legacy fallback. Existing configuration preparation, basename/meta
+selection, logging, embedding, save behavior, unknown-name errors and explicit
+stub errors are retained. This migration changes dispatch, not PDF or ZIP algorithms.</p>
+<h2>Worked example: inputs, method and answer</h2>
+<p>The executable example is <code>examples/engine_registry.py</code>. With the
+package installed, run it from the repository root, selecting an output directory:</p>
+<pre>python examples/engine_registry.py --output example-output</pre>
+<p><strong>Input:</strong> basename <code>uppercase_example</code>, text
+<code>alpha beta</code>. <strong>Method:</strong> construct the registered runner,
+uppercase each letter, preserve the space, return cfg, and save through the engine.
+<strong>Answer:</strong> <code>ALPHA BETA</code>, printed and retained in the saved
+YAML beneath the selected output directory. Embedding preserves the caller's
+custom fields without requiring a packaged base configuration.</p>
+<p>No engineering equation, coefficient or acceptance limit is introduced.
+The expected text is derived character by character in the example test.</p>
+<h2>Sources and verification</h2>
+<ul>
+<li><a href="https://github.com/vamseeachanta/assetutilities/issues/29">Issue: engine registry migration</a>.</li>
+<li>Repository precedent: <code>src/assetutilities/common/reportgen/writers.py</code>
+and <code>src/assetutilities/common/reportgen/reportgen.py</code>.</li>
+<li>Compatibility source: the prior branches in <code>src/assetutilities/engine.py</code>.</li>
+<li>Tests: <code>tests/unit/test_engine_registry.py</code>,
+<code>tests/unit/test_engine_registry_dispatch.py</code>, and existing engine tests.</li>
+</ul>
+</html>

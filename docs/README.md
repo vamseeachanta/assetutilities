@@ -19,6 +19,9 @@ This is the canonical documentation entry point for issue routing in
 
 ## Curated Routing Surfaces
 
+The [engine registry guide](modules/engine-registry.html) documents runner
+registration, compatibility, and a runnable custom-workflow example.
+
 These files are trusted routing surfaces:
 
 - `AGENTS.md`
