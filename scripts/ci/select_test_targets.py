@@ -88,6 +88,14 @@ CONTRACT_ROUTES = {
     "docs/README.md": "tests/docs",
     "README.md": "tests/docs",
     "AGENTS.md": "tests/docs",
+    "scripts/operations/workspace_ops.py": "tests/operations",
+    "docs/operations/workspace-operations.md": "tests/operations",
+}
+
+# Include future test support files and examples in their contract suite.
+CONTRACT_PREFIX_ROUTES = {
+    "tests/operations/": "tests/operations",
+    "examples/operations/": "tests/operations",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST
@@ -130,6 +138,10 @@ def select(changed: list[str], root: Path) -> dict:
     relevant = False
 
     for p in changed:
+        for prefix, target in CONTRACT_PREFIX_ROUTES.items():
+            if p.startswith(prefix):
+                contracts.add(target)
+                relevant = True
         if p in CONTRACT_ROUTES:
             contracts.add(CONTRACT_ROUTES[p])
             relevant = True
