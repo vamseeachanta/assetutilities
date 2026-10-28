@@ -209,3 +209,66 @@ def test_data_store_is_collected_for_contract_and_full_changes(changed):
         target for shard in matrix["include"] for target in shard["targets"].split()
     }
     assert "tests/data_store" in targets
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        ["src/assetutilities/agent_os/integration/workflow_refresh.py"],
+        ["tests/agent_os/integration/test_workflow_engineering_value.py"],
+        ["tests/agent_os/integration/test_enhanced_specs_integration.py"],
+        [
+            "src/assetutilities/agent_os/integration/workflow_refresh.py",
+            "tests/agent_os/integration/test_workflow_engineering_value.py",
+        ],
+    ],
+)
+def test_learning_record_changes_select_integration_tests(changed):
+    """Source and test changes must run the retained-value assertions once."""
+    result = select(changed, REPO_ROOT)
+    assert result["scope"] == "modules"
+    assert result["xdist"].count("tests/agent_os/integration") == 1
+    if "src/assetutilities/agent_os/integration/workflow_refresh.py" in changed:
+        assert "tests/modules/agent_os" in result["xdist"]
+
+    matrix = to_matrix(changed, REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert "_always" in _names(matrix)
+    assert [
+        shard
+        for shard in matrix["include"]
+        if shard["targets"] == "tests/agent_os/integration"
+    ] == [
+        {
+            "name": "agent_os-integration",
+            "targets": "tests/agent_os/integration",
+            "mode": "xdist",
+        }
+    ]
+    if "src/assetutilities/agent_os/integration/workflow_refresh.py" in changed:
+        assert "modules-agent_os" in _names(matrix)
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "src/assetutilities/agent_os/integration_extra/example.py",
+        "tests/agent_os/integration_extra/test_example.py",
+    ],
+)
+def test_integration_route_does_not_match_sibling_prefixes(changed):
+    """A similarly named sibling must not acquire the integration shard."""
+    assert "tests/agent_os/integration" not in select([changed], REPO_ROOT)["xdist"]
+    assert "agent_os-integration" not in _names(to_matrix([changed], REPO_ROOT))
+
+
+def test_selector_test_changes_run_selector_guards():
+    """Editing the routing regressions must select the guard suite itself."""
+    changed = ["tests/ci/test_select_test_targets.py"]
+    result = select(changed, REPO_ROOT)
+    assert result["scope"] == "modules"
+    assert "tests/ci" in result["xdist"]
+    matrix = to_matrix(changed, REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "ci"}
+    assert {"name": "ci", "targets": "tests/ci", "mode": "xdist"} in matrix["include"]
