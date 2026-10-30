@@ -1,15 +1,15 @@
 &id001 !!python/object/new:assetutilities.common.data.AttributeDict
 dictitems:
   Analysis:
-    CustomInputFile: c:\Users\ss7a2365\Documents\github\assetutilities\src\assetutilities\tests\test_data/excel_utilities/excel_utilities_custom_calculation.yml
+    CustomInputFile: fixtures/reference-9.yml
     DefaultInputFile: null
-    analysis_root_folder: c:\Users\ss7a2365\Documents\github\assetutilities\src\assetutilities\tests\test_data/excel_utilities
+    analysis_root_folder: fixtures/reference-5/
     basename: excel_utilities
     cfg_array_file_names: null
     file_name: app_excel_utilities_excel_utilities_custom_calculation
     file_name_for_overwrite: app_excel_utilities_excel_utilities_custom_calculation
-    log_folder: c:\Users\ss7a2365\Documents\github\assetutilities\src\assetutilities\tests\test_data/excel_utilities\logs\
-    result_folder: c:\Users\ss7a2365\Documents\github\assetutilities\src\assetutilities\tests\test_data/excel_utilities\results\
+    log_folder: fixtures/reference-6/
+    result_folder: fixtures/reference-7/
     start_time: 2023-11-15 05:42:01.525669
   basename: excel_utilities
   default:
@@ -20,12 +20,12 @@ dictitems:
   files:
     source:
       cell_range: null
-      path: C:\Users\ss7a2365\Desktop\
+      path: fixtures/reference-8/
       workbook: S01-Dyn-FC180-2.5mHs.xlsx
       worksheet: EditingTable
     target:
       cell_range: null
-      path: C:\Users\ss7a2365\Desktop\
+      path: fixtures/reference-8/
       workbook: Summary_1.xlsx
       worksheet: Sheet1
   task: custom_calculation

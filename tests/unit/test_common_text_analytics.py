@@ -1,63 +1,55 @@
-# ABOUTME: Tests for common/text_analytics.py — TextAnalytics stub class.
-# ABOUTME: Covers router and get_subset_files nominal paths.
+"""Ordered set comparison with independent hand-enumerated answers."""
+
+from pathlib import Path
 
 import pytest
+import yaml
 
 from assetutilities.common.text_analytics import TextAnalytics
 
 
-class TestTextAnalyticsInit:
-    """TextAnalytics can be instantiated without arguments."""
+def test_comparison_preserves_first_occurrence_order(tmp_path):
+    """A=[red, blue, red, green], B=[green, gold, blue, gold].
 
-    def test_init_returns_instance(self):
-        # Act
-        ta = TextAnalytics()
-
-        # Assert
-        assert isinstance(ta, TextAnalytics)
-
-
-class TestTextAnalyticsRouter:
-    """TextAnalytics.router delegates to get_subset_files (no-op stub)."""
-
-    def test_router_returns_none(self):
-        # Arrange
-        ta = TextAnalytics()
-        cfg = {}
-
-        # Act
-        result = ta.router(cfg)
-
-        # Assert — stub implementation returns None
-        assert result is None
-
-    def test_router_does_not_raise(self):
-        # Arrange
-        ta = TextAnalytics()
-        cfg = {"text_analytics": {"flag": True}}
-
-        # Act / Assert — should not raise
-        ta.router(cfg)
+    Hand intersection in A order is [blue, green]; A minus B is [red];
+    B minus A is [gold]. Unique result counts are 2, 1, 1; input sizes 4, 4.
+    """
+    cfg = {
+        "Analysis": {"result_folder": str(tmp_path)},
+        "data": {
+            "set1": ["red", "blue", "red", "green"],
+            "set2": ["green", "gold", "blue", "gold"],
+        },
+    }
+    assert TextAnalytics().router(cfg) is cfg
+    report = yaml.safe_load(Path(cfg["text_analytics"]["output_file"]).read_text())
+    assert report == {
+        "common": ["blue", "green"],
+        "only_in_set1": ["red"],
+        "only_in_set2": ["gold"],
+        "counts": {"common": 2, "only_in_set1": 1, "only_in_set2": 1},
+        "input_sizes": {"set1": 4, "set2": 4},
+    }
 
 
-class TestTextAnalyticsGetSubsetFiles:
-    """TextAnalytics.get_subset_files is a no-op stub — coverage only."""
+def test_empty_sets(tmp_path):
+    cfg = {
+        "Analysis": {"result_folder": str(tmp_path)},
+        "data": {"set1": [], "set2": []},
+    }
+    TextAnalytics().get_subset_files(cfg)
+    assert cfg["text_analytics"]["counts"] == {
+        "common": 0,
+        "only_in_set1": 0,
+        "only_in_set2": 0,
+    }
 
-    def test_get_subset_files_returns_none(self):
-        # Arrange
-        ta = TextAnalytics()
-        cfg = {}
 
-        # Act
-        result = ta.get_subset_files(cfg)
-
-        # Assert — stub returns None
-        assert result is None
-
-    def test_get_subset_files_accepts_any_cfg(self):
-        # Arrange
-        ta = TextAnalytics()
-        cfg = {"arbitrary": "data", "nested": {"key": 42}}
-
-        # Act / Assert — should not raise regardless of cfg contents
-        ta.get_subset_files(cfg)
+@pytest.mark.parametrize("value", ["red", [1], [None], [["red"]]])
+def test_requires_string_lists(tmp_path, value):
+    cfg = {
+        "Analysis": {"result_folder": str(tmp_path)},
+        "data": {"set1": value, "set2": []},
+    }
+    with pytest.raises(ValueError, match="list of strings"):
+        TextAnalytics().router(cfg)

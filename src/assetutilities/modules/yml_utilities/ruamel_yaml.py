@@ -1,16 +1,135 @@
 import os
 import re
+import stat
+from collections.abc import Mapping, Set
+from copy import deepcopy
+from io import StringIO
 from pathlib import Path
 
 from loguru import logger
 from ruamel.yaml import YAML as ruamelYAML
+from ruamel.yaml.comments import (
+    CommentedMap,
+    CommentedSeq,
+    TaggedScalar,
+    merge_attrib,
+)
+from ruamel.yaml.scalarstring import FoldedScalarString, LiteralScalarString
+from ruamel.yaml.tag import Tag
 
-# from ruamel.yaml.comments import CommentedMap
 
-ruamel_yaml = ruamelYAML()
-ruamel_yaml.preserve_quotes = True  # Keeps quotes if present
-ruamel_yaml.allow_duplicate_keys = True  # Allows duplicate keys if required
-ruamel_yaml.indent(mapping=2, sequence=4, offset=2)
+def _new_yaml(data=None):
+    """Keep parser state local, including after a rejected document."""
+    yaml = ruamelYAML()
+    yaml.preserve_quotes = True
+    # YAML 1.2.2 (2021), section 3.2.1.1: mapping keys must be unique.
+    yaml.allow_duplicate_keys = False
+    # Formatting follows ruamel's documented block-sequence indentation example.
+    # Source: https://yaml.dev/doc/ruamel.yaml/detail/#Indentation_of_block_sequences
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    # YAML 1.2.2 (2021), section 6.8.2: each document declares its tag handles.
+    # Collect node metadata so independently created dumpers retain declarations,
+    # including tags on keys, aliases and otherwise hidden merge-source maps.
+    yaml.tags = {}
+    pending = [data]
+    seen = set()
+    while pending:
+        node = pending.pop()
+        if id(node) in seen:
+            continue
+        seen.add(id(node))
+        tag = getattr(node, Tag.attrib, None)
+        if tag is not None and tag.handle is not None:
+            yaml.tags[tag.handle] = tag.handles[tag.handle]
+        if isinstance(node, Mapping):
+            pending.extend(node.keys())
+            pending.extend(node.values())
+            pending.extend(getattr(node, merge_attrib, ()))
+        elif isinstance(node, (list, tuple, Set)):
+            pending.extend(node)
+    return yaml
+
+
+def _single_line_scalar(value):
+    if isinstance(value, TaggedScalar):
+        if value.style in ("|", ">"):
+            return False
+        value = value.value
+    return not isinstance(
+        value, (Mapping, list, Set, LiteralScalarString, FoldedScalarString)
+    ) and not (isinstance(value, str) and "\n" in value)
+
+
+def _is_link_or_directory(path):
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return False
+    return (
+        stat.S_ISLNK(info.st_mode)
+        or stat.S_ISDIR(info.st_mode)
+        or bool(
+            getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+        )
+    )
+
+
+def _split_destinations(keys, input_file, output_dir):
+    """Validate the complete output set before creating directories or files."""
+    destinations = []
+    seen = set()
+    root = Path(output_dir).resolve()
+    for key in keys:
+        if (
+            not isinstance(key, str)
+            or not key.strip()
+            or key.endswith((".", " "))
+            or re.search(r'[<>:"/\\|?*\x00-\x1f]', key)
+        ):
+            raise ValueError("Primary keys must be portable filename components")
+        filename = f"{Path(input_file).stem}_{key}.yml"
+        destination = Path(output_dir) / filename
+        if (
+            filename.casefold() in seen
+            or _is_link_or_directory(destination)
+            or destination.resolve().parent != root
+        ):
+            raise ValueError(
+                "Split destinations must be distinct and inside output_dir"
+            )
+        seen.add(filename.casefold())
+        destinations.append((key, destination.as_posix()))
+    return destinations
+
+
+def _shape_scalar_pairs(data, seen=None, is_row=False):
+    """Set collection style rather than rewriting emitted scalar text.
+
+    YAML 1.2.2 (2021), section 7.4.1 defines flow sequences. The pair length
+    is the existing shaping API's formatting choice, not an engineering limit.
+    """
+    if seen is None:
+        seen = set()
+    if id(data) in seen:
+        return
+    seen.add(id(data))
+    if isinstance(data, Mapping):
+        for value in data.values():
+            _shape_scalar_pairs(value, seen)
+    elif isinstance(data, CommentedSeq):
+        if (
+            is_row
+            and len(data) == 2
+            and all(
+                not isinstance(
+                    value, (Mapping, list, LiteralScalarString, FoldedScalarString)
+                )
+                for value in data
+            )
+        ):
+            data.fa.set_flow_style()
+        for value in data:
+            _shape_scalar_pairs(value, seen, is_row=True)
 
 
 def save_yml(data, output_file_path, shape_output=False):
@@ -23,27 +142,26 @@ def save_yml(data, output_file_path, shape_output=False):
     Args:
         data: A (Commented)Mapping or plain dict to dump.
         output_file_path: Destination path (parent dirs are created as needed).
-        shape_output: When True, post-processes nested 2-element lists into the
-            compact ``- [a, b]`` flow form (matches the repo's shaped output).
+        shape_output: When True, writes nested two-scalar rows in compact
+            ``- [a, b]`` flow form without changing values or the input object.
 
     Returns:
         The ``output_file_path`` that was written.
     """
+    if shape_output:
+        # Materialize round-trip nodes for plain dictionaries too. Parsing this
+        # private copy preserves comments and avoids mutating caller-owned data.
+        buffer = StringIO()
+        _new_yaml(data).dump(data, buffer)
+        data = _new_yaml().load(buffer.getvalue())
+        _shape_scalar_pairs(data)
+
     output_dir = os.path.dirname(output_file_path)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    with open(output_file_path, "w", encoding="utf-8-sig") as f:
-        ruamel_yaml.dump(data, f)
-
-    if shape_output:
-        with open(output_file_path, encoding="utf-8-sig") as f:
-            content = f.read()
-        modified_content = re.sub(
-            r"-\s+-\s+([^\n]+)\n\s+-\s+([^\n]+)", r"- [\1, \2]", content
-        )
-        with open(output_file_path, "w", encoding="utf-8-sig") as f:
-            f.write(modified_content)
+    with open(output_file_path, "w", encoding="utf-8", newline="\n") as f:
+        _new_yaml(data).dump(data, f)
 
     return output_file_path
 
@@ -68,25 +186,28 @@ def split_yaml_file_by_primary_key(
     Returns:
         List of dicts ``[{"data": <output_file_path>}, ...]`` (one per emitted key).
     """
-    os.makedirs(output_dir, exist_ok=True)
-    file_name_stem = Path(input_file).stem
-
     handler = RuamelYAML()
-    cleaned_yaml, data = handler.load_clean_yaml_file(input_file)
-    primary_key_info = handler.get_primary_key_single_line_info(cleaned_yaml)
+    _, data = handler.load_clean_yaml_file(input_file)
+    keys = [
+        key
+        for key, value in data.items()
+        if not single_line_keys_skipped or not _single_line_scalar(value)
+    ]
+    destinations = _split_destinations(keys, input_file, output_dir)
 
     output_file_name_array = []
-    for key in data.keys():
-        if single_line_keys_skipped and primary_key_info.get(key, False):
-            continue
-
-        output_file_name = f"{file_name_stem}_{key}.yml"
-        output_file_path = os.path.join(output_dir, output_file_name)
-        save_yml({key: data[key]}, output_file_path, shape_output=shape_output)
+    for key, output_file_path in destinations:
+        # A fresh root materializes inherited values without copying root merges.
+        # Reuse the key/value nodes to retain quotes and nested round-trip data.
+        section = CommentedMap({key: data[key]})
+        section.ca.comment = deepcopy(data.ca.comment)
+        if key in data.ca.items:
+            section.ca.items[key] = deepcopy(data.ca.items[key])
+        save_yml(section, output_file_path, shape_output=shape_output)
         output_file_name_array.append({"data": output_file_path})
 
     logger.debug(
-        f"Split {input_file} into {len(output_file_name_array)} file(s) by primary key"
+        "Split YAML into {} file(s) by primary key", len(output_file_name_array)
     )
     return output_file_name_array
 
@@ -126,32 +247,15 @@ class RuamelYAML:
                 raise Exception("No divide by method specified")
 
     def get_primary_key_single_line_info(self, cleaned_yaml):
-        """Map each top-level key -> True if it is a single-line scalar value.
+        """Classify parsed values, including quoted keys and flow collections.
 
-        A key is "single line" when it has inline content after the colon and the
-        following line is neither indented (a continuation) nor a blank separator.
+        YAML 1.2.2 (2021), sections 7.4 and 8.1, distinguishes collections
+        from scalars independently of whether their spelling occupies one line.
         """
-        lines = cleaned_yaml.splitlines()
-        primary_key_info = {}
-
-        for i, line in enumerate(lines):
-            key_match = re.match(r"^([^:]+):", line)
-            if key_match:
-                current_key = key_match.group(1).strip()
-                value_part = line[key_match.end() :].strip()
-
-                # Single-line if there is inline content after the colon.
-                is_single_line = bool(value_part)
-
-                # Look ahead: an indented or blank next line means a block value.
-                if is_single_line and i + 1 < len(lines):
-                    next_line = lines[i + 1]
-                    if next_line and (next_line[0].isspace() or not next_line.strip()):
-                        is_single_line = False
-
-                primary_key_info[current_key] = is_single_line
-
-        return primary_key_info
+        data = _new_yaml().load(cleaned_yaml)
+        if not isinstance(data, Mapping):
+            raise ValueError("YAML splitting requires a top-level mapping")
+        return {key: _single_line_scalar(value) for key, value in data.items()}
 
     def divide_yaml_file_by_primary_keys(self, cfg, file_name):
         """Engine entry point — delegates to the reusable module-level splitter.
@@ -170,15 +274,17 @@ class RuamelYAML:
         return output_file_name_array
 
     def load_clean_yaml_file(self, file_name):
-        with open(file_name, encoding="utf-8-sig") as file:
+        with open(file_name, encoding="utf-8") as file:
             yaml_content = file.read()
 
-            cleaned_yaml = self.clean_yaml_file(yaml_content)
-            cleaned_yaml = self.extract_data_after_document_start(cleaned_yaml)
+            # Parse the original document: percent signs, blank lines and '---'
+            # inside scalars are data (YAML 1.2.2, sections 6.8, 7.3 and 8.1).
+            data = _new_yaml().load(yaml_content)
 
-            data = ruamel_yaml.load(cleaned_yaml)
+        if not isinstance(data, Mapping):
+            raise ValueError("YAML splitting requires a top-level mapping")
 
-        return cleaned_yaml, data
+        return yaml_content, data
 
     def clean_yaml_line(self, line):
         """
