@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data consolidation inventory</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 70rem; margin: auto; padding: 2rem; line-height: 1.6; }
+    pre { overflow-x: auto; background: #f3f4f6; padding: 1rem; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1px solid #bbb; padding: .5rem; text-align: left; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<h1>Data consolidation inventory</h1>
+<h2>Summary</h2>
+<p><code>assetutilities.data_inventory</code> provides a read-only inventory of
+regular files below an explicitly selected directory. Logical byte totals,
+relative paths and optional SHA-256 duplicate-content candidates support
+consolidation planning. The utility does not select a canonical copy or perform
+data migration.</p>
+
+<h2>Revision history</h2>
+<table>
+  <thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
+  <tbody><tr><td>Initial</td><td>2026-10-20</td><td>Add read-only inventory, duplicate candidates and an exact worked example for consolidation planning.</td></tr></tbody>
+</table>
+<p>Table 1. Document revision history.</p>
+
+<h2>Inputs and interface</h2>
+<p>The input is an existing directory with permission to enumerate its entries.
+The directory itself shall not be a symbolic link. The optional
+<code>hash_contents=True</code> argument reads file contents; the default reads
+metadata only. The module uses the Python standard library.</p>
+<pre><code>from assetutilities.data_inventory import inventory
+
+report = inventory("example-input", hash_contents=True)
+print(report["logical_bytes"])
+</code></pre>
+<p>The command-line interface emits JSON on standard output. Store redirected
+output outside the directory being scanned so that it does not become input.</p>
+<pre><code>python -m assetutilities.data_inventory example-input --hash &gt; inventory.json</code></pre>
+<p>For a source checkout, set <code>PYTHONPATH=src</code> before the command.
+Output paths are relative to the input root; the absolute root is omitted.
+Relative names can still identify sensitive data, so inventory publication
+requires review.</p>
+
+<h2>Method</h2>
+<p>Python's <a href="https://docs.python.org/3.11/library/os.html#os.walk">os.walk</a>
+enumerates the directory without following symbolic links. Regular files are
+identified using their link-independent metadata. Symbolic links and special
+files are listed in <code>skipped</code>; empty directories have no file record.
+Hidden regular files are included. There is no implicit exclusion for caches,
+repositories, large files or nested mount points.</p>
+<p>The logical byte total is <code>B = sum(s_i)</code>, where <code>s_i</code>
+is each regular-file path's
+<a href="https://docs.python.org/3.11/library/os.html#os.stat_result.st_size">st_size in bytes</a>.
+The file count is the number of recorded regular-file paths. These definitions
+use Python 3.11 documentation, first released in 2022; no engineering
+coefficients or acceptance limits are introduced.</p>
+<p>With hashing enabled,
+<a href="https://docs.python.org/3.11/library/hashlib.html#hash-algorithms">hashlib.sha256</a>
+is updated from bounded buffers. Files with equal byte lengths and SHA-256
+digests are grouped as candidates. Members and file records are sorted by
+relative path. These are digest matches, not byte-by-byte identity checks.
+The published reference vector is the first input/output in the
+<a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA256.pdf">NIST SHA-256 example</a>
+(undated): input <code>abc</code> and its stated digest.</p>
+
+<h2>Worked example</h2>
+<p>The following example creates only synthetic inputs. Start in a writable
+scratch directory and select a new directory name to preserve existing data.</p>
+<pre><code>from pathlib import Path
+from assetutilities.data_inventory import inventory
+
+root = Path("example-input")
+root.mkdir()  # Fails if the directory exists; existing data is preserved.
+(root / "a.txt").write_bytes(b"abc")
+(root / "copy.txt").write_bytes(b"abc")
+(root / "b.txt").write_bytes(b"xy")
+
+report = inventory(root, hash_contents=True)
+assert report["status"] == "COMPLETE"
+assert report["file_count"] == 3
+assert report["logical_bytes"] == 8
+assert report["duplicate_groups"][0]["paths"] == ["a.txt", "copy.txt"]
+print(report["logical_bytes"], report["duplicate_groups"][0]["paths"])
+</code></pre>
+<p>The independent hand calculation is <code>3 + 3 + 2 = 8 bytes</code> across
+three regular-file paths. The identical <code>abc</code> inputs form one
+candidate group; <code>xy</code> does not belong to it. The answer printed is:</p>
+<pre><code>8 ['a.txt', 'copy.txt']</code></pre>
+
+<h2>Result interpretation</h2>
+<table>
+  <thead><tr><th>Field</th><th>Meaning and criterion</th></tr></thead>
+  <tbody>
+    <tr><td><code>status: COMPLETE</code></td><td>No enumeration, metadata or requested hash error was observed within the declared regular-file scope.</td></tr>
+    <tr><td><code>status: PARTIAL</code></td><td>At least one error was observed. Totals describe successfully inventoried paths only.</td></tr>
+    <tr><td><code>duplicate_status: EVALUATED</code></td><td>Hashing was requested and every observed regular-file path was fingerprinted without an error.</td></tr>
+    <tr><td><code>duplicate_status: NOT_EVALUATED</code></td><td>Hashing was omitted or an error occurred. Empty groups do not establish absence of duplicates.</td></tr>
+    <tr><td><code>errors</code></td><td>Relative paths with operating-system error names; system error messages and absolute locations are omitted.</td></tr>
+    <tr><td><code>skipped</code></td><td>Symbolic links and special files excluded from regular-file totals.</td></tr>
+  </tbody>
+</table>
+<p>Table 2. Output fields and their evaluation criteria.</p>
+<p>The CLI exits with 0 for a complete inventory, 1 for a partial inventory and
+2 for invalid command-line input. These are interface conventions, not
+engineering acceptance limits.</p>
+
+<h2>Known limits and follow-up</h2>
+<p>Logical bytes are file lengths per path, not allocated disk usage or
+recoverable storage. Hard links are counted per name. Sparse files, compression,
+deduplication, permissions, ownership and retention obligations are not evaluated.
+A digest match does not authorize removal of either file.</p>
+<p>The scan requires a trusted, quiescent input tree and is not an atomic snapshot
+or a security boundary against concurrent path replacement. Device, inode,
+length and modification/change timestamps are compared before and after each
+hash to detect observed changes; changes after a file is read, restored metadata,
+new files during traversal and changes to directory ancestry can escape detection.
+Content reads can update filesystem access times.</p>
+<p>Metadata is retained in memory in proportion to file count; contents are
+streamed. Hashing reads all regular files, so its duration depends on input
+volume. Machine setup, canonical data ownership, backup verification and migration
+acceptance remain unspecified in issue 33 and require maintainer criteria.</p>
+<p>Focused tests: <code>tests/unit/test_data_inventory.py</code>. Expected byte
+totals are written out independently in the test docstrings; the SHA-256 test
+uses the cited NIST reference vector.</p>
+</body>
+</html>
