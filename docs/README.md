@@ -17,6 +17,11 @@ This is the canonical documentation entry point for issue routing in
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
 
+## Offline workflow examples
+
+See [PDF, CSV, text and Git workflows](modules/offline-workflows.md) for input
+contracts, worked answers, output locations and limitations.
+
 ## Curated Routing Surfaces
 
 These files are trusted routing surfaces:
