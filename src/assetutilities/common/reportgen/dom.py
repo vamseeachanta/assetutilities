@@ -22,7 +22,7 @@ class DocumentDOM:
     _instance: ClassVar[Optional["DocumentDOM"]] = None
     _lock = threading.Lock()  # Add class-level lock
 
-    # - [ ] #todo #11_siva #acma_consultation add thread safety to singleton pattern
+    # - [ ] #todo add thread safety to singleton pattern
     def __new__(cls) -> "DocumentDOM":
         """Ensure single DOM instance with thread safety"""
         if cls._instance is None:
