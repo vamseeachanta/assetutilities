@@ -1,4 +1,5 @@
 import datetime
+from copy import deepcopy
 import functools
 import os
 import pkgutil
@@ -17,6 +18,7 @@ from loguru import logger
 from assetutilities.common.data import AttributeDict, SaveData
 from assetutilities.common.set_logging import set_logging
 from assetutilities.common.update_deep import update_deep_dictionary
+from assetutilities.common.yml_utilities import resolve_placeholders
 
 save_data = SaveData()
 
@@ -122,7 +124,15 @@ class ConfigureApplicationInputs:
 
         return cfg
 
-    def configure_embed(self, cfg, basename, root_folder, log_to_file=False):
+    def configure_embed(
+        self,
+        cfg,
+        basename,
+        root_folder,
+        log_to_file=False,
+        *,
+        placeholders_resolved=False,
+    ):
         """Embeddable configuration for an in-memory cfg (workspace-hub#3297).
 
         Unlike ``configure``, this does NOT run the
@@ -132,11 +142,13 @@ class ConfigureApplicationInputs:
         cfg, routes all results + logs under the INJECTED ``root_folder`` (never
         ``os.getcwd()``), and uses no-file logging by default. A per-call instance
         is expected (see ``engine``) so no ``customYaml``/``CustomInputs`` instance
-        state is touched -> re-entrant.
+        state is touched -> re-entrant. Already-rendered file inputs set
+        ``placeholders_resolved`` to preserve single-pass substitution.
         """
         if cfg is None or root_folder is None:
             raise ValueError("configure_embed requires both cfg and root_folder")
 
+        cfg = deepcopy(cfg) if placeholders_resolved else resolve_placeholders(cfg)
         application_start_time = datetime.datetime.now()
 
         custom_file_name = basename
@@ -252,18 +264,18 @@ class ConfigureApplicationInputs:
 
     def generateYMLInput(self, run_dict, cfg_argv_dict):
         if os.path.isfile(self.ApplicationInputFile):
-            with open(self.ApplicationInputFile) as ymlfile:
+            with open(self.ApplicationInputFile, encoding="utf-8") as ymlfile:
                 cfg = yaml.safe_load(ymlfile)
         else:
-            cfg = self.ApplicationInputFile_dict
+            cfg = deepcopy(self.ApplicationInputFile_dict)
 
         if self.customYaml is not None:
             try:
-                with open(self.customYaml) as ymlfile:
+                with open(self.customYaml, encoding="utf-8") as ymlfile:
                     cfgCustomValues = yaml.safe_load(ymlfile)
                     default_yaml_file = cfgCustomValues.get("default_yaml", None)
 
-                with open(self.customYaml) as fp:
+                with open(self.customYaml, encoding="utf-8") as fp:
                     custom_file_data = fp.read()
             except Exception as e:
                 # Library code must not kill the host process: engine() callers
@@ -289,7 +301,7 @@ class ConfigureApplicationInputs:
             if default_yaml_file is None:
                 cfgDefaultAndCustomValues = yaml.safe_load(custom_file_data)
             else:
-                with open(default_yaml_file) as fp:
+                with open(default_yaml_file, encoding="utf-8") as fp:
                     default_file_data = fp.read()
                 custom_and_default_yaml_data = (
                     custom_file_data + "\n" + default_file_data
@@ -311,7 +323,8 @@ class ConfigureApplicationInputs:
                 "Update default app configuration with dictionary content ... FINISH"
             )
 
-        return cfg
+        # Resolve after defaults, custom input and argument overrides are merged.
+        return resolve_placeholders(cfg)
 
     def get_application_configuration_parameters(
         self, run_dict, basename, cfg, root_folder=None, log_to_file=True

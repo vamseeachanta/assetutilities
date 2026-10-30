@@ -15,8 +15,9 @@ from typing import Any, Optional, Union
 import yaml  # type: ignore[import-untyped]
 import yaml.composer  # type: ignore[import-untyped]
 from deepdiff import DeepDiff
-from jinja2 import Environment, StrictUndefined
+from jinja2 import StrictUndefined
 from jinja2.exceptions import TemplateError, UndefinedError
+from jinja2.sandbox import ImmutableSandboxedEnvironment
 from loguru import logger
 
 # Reader imports
@@ -46,8 +47,15 @@ def represent_none(self: Any, _: Any) -> Any:
 yaml.add_representer(type(None), represent_none)
 
 
-def ymlInput(defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
-    return WorkingWithYAML().ymlInput(defaultYml, updateYml)
+def ymlInput(
+    defaultYml: str,
+    updateYml: Optional[str] = None,
+    *,
+    resolve_placeholders: bool = True,
+) -> dict[str, Any]:
+    return WorkingWithYAML().ymlInput(
+        defaultYml, updateYml, resolve_placeholders=resolve_placeholders
+    )
 
 
 def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
@@ -64,7 +72,9 @@ def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None)
     parsing. They can therefore reference any key in the document (including
     nested keys via dotted access) and be embedded inside larger strings.
 
-    Substitution is performed with Jinja2. Dotted placeholders like
+    Substitution is performed once with sandboxed Jinja2. Mapping keys and
+    native scalar types are preserved; template results remain strings.
+    Chained expansion is not performed. Dotted placeholders like
     ``{{ meta.library }}`` resolve against the nested mapping ``context["meta"]``.
 
     Args:
@@ -85,23 +95,47 @@ def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None)
     """
     if context is None:
         context = data if isinstance(data, Mapping) else {}
+    render_context = {
+        key: value for key, value in context.items() if isinstance(key, str)
+    }
 
-    env = Environment(undefined=StrictUndefined, autoescape=False)
+    # Jinja 3.1 API: sandboxed rendering and keep_trailing_newline preserve
+    # config text without exposing Python internals through template attributes.
+    env = ImmutableSandboxedEnvironment(
+        undefined=StrictUndefined, autoescape=False, keep_trailing_newline=True
+    )
+    memo: dict[int, Any] = {}
 
-    if isinstance(data, str):
-        try:
-            return env.from_string(data).render(**dict(context))
-        except UndefinedError:
-            # Reference a key that does not exist: leave the literal in place.
-            return data
-        except TemplateError as e:
-            logger.warning(f"Placeholder template error in {data!r}: {e}")
-            return data
-    if isinstance(data, Mapping):
-        return {k: resolve_placeholders(v, context) for k, v in data.items()}
-    if isinstance(data, list):
-        return [resolve_placeholders(item, context) for item in data]
-    return data
+    def visit(value: Any) -> Any:
+        if isinstance(value, str):
+            if not any(marker in value for marker in ("{{", "{%", "{#")):
+                return value
+            try:
+                return env.from_string(value).render(render_context)
+            except UndefinedError:
+                return value
+            except (TemplateError, TypeError):
+                # Do not log config values: they can contain private data.
+                logger.warning("Placeholder template could not be rendered")
+                return value
+        if isinstance(value, (Mapping, list)):
+            # YAML aliases can share nodes, including recursive nodes (YAML
+            # 1.2.2, 2021, sections 3.2.2.2 and 7.1). Preserve that graph in the copy.
+            identity = id(value)
+            if identity in memo:
+                return memo[identity]
+            if isinstance(value, Mapping):
+                result: dict[Any, Any] = {}
+                memo[identity] = result
+                result.update((key, visit(item)) for key, item in value.items())
+                return result
+            items: list[Any] = []
+            memo[identity] = items
+            items.extend(visit(item) for item in value)
+            return items
+        return value
+
+    return visit(data)
 
 
 class WorkingWithYAML:
@@ -179,7 +213,14 @@ class WorkingWithYAML:
         au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
         return cfg
 
-    def ymlInput(self, defaultYml: str, updateYml: Optional[str] = None) -> dict[str, Any]:
+    def ymlInput(
+        self,
+        defaultYml: str,
+        updateYml: Optional[str] = None,
+        *,
+        resolve_placeholders: bool = True,
+    ) -> dict[str, Any]:
+        """Load and merge YAML; disable placeholder resolution for literal data."""
         if not is_file_valid_func(defaultYml):
             raise Exception("Not valid file. Please check the file path.")
 
@@ -194,7 +235,7 @@ class WorkingWithYAML:
         if updateYml is not None:
             #  Update values file
             try:
-                with open(updateYml) as ymlfile:
+                with open(updateYml, encoding="utf-8") as ymlfile:
                     cfgUpdateValues = yaml.safe_load(ymlfile)
                 #  Convert to logs
                 # logger.info(cfgUpdateValues)
@@ -207,12 +248,13 @@ class WorkingWithYAML:
                 )
                 logger.info(f"Error is : {e}")
 
-        return cfg
+        # Resolve against the final merged document, never an intermediate one.
+        return self.process_placeholders(cfg) if resolve_placeholders else cfg
 
     def yml_read_stream(self, yaml_file_name: str) -> dict[str, Any]:
         stream_dict: dict[str, Any] = {}
         try:
-            with open(yaml_file_name) as ymlfile:
+            with open(yaml_file_name, encoding="utf-8") as ymlfile:
                 yaml_content = ymlfile.read()
 
                 # Clean the YAML content
@@ -245,7 +287,8 @@ class WorkingWithYAML:
         return d
 
     def load_yml_with_utf_8_sig(self, file_name: str) -> Any:
-        doc = yaml.safe_load(open(file_name, encoding="utf-8-sig"))
+        with open(file_name, encoding="utf-8") as ymlfile:
+            doc = yaml.safe_load(ymlfile)
 
         return doc
 
@@ -253,7 +296,7 @@ class WorkingWithYAML:
         """
         Analyze Yaml file
         """
-        file_name_content = ymlInput(file_name)
+        file_name_content = ymlInput(file_name, resolve_placeholders=False)
         logger.info(file_name_content.keys())
 
     def compare_yaml_root_keys(self, file_name1: str, file_name2: str) -> None:
@@ -261,15 +304,19 @@ class WorkingWithYAML:
         Compare 2 yaml files
         """
 
-        file_name1_content = ymlInput(file_name1)
-        file_name2_content = ymlInput(file_name2)
+        file_name1_content = ymlInput(file_name1, resolve_placeholders=False)
+        file_name2_content = ymlInput(file_name2, resolve_placeholders=False)
         file_name1_keys = file_name1_content.keys()
         file_name2_keys = file_name2_content.keys()
         if file_name1_keys == file_name2_keys:
             logger.info("Yaml files have the same root keys")
         else:
-            logger.info(f"The root keys for {file_name1}: {file_name1_keys}")
-            logger.info(f"The root keys for {file_name2}: {file_name2_keys}")
+            logger.info(
+                f"The root keys for {Path(file_name1).as_posix()}: {file_name1_keys}"
+            )
+            logger.info(
+                f"The root keys for {Path(file_name2).as_posix()}: {file_name2_keys}"
+            )
 
     def compare_yaml_files_deepdiff(self, cfg: dict[str, Any]) -> None:
         """
@@ -277,26 +324,25 @@ class WorkingWithYAML:
         """
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
-        file_name1_content = ymlInput(file_name1)
-        file_name2_content = ymlInput(file_name2)
+        file_name1_content = ymlInput(file_name1, resolve_placeholders=False)
+        file_name2_content = ymlInput(file_name2, resolve_placeholders=False)
         file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
         if file_diff == {}:  # if there is no difference
             logger.info("Yaml files are the same")
         else:
-            # get file root directory
-            file_directory = os.path.dirname(file_name1)
-            uniquebasename = get_common_name_from_2_filenames(file_name1, file_name2)
-            self.save_diff_files(file_diff, file_directory, uniquebasename)
+            self.save_diff_files(file_diff, cfg)
 
     def compare_yaml_file_contents_deepdiff(self, cfg: dict[str, Any]) -> None:
         file_name1 = cfg["file_name1"]
         file_name2 = cfg["file_name2"]
 
         file_name1_content = read_data.key_chain(
-            ymlInput(file_name1), *cfg["map_list"]["file_name1"]
+            ymlInput(file_name1, resolve_placeholders=False),
+            *cfg["map_list"]["file_name1"],
         )
         file_name2_content = read_data.key_chain(
-            ymlInput(file_name2), *cfg["map_list"]["file_name2"]
+            ymlInput(file_name2, resolve_placeholders=False),
+            *cfg["map_list"]["file_name2"],
         )
 
         file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
@@ -322,7 +368,7 @@ class WorkingWithYAML:
                 )
 
             file_name = f"{file_directory}/wwyaml_{uniquebasename}_updated_values.yml"
-            with open(file_name, "w") as f:
+            with open(file_name, "w", encoding="utf-8", newline="\n") as f:
                 for key, value in file_diff.items():
                     if key == "values_changed":
                         for k, v in value.items():
@@ -345,7 +391,7 @@ class WorkingWithYAML:
         library_yaml_filename = cfg["filename"]
         library_name = cfg["library_name"]
         if os.path.isfile(library_yaml_filename):
-            with open(library_yaml_filename) as ymlfile:
+            with open(library_yaml_filename, encoding="utf-8") as ymlfile:
                 library_yaml = yaml.safe_load(ymlfile)
         else:
             data = pkgutil.get_data(library_name, cfg["filename"])
@@ -415,7 +461,6 @@ class WorkingWithYAML:
             return False, None
 
     def test_variable_placeholder(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
-        cfg = self.process_placeholders(cfg, cfg)
         try:
             method = cfg["placeholder_tests"]["method"]
             print("yml key placeholder is reusable:", method)
@@ -427,8 +472,8 @@ class WorkingWithYAML:
     def process_placeholders(self, data: Any, context: Optional[dict[str, Any]] = None) -> Any:
         """Resolve ``{{ key }}`` placeholders in a config tree (backwards-compatible alias).
 
-        Thin wrapper around :func:`resolve_placeholders`. Retained so existing
-        callers (``test_variable_placeholder`` and downstream code) keep working.
+        Thin wrapper around :func:`resolve_placeholders` for downstream callers.
+        Diagnostic helpers report values already resolved during configuration.
 
         Args:
             data: The value/tree to resolve. Usually the full ``cfg`` dict.
