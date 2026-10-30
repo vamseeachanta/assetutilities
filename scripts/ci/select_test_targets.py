@@ -90,6 +90,10 @@ CONTRACT_ROUTES = {
     "docs/README.md": "tests/docs",
     "README.md": "tests/docs",
     "AGENTS.md": "tests/docs",
+    "docs/sub_utilities/assets/style.css": "tests/modules/devtools",
+    "scripts/reporting/generate_devtools_report.py": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/index.html": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/changes.json": "tests/modules/devtools",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST
