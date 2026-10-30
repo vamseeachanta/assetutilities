@@ -90,7 +90,7 @@ def test_every_module_is_selected(module):
     r = select([f"tests/modules/{module}/test_smoke.py"], REPO_ROOT)
     assert r["scope"] == "modules"
     if module in MATRIX_IGNORE_DOMAINS:
-        # WIP staging domains are intentionally excluded (issue #99): the change
+        # WIP staging domains are intentionally excluded: the change
         # is still "relevant" (scope=modules, runs the always-on set) but the
         # WIP domain itself is never sharded.
         assert f"tests/modules/{module}" not in r["xdist"]
@@ -162,7 +162,7 @@ def test_matrix_full_scope_fans_out_every_module_with_tests():
     base = REPO_ROOT / "tests" / "modules"
     for module in _modules():
         if module in MATRIX_IGNORE_DOMAINS:
-            # WIP staging domains are intentionally never sharded (issue #99).
+            # WIP staging domains are intentionally never sharded.
             assert f"modules-{module}" not in names, f"{module} should be ignored"
         elif _has_tests(base / module):
             assert f"modules-{module}" in names, f"{module} missing from full matrix"
