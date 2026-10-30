@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Units module analysis</title>
+<style>{{ style | safe }}</style>
+<style>
+body{margin:0}h2{margin-bottom:16px}h3{margin:24px 0 12px}p{max-width:72ch}
+figure{margin:24px 0}svg{width:100%;height:auto}figcaption,caption{font-size:14px;color:var(--ink-2);text-align:left;padding:10px 0;caption-side:bottom}
+.table-wrap{overflow-x:auto}td,th{text-align:left;white-space:normal;vertical-align:top}pre{overflow-x:auto;padding:16px;background:var(--surface-2)}
+button,input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--hairline);border-radius:5px;padding:8px;max-width:100%}
+button{cursor:pointer}label{display:block;margin-top:12px}textarea{width:100%;min-height:90px}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.chart circle{fill:var(--cfd);stroke:var(--surface);stroke-width:2}.chart .curve{fill:none;stroke:var(--cfd);stroke-width:3}
+.chart text,.schematic text{font:14px var(--sans);fill:var(--ink)}.schematic path,.schematic line{stroke:var(--ink-2);stroke-width:2;fill:none}
+code,.digest{overflow-wrap:anywhere}.digest{font:11px var(--mono)}#comments-list li{white-space:pre-wrap;overflow-wrap:anywhere}
+@media print{.masthead,.toc,#comments,.controls{display:none}.shell{display:block}.main{padding:0}.doc{background:white;color:black}h2,h3{break-after:avoid}tr{break-inside:avoid}}
+</style>
+</head>
+<body class="hs-doc doc" id="top">
+<header class="masthead"><div class="wrap"><span class="brand">Engineering units</span><span class="lg">Draft for maintainer review</span></div></header>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">Module analysis · Revision A · 22 October 2026</p>
+<h1>Units module analysis</h1>
+<p class="lede">Tracked conversions, pressure–area arithmetic and the evidence required before engineering use.</p>
+<p>Document reference: units module analysis. Prepared: engineering documentation. Checked: pending. Approved: pending. Client reference: not applicable to a public module description.</p>
+</div></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents"><p class="tt">Contents</p><ol>
+{% for target, title in [('summary','Executive Summary'),('introduction','Introduction'),('results','Summary of Results'),('basis','Basis and Criteria'),('method','Methodology and Interfaces'),('worked-example','Worked example'),('limits','Limits of Use'),('recommendations','Recommendations'),('references','References'),('symbols','Acronyms and Symbols')] %}
+<li><a href="#{{ target }}">{{ loop.index }} {{ title }}</a></li>
+{% endfor %}
+</ol><p><a href="#appendix-a">Appendix A: data and limitations</a></p><p><a href="#appendix-b">Appendix B: quality evidence</a></p><p><a href="#changes">Changes</a> · <a href="#comments">Comments</a></p></nav>
+<main class="main">
+<section id="summary">
+<h2>1 Executive Summary</h2>
+<p>The units module is a quantity-conversion and calculation-history library. Analysis is performed to determine how its public interfaces support unit-aware calculations, and the key results are summarized below.</p>
+<ul>
+<li>Explicitly labelled quantities can be converted and multiplied while their operation history is preserved.
+<ul><li>The public pressure–area example gives {{ display.force_kn }} kN for {{ display.pressure_kpa }} kPa acting uniformly over {{ display.area_m2 }} m². This is a surface-force magnitude; an allowable load and opposing pressure are not supplied, so capacity and net force are not evaluated.</li></ul></li>
+<li>The module can support the numerical part of a calculation record.
+<ul><li>The source label and operation history do not establish measurement quality or physical validity. Raw numeric inputs at decorated interfaces bypass unit conversion, as described in <a href="#limits">Section 7</a>.</li></ul></li>
+</ul>
+<div class="table-wrap"><table><caption>Revision history. The initial issue establishes the module description and its limits.</caption><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First issue: public conversion and force examples are described to distinguish calculation output from engineering acceptance.</td></tr><tr><td>A (draft update)</td><td>22 October 2026</td><td>Dependency versions are retained as provenance without requiring identical rebuild environments; comments entered during saving or loading are protected against note loss.</td></tr><tr><td>A (evidence update)</td><td>22 October 2026</td><td>Source digests are normalized across checkout line endings and extended to documented interfaces; dimensional checks, literal force anchors, valid table captions and continuous-integration selection strengthen the evidence.</td></tr></tbody></table></div>
+</section>
+<section id="introduction">
+<h2>2 Introduction</h2>
+<p>The scope and intended use of the quantity workflow are described here. The module is used to attach units to magnitudes, convert compatible quantities and record arithmetic history.</p>
+<p>The main workflow covers explicit input quantities, dimensional checking, conversion, multiplication and an audit export. Its public entry points are documented in the repository guide, identified in <a href="#repository-records">Section 9.2</a>. The result can be passed to a separate engineering assessment once the physical basis and acceptance criterion are supplied.</p>
+<h3>2.1 Not covered</h3>
+<p>The additional sub-areas are identified without extending the worked-example conclusion to them. Commodity-energy adapters, environmental-data adapters, offshore field mappings, automatic input inference, display templates, policy enforcement and lineage rendering are not evaluated as engineering models in this report.</p>
+<p>Their interfaces and existing tests are listed in <a href="#repository-records">Section 9.2</a>. External integrations are outside the assessed workflow.</p>
+</section>
+<section id="results">
+<h2>3 Summary of Results</h2>
+<p>The surface-force magnitude at constant example pressure is presented against loaded area. Each point is calculated by calling the quantity interface; intermediate areas are illustrative samples between the origin and the documented example area.</p>
+<p>The public pressure–area example gives {{ display.force_kn }} kN for {{ display.pressure_kpa }} kPa acting uniformly over {{ display.area_m2 }} m². This is a surface-force magnitude; an allowable load and opposing pressure are not supplied, so capacity and net force are not evaluated.</p>
+<figure class="card">
+<svg class="chart" viewBox="0 0 720 350" role="group" aria-label="Surface force against area at constant example pressure; focus a point for values">
+<line class="axis" x1="80" y1="280" x2="660" y2="280"/><line class="axis" x1="80" y1="35" x2="80" y2="280"/>
+<text x="80" y="22">Surface force (kN)</text><text x="310" y="335">Loaded area (m²)</text>
+<text x="20" y="48">{{ display.force_kn }}</text><text x="52" y="285">0</text>
+<polyline class="curve" points="{% for point in data.curve %}{{ 80 + 570 * point.area_m2 / data['values']['area_m2'] }},{{ 280 - 235 * point.force_kn / data['values']['force_kn'] }} {% endfor %}"/>
+{% for point in data.curve %}
+<circle cx="{{ 80 + 570 * point.area_m2 / data['values']['area_m2'] }}" cy="{{ 280 - 235 * point.force_kn / data['values']['force_kn'] }}" r="7" tabindex="0" data-point="{{ loop.index0 }}" aria-describedby="chart-detail"><title>Public guide illustration; loaded surface; area {{ '%.1f'|format(point.area_m2) }} m²; demand {{ '%.3f'|format(point.force_kn) }} kN; allowable load not supplied.</title></circle>
+<text x="{{ 74 + 570 * point.area_m2 / data['values']['area_m2'] }}" y="305">{{ '%.1f'|format(point.area_m2) }}</text>
+{% endfor %}
+</svg>
+<p id="chart-detail" aria-live="polite">Hover over or focus a point for the example area, surface force, units and limit status.</p>
+<figcaption>Figure 1. Surface force increases with loaded area at the documented example pressure. The endpoint denotes example coverage, without a capacity limit.</figcaption>
+</figure>
+<p>The legend is defined as follows: “not evaluated” means that a required physical input or criterion is absent; “illustration” means that a teaching input is used without a measurement claim. No allowable-load line is drawn because no numerical limit is available.</p>
+</section>
+<section id="basis">
+<h2>4 Basis and Criteria</h2>
+<p>The arithmetic basis and comparison criteria are defined in this section. The public guide supplies teaching inputs; the external references supply the physical relation and decimal unit definitions.</p>
+<h3>4.1 Theory and equations</h3>
+<p>Compatible multiplicative units are converted by equating the same physical quantity in source and target units. With magnitude <var>x</var> and scale <var>c</var> relative to a common unit, the numerical conversion is <var>x</var><sub>target</sub> = <var>x</var><sub>source</sub> <var>c</var><sub>source</sub> / <var>c</var><sub>target</sub>. This is the factor method described in <a href="#ref-conversion">Reference 1, Appendix B.3</a>; offset temperature conversions are outside this equation.</p>
+<div class="formula">1 kPa = 1000 Pa; 1 kN = 1000 N; 1 mm = 0.001 m.</div>
+<p>The decimal prefixes are defined in <a href="#ref-prefix">Reference 2, Section 4.3, Table 5</a>. Pressure is normal force per area, so the force on a uniformly loaded planar surface is expressed below.</p>
+<div class="formula"><var>F</var> = <var>p</var> <var>A</var>; Pa × m² = N.</div>
+<p><var>F</var> is normal surface-force magnitude, <var>p</var> is uniform pressure and <var>A</var> is loaded area. The relation is rearranged from <a href="#ref-physics">Reference 3, Section 14.1, Equation 14.3</a>; the pascal is expressed as newtons per square metre in <a href="#ref-prefix">Reference 2, Section 4.2.1, Table 3</a>.</p>
+<h3>4.2 Physical and numerical criteria</h3>
+<p>Uniform pressure over the stated area is an idealization marked ASSUMED - to be confirmed for any physical application. The example inputs are used as specified teaching magnitudes, without assigning measurement uncertainty or material properties.</p>
+<p>The report's arithmetic criterion is agreement with the hand-calculated anchors to a relative tolerance of 10<sup>−12</sup>. This is a numerical regression criterion selected in the report tests, identified in <a href="#repository-records">Section 9.2</a>; it is not a material, load or operating limit. Displayed inputs are also multiplied to check the displayed headline result.</p>
+<p>Capacity remains NOT_EVALUATED until the allowable load and its governing criterion are supplied. Net force remains NOT_EVALUATED until the pressure on the opposing face is supplied. These dispositions are recorded in <a href="#appendix-a">Appendix A</a>.</p>
+</section>
+<section id="method">
+<h2>5 Methodology and Interfaces</h2>
+<p>The quantity interface is applied from explicitly labelled inputs to a force output and calculation record. Pint <span data-dependency-version="pint">{{ data.versions.pint }}</span> and NumPy <span data-dependency-version="numpy">{{ data.versions.numpy }}</span> are the installed calculation dependencies represented by this copy.</p>
+<h3>5.1 Inputs and execution</h3>
+<p>A numeric scalar or array, a unit expression and an optional source label are accepted by <code>TrackedQuantity(value, unit, source)</code>. The pressure, area and thickness magnitudes below are read from the public guide rather than duplicated as report constants.</p>
+<pre><code>pressure = TrackedQuantity(pressure_value, "kPa", source="Public guide: Quick Start")
+area = TrackedQuantity(area_value, "m**2", source="Public guide: Quick Start")
+pressure.check_dimensions("Pa")
+area.check_dimensions("m**2")
+force = (pressure.to("Pa") * area).to("kN")
+audit = CalculationAuditLog()
+audit.add_input("pressure", pressure)
+audit.add_input("area", area)
+audit.add_step("Check pressure and area dimensions, convert pressure to pascals, multiply by area, convert force to kilonewtons.")
+audit.add_output("force", force)
+record = audit.to_dict()</code></pre>
+<p>The conversion returns a new quantity with its prior history and a conversion entry. Multiplication combines the operand histories and adds the arithmetic operation; the original inputs remain available. The dimensional checks establish compatibility with pressure and area units, without validating their physical origin. The listing uses the executed source labels and audit step; volatile timestamps are omitted from the embedded record.</p>
+<h3>5.2 Outputs</h3>
+<p>The outputs are a numeric magnitude, its canonical unit and an operation history. Dictionary serialization includes source labels, operation labels and timestamps; the audit interface groups named inputs, outputs and descriptive steps.</p>
+<p>In this report's embedded calculation record, volatile timestamps are omitted while the source, operation and unit fields are preserved. The audit description is supplied by the caller; it is not an executed-equation certificate. The source files and their content digests are listed in <a href="#repository-records">Section 9.2</a>.</p>
+</section>
+<section id="worked-example">
+<h2>6 Worked example</h2>
+<p>The guide's explicit pressure and area are multiplied through the public interface. An explicit conversion is applied to make the force unit unambiguous.</p>
+<p>The inputs are <span data-value="pressure_kpa">{{ display.pressure_kpa }}</span> kPa and <span data-value="area_m2">{{ display.area_m2 }}</span> m². The converted pressure is <span data-value="pressure_pa">{{ display.pressure_pa }}</span> Pa. The resulting surface force is <span data-value="force_n">{{ display.force_n }}</span> N, expressed as <span data-value="force_kn">{{ display.force_kn }}</span> kN.</p>
+<p>A separate length conversion from the same guide converts <span data-value="thickness_mm">{{ display.thickness_mm }}</span> mm to <span data-value="thickness_m">{{ display.thickness_m }}</span> m. That thickness is not used as a structural property of the loaded surface.</p>
+<p>The public teaching inputs and their arithmetic locations are identified in <a href="#repository-records">the repository record</a>. The physical assumptions and unavailable capacity inputs are recorded in <a href="#appendix-a">the data register</a>.</p>
+</section>
+<section id="limits">
+<h2>7 Limits of Use</h2>
+<p>The result boundaries are stated here; the associated evidence and handling actions are given in <a href="#appendix-a">Appendix A</a>. Dimensional compatibility alone does not establish load origin, sign convention, pressure datum, material resistance or uncertainty.</p>
+<p>Raw numeric arguments at decorated interfaces remain raw; unknown inferred fields and unknown policy quantity types can pass through. The strict policy flag rejects a mismatched unit only when automatic conversion is also disabled. Required inputs therefore need explicit type, unit and physical checks at the calling boundary.</p>
+<p>Custom commodity definitions encode energy equivalents without a published basis in the inspected definition file. Their absolute factors are not evaluated here. The environmental length alias <code>nm</code> denotes a nautical mile in its adapter but a nanometre in the main registry; unambiguous unit names are required.</p>
+<p>Provenance records are caller-labelled and mutable through serialization. The lineage rendering connects recorded inputs and outputs without reconstructing exact dependency paths. These records are calculation aids, without tamper evidence or proof of measurement origin.</p>
+</section>
+<section id="recommendations">
+<h2>8 Recommendations</h2>
+<p>The actions below are tied to the physical and interface limitations identified in this report. No structural acceptance is assigned to the example force.</p>
+<ul><li>Use explicit quantities and target units at calculation boundaries.
+<ul><li>Reject missing or untracked required inputs, and distinguish force from pressure before arithmetic, using the dimensional relation in <a href="#basis">Section 4</a> and the public interface in <a href="#method">Section 5</a>.</li></ul></li>
+<li>Supply the physical acceptance basis before applying the surface force to a component.
+<ul><li>Define the pressure datum, opposing pressure, loaded geometry, allowable load and governing criterion. Confirm the uniform-pressure idealization against the intended loading, as required by the relation in <a href="#ref-physics">Reference 3</a>.</li></ul></li>
+<li>Bound the additional interfaces before wider use.
+<ul><li>Use full length-unit names in shared data, document commodity-factor sources before absolute energy comparisons, and specify both policy switches when rejection is required. These actions address the inspected behaviours listed in <a href="#appendix-a">Appendix A</a>.</li></ul></li>
+</ul>
+</section>
+<section id="references">
+<h2>9 References</h2>
+<p>The external theory sources and repository records are identified in this section. Only public sources and repository teaching inputs are used for the reported numerical example.</p>
+<h3>9.1 Public theory sources</h3>
+<p>The editions and sections used for the equations and unit scales are listed below.</p>
+<ol>
+<li id="ref-conversion">National Institute of Standards and Technology, <a href="https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors">Special Publication 811, Guide for the Use of the International System of Units, 2008 edition, Appendix B.3: Use of conversion factors</a>.</li>
+<li id="ref-prefix">National Institute of Standards and Technology, <a href="https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes">Special Publication 811, 2008 edition, Sections 4.2.1 and 4.3, Tables 3 and 5</a>. The current web table adds later decimal prefixes; only kilo and milli are used here.</li>
+<li id="ref-physics">OpenStax, <a href="https://openstax.org/books/university-physics-volume-1/pages/14-1-fluids-density-and-pressure">University Physics, Volume 1, 2016 edition, Section 14.1: Fluids, Density, and Pressure, Equation 14.3</a>. The pressure relation is paraphrased; no source figure is reproduced.</li>
+</ol>
+<h3 id="repository-records">9.2 Repository records</h3>
+<p>The public example, calculation sources and executable evidence are listed here. Locators are relative to this report or to the named source repository. Source digests include the input guide and the local implementations supporting the interface claims in Section 7 and Appendix A. SHA-256 is applied after CRLF line endings are normalized to LF; other content changes remain detectable.</p>
+<ul>
+<li><a href="../../../units-guide.md">Engineering Units Guide</a>: Quick Start supplies the pressure and area; TrackedQuantity supplies the separate thickness conversion. The guide's force-output comment is not used as numerical evidence.</li>
+<li><a href="../../../../src/assetutilities/units/__init__.py">Public exports</a>, <a href="../../../../src/assetutilities/units/input_parser.py">input parser</a>, <a href="../../../../src/assetutilities/units/computation.py">decorator</a>, <a href="../../../../src/assetutilities/units/policy.py">policy</a>, <a href="../../../../src/assetutilities/units/output_formatter.py">formatter</a>, <a href="../../../../src/assetutilities/units/visualization.py">lineage graph</a> and <a href="../../../../src/assetutilities/units/domains/metocean.py">environmental adapters</a> establish the interface limits described in Appendix A.</li>
+<li><a href="../../../../tests/unit/test_registry.py">Registry tests</a>, <a href="../../../../tests/unit/test_quantity.py">quantity tests</a>, <a href="../../../../tests/unit/test_dimensions.py">dimensional tests</a> and <a href="../../../../tests/unit/test_integration.py">integration tests</a> cover conversion, arithmetic, error handling and audit serialization.</li>
+<li><a href="../../../../tests/unit/test_domains_energy.py">Energy adapter tests</a>, <a href="../../../../tests/unit/test_domains_metocean.py">environmental adapter tests</a>, <a href="../../../../tests/unit/test_policy.py">policy tests</a> and <a href="../../../../tests/unit/test_format_templates.py">format-template tests</a> provide additional software evidence, without establishing a physical operating envelope.</li>
+<li><a href="../../../../tests/reports/test_units_report.py">Report tests</a> contain the hand anchors, numerical consistency checks, rebuild comparison, displayed-input check and comment-export checks. Rebuild command: <code>uv run python scripts/reports/build_units_report.py</code>.</li>
+<li><a href="../../../../scripts/reports/units_house_style.css">Vendored house stylesheet</a>: the unchanged style block from <code>digitalmodel:src/digitalmodel/reporting/assets/calc_report_format.html</code>. No page with the requested body class exists under the inspected base documentation; the shared calculation-report shell is reused.</li>
+</ul>
+{% for path, digest in data.source_digests.items() %}<p class="digest"><a href="../../../../{{ path }}">{{ path }}</a> — SHA-256: {{ digest }}</p>{% endfor %}
+</section>
+<section id="symbols">
+<h2>10 Acronyms and Symbols</h2>
+<p>The quantities and abbreviations used in the report are defined here. Their units refer to the selected pressure–area example.</p>
+<p><var>F</var> denotes normal surface force in newtons or kilonewtons; <var>p</var> denotes uniform pressure in pascals or kilopascals; <var>A</var> denotes loaded area in square metres. <var>x</var> denotes numerical magnitude and <var>c</var> denotes a multiplicative unit scale relative to a common reference.</p>
+<p>SI denotes the International System of Units. NIST denotes the National Institute of Standards and Technology. Pa, kPa, N, kN, m and mm denote pascal, kilopascal, newton, kilonewton, metre and millimetre. JSON denotes JavaScript Object Notation; CSV denotes comma-separated values. SHA-256 denotes the content-digest algorithm used in the source record. NOT_EVALUATED means that the required basis is absent; ASSUMED - to be confirmed identifies an idealization requiring physical confirmation.</p>
+</section>
+<section id="appendix-a">
+<h2>Appendix A Data Register and Physical Basis</h2>
+<p>The teaching inputs, unavailable design inputs and interface restrictions are registered below. No unavailable value is replaced by a guessed engineering constant.</p>
+<figure class="card">
+<svg class="schematic" viewBox="0 0 720 300" role="img" aria-label="Uniform pressure acts normally on a planar loaded surface; opposing-face pressure and supports are unspecified">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" style="fill:var(--ink-2)"/></marker></defs>
+<path d="M230 170 L400 120 L550 180 L380 235 Z" style="fill:var(--surface-2)"/>
+<path d="M230 170 L230 184 L380 249 L550 194 L550 180 M380 235 L380 249"/>
+{% for x, y in [(285,160),(370,143),(445,168),(375,190)] %}<line x1="{{ x }}" y1="{{ y - 80 }}" x2="{{ x }}" y2="{{ y }}" marker-end="url(#arrow)"/>{% endfor %}
+<text x="240" y="40">Uniform normal pressure p = {{ display.pressure_kpa }} kPa</text>
+<text x="65" y="225">A = {{ display.area_m2 }} m²</text><line x1="170" y1="218" x2="280" y2="192"/>
+<text x="260" y="285">Opposing pressure and supports are unspecified.</text>
+</svg>
+<figcaption>Figure 2. An idealized planar loaded surface is shown in perspective, without scale or specified thickness. The computed quantity is the force applied on the illustrated face, without an equilibrium or capacity assessment.</figcaption>
+</figure>
+<div class="table-wrap"><table><caption>Table A1. Input and intended-use register. Unavailable quantities are distinct from a true zero.</caption><thead><tr><th>Quantity or basis</th><th>Value or status</th><th>Use and limit</th><th>Source</th></tr></thead><tbody>
+<tr><td>Pressure (kPa)</td><td>{{ display.pressure_kpa }}</td><td>Teaching input; no measured atmospheric condition is asserted.</td><td>Section 9.2, public guide</td></tr>
+<tr><td>Loaded area (m²)</td><td>{{ display.area_m2 }}</td><td>Teaching input; geometry beyond area is unspecified.</td><td>Section 9.2, public guide</td></tr>
+<tr><td>Separate thickness (mm)</td><td>{{ display.thickness_mm }}</td><td>Conversion illustration only; not a dimension of Figure 2.</td><td>Section 9.2, public guide</td></tr>
+<tr><td>Uniform pressure</td><td>ASSUMED - to be confirmed</td><td>Required for the simple surface-force relation in a physical application.</td><td>Reference 3, Equation 14.3</td></tr>
+<tr><td>Opposing-face pressure</td><td>NOT_EVALUATED</td><td>Required before net force is assigned.</td><td>Section 4.2</td></tr>
+<tr><td>Allowable load and criterion</td><td>NOT_EVALUATED</td><td>Required before a load acceptance statement is made.</td><td>Section 4.2</td></tr>
+</tbody></table></div>
+<p>Input inference only traverses a flat dictionary and recognizes exact field names; it does not read a configuration file. Explicit units take precedence, unknown fields remain unchanged, and array inputs are outside the scalar inference path. The offshore field dictionary does not automatically extend that parser.</p>
+<p>The policy implementation only rejects a mismatched known quantity when strict mode is enabled and automatic conversion is disabled. Both switches need to be specified for rejection. An unknown quantity type passes through. The formatter's direct precision argument is superseded by its resolved template; an explicit template is the documented control.</p>
+<p>Energy adapters use literal mapping keys and can reject dimensionally incompatible pairs. Some gas-labelled registry aliases are defined as energy equivalents rather than physical gas volumes. Published commodity-factor metadata is absent in the inspected registry; numerical commodity coefficients are excluded from this report.</p>
+<p>Array and offset-temperature behaviour, cross-registry operations, input finiteness, uncertainty propagation, tamper evidence and dependency-graph accuracy are outside the numerical example. Domain adapters return plain magnitudes; the missing-value path in the environmental adapter returns no quantity. These interfaces require their own application-specific input checks.</p>
+</section>
+<section id="appendix-b">
+<h2>Appendix B Validation and Quality Evidence</h2>
+<p>The repository evidence and the new numerical checks are distinguished here. Software checks establish the behaviours they assert; field agreement and a complete engineering qualification are not established.</p>
+<p>The existing registry and quantity tests assert compatible conversions, arithmetic and incompatible addition. The integration tests exercise configuration parsing, unit policy, round trips, audit serialization, formatting and lineage construction. A round trip is a consistency check; reciprocal conversion errors can cancel. No saved measured benchmark dataset for the selected pressure–area example is identified in these records.</p>
+<p>The report adds hand-calculated pressure, force and length anchors using the external theory in Section 4. The arithmetic is written above each assertion. Force in newtons and all five curve points are also compared with literal hand-calculated values. Separate consistency checks compare every worked-example value and curve point with a fresh module call, and the displayed inputs are multiplied to recover the headline result.</p>
+<p>The rebuild check compares rounded payload values with tolerance and compares the remaining document text with the committed copy. Dependency versions are retained in the calculation record and displayed provenance, but are excluded from rebuild equality so supported environments can be compared. Calculation-source digest differences identify stale evidence and name the rebuild command. UTF-8 and line-feed output are checked, and the report tests are exercised with the Python UTF-8 override unset.</p>
+<p>The delivery checks cover section structure, caption placement in table markup, local pointers, standalone assets, public wording and the comment-save logic. LF and CRLF source copies give identical digests, while a content change produces a different digest. The displayed workflow is executed and its audit compared with the embedded record. Changes under documentation, report generators and report tests select the report suite in continuous integration. Browser-rendered layout, measured operating data and licensed integration behaviour are not evaluated by these checks.</p>
+<p>Quality pre-flight evidence is held by the report tests in Section 9.2: the inputs have public source locations, the equations have external references, missing physical criteria remain explicit, the summary preserves the surface-force qualifier, and numerical outputs are rebuilt from module calls. Reviewer comments are exported as a separate local JSON file; they are not sent to a service.</p>
+</section>
+<section id="changes">
+<h2>Changes since the Previous Issue</h2>
+<p>This initial issue establishes the example basis and the boundaries of its use.</p>
+{% for item in changes.changes %}<p>Sections {{ item.section }}: {{ item.change }} {{ item.reason }}</p>{% endfor %}
+<p>The same change-panel content is supplied in the accompanying changes.json file.</p>
+</section>
+<section id="comments">
+<h2>Review Comments</h2>
+<p>Comments are kept in this page until saved. Select a section, add a note, and save the comment file beside the report. Existing comment files can be loaded before adding further notes.</p>
+<label for="comment-section">Section</label><select id="comment-section">{% for name in ['Executive Summary','Introduction','Summary of Results','Basis and Criteria','Methodology and Interfaces','Worked example','Limits of Use','Recommendations','References','Acronyms and Symbols','Appendices'] %}<option>{{ name }}</option>{% endfor %}</select>
+<label for="comment-text">Comment</label><textarea id="comment-text"></textarea>
+<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save comments beside report</button><label>Load comments <input id="load-comments" type="file" accept="application/json,.json"></label></div>
+<p id="save-status" role="status">No comment file has been saved. Where direct saving is unavailable, a download is offered; place it beside the report.</p><ol id="comments-list"></ol>
+</section>
+</main></div>
+<script id="report-data" type="application/json">{{ data | tojson }}</script>
+<script>
+"use strict";
+const reportData = JSON.parse(document.getElementById("report-data").textContent);
+const commentFile = "units-report.comments.json";
+const comments = [];
+let unsaved = false;
+let commentRevision = 0;
+let saving = false;
+let loading = false;
+const byId = id => document.getElementById(id);
+const setStatus = text => { byId("save-status").textContent = text; };
+function renderComments() {
+  byId("comments-list").replaceChildren();
+  comments.forEach(item => {
+    const row = document.createElement("li");
+    row.textContent = `${item.section}: ${item.text}`;
+    byId("comments-list").appendChild(row);
+  });
+}
+byId("add-comment").addEventListener("click", () => {
+  const text = byId("comment-text").value.trim();
+  if (!text) { setStatus("Enter a comment before adding it."); return; }
+  comments.push({section: byId("comment-section").value, text});
+  commentRevision += 1;
+  byId("comment-text").value = "";
+  unsaved = true;
+  renderComments();
+  setStatus("Comment added. Save the comment file to preserve it.");
+});
+byId("save-comments").addEventListener("click", async () => {
+  if (saving || loading) { setStatus("A comment file operation is already in progress. Save any newer comments afterwards."); return; }
+  if (byId("comment-text").value.trim()) {
+    setStatus("Add the current comment before saving."); return;
+  }
+  const savedRevision = commentRevision;
+  const payload = JSON.stringify({document: "Units module analysis", revision: "A", comments}, null, 2) + "\n";
+  saving = true;
+  try {
+    if (window.showSaveFilePicker) {
+      const handle = await window.showSaveFilePicker({suggestedName: commentFile, types: [{description: "Comment file", accept: {"application/json": [".json"]}}]});
+      const writable = await handle.createWritable();
+      await writable.write(payload);
+      await writable.close();
+      unsaved = savedRevision !== commentRevision;
+      setStatus(unsaved ? "Comment file saved; newer comments remain unsaved. Save again to preserve them." : "Comment file saved. Keep it beside the report.");
+    } else {
+      const url = URL.createObjectURL(new Blob([payload], {type: "application/json"}));
+      const link = document.createElement("a");
+      link.href = url; link.download = commentFile; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus("Download offered. Save units-report.comments.json beside the report; disk saving has not been confirmed.");
+    }
+  } catch (error) {
+    setStatus(error.name === "AbortError" ? "Saving cancelled; comments remain on this page." : "Saving failed; comments remain on this page.");
+  } finally {
+    saving = false;
+  }
+});
+byId("load-comments").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (saving || loading) { setStatus("A comment file operation is already in progress. Try loading again afterwards."); return; }
+  if (unsaved || byId("comment-text").value.trim()) {
+    setStatus("Save the current comments before loading another file."); return;
+  }
+  const loadRevision = commentRevision;
+  loading = true;
+  try {
+    const text = await file.text();
+    if (loadRevision !== commentRevision || unsaved || byId("comment-text").value.trim()) {
+      setStatus("Comments changed while loading. Save the current comments before loading another file."); return;
+    }
+    const loaded = JSON.parse(text);
+    if (loaded.document !== "Units module analysis" || loaded.revision !== "A" || !Array.isArray(loaded.comments) || !loaded.comments.every(item => item && typeof item.section === "string" && typeof item.text === "string")) {
+      throw new Error("Invalid comment file");
+    }
+    comments.splice(0, comments.length, ...loaded.comments);
+    commentRevision += 1;
+    renderComments();
+    setStatus("Existing comments loaded. Save again after adding notes.");
+  } catch (error) { setStatus("The selected file is not a comment file for this report revision."); }
+  finally { loading = false; }
+});
+document.querySelectorAll("[data-point]").forEach(point => {
+  const show = () => {
+    const sample = reportData.curve[Number(point.dataset.point)];
+    byId("chart-detail").textContent = `Public guide illustration; loaded surface; area ${sample.area_m2.toFixed(1)} m²; demand ${sample.force_kn.toFixed(3)} kN; allowable load not supplied. Capacity is not evaluated.`;
+  };
+  point.addEventListener("mouseenter", show); point.addEventListener("focus", show);
+});
+window.addEventListener("beforeunload", event => {
+  if (unsaved || byId("comment-text").value.trim()) { event.preventDefault(); event.returnValue = ""; }
+});
+</script>
+</body>
+</html>

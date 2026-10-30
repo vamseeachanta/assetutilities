@@ -1,0 +1,27 @@
+{
+  "document": "Units module analysis",
+  "revision": "A",
+  "date": "2026-10-22",
+  "changes": [
+    {
+      "section": "3 and 6",
+      "change": "The pressure–area example is expressed as force with explicit output units.",
+      "reason": "The numerical result is separated from any allowable load or net-force assessment."
+    },
+    {
+      "section": "7 and Appendix A",
+      "change": "Input handling, custom energy definitions and provenance limits are stated.",
+      "reason": "Use of conversion results is bounded by the available physical basis."
+    },
+    {
+      "section": "5, Appendix B and Review Comments",
+      "change": "Rebuild comparisons retain dependency provenance without requiring identical versions; comment saving and loading preserve newer notes.",
+      "reason": "Version provenance is separated from numerical and source checks, and navigation warnings protect newer notes during file operations."
+    },
+    {
+      "section": "3, 5, 9 and Appendices A–B",
+      "change": "Source digests normalize checkout line endings and include the documented interfaces; the listing matches executed dimensional checks, table captions use valid markup, and force and curve values have literal anchors.",
+      "reason": "Cross-platform rebuilds and interface freshness are checked, and documentation, generator and report-test changes select the report suite in continuous integration."
+    }
+  ]
+}
