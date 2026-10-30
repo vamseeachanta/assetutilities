@@ -1,2 +1,2 @@
-C:\Program Files\ANSYS Inc\v182\aqwa\bin\winx64\aqwa.exe /nowind /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/no_load_09moors
-C:\Program Files\ANSYS Inc\v182\aqwa\bin\winx64\aqwa.exe /nowind /mnt/local-analysis/workspace-hub/assetutilities/tests/modules/file_edit/no_load_10moors
+fixture-command fixtures/reference-89.dat
+fixture-command fixtures/reference-90.dat

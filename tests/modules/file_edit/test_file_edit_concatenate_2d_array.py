@@ -1,46 +1,51 @@
-# TODO fix the code
-import os
+"""Exercise Cartesian concatenation without writing into the fixture tree."""
 
-from test_utils import get_test_file_path
+import itertools
+import shutil
 import sys
+from pathlib import Path
 
-from assetutilities.engine import engine
-
-
-def run_file(input_file, expected_result=None):
-    if expected_result is None:
-        expected_result = {}
-    if input_file is not None and not os.path.isfile(input_file):
-        input_file = get_test_file_path(input_file, os.path.dirname(__file__))
-    engine(input_file)
-
-    # obtained_result = cfg[cfg['basename']]['properties']
-    # expected_result = expected_result[cfg['basename']]['properties'].copy()
-
-    # assert not deepdiff.DeepDiff(obtained_result,
-    #                              expected_result,
-    #                              ignore_order=True,
-    #                              significant_digits=4)
+import yaml
 
 
-def get_valid_pytest_output_file(pytest_output_file):
-    if pytest_output_file is not None and not os.path.isfile(pytest_output_file):
-        pytest_output_file = get_test_file_path(pytest_output_file, os.path.dirname(__file__))
-    return pytest_output_file
+def _assert_batch_paths(lines, content, output_dir, labels):
+    """Compare the exact command and ordered targets using the output path flavor."""
+    assert len(lines) == len(labels)
+    prefix = content + " "
+    for line, label in zip(lines, labels):
+        assert line.startswith(prefix)
+        assert type(output_dir)(line[len(prefix) :]) == output_dir / label
 
 
-def test_file_run():
-    input_file = "file_edit_concatenate_2d_array.yml"
+def test_file_run(tmp_path, monkeypatch):
+    from assetutilities.engine import engine
 
-    # pytest_output_file = '../test_data/6d_buoy/buoy_6d_circular_px_0_pytest.yml'
-    # pytest_output_file = get_valid_pytest_output_file(pytest_output_file)
-    expected_result = {}
-    # expected_result = ymlInput(pytest_output_file, updateYml=None)
+    source = Path(__file__).parent
+    input_name = "file_edit_concatenate_2d_array.yml"
+    inputs = yaml.safe_load((source / input_name).read_text(encoding="utf-8"))["input"][
+        0
+    ]
+    expected_bytes = [
+        b"".join((source / name).read_bytes() for name in group)
+        for group in itertools.product(*inputs["input_files"])
+    ]
+    content = inputs["batch"]["content"]
+    labels = ["D_no_tug_000MPH000WD_10moors", "D_no_tug_100MPH000WD_10moors"]
+    shutil.copyfile(source / input_name, tmp_path / input_name)
+    shutil.copytree(
+        source / "concatenate",
+        tmp_path / "concatenate",
+        ignore=shutil.ignore_patterns("dats"),
+    )
+    monkeypatch.setattr(sys, "argv", ["assetutilities"])
+    monkeypatch.chdir(tmp_path)
 
-    if len(sys.argv) > 1:
-        sys.argv.pop()
-
-    run_file(input_file, expected_result)
-
-
-test_file_run()
+    engine(str(tmp_path / input_name), root_folder=str(tmp_path))
+    output_dir = tmp_path / inputs["output_dir"]
+    assert sorted(path.stem for path in output_dir.glob("*.dat")) == labels
+    for label, expected in zip(labels, expected_bytes):
+        assert (output_dir / (label + ".dat")).read_bytes() == expected
+    batch = tmp_path / "file_edit_concatenate_2d_array_0.bat"
+    _assert_batch_paths(
+        batch.read_text(encoding="utf-8").splitlines(), content, output_dir, labels
+    )

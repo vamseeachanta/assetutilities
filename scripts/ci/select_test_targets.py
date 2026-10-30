@@ -49,6 +49,8 @@ from pathlib import Path
 ALWAYS_XDIST = [
     "tests/unit",
     "tests/data_store",
+    "tests/hygiene",
+    "tests/ci",
 ]
 
 # Module domains that are WIP staging areas, not gating suites — never shard
