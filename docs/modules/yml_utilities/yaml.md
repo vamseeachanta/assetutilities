@@ -1,5 +1,7 @@
 ## YAML
 
+Worked example: [YAML splitting and plotting](split_and_plot.html).
+
 Yaml is a human readable data serialization format. Used for configuration and data exchange b/w systems.
 
 Usage
