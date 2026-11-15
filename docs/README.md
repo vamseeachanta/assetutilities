@@ -17,6 +17,11 @@ This is the canonical documentation entry point for issue routing in
 | visualization | `src/assetutilities/common/visualization*.py` | `tests/unit/test_visualization*.py`, `tests/modules/visualization/` | `docs/modules/visualization/` |
 | developer tooling | `src/assetutilities/devtools/`, `scripts/` | focused devtool or script tests | `src/assetutilities/devtools/README.md` |
 
+## Offline workflow examples
+
+See [PDF, CSV, text and Git workflows](modules/offline-workflows.md) for input
+contracts, worked answers, output locations and limitations.
+
 ## Curated Routing Surfaces
 
 These files are trusted routing surfaces:
@@ -30,6 +35,9 @@ These files are trusted routing surfaces:
 - `scripts/hygiene/check-source-hygiene.sh`
 
 Use these surfaces to choose source, tests, and docs paths for issue work.
+
+For offline domain coverage and explicit live-service test selection, see
+[Offline domain tests and live-data opt-in](sub_ci-cd/network-tests.md).
 
 ## Raw Inventory And Supporting Material
 
@@ -54,3 +62,11 @@ surface and update it if it is stale.
   for focused validation.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
+
+## Plugin Trial Evidence
+
+The [Compound Engineering trial assessment](evaluations/compound-engineering-trial.html)
+provides a worked example, evidence format, and pending live-trial procedure for
+[the trial epic](https://github.com/vamseeachanta/assetutilities/issues/81).
+The local validator checks recorded evidence; plugin effectiveness remains
+NOT_EVALUATED until a live trial is completed and reviewed.

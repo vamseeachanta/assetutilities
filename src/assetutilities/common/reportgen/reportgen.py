@@ -6,10 +6,16 @@ import logging
 from enum import Enum
 from typing import Any, Dict
 
+from .citations import (
+    build_disclosure_section,
+    build_provenance_section,
+    build_references_section,
+)
 from .dom import DocumentDOM
 from .writers import (
     DefaultDOCXWriter,
     DefaultMDWriter,
+    DefaultHTMLWriter,
     ReportWriter,
     ReportWriterRegistry,
 )
@@ -18,6 +24,7 @@ from .writers import (
 class ReportFormat(Enum):
     MARKDOWN = "md"
     WORD = "docx"
+    HTML = "html"
     PDF = "pdf"
 
 
@@ -30,7 +37,23 @@ class ReportGenerator:
 
     def initialize_from_config(self, config: Dict[str, Any]) -> None:
         """Initialize generator with config data"""
+        self.writer = None
         self.dom.initialize_dom_from_config(config)
+        if self.dom.references:
+            self.dom.sections.extend(
+                [
+                    build_references_section(self.dom.references),
+                    build_disclosure_section(),
+                ]
+            )
+        flag = config.get("provenance", bool(self.dom.references))
+        if not isinstance(flag, bool):
+            raise ValueError("provenance must be a boolean")
+        timestamped = self.dom.report_details.get("timestamped_filename", True)
+        if not isinstance(timestamped, bool):
+            raise ValueError("timestamped_filename must be a boolean")
+        if flag:
+            self.dom.sections.append(build_provenance_section(config))
 
         # Handle target report format
         format_type = self.dom.report_details.get("target_report_type", "md").lower()
@@ -44,6 +67,19 @@ class ReportGenerator:
         # Check if writer class specified
         writer_class = self.dom.report_details.get("report_writer_class")
         if writer_class:
+            paragraphs = [
+                paragraph
+                for section in [self.dom.first_section, *self.dom.sections]
+                for paragraph in (
+                    section.paragraphs
+                    + [p for sub in section.subsections for p in sub["paragraphs"]]
+                )
+            ]
+            if any(p.get("type") == "citation" for p in paragraphs) and (
+                ReportWriterRegistry.get_writer(writer_class)
+                not in (DefaultMDWriter, DefaultDOCXWriter, DefaultHTMLWriter)
+            ):
+                raise ValueError("citation paragraphs require a default writer")
             self._initialize_writer(writer_class)
 
     def _initialize_writer(self, writer_class: str) -> None:
@@ -78,6 +114,8 @@ class ReportGenerator:
         elif self.target_format == ReportFormat.WORD:
             writer = DefaultDOCXWriter(self.dom)
             writer.flush()
+        elif self.target_format == ReportFormat.HTML:
+            DefaultHTMLWriter(self.dom).flush()
         elif self.target_format == ReportFormat.PDF:
             self._flush_pdf()
 

@@ -104,7 +104,7 @@ this section contains instructions for specific tasks. each subsection is a spec
 - "todo"
 *instruction* :
     When asked to "add action item", add an entry that looks like
-        - "- [ ] #todo #13_siva_AceEngineer #ae_au" followed by the action item provided by the user
+        - "- [ ] #todo " followed by the action item provided by the user
         - precede with a comment appropriate to file in context
           - .sh / .py / .java / .toml precede a programming languange appropriate comment
             - e.g. in .sh file, preceed with a "#"  
