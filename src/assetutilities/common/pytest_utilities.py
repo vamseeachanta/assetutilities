@@ -10,8 +10,13 @@ def pytest_deepdiff_nested_dict(
 ):
     # https://github.com/pytest-dev/pytest/issues/3164
     # Working only if used directly in a test function but not outside
+    # Options must be keywords: deepdiff 8 added _original_type as the third
+    # positional parameter, so positional options bind to the wrong names.
     assert not deepdiff.DeepDiff(
-        obtained_result, expected_result, ignore_order, significant_digits
+        obtained_result,
+        expected_result,
+        ignore_order=ignore_order,
+        significant_digits=significant_digits,
     )
 
 
