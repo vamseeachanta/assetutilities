@@ -194,6 +194,12 @@ def test_table_captions_are_first_children(builder):
         assert all(table.lstrip().startswith("<caption>") for table in tables)
 
 
+def test_change_panel_section_labels(builder):
+    for html in (builder.render_report(), REPORT.read_text(encoding="utf-8")):
+        assert "Sections Appendix B:" not in html
+        assert "Sections B:" in html
+
+
 class ReportParser(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -350,6 +356,9 @@ def test_structure_sources_and_public_wording(builder):
         "resave-close",
         "load-added",
         "load-draft",
+        "download-load",
+        "download-added",
+        "download-draft",
     ],
 )
 def test_change_panel_and_comment_save(builder, tmp_path, interaction):
@@ -359,13 +368,17 @@ def test_change_panel_and_comment_save(builder, tmp_path, interaction):
     html = builder.render_report()
     scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
     assert len(scripts) == 1
+    assert '<button id="confirm-download" type="button" hidden>' in html
     script = tmp_path / "interaction.js"
     payload = re.search(
         r'<script id="report-data" type="application/json">(.*?)</script>', html, re.S
     ).group(1)
     harness = "const initialData = " + payload + ";\n" + JS_HARNESS
     action, phase = interaction.split("-")
-    check = "checkDelayedLoad" if action == "load" else "checkDelayedSave"
+    check = {
+        "load": "checkDelayedLoad",
+        "download": "checkDownload",
+    }.get(action, "checkDelayedSave")
     arguments = json.dumps(phase) + (", true" if action == "resave" else "")
     script.write_text(
         harness
@@ -545,6 +558,49 @@ async function checkDelayedSave(phase, clean = false) {
   prevented = false;
   events.beforeunload({preventDefault() { prevented = true; }});
   assert.equal(prevented, false, "Saving all notes must clear the navigation warning");
+}
+
+async function checkDownload(change) {
+  const click = id => elements[id].handlers.click();
+  const addNote = text => { elements["comment-text"].value = text; click("add-comment"); };
+  const warned = () => {
+    let prevented = false;
+    events.beforeunload({preventDefault() { prevented = true; }});
+    return prevented;
+  };
+  const load = () => elements["load-comments"].handlers.change({target: {files: [{
+    async text() { return JSON.stringify({document: "Units module analysis", revision: "A",
+      comments: [{section: "References", text: "Downloaded notes reloaded"}]}); }
+  }]}});
+  delete window.showSaveFilePicker;
+  addNote("Note before downloading");
+  const savedCount = elements["comments-list"].children.length;
+  await click("save-comments");
+  assert.equal(elements["confirm-download"].hidden, false);
+  assert.equal(warned(), true, "Offering a download must not confirm a disk save");
+  await load();
+  assert.equal(elements["comments-list"].children.length, savedCount);
+  assert.match(elements["save-status"].textContent, /Save the current/);
+  if (change === "added") addNote("Newer note after downloading");
+  if (change === "draft") elements["comment-text"].value = "Draft after downloading";
+  click("confirm-download");
+  assert.equal(elements["confirm-download"].hidden, true);
+  assert.equal(warned(), change !== "load");
+  await load();
+  if (change !== "load") {
+    assert.equal(elements["comments-list"].children.length, savedCount + (change === "added" ? 1 : 0));
+    assert.match(elements["save-status"].textContent, /Save the current/);
+    if (change === "draft") click("add-comment");
+    await click("save-comments");
+    click("confirm-download");
+    assert.equal(warned(), false);
+    await load();
+  }
+  assert.equal(elements["comments-list"].children.length, 1);
+  assert.match(elements["comments-list"].children[0].textContent, /Downloaded notes reloaded/);
+  addNote("Note after acknowledgement");
+  click("confirm-download");
+  assert.equal(warned(), true, "An old acknowledgement must not clear newer notes");
 }
 
 async function checkDelayedLoad(change) {

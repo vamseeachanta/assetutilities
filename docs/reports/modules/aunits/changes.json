@@ -24,9 +24,14 @@
       "reason": "Cross-platform rebuilds and interface freshness are checked, and documentation, generator and report-test changes select the report suite in continuous integration."
     },
     {
-      "section": "Appendix B",
+      "section": "B",
       "change": "Source digests are refreshed for dimensional template matching and nonblank formatter names; report selection is limited to its documented inputs.",
       "reason": "Saved evidence must match the current interfaces while unrelated documentation retains its own test routing."
+    },
+    {
+      "section": "Review Comments",
+      "change": "Downloaded comment files can be acknowledged as saved before loading another file; newer notes retain save protection.",
+      "reason": "Browsers without direct file saving need an explicit acknowledgement for the downloaded comment revision."
     }
   ]
 }

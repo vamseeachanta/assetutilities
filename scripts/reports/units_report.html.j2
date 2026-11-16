@@ -41,7 +41,7 @@ code,.digest{overflow-wrap:anywhere}.digest{font:11px var(--mono)}#comments-list
 <li>The module can support the numerical part of a calculation record.
 <ul><li>The source label and operation history do not establish measurement quality or physical validity. Raw numeric inputs at decorated interfaces bypass unit conversion, as described in <a href="#limits">Section 7</a>.</li></ul></li>
 </ul>
-<div class="table-wrap"><table><caption>Revision history. The initial issue establishes the module description and its limits.</caption><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First issue: public conversion and force examples are described to distinguish calculation output from engineering acceptance.</td></tr><tr><td>A (draft update)</td><td>22 October 2026</td><td>Dependency versions are retained as provenance without requiring identical rebuild environments; comments entered during saving or loading are protected against note loss.</td></tr><tr><td>A (evidence update)</td><td>22 October 2026</td><td>Source digests are normalized across checkout line endings and extended to documented interfaces; dimensional checks, literal force anchors, valid table captions and continuous-integration selection strengthen the evidence.</td></tr><tr><td>A (compatibility update)</td><td>16 November 2026</td><td>Source evidence is refreshed after formatter changes; report inputs retain coverage while unrelated documentation keeps its own test routing.</td></tr></tbody></table></div>
+<div class="table-wrap"><table><caption>Revision history. The initial issue establishes the module description and its limits.</caption><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First issue: public conversion and force examples are described to distinguish calculation output from engineering acceptance.</td></tr><tr><td>A (draft update)</td><td>22 October 2026</td><td>Dependency versions are retained as provenance without requiring identical rebuild environments; comments entered during saving or loading are protected against note loss.</td></tr><tr><td>A (evidence update)</td><td>22 October 2026</td><td>Source digests are normalized across checkout line endings and extended to documented interfaces; dimensional checks, literal force anchors, valid table captions and continuous-integration selection strengthen the evidence.</td></tr><tr><td>A (compatibility update)</td><td>16 November 2026</td><td>Source evidence is refreshed after formatter changes; report inputs retain coverage while unrelated documentation keeps its own test routing.</td></tr><tr><td>A (comment update)</td><td>16 November 2026</td><td>Downloaded comment files can be acknowledged as saved so loading remains available without discarding newer notes; the appendix change label is corrected.</td></tr></tbody></table></div>
 </section>
 <section id="introduction">
 <h2>2 Introduction</h2>
@@ -207,7 +207,7 @@ record = audit.to_dict()</code></pre>
 <p>Comments are kept in this page until saved. Select a section, add a note, and save the comment file beside the report. Existing comment files can be loaded before adding further notes.</p>
 <label for="comment-section">Section</label><select id="comment-section">{% for name in ['Executive Summary','Introduction','Summary of Results','Basis and Criteria','Methodology and Interfaces','Worked example','Limits of Use','Recommendations','References','Acronyms and Symbols','Appendices'] %}<option>{{ name }}</option>{% endfor %}</select>
 <label for="comment-text">Comment</label><textarea id="comment-text"></textarea>
-<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save comments beside report</button><label>Load comments <input id="load-comments" type="file" accept="application/json,.json"></label></div>
+<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save comments beside report</button><button id="confirm-download" type="button" hidden>I have saved the downloaded file</button><label>Load comments <input id="load-comments" type="file" accept="application/json,.json"></label></div>
 <p id="save-status" role="status">No comment file has been saved. Where direct saving is unavailable, a download is offered; place it beside the report.</p><ol id="comments-list"></ol>
 </section>
 </main></div>
@@ -219,6 +219,7 @@ const commentFile = "units-report.comments.json";
 const comments = [];
 let unsaved = false;
 let commentRevision = 0;
+let downloadedRevision = null;
 let saving = false;
 let loading = false;
 const byId = id => document.getElementById(id);
@@ -248,6 +249,8 @@ byId("save-comments").addEventListener("click", async () => {
   }
   const savedRevision = commentRevision;
   const payload = JSON.stringify({document: "Units module analysis", revision: "A", comments}, null, 2) + "\n";
+  downloadedRevision = null;
+  byId("confirm-download").hidden = true;
   saving = true;
   try {
     if (window.showSaveFilePicker) {
@@ -262,13 +265,22 @@ byId("save-comments").addEventListener("click", async () => {
       const link = document.createElement("a");
       link.href = url; link.download = commentFile; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus("Download offered. Save units-report.comments.json beside the report; disk saving has not been confirmed.");
+      downloadedRevision = savedRevision;
+      byId("confirm-download").hidden = false;
+      setStatus("Download offered; disk saving has not been confirmed. Save units-report.comments.json beside the report, then select ‘I have saved the downloaded file’.");
     }
   } catch (error) {
     setStatus(error.name === "AbortError" ? "Saving cancelled; comments remain on this page." : "Saving failed; comments remain on this page.");
   } finally {
     saving = false;
   }
+});
+byId("confirm-download").addEventListener("click", () => {
+  if (saving || loading || downloadedRevision === null) return;
+  unsaved = downloadedRevision !== commentRevision;
+  downloadedRevision = null;
+  byId("confirm-download").hidden = true;
+  setStatus(unsaved ? "Downloaded comments acknowledged; newer comments remain unsaved. Save again to preserve them." : "Downloaded comment file acknowledged as saved. Keep it beside the report.");
 });
 byId("load-comments").addEventListener("change", async event => {
   const file = event.target.files[0];
