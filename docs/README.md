@@ -24,6 +24,10 @@ contracts, worked answers, output locations and limitations.
 
 ## Curated Routing Surfaces
 
+For read-only consolidation planning, see the
+[data inventory guide and worked example](modules/data_inventory.html) and
+`src/assetutilities/data_inventory.py`.
+
 These files are trusted routing surfaces:
 
 - `AGENTS.md`
