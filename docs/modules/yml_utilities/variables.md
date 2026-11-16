@@ -11,6 +11,7 @@ configuration path now performs the same substitution as the standalone helper.
 | --- | --- | --- |
 | A | 2026-10-19 | Document loading, merge order and a worked example so variable definitions can be reused consistently. |
 | B | 2026-10-22 | Handle mixed YAML keys, add literal loading for comparisons, and clarify single-pass rendering and container limits. |
+| C | 2026-11-15 | Document UTF-8 configuration inputs and logged diagnostics to clarify input requirements and output handling. |
 
 ## Loading and merge order
 
@@ -27,6 +28,8 @@ and the module-level `ymlInput` wrapper parse YAML safely, merge the optional
 update, and by default resolve placeholders against that final mapping.
 Multi-document inputs are combined before substitution. Anchors are scoped to
 their YAML document, not shared across files.
+Configuration and update files are read as UTF-8; a leading byte-order mark is
+accepted.
 
 This default changes existing callers of these shared loaders immediately:
 expressions such as `$10^{{3}}$` are rendered, and Jinja `{# ... #}` comments are
@@ -119,6 +122,8 @@ of the resolver implementation.
   supported configuration tree before loading.
 - The placeholder diagnostic reports the supplied value without rendering again.
   Direct users of that diagnostic should resolve their configuration first.
+  Reuse diagnostics use the module logger at INFO level; unreadable application
+  update files are logged at ERROR level before the existing exception is raised.
 - Configuration files should remain trusted inputs: sandboxing blocks Python
   internals but does not enforce execution time or memory limits.
 - The separate `assetutilities.common.ymlInput` module, the UTF-8 reader and

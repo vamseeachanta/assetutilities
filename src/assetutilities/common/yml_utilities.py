@@ -444,7 +444,7 @@ class WorkingWithYAML:
     def test_single_variable(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
         try:
             label = cfg["data"]["groups"][0]["label"]
-            print("Label is reusable:", label)
+            logger.info("Label is reusable: {}", label)
             return True, label
         except KeyError as e:
             logger.error("Label cannot be accesible:", e)
@@ -463,7 +463,7 @@ class WorkingWithYAML:
     def test_variable_placeholder(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
         try:
             method = cfg["placeholder_tests"]["method"]
-            print("yml key placeholder is reusable:", method)
+            logger.info("yml key placeholder is reusable: {}", method)
             return True, method
         except KeyError as e:
             logger.error("yml key cannot be accesible:", e)

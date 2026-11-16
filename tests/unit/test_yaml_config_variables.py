@@ -7,8 +7,10 @@ are arbitrary input data, not engineering constants or acceptance limits.
 
 from copy import deepcopy
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from loguru import logger
 
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
 from assetutilities.common.yml_utilities import (
@@ -338,7 +340,9 @@ def test_key_helpers_do_not_render_template_values(tmp_path, helper):
 @pytest.mark.parametrize(
     "template", ["{% raw %}{{ label }}{% endraw %}", "{{ indirect }}"]
 )
-def test_placeholder_diagnostic_reports_already_resolved_value(template, capsys):
+def test_placeholder_diagnostic_reports_already_resolved_value(
+    template, yaml_diagnostic_records
+):
     """A diagnostic reports the single-pass result without rendering it again."""
     cfg = resolve_placeholders(
         {
@@ -348,10 +352,74 @@ def test_placeholder_diagnostic_reports_already_resolved_value(template, capsys)
         }
     )
     assert WorkingWithYAML().test_variable_placeholder(cfg) == (True, "{{ label }}")
-    assert (
-        capsys.readouterr().out.strip()
-        == "yml key placeholder is reusable: {{ label }}"
+    assert yaml_diagnostic_records == [
+        ("INFO", "yml key placeholder is reusable: {{ label }}")
+    ]
+
+
+@pytest.fixture
+def yaml_diagnostic_records():
+    """Capture diagnostics without depending on the configured output sinks."""
+    records = []
+    sink = logger.add(
+        lambda message: records.append(
+            (message.record["level"].name, message.record["message"])
+        )
     )
+    try:
+        yield records
+    finally:
+        logger.remove(sink)
+
+
+def test_single_variable_diagnostic_uses_logger(yaml_diagnostic_records):
+    cfg = {"data": {"groups": [{"label": "sample"}]}}
+    assert WorkingWithYAML().test_single_variable(cfg) == (True, "sample")
+    assert yaml_diagnostic_records == [("INFO", "Label is reusable: sample")]
+
+
+def test_unreadable_update_logs_errors_and_preserves_cause(
+    tmp_path, yaml_diagnostic_records
+):
+    manager = ConfigureApplicationInputs()
+    manager.ApplicationInputFile = (tmp_path / "packaged.yml").as_posix()
+    manager.ApplicationInputFile_dict = {"label": "sample"}
+    manager.customYaml = (tmp_path / "absent.yml").as_posix()
+    manager.CustomInputs = None
+    with pytest.raises(ValueError) as failure:
+        manager.generateYMLInput({}, {})
+    assert isinstance(failure.value.__cause__, FileNotFoundError)
+    assert yaml_diagnostic_records == [
+        ("ERROR", "Update Input file could not be loaded successfully."),
+        ("ERROR", f"Error is : {failure.value.__cause__}"),
+    ]
+
+
+def test_unavailable_argument_logs_default_fallback(
+    tmp_path, monkeypatch, yaml_diagnostic_records
+):
+    class UnavailableArgument(list):
+        def __getitem__(self, key):
+            if key == 1:
+                raise IndexError("argument unavailable")
+            return super().__getitem__(key)
+
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(
+        "assetutilities.common.ApplicationManager.sys",
+        SimpleNamespace(argv=UnavailableArgument(["python", "update.yml"]), modules={}),
+    )
+    manager = ConfigureApplicationInputs()
+    source = tmp_path / "default.yml"
+    manager.ApplicationInputFile = str(source)
+    manager.get_custom_file()
+    assert manager.customYaml is None
+    assert manager.CustomInputs is None
+    assert (
+        "INFO",
+        "No update values file is provided. Running program default "
+        f"values from {source.as_posix()}",
+    ) in yaml_diagnostic_records
 
 
 @pytest.mark.parametrize(
