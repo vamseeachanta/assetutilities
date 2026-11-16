@@ -8,10 +8,47 @@ import sys
 from contextlib import contextmanager
 from pathlib import Path
 from html.parser import HTMLParser
+from types import SimpleNamespace
 
 import pytest
 
 from assetutilities.data_inventory import inventory, main
+
+
+@pytest.fixture(params=["ESTALE", "WSAESTALE"])
+def stale_error_mapping(monkeypatch, request):
+    """Exercise change detection with both platform names for the same errno."""
+    monkeypatch.setitem(errno.errorcode, errno.ESTALE, request.param)
+
+
+def test_unchanged_file_with_different_ctime_sources_is_complete(tmp_path, monkeypatch):
+    """Creation and change times can differ between path and descriptor metadata."""
+    (tmp_path / "data").write_bytes(b"abc")
+    real_fstat = os.fstat
+
+    def fstat(descriptor):
+        metadata = real_fstat(descriptor)
+        return SimpleNamespace(
+            st_dev=metadata.st_dev,
+            st_ino=metadata.st_ino,
+            st_size=metadata.st_size,
+            st_mtime_ns=metadata.st_mtime_ns,
+            st_ctime_ns=metadata.st_ctime_ns + 1,
+        )
+
+    monkeypatch.setattr(os, "fstat", fstat)
+    report = inventory(tmp_path, hash_contents=True)
+
+    assert report["status"] == "COMPLETE"
+    assert report["errors"] == []
+    assert report["files"] == [
+        {
+            "path": "data",
+            "size_bytes": 3,
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        }
+    ]
+    assert report["duplicate_status"] == "EVALUATED"
 
 
 def test_inventory_totals_and_relative_paths(tmp_path):
@@ -169,7 +206,9 @@ def test_hash_read_failure_keeps_metadata_but_no_duplicate_claim(tmp_path, monke
     assert report["duplicate_groups"] == []
 
 
-def test_file_changed_before_read_is_not_fingerprinted(tmp_path, monkeypatch):
+def test_file_changed_before_read_is_not_fingerprinted(
+    tmp_path, monkeypatch, stale_error_mapping
+):
     """A changed length invalidates the fingerprint; no value is guessed."""
     path = tmp_path / "changing"
     path.write_bytes(b"abc")
@@ -190,7 +229,9 @@ def test_file_changed_before_read_is_not_fingerprinted(tmp_path, monkeypatch):
     assert report["duplicate_groups"] == []
 
 
-def test_file_changed_during_read_is_not_fingerprinted(tmp_path, monkeypatch):
+def test_file_changed_during_read_is_not_fingerprinted(
+    tmp_path, monkeypatch, stale_error_mapping
+):
     """A read-time append must be detected by the post-read descriptor check."""
     path = tmp_path / "changing"
     for name in ("changing", "copy", "original"):
@@ -225,7 +266,9 @@ def test_file_changed_during_read_is_not_fingerprinted(tmp_path, monkeypatch):
     assert report["duplicate_groups"] == []
 
 
-def test_path_replaced_after_read_is_not_fingerprinted(tmp_path, monkeypatch):
+def test_path_replaced_after_read_is_not_fingerprinted(
+    tmp_path, monkeypatch, stale_error_mapping
+):
     """Replace after closing so only the final path signature check can fail."""
     root = tmp_path / "data"
     root.mkdir()
@@ -367,11 +410,23 @@ def test_repeat_reports_are_deterministic(tmp_path):
     assert first["duplicate_groups"][0]["paths"] == ["a", "m", "z"]
 
 
-def test_relative_root_and_unusual_names(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        "",
+        pytest.param(
+            "\nnewline",
+            marks=pytest.mark.skipif(
+                sys.platform == "win32", reason="Windows filenames reject newlines"
+            ),
+        ),
+    ],
+)
+def test_relative_root_and_unusual_names(tmp_path, monkeypatch, suffix):
     """Hand calculation: b'abc' is 3 bytes regardless of its filename."""
     root = tmp_path / "data"
     root.mkdir()
-    name = "space and\nnewline-\N{GREEK SMALL LETTER ALPHA}"
+    name = "space and-\N{GREEK SMALL LETTER ALPHA}" + suffix
     (root / name).write_bytes(b"abc")
     monkeypatch.chdir(tmp_path)
     report = inventory("data", hash_contents=True)
@@ -380,7 +435,9 @@ def test_relative_root_and_unusual_names(tmp_path, monkeypatch):
     assert json.loads(json.dumps(report)) == report
 
 
-def test_same_length_replacement_invalidates_hash(tmp_path, monkeypatch):
+def test_same_length_replacement_invalidates_hash(
+    tmp_path, monkeypatch, stale_error_mapping
+):
     """A replaced file is not the inode whose length was inventoried."""
     path = tmp_path / "changing"
     replacement = tmp_path / "replacement"

@@ -14,13 +14,17 @@ from collections import defaultdict
 from pathlib import Path
 
 
+class _Changed(OSError):
+    """A file changed during hashing, independent of platform errno names."""
+
+
 def _signature(metadata: os.stat_result) -> tuple:
+    # Path and descriptor ctime have different meanings on some platforms.
     return (
         metadata.st_dev,
         metadata.st_ino,
         metadata.st_size,
         metadata.st_mtime_ns,
-        metadata.st_ctime_ns,
     )
 
 
@@ -33,13 +37,13 @@ def _sha256(path: Path, metadata: os.stat_result) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         if _signature(os.fstat(stream.fileno())) != _signature(metadata):
-            raise OSError(errno.ESTALE, "file changed before hashing")
+            raise _Changed(errno.ESTALE, "file changed before hashing")
         for chunk in iter(lambda: stream.read(io.DEFAULT_BUFFER_SIZE), b""):
             digest.update(chunk)
         if _signature(os.fstat(stream.fileno())) != _signature(metadata):
-            raise OSError(errno.ESTALE, "file changed during hashing")
+            raise _Changed(errno.ESTALE, "file changed during hashing")
     if _signature(path.lstat()) != _signature(metadata):
-        raise OSError(errno.ESTALE, "file replaced during hashing")
+        raise _Changed(errno.ESTALE, "file replaced during hashing")
     return digest.hexdigest()
 
 
@@ -58,7 +62,11 @@ def _error(root: Path, path: Path, exc: OSError) -> dict:
     """Retain relative location and error kind without system path messages."""
     return {
         "path": path.relative_to(root).as_posix(),
-        "error": errno.errorcode.get(exc.errno, "IO_ERROR"),
+        "error": (
+            "ESTALE"
+            if isinstance(exc, _Changed)
+            else errno.errorcode.get(exc.errno, "IO_ERROR")
+        ),
     }
 
 

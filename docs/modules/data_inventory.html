@@ -24,7 +24,8 @@ data migration.</p>
 <h2>Revision history</h2>
 <table>
   <thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
-  <tbody><tr><td>Initial</td><td>2026-10-20</td><td>Add read-only inventory, duplicate candidates and an exact worked example for consolidation planning.</td></tr></tbody>
+  <tbody><tr><td>Initial</td><td>2026-10-20</td><td>Add read-only inventory, duplicate candidates and an exact worked example for consolidation planning.</td></tr>
+  <tr><td>1</td><td>2026-11-15</td><td>Use portable timestamp comparisons and stable change-detection errors so unchanged files can be hashed across platforms.</td></tr></tbody>
 </table>
 <p>Table 1. Document revision history.</p>
 
@@ -100,7 +101,7 @@ candidate group; <code>xy</code> does not belong to it. The answer printed is:</
     <tr><td><code>status: PARTIAL</code></td><td>At least one error was observed. Totals describe successfully inventoried paths only.</td></tr>
     <tr><td><code>duplicate_status: EVALUATED</code></td><td>Hashing was requested and every observed regular-file path was fingerprinted without an error.</td></tr>
     <tr><td><code>duplicate_status: NOT_EVALUATED</code></td><td>Hashing was omitted or an error occurred. Empty groups do not establish absence of duplicates.</td></tr>
-    <tr><td><code>errors</code></td><td>Relative paths with operating-system error names; system error messages and absolute locations are omitted.</td></tr>
+    <tr><td><code>errors</code></td><td>Relative paths with operating-system error names; detected file changes use <code>ESTALE</code> on every platform. System error messages and absolute locations are omitted.</td></tr>
     <tr><td><code>skipped</code></td><td>Symbolic links and special files excluded from regular-file totals.</td></tr>
   </tbody>
 </table>
@@ -116,7 +117,7 @@ deduplication, permissions, ownership and retention obligations are not evaluate
 A digest match does not authorize removal of either file.</p>
 <p>The scan requires a trusted, quiescent input tree and is not an atomic snapshot
 or a security boundary against concurrent path replacement. Device, inode,
-length and modification/change timestamps are compared before and after each
+length and modification timestamps are compared before and after each
 hash to detect observed changes; changes after a file is read, restored metadata,
 new files during traversal and changes to directory ancestry can escape detection.
 Content reads can update filesystem access times.</p>
