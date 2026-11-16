@@ -109,3 +109,6 @@ logger.debug("yml key placeholder is reusable:", method)
 Single Variable | Direct scalar access | label: "customer-A"
 Block | Dictionary with nested values | target: { template: "...", ... }
 Jinja2 Placeholder | Dynamic string interpolation | method: "GET /api/v1/{{ endpoint }}"
+
+See [configuration loading and the worked example](variables.md) for merge order,
+placeholder resolution through the application configuration path, and limits.

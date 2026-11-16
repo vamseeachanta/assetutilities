@@ -1,23 +1,4 @@
-# ABOUTME: Tests for engine.engine() dispatch fixes from issue #91.
-# ABOUTME: Routed-but-unreachable handlers (read_pdf/edit_pdf) + loud stubs.
-
-"""Engine dispatch regression tests (issue #91).
-
-Covers the concrete dispatch defects:
-  - read_pdf / edit_pdf: previously had no dispatch branch and hit the
-    generic ``else`` raise. They must now reach their handlers.
-  - gitpython: pointed at a non-existent module
-    (``assetutilities.tools.git.git_python_utilities``) -> opaque
-    ModuleNotFoundError. Must now raise a clear NotImplementedError.
-  - csv_utilities / text_analytics: no-op ``pass`` stubs that silently
-    produced no output. Must now raise a clear NotImplementedError.
-
-Dispatch is exercised with ``config_flag=False`` and a minimal cfg so the
-file/config pipeline is skipped and the branch is reached directly. The
-trailing ``save_cfg`` is patched for the *reachable* handlers because the
-minimal dict lacks the ``Analysis`` attribute it expects; the stub branches
-raise before ``save_cfg`` is reached.
-"""
+"""Dispatch regressions for all formerly deferred workflow handlers."""
 
 from unittest import mock
 
@@ -26,19 +7,25 @@ import pytest
 from assetutilities.engine import engine
 
 
-# --- Genuine stubs: must fail loudly with NotImplementedError ---------------
-
-
 @pytest.mark.parametrize(
-    "basename",
-    ["gitpython", "text_analytics", "csv_utilities"],
+    "basename, target",
+    [
+        ("csv_utilities", "assetutilities.engine.CSVUtilitiesRouter.router"),
+        ("text_analytics", "assetutilities.engine.TextAnalytics.router"),
+        (
+            "gitpython",
+            "assetutilities.modules.git_utilities.git_utilities.GitUtilities.router",
+        ),
+    ],
 )
-def test_stub_basename_raises_not_implemented(basename):
-    with pytest.raises(NotImplementedError) as exc:
-        engine(cfg={"basename": basename}, config_flag=False)
-    # Message names the basename and gives guidance (not a silent no-op).
-    assert basename in str(exc.value)
-    assert "stub" in str(exc.value).lower()
+def test_workflow_handler_is_reachable(basename, target):
+    cfg = {"basename": basename}
+    with mock.patch(target, side_effect=lambda cfg: cfg) as handler, mock.patch(
+        "assetutilities.engine.app_manager.save_cfg",
+        side_effect=lambda cfg_base: cfg_base,
+    ):
+        assert engine(cfg=cfg, config_flag=False) is cfg
+    handler.assert_called_once_with(cfg)
 
 
 # --- Previously-unreachable handlers: must now be reached --------------------
