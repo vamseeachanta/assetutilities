@@ -21,7 +21,7 @@ Decision tree (first match wins):
     ``src/modules/<m>/``) — but only keep ones with a real
     ``tests/modules/<m>/`` dir — and route exact contract paths (e.g.
     ``config/repo_structure.yml`` -> ``tests/repo_structure``) ->
-    ``scope=modules``. Documentation and report assets also select
+    ``scope=modules``. Units documentation and report assets also select
     ``tests/reports`` so report-only edits retain executable coverage.
   * if nothing test-relevant changed (unrelated reports / notebooks only)
     -> ``scope=skip`` — still runs the cheap always-on cross-cutting set so the
@@ -98,7 +98,12 @@ CONTRACT_ROUTES = {
 }
 
 # Report inputs, generated documents, templates, styles and guard tests.
-REPORT_PREFIXES = ("docs/", "scripts/reports/", "tests/reports/")
+REPORT_EXACT = {"docs/units-guide.md"}
+REPORT_PREFIXES = (
+    "docs/reports/modules/aunits/",
+    "scripts/reports/",
+    "tests/reports/",
+)
 
 # A module's source can live under any of these prefixes; the canonical TEST
 # home is always tests/modules/<m>/ (we only shard a module that has one).
@@ -140,7 +145,7 @@ def select(changed: list[str], root: Path) -> dict:
     relevant = False
 
     for p in changed:
-        if p.startswith(REPORT_PREFIXES):
+        if p in REPORT_EXACT or p.startswith(REPORT_PREFIXES):
             contracts.add("tests/reports")
             relevant = True
         if p in CONTRACT_ROUTES:

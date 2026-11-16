@@ -41,7 +41,7 @@ CALCULATION_SOURCES = (
 CHANGES = {
     "document": "Units module analysis",
     "revision": "A",
-    "date": "2026-10-22",
+    "date": "2026-11-16",
     "changes": [
         {
             "section": "3 and 6",
@@ -62,6 +62,11 @@ CHANGES = {
             "section": "3, 5, 9 and Appendices A–B",
             "change": "Source digests normalize checkout line endings and include the documented interfaces; the listing matches executed dimensional checks, table captions use valid markup, and force and curve values have literal anchors.",
             "reason": "Cross-platform rebuilds and interface freshness are checked, and documentation, generator and report-test changes select the report suite in continuous integration.",
+        },
+        {
+            "section": "Appendix B",
+            "change": "Source digests are refreshed for dimensional template matching and nonblank formatter names; report selection is limited to its documented inputs.",
+            "reason": "Saved evidence must match the current interfaces while unrelated documentation retains its own test routing.",
         },
     ],
 }

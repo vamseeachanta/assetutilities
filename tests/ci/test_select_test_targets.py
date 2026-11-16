@@ -122,6 +122,7 @@ def test_matrix_is_never_empty_on_skip():
         "scripts/reports/build_units_report.py",
         "scripts/reports/units_report.html.j2",
         "scripts/reports/units_house_style.css",
+        "scripts/reports/build_constants_report.py",
         "tests/reports/test_units_report.py",
     ],
 )
@@ -134,6 +135,22 @@ def test_report_inputs_select_report_suite(path):
     assert [shard for shard in matrix["include"] if shard["name"] == "reports"] == [
         {"name": "reports", "targets": "tests/reports", "mode": "xdist"}
     ]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/guide.md",
+        "docs/units-guide.md.bak",
+        "docs/reports/modules/aunits-other/index.html",
+        "docs/reports/modules/aconstants/index.html",
+    ],
+)
+def test_unrelated_docs_do_not_select_report_suite(path):
+    result = select([path], REPO_ROOT)
+    assert result["scope"] == "skip"
+    assert "tests/reports" not in result["xdist"]
+    assert _names(to_matrix([path], REPO_ROOT)) == {"_always"}
 
 
 @pytest.mark.parametrize(
@@ -157,8 +174,6 @@ def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
     matrix = to_matrix(changed, REPO_ROOT)
     assert matrix["scope"] == "modules"
     expected = {"_always", "docs"}
-    if any(path.startswith("docs/") for path in changed):
-        expected.add("reports")
     assert _names(matrix) == expected
     assert [shard for shard in matrix["include"] if shard["name"] == "docs"] == [
         {"name": "docs", "targets": "tests/docs", "mode": "xdist"}
