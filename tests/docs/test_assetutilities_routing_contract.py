@@ -6,7 +6,6 @@ from pathlib import Path
 
 import yaml
 
-
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = ROOT / "src" / "assetutilities"
 OPERATOR_MAP = ROOT / "docs" / "maps" / "assetutilities-operator-map.md"
@@ -92,6 +91,27 @@ def test_registry_covers_all_top_level_routing_dirs() -> None:
 
     assert registry["repo"] == "assetutilities"
     assert module_names == set(_routing_dirs_from_git_tree())
+
+
+def test_standard_report_is_routed_under_common() -> None:
+    """Keep the report route aligned with its independently observed file homes.
+
+    The expected paths come from the shipped report implementation, its tests,
+    and its user guide; the report package is nested under common, rather than
+    being a top-level package. No numerical calculation is involved.
+    """
+    registry = yaml.safe_load(_read(REGISTRY))
+    common = next(
+        module for module in registry["modules"] if module["name"] == "common"
+    )
+    report = common["submodules"]["standard_report"]
+
+    assert report["source_path"] == "src/assetutilities/common/reportgen/"
+    assert report["tests_path"] == "tests/modules/reportgen/"
+    assert report["docs_path"] == "docs/modules/documentation/standard-report.md"
+    assert (ROOT / report["source_path"] / "standard.py").is_file()
+    assert (ROOT / report["tests_path"] / "test_standard_report.py").is_file()
+    assert (ROOT / report["docs_path"]).is_file()
 
 
 def test_module_structure_matches_observed_tree() -> None:

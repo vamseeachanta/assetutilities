@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Compound Engineering trial plan</title>
+<main>
+<h1>Compound Engineering trial plan</h1>
+<p>The trial will separate evidence preparation from observed plugin behavior.
+The source criteria will remain those in
+<a href="https://github.com/vamseeachanta/assetutilities/issues/81">the trial epic</a>.
+No plugin result will be inferred from tests of the evidence tooling.</p>
+<h2>Proposed scope</h2>
+<ol>
+<li>A standard-library validator in <code>scripts/evaluation/compound_trial.py</code>
+will read a trial record, require the epic's complete criterion set, and preserve
+<code>PASS</code>, <code>FAIL</code>, and <code>NOT_EVALUATED</code> separately.</li>
+<li>The validator will check local evidence digests and reject malformed records,
+missing artifacts, links escaping the evidence root, and unsupported versions.
+It will return readiness for maintainer review only when all criteria pass;
+it will never authorize installation or rollout.</li>
+<li>A worked example, trial assessment, and reusable solution note will describe
+the remaining live trial and the per-repository guardrails. Local plugin
+configuration will be ignored without installing or invoking the plugin.</li>
+</ol>
+<h2>Basis and tests</h2>
+<p>No engineering equations or empirical coefficients will be introduced.
+Criterion membership will come from the epic's success criteria; details will
+come from its linked setup, worktree, advisory, pipeline, and decision issues.
+Synthetic tests will enumerate expected counts by hand and will label their
+evidence as synthetic. They will exercise the command-line interface, including
+incomplete, failed, complete, malformed, and tampered evidence.</p>
+<h2>Adversarial plan checks</h2>
+<p>The design will be challenged against false adoption claims, arbitrary status
+strings, incomplete criterion lists, stale or missing evidence, absolute paths,
+parent traversal, symlink escapes, duplicate JSON keys, and unverified plugin
+revisions. Evidence hashes will establish byte agreement only; they will not
+authenticate statements or a reviewer's judgment.</p>
+<h2>Remaining live trial</h2>
+<p>The actual user-scoped installation and assistant-driven skills will remain
+outside this implementation. The assessment will mark their outcomes
+<code>NOT_EVALUATED</code>. A maintainer will resolve the requested plugin version,
+run the isolated trial, capture observations, obtain independent review, and
+decide adoption before any rollout.</p>
+</main>
+</html>

@@ -1,5 +1,6 @@
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
+
 # Loguru logging shim (issue #28). Drop-in replacement for `logging.info(...)`;
 # the run-log file is still configured by ApplicationManager via set_logging.
 from assetutilities.common.logging_setup import logger
@@ -47,6 +48,7 @@ def engine(
       logging) -- the embeddable run path #3282 consumes.
     """
     cfg_argv_dict = {}
+    loaded_from_file = cfg is None
     if cfg is None:
         inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
         cfg = wwyaml.ymlInput(inputfile, updateYml=None)
@@ -67,14 +69,22 @@ def engine(
         # customYaml/CustomInputs). Dispatches the caller cfg directly under the
         # injected root; raises ValueError if cfg/root_folder missing.
         cfg_base = ConfigureApplicationInputs().configure_embed(
-            cfg, basename, root_folder, log_to_file=log_to_file
+            cfg,
+            basename,
+            root_folder,
+            log_to_file=log_to_file,
+            placeholders_resolved=loaded_from_file,
         )
         fm = FileManagement()
         cfg_base = fm.router(cfg_base)
     elif config_flag:
         fm = FileManagement()
         cfg_base = app_manager.configure(
-            cfg, library_name, basename, cfg_argv_dict, inputfile,
+            cfg,
+            library_name,
+            basename,
+            cfg_argv_dict,
+            inputfile,
             root_folder=root_folder,
         )
         cfg_base = fm.router(cfg_base)
@@ -103,17 +113,9 @@ def engine(
         fe = FileEdit()
         fe.router(cfg_base)
     elif basename in ["gitpython"]:
-        # NOTE: this handler points at a module that does not exist in this
-        # package (`assetutilities.tools.git.git_python_utilities`), so it
-        # previously raised an opaque ModuleNotFoundError on dispatch. There is
-        # no GitPythonUtilities implementation to wire up, so fail loudly with
-        # actionable guidance instead of mis-routing. See issue #91.
-        raise NotImplementedError(
-            "basename 'gitpython' is a stub: no handler is implemented "
-            "(expected 'assetutilities.tools.git.git_python_utilities."
-            "GitPythonUtilities', which does not exist). Implement that module "
-            "and re-wire this branch before using the 'gitpython' workflow."
-        )
+        from assetutilities.modules.git_utilities.git_utilities import GitUtilities
+
+        cfg_base = GitUtilities().router(cfg_base)
     elif basename in ["read_pdf"]:
         # Reader imports (lazy: pulls optional PDF deps such as tabula/PyPDF2)
         from assetutilities.modules.pdf_utilities.read_pdf import ReadPDF
@@ -127,15 +129,7 @@ def engine(
         edit_pdf = EditPDF()
         edit_pdf.edit_pdf(cfg_base)
     elif basename in ["text_analytics"]:
-        # The TextAnalytics.router/get_subset_files methods are no-op stubs
-        # (`pass`), so dispatching here silently produced no output. Fail loudly
-        # until a real implementation is wired up. See issue #91.
-        raise NotImplementedError(
-            "basename 'text_analytics' is a stub: "
-            "TextAnalytics.get_subset_files is a no-op and produces no output. "
-            "Implement assetutilities.common.text_analytics.TextAnalytics "
-            "before using the 'text_analytics' workflow."
-        )
+        cfg_base = TextAnalytics().router(cfg_base)
     elif basename in ["word_utilities"]:
         # Reader imports
         from assetutilities.common.word_utilities import WordUtilities
@@ -166,17 +160,7 @@ def engine(
         cfg_base = zu.router(cfg_base)
 
     elif basename == "csv_utilities":
-        # CSVUtilitiesRouter.router is a no-op stub (the only branch is `pass`);
-        # the real CSVUtilities helper reads a zip file-object, not a path, and
-        # produces no standalone output. Fail loudly rather than silently
-        # returning an unchanged cfg. See issue #91.
-        raise NotImplementedError(
-            "basename 'csv_utilities' is a stub: CSVUtilitiesRouter.router is a "
-            "no-op and produces no output (the underlying CSVUtilities is an "
-            "internal helper for zip_utilities that reads a zip file-object, "
-            "not a standalone path). Implement a real router before using the "
-            "'csv_utilities' workflow."
-        )
+        cfg_base = CSVUtilitiesRouter().router(cfg_base)
 
     else:
         raise (Exception(f"Analysis for basename: {basename} not found. ... FAIL"))

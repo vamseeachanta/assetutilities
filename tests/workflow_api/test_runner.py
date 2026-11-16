@@ -11,7 +11,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import pytest
 
 from assetutilities.workflow_api import (
     ResultEnvelope,
@@ -40,11 +39,12 @@ def _snapshot(path: Path) -> dict:
 
 # --- registry / schema (no engine) -----------------------------------------
 
+
 def test_registry_schema_v2_invocation_and_optional_result():
     reg = load_registry()
     assert reg["schema_version"] == 2
     assert reg["invocation"] == "uv run python -m assetutilities {input}"
-    assert len(reg["workflows"]) == 9
+    assert len(reg["workflows"]) == 14  # Registry additions specified by issue #91.
     de = resolve_registry_row("data_exploration")
     assert de["result"]["kind"] == "files"
 
@@ -61,9 +61,13 @@ def test_build_cfg_merges_params_over_example():
 
 # --- locator unit (no engine) ----------------------------------------------
 
+
 def test_locator_from_row_defaults_to_files():
     assert ResultLocator.from_row(None).kind == "files"
-    assert ResultLocator.from_row({"result": {"kind": "in_memory", "key": "k"}}).kind == "in_memory"
+    assert (
+        ResultLocator.from_row({"result": {"kind": "in_memory", "key": "k"}}).kind
+        == "in_memory"
+    )
 
 
 def test_locator_in_memory_missing_key_warns_not_silent():
@@ -77,7 +81,9 @@ def test_locator_files_emits_no_files_warns(tmp_path):
     results = tmp_path / "results"
     results.mkdir()
     cfg_base = {"Analysis": {"result_folder": str(results), "file_name": "x"}}
-    payload, warns = extract_result(cfg_base, ResultLocator(kind="files"), str(tmp_path))
+    payload, warns = extract_result(
+        cfg_base, ResultLocator(kind="files"), str(tmp_path)
+    )
     assert payload == {"kind": "files", "outputs": []}
     assert warns and "no files" in warns[0]
 
@@ -87,7 +93,9 @@ def test_extract_result_excludes_cfg_dump(tmp_path):
     results.mkdir()
     (results / "data_exploration_FST1.csv").write_text("a,b\n1,2\n")
     (results / "data_exploration.yml").write_text("Analysis: {}\n")  # the save_cfg dump
-    cfg_base = {"Analysis": {"result_folder": str(results), "file_name": "data_exploration"}}
+    cfg_base = {
+        "Analysis": {"result_folder": str(results), "file_name": "data_exploration"}
+    }
     payload, _ = extract_result(cfg_base, ResultLocator(kind="files"), str(tmp_path))
     names = {f["basename"] for f in payload["outputs"]}
     assert names == {"data_exploration_FST1.csv"}
@@ -95,6 +103,7 @@ def test_extract_result_excludes_cfg_dump(tmp_path):
 
 
 # --- error envelopes (no engine) -------------------------------------------
+
 
 def test_run_workflow_unknown_id_error_envelope():
     env = run_workflow("nope_not_a_workflow")
@@ -105,6 +114,7 @@ def test_run_workflow_unknown_id_error_envelope():
 
 
 # --- engine-backed (embed path) --------------------------------------------
+
 
 def test_run_workflow_by_id_returns_envelope():
     env = run_workflow("data_exploration")
