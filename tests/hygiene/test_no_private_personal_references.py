@@ -1,7 +1,7 @@
 """Keep private personal references out of tracked text and diagnostics.
 
 The stored SHA-256 digests cover only a 4-character and a 6-character prefix.
-Either prefix can be recovered by brute force in seconds, so the digests keep
+Either prefix can be recovered by brute force, so the digests keep
 the words out of plain-text search but do not make them confidential.
 """
 
@@ -64,7 +64,12 @@ def _private_name_files(
         else:
             continue
         if _contains_name(data, digests):
-            matches.append(relative)
+            matches.append(
+                "/".join(
+                    "[redacted]" if _contains_name(os.fsencode(part), digests) else part
+                    for part in relative.split("/")
+                )
+            )
     return sorted(matches)
 
 
@@ -177,3 +182,44 @@ def test_rule_needs_no_source_tag_and_ignores_inherited_git_bindings(
     digest = hashlib.sha256(b"restricted").hexdigest()
     assert _private_name_files(tmp_path, ((10, digest),)) == ["tracked.md"]
     assert all(os.environ[key] == "unrelated-checkout" for key in keys)
+
+
+@pytest.mark.parametrize(
+    ("relative", "redacted"),
+    [
+        ("docs/RESTRICTEDcompound/notes.md", "docs/[redacted]/notes.md"),
+        ("docs/13_SEALED_tag.md", "docs/[redacted]"),
+        ("restricted/SEALED.md", "[redacted]/[redacted]"),
+        ("docs/safe_restricted.md", "docs/[redacted]"),
+    ],
+)
+def test_failure_redacts_matching_components_and_keeps_ordinary_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    relative: str,
+    redacted: str,
+) -> None:
+    ordinary = "docs/unrestricted_unsealed.md"
+    for name in (relative, ordinary):
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("restricted sealed", encoding="utf-8")
+
+    def tracked_files(command: list[str], **kwargs: object):
+        assert command == ["git", "ls-files", "-z"]
+        assert kwargs["cwd"] == tmp_path
+        data = os.fsencode(relative) + b"\0" + os.fsencode(ordinary) + b"\0"
+        return subprocess.CompletedProcess(command, 0, stdout=data)
+
+    monkeypatch.setattr(subprocess, "run", tracked_files)
+    digests = (
+        (10, hashlib.sha256(b"restricted").hexdigest()),
+        (6, hashlib.sha256(b"sealed").hexdigest()),
+    )
+    matches = _private_name_files(tmp_path, digests)
+    monkeypatch.setitem(globals(), "_private_name_files", lambda root: matches)
+    with pytest.raises(pytest.fail.Exception) as failure:
+        test_tracked_text_has_no_private_name()
+    message = str(failure.value)
+    assert message == f"{RULE}: " + ", ".join(sorted((redacted, ordinary)))
+    assert not _contains_name(message.encode(), digests)
