@@ -1,4 +1,9 @@
-"""Keep private personal references out of tracked text and diagnostics."""
+"""Keep private personal references out of tracked text and diagnostics.
+
+The stored SHA-256 digests cover only a 4-character and a 6-character prefix.
+Either prefix can be recovered by brute force in seconds, so the digests keep
+the words out of plain-text search but do not make them confidential.
+"""
 
 from __future__ import annotations
 

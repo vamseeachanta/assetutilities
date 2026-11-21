@@ -49,11 +49,13 @@ from pathlib import Path
 ALWAYS_XDIST = [
     "tests/unit",
     "tests/data_store",
+    "tests/hygiene",
+    "tests/ci",
 ]
 
 # Module domains that are WIP staging areas, not gating suites — never shard
 # them into the CI matrix. `tests_wip` is a holding pen for not-yet-stable tests
-# (e.g. plotly polar viz that errors in the engine). See issue #99.
+# (e.g. plotly polar viz that errors in the engine).
 MATRIX_IGNORE_DOMAINS = {
     "tests_wip",
 }
@@ -88,6 +90,10 @@ CONTRACT_ROUTES = {
     "docs/README.md": "tests/docs",
     "README.md": "tests/docs",
     "AGENTS.md": "tests/docs",
+    "docs/sub_utilities/assets/style.css": "tests/modules/devtools",
+    "scripts/reporting/generate_devtools_report.py": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/index.html": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/changes.json": "tests/modules/devtools",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST

@@ -1,48 +1,27 @@
-# Standard library imports
-import os
+"""Compare file-size filtering with portable fixture-relative results."""
 
-from test_utils import get_test_file_path
+import shutil
 import sys
+from pathlib import Path
 
-# Third party imports
-import colorama
-import deepdiff
-
-# Reader imports
-from assetutilities.common.yml_utilities import ymlInput
-from assetutilities.engine import engine
-from assetutilities.modules.test_utilities.test_utilities import TestUtilities
-
-colorama.init(autoreset=True)
-
-# Standard library imports
-
-tu = TestUtilities()
+import yaml
 
 
-def run_process(input_file, expected_result):
-    if input_file is not None and not os.path.isfile(input_file):
-        input_file = get_test_file_path(input_file, os.path.dirname(__file__))
-    cfg = engine(input_file)
+def test_run_process(tmp_path, monkeypatch):
+    from assetutilities.engine import engine
 
-    obtained_result = cfg[cfg["basename"]]["input_files"].copy()
-    assert not deepdiff.DeepDiff(obtained_result, expected_result, ignore_order=True), (
-        f"Obtained result: {obtained_result} does not match expected result: {expected_result}"
-    )
+    source = Path(__file__).parent
+    input_name = "test_file_management_file_size.yml"
+    snapshot = source / "results/test_file_management_file_size_pytest.yml"
+    expected = yaml.safe_load(snapshot.read_text(encoding="utf-8"))
+    shutil.copyfile(source / input_name, tmp_path / input_name)
+    shutil.copytree(source / "test_files", tmp_path / "test_files")
+    monkeypatch.setattr(sys, "argv", ["assetutilities"])
+    monkeypatch.chdir(tmp_path)
 
-    return cfg
-
-
-def test_run_process():
-    input_file = "test_file_management_file_size.yml"
-
-    pytest_output_file = "results/test_file_management_file_size_pytest.yml"
-    pytest_output_file = tu.get_valid_pytest_output_file(
-        os.path.dirname(__file__), pytest_output_file
-    )
-    expected_result = ymlInput(pytest_output_file, updateYml=None)
-
-    if len(sys.argv) > 1:
-        sys.argv.pop()
-
-    run_process(input_file, expected_result)
+    result = engine(str(tmp_path / input_name), root_folder=str(tmp_path))
+    obtained = {
+        extension: sorted(Path(path).relative_to(tmp_path).as_posix() for path in paths)
+        for extension, paths in result["file_management"]["input_files"].items()
+    }
+    assert obtained == {key: sorted(paths) for key, paths in expected.items()}

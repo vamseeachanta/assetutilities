@@ -6,10 +6,15 @@
 # 2. python 
 # 3. miniconda 
 
-# hardcoded. fix this soon. 
-proj_home="$HOME/assetutilities"
+# Resolve the repository from the script location, independent of the caller.
+proj_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)" || exit 1
 env_file_path="${proj_home}/dev_tools"
 env_file=${env_file_path}"/environment.yml"
+
+if [[ ! -f "$env_file" ]]; then
+    printf 'Environment definition not found.\n' >&2
+    exit 1
+fi
 
 # locate the env name for this env 
 env_name=$(grep 'name:' "$env_file" | awk '{print $2}')
