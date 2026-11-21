@@ -125,6 +125,38 @@ def test_worked_example_saves_answer(tmp_path, monkeypatch):
     assert saved["text"] == "alpha beta"
 
 
+def test_replacement_dictionary_saves_answer(tmp_path, monkeypatch):
+    """A fresh plain dictionary must pass through real embedded persistence."""
+    import yaml
+
+    registry = RunnerRegistry()
+
+    @registry.register("replacement_example")
+    class ReplacementRunner(EngineRunner):
+        def run(self, cfg):
+            return {**cfg, "answer": cfg["text"].upper()}
+
+    monkeypatch.setattr(engine_module, "runner_registry", registry)
+    result = engine_module.engine(
+        cfg={
+            "basename": "replacement_example",
+            "text": "alpha beta",
+            "default": {
+                "log_level": "INFO",
+                "config": {"overwrite": {"output": True}},
+            },
+        },
+        embed=True,
+        root_folder=str(tmp_path),
+        log_to_file=False,
+    )
+    assert result["answer"] == "ALPHA BETA"
+    (saved_file,) = (tmp_path / "results").glob("*.yml")
+    saved = yaml.safe_load(saved_file.read_text())
+    assert saved["answer"] == "ALPHA BETA"
+    assert saved["text"] == "alpha beta"
+
+
 def test_registry_import_keeps_optional_handlers_lazy(tmp_path):
     """Importing the registry alone must not load any migrated handler."""
     import os

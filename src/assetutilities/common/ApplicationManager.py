@@ -479,9 +479,9 @@ class ConfigureApplicationInputs:
         return parse_hybrid_arguments(inputfile)
 
     def save_cfg(self, cfg_base):
-        output_dir = cfg_base.Analysis["analysis_root_folder"]
+        output_dir = cfg_base["Analysis"]["analysis_root_folder"]
 
-        filename = cfg_base.Analysis["file_name"]
+        filename = cfg_base["Analysis"]["file_name"]
         filename_path = os.path.join(output_dir, "results", filename)
         cfg_base = self.standardize_yml_data(cfg_base)
 
