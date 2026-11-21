@@ -48,7 +48,8 @@ def test_workflow_area_survives_learning_reload(tmp_path: Path) -> None:
     del manager
 
     reader = WorkflowRefreshManager(tmp_path)
-    history = json.loads((tmp_path / "context" / "learning.json").read_text())
+    learning_path = tmp_path / "context" / "learning.json"
+    history = json.loads(learning_path.read_text(encoding="utf-8"))
     assert len(history) == 1
     _assert_area(history[0]["data"], 3 * math.pi)
     assert history[0]["data"] == original_data
@@ -86,7 +87,8 @@ def test_learning_history_preserves_distinct_engineering_results(
     del manager
 
     reader = WorkflowRefreshManager(tmp_path)
-    history = json.loads((tmp_path / "context" / "learning.json").read_text())
+    learning_path = tmp_path / "context" / "learning.json"
+    history = json.loads(learning_path.read_text(encoding="utf-8"))
     assert len(history) == 2
     _assert_area(history[0]["data"], 3 * math.pi)
     _assert_area(history[1]["data"], 8 * math.pi)

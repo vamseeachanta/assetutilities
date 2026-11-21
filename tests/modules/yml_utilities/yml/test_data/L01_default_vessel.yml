@@ -1,10 +1,8 @@
 ﻿%YAML 1.1
 # Type: Diffraction
 # Program: OrcaWave 11.5b
-# File: K:\1522\ctr7\orcawave\L01 Default vessel\L01_default_vessel.yml
+# Export metadata omitted for fixture privacy.
 # Created: 11:04 PM on 2/12/2025
-# User: vamseea
-# Machine: ACMA-ANSYS04
 ---
 # Model
 UnitsSystem: SI
@@ -79,7 +77,7 @@ Bodies:
     BodyMeshPosition: [0, 0, 0]
     BodyMeshAttitude: [0, 0, 0]
     BodyIncludedInAnalysis: Yes
-    BodyMeshFileName: K:\1522\ctr7\orcawave\L01 Default vessel\L01 Vessel mesh.gdf
+    BodyMeshFileName: fixtures/reference-95.gdf
     BodyMeshFormat: Wamit gdf
     BodyMeshLengthUnits: m
     BodyMeshSymmetry: xz plane
@@ -87,7 +85,7 @@ Bodies:
     BodyAddInteriorSurfacePanels: Yes
     BodyInteriorSurfacePanelMethod: Triangulation method
     BodyControlSurfaceType: Defined by mesh file
-    BodyControlSurfaceMeshFileName: K:\1522\ctr7\orcawave\L01 Default vessel\L01 Control surface mesh.gdf
+    BodyControlSurfaceMeshFileName: fixtures/reference-96.gdf
     BodyControlSurfaceMeshFormat: Wamit gdf
     BodyControlSurfaceMeshLengthUnits: m
     BodyOrcaFlexImportSymmetry: Use global mesh symmetry

@@ -90,7 +90,7 @@ def test_every_module_is_selected(module):
     r = select([f"tests/modules/{module}/test_smoke.py"], REPO_ROOT)
     assert r["scope"] == "modules"
     if module in MATRIX_IGNORE_DOMAINS:
-        # WIP staging domains are intentionally excluded (issue #99): the change
+        # WIP staging domains are intentionally excluded: the change
         # is still "relevant" (scope=modules, runs the always-on set) but the
         # WIP domain itself is never sharded.
         assert f"tests/modules/{module}" not in r["xdist"]
@@ -139,6 +139,34 @@ def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "src/assetutilities/devtools/modernize_deps.py",
+        "tests/modules/devtools/test_devtools_coverage.py",
+        "tests/modules/devtools/test_devtools_report.py",
+        "docs/sub_utilities/assets/style.css",
+        "scripts/reporting/generate_devtools_report.py",
+        "docs/reports/modules/adevtools/index.html",
+        "docs/reports/modules/adevtools/changes.json",
+    ],
+)
+def test_report_inputs_select_devtools_freshness_check(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "modules-devtools"}
+    assert [
+        shard for shard in matrix["include"] if shard["name"] == "modules-devtools"
+    ] == [
+        {
+            "name": "modules-devtools",
+            "targets": "tests/modules/devtools",
+            "mode": "xdist",
+        }
+    ]
+    assert (REPO_ROOT / "tests/modules/devtools/test_devtools_report.py").is_file()
+
+
 def test_matrix_module_scope_one_shard_per_domain():
     m = to_matrix(
         [
@@ -162,7 +190,7 @@ def test_matrix_full_scope_fans_out_every_module_with_tests():
     base = REPO_ROOT / "tests" / "modules"
     for module in _modules():
         if module in MATRIX_IGNORE_DOMAINS:
-            # WIP staging domains are intentionally never sharded (issue #99).
+            # WIP staging domains are intentionally never sharded.
             assert f"modules-{module}" not in names, f"{module} should be ignored"
         elif _has_tests(base / module):
             assert f"modules-{module}" in names, f"{module} missing from full matrix"
@@ -263,12 +291,33 @@ def test_integration_route_does_not_match_sibling_prefixes(changed):
 
 
 def test_selector_test_changes_run_selector_guards():
-    """Editing the routing regressions must select the guard suite itself."""
+    """Editing the routing regressions must run the guard suite in the always shard."""
     changed = ["tests/ci/test_select_test_targets.py"]
-    result = select(changed, REPO_ROOT)
-    assert result["scope"] == "modules"
-    assert "tests/ci" in result["xdist"]
     matrix = to_matrix(changed, REPO_ROOT)
-    assert matrix["scope"] == "modules"
-    assert _names(matrix) == {"_always", "ci"}
-    assert {"name": "ci", "targets": "tests/ci", "mode": "xdist"} in matrix["include"]
+    always = [shard for shard in matrix["include"] if shard["name"] == "_always"]
+    assert len(always) == 1
+    assert "tests/ci" in always[0]["targets"].split()
+    assert "ci" not in _names(matrix)
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "tests/modules/yml_utilities/yml/test_data/Template_example.yml",
+        "examples/workflows/excel_utilities/input_data/inputs.csv",
+        "tests/hygiene/test_yaml_fixture_header_privacy.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_array.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_2d_array.py",
+        "tests/modules/file_management/test_file_management_file_size.py",
+        "tests/modules/file_management/test_file_management_regex.py",
+        "docs/example.md",
+        "pyproject.toml",
+    ],
+)
+def test_privacy_guard_is_always_selected(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = [
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    ]
+    assert targets.count("tests/hygiene") == 1
+    assert targets.count("tests/ci") == 1

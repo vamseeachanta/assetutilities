@@ -119,6 +119,11 @@ jobs:
       - name: Test workflow triggers
         run: uv run python -m pytest tests/workflows/test_ci_triggers.py
 
+      - name: Test target explanations and selector
+        run: >-
+          uv run python -m pytest tests/devtools/test_test_target_explain.py
+          tests/ci/test_select_test_targets.py
+
       - name: Run source hygiene gate
         run: bash scripts/hygiene/check-source-hygiene.sh
 
