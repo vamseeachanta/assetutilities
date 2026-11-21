@@ -154,3 +154,17 @@ def test_registry_import_keeps_optional_handlers_lazy(tmp_path):
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_runner_returning_non_mapping_raises_type_error(monkeypatch, save_cfg):
+    registry = RunnerRegistry()
+
+    @registry.register("returns_none")
+    class ReturnsNone(EngineRunner):
+        def run(self, cfg):
+            return None
+
+    monkeypatch.setattr(engine_module, "runner_registry", registry)
+    with pytest.raises(TypeError, match="ReturnsNone.*'returns_none'.*NoneType"):
+        engine_module.engine(cfg={"basename": "returns_none"}, config_flag=False)
+    save_cfg.assert_not_called()

@@ -1,19 +1,23 @@
+from collections.abc import Mapping
+
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
-from assetutilities.common.download_data.dwnld_from_zipurl import DownloadDataFromURL
-from assetutilities.common.file_edit import FileEdit
-from assetutilities.common.file_management import FileManagement
 
 # Loguru logging shim (issue #28). Drop-in replacement for `logging.info(...)`;
 # the run-log file is still configured by ApplicationManager via set_logging.
 from assetutilities.common.logging_setup import logger
+from assetutilities.common.download_data.dwnld_from_zipurl import DownloadDataFromURL
+from assetutilities.common.file_edit import FileEdit
+from assetutilities.common.file_management import FileManagement
+from assetutilities.common.text_analytics import TextAnalytics
 from assetutilities.common.update_deep import AttributeDict
 from assetutilities.common.utilities import save_application_cfg
 from assetutilities.common.visualization_components import VisualizationComponents
 from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
-from assetutilities.engine_registry import runner_registry
+from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
+from assetutilities.engine_registry import runner_registry
 
 library_name = "assetutilities"
 
@@ -46,6 +50,7 @@ def engine(
       logging) -- the embeddable run path #3282 consumes.
     """
     cfg_argv_dict = {}
+    loaded_from_file = cfg is None
     if cfg is None:
         inputfile, cfg_argv_dict = app_manager.validate_arguments_run_methods(inputfile)
         cfg = wwyaml.ymlInput(inputfile, updateYml=None)
@@ -66,7 +71,11 @@ def engine(
         # customYaml/CustomInputs). Dispatches the caller cfg directly under the
         # injected root; raises ValueError if cfg/root_folder missing.
         cfg_base = ConfigureApplicationInputs().configure_embed(
-            cfg, basename, root_folder, log_to_file=log_to_file
+            cfg,
+            basename,
+            root_folder,
+            log_to_file=log_to_file,
+            placeholders_resolved=loaded_from_file,
         )
         fm = FileManagement()
         cfg_base = fm.router(cfg_base)
@@ -92,6 +101,11 @@ def engine(
     runner_class = runner_registry.get(basename)
     if runner_class is not None:
         cfg_base = runner_class().run(cfg_base)
+        if not isinstance(cfg_base, Mapping):
+            raise TypeError(
+                f"Runner {runner_class.__name__} for basename {basename!r} "
+                f"returned {type(cfg_base).__name__}, not a configuration mapping"
+            )
     elif basename in ["excel_utilities"]:
         # Reader imports
         from assetutilities.modules.excel_utilities.excel_utilities import (
@@ -109,27 +123,11 @@ def engine(
         fe = FileEdit()
         fe.router(cfg_base)
     elif basename in ["gitpython"]:
-        # NOTE: this handler points at a module that does not exist in this
-        # package (`assetutilities.tools.git.git_python_utilities`), so it
-        # previously raised an opaque ModuleNotFoundError on dispatch. There is
-        # no GitPythonUtilities implementation to wire up, so fail loudly with
-        # actionable guidance instead of mis-routing. See issue #91.
-        raise NotImplementedError(
-            "basename 'gitpython' is a stub: no handler is implemented "
-            "(expected 'assetutilities.tools.git.git_python_utilities."
-            "GitPythonUtilities', which does not exist). Implement that module "
-            "and re-wire this branch before using the 'gitpython' workflow."
-        )
+        from assetutilities.modules.git_utilities.git_utilities import GitUtilities
+
+        cfg_base = GitUtilities().router(cfg_base)
     elif basename in ["text_analytics"]:
-        # The TextAnalytics.router/get_subset_files methods are no-op stubs
-        # (`pass`), so dispatching here silently produced no output. Fail loudly
-        # until a real implementation is wired up. See issue #91.
-        raise NotImplementedError(
-            "basename 'text_analytics' is a stub: "
-            "TextAnalytics.get_subset_files is a no-op and produces no output. "
-            "Implement assetutilities.common.text_analytics.TextAnalytics "
-            "before using the 'text_analytics' workflow."
-        )
+        cfg_base = TextAnalytics().router(cfg_base)
     elif basename in ["word_utilities"]:
         # Reader imports
         from assetutilities.common.word_utilities import WordUtilities
@@ -155,19 +153,8 @@ def engine(
 
         # init and run reportgen using config
         reportgen.run(cfg_base)
-
     elif basename == "csv_utilities":
-        # CSVUtilitiesRouter.router is a no-op stub (the only branch is `pass`);
-        # the real CSVUtilities helper reads a zip file-object, not a path, and
-        # produces no standalone output. Fail loudly rather than silently
-        # returning an unchanged cfg. See issue #91.
-        raise NotImplementedError(
-            "basename 'csv_utilities' is a stub: CSVUtilitiesRouter.router is a "
-            "no-op and produces no output (the underlying CSVUtilities is an "
-            "internal helper for zip_utilities that reads a zip file-object, "
-            "not a standalone path). Implement a real router before using the "
-            "'csv_utilities' workflow."
-        )
+        cfg_base = CSVUtilitiesRouter().router(cfg_base)
 
     else:
         raise (Exception(f"Analysis for basename: {basename} not found. ... FAIL"))

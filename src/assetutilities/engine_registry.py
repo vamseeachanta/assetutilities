@@ -20,7 +20,12 @@ class EngineRunner(ABC):
 
 
 class RunnerRegistry:
-    """Map exact basenames to concrete runners without silent replacement."""
+    """Map exact basenames to concrete runners without silent replacement.
+
+    A name registered twice is rejected. The engine consults this registry
+    before its built-in branches, so registering a built-in basename (for
+    example ``file_management``) deliberately overrides that workflow.
+    """
 
     def __init__(self) -> None:
         self._runners: dict[str, type[EngineRunner]] = {}
