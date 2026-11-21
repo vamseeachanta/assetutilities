@@ -68,7 +68,7 @@ def test_src_module_change_maps_to_test_home():
 
 
 def test_noncode_only_change_skips_full_tree():
-    for path in ("reports/x.html", "notebooks/demo.ipynb", "docs/x.md"):
+    for path in ("reports/x.html", "notebooks/demo.ipynb"):
         r = select([path], REPO_ROOT)
         assert r["scope"] == "skip", path
         # skip still runs the cheap always-on set, never module/full dirs
@@ -106,11 +106,51 @@ def _names(m: dict) -> set[str]:
 
 
 def test_matrix_is_never_empty_on_skip():
-    """Docs-only change still yields the always-on shard (matrix never empty)."""
-    m = to_matrix(["docs/x.md"], REPO_ROOT)
+    """An unrelated notebook still yields the always-on shard."""
+    m = to_matrix(["notebooks/demo.ipynb"], REPO_ROOT)
     assert m["scope"] == "skip"
     assert m["include"], "matrix must never be empty (CI matrix would error)"
     assert _names(m) == {"_always"}
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/units-guide.md",
+        "docs/reports/modules/aunits/units-report.html",
+        "docs/reports/modules/aunits/changes.json",
+        "scripts/reports/build_units_report.py",
+        "scripts/reports/units_report.html.j2",
+        "scripts/reports/units_house_style.css",
+        "scripts/reports/build_constants_report.py",
+        "tests/reports/test_units_report.py",
+    ],
+)
+def test_report_inputs_select_report_suite(path):
+    result = select([path], REPO_ROOT)
+    assert result["scope"] == "modules"
+    assert "tests/reports" in result["xdist"]
+    matrix = to_matrix([path], REPO_ROOT)
+    assert _names(matrix) == {"_always", "reports"}
+    assert [shard for shard in matrix["include"] if shard["name"] == "reports"] == [
+        {"name": "reports", "targets": "tests/reports", "mode": "xdist"}
+    ]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/guide.md",
+        "docs/units-guide.md.bak",
+        "docs/reports/modules/aunits-other/index.html",
+        "docs/reports/modules/aconstants/index.html",
+    ],
+)
+def test_unrelated_docs_do_not_select_report_suite(path):
+    result = select([path], REPO_ROOT)
+    assert result["scope"] == "skip"
+    assert "tests/reports" not in result["xdist"]
+    assert _names(to_matrix([path], REPO_ROOT)) == {"_always"}
 
 
 @pytest.mark.parametrize(
@@ -133,7 +173,8 @@ def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
     """Each routing contract input selects exactly one docs shard."""
     matrix = to_matrix(changed, REPO_ROOT)
     assert matrix["scope"] == "modules"
-    assert _names(matrix) == {"_always", "docs"}
+    expected = {"_always", "docs"}
+    assert _names(matrix) == expected
     assert [shard for shard in matrix["include"] if shard["name"] == "docs"] == [
         {"name": "docs", "targets": "tests/docs", "mode": "xdist"}
     ]
