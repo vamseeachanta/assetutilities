@@ -103,7 +103,7 @@ jobs:
           echo "tested=$tested first_parent=${parents[0]} second_parent=${parents[1]} tip=$tip event_base=$EVENT_BASE_SHA tree=$tree"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
 
