@@ -12,7 +12,7 @@ from .propagate_commands import CommandPropagator, find_repositories
 from .organize_structure import ProjectOrganizer, organize_repository
 from .cli import main
 
-__version__ = "1.0.0"
+__version__ = "0.2.0"  # ships in the assetutilities distribution; keep in step with it
 __all__ = [
     "DependencyModernizer",
     "CommandPropagator",

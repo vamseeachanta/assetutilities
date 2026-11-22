@@ -8,7 +8,9 @@ consumer environment until that consumer moves its pin.
 ## Version and tag scheme
 
 - The version lives in `pyproject.toml` (`[project].version`), mirrored in
-  `src/assetutilities/__init__.py` (`__version__`) and the root entry of `uv.lock`.
+  `src/assetutilities/__init__.py` (`__version__`),
+  `src/assetutilities/devtools/__init__.py` (`__version__`), the `Version:` line of
+  the `src/assetutilities/__main__.py` docstring, and the root entry of `uv.lock`.
 - Semantic Versioning. While the version is `0.x`, a behavior or API change bumps
   the minor version and a fix-only release bumps the patch version.
 - Release tags are annotated and named `v<version>`, for example `v0.2.0`.
@@ -32,8 +34,11 @@ tagged. The minor bump also covers the units template-matching change listed in
 ## Release steps
 
 1. **Release PR.** Open a PR that:
-   - bumps `version` in `pyproject.toml`, `__version__` in
-     `src/assetutilities/__init__.py`, and the root `assetutilities` entry in `uv.lock`;
+   - bumps the version in every place listed above: `version` in `pyproject.toml`,
+     `__version__` in `src/assetutilities/__init__.py` and
+     `src/assetutilities/devtools/__init__.py`, the `- assetutilities v<version>` line
+     in the `src/assetutilities/__main__.py` docstring, and the root `assetutilities`
+     entry in `uv.lock`;
    - moves the `CHANGELOG.md` entries under `[Unreleased]` into a new
      `## [<version>]` section.
 2. **Merge** it with CI green.
@@ -45,9 +50,13 @@ tagged. The minor bump also covers the units template-matching change listed in
    # Confirm HEAD is the release PR merge and the version matches the tag
    git log -1 --oneline
    grep '^version = ' pyproject.toml        # version = "0.2.0"
+   merge=$(git rev-parse HEAD)
    git tag -a v0.2.0 -m "assetutilities 0.2.0"
    git push origin v0.2.0
-   git ls-remote --tags origin v0.2.0        # record the commit for consumers
+   # The tag is annotated, so `refs/tags/v0.2.0` names the tag object, not the
+   # commit. Compare the peeled ref (^{}) with the merge commit.
+   tagged=$(git ls-remote --tags origin 'refs/tags/v0.2.0^{}' | cut -f1)
+   test "$tagged" = "$merge" && echo "v0.2.0 -> $merge"   # record this commit for consumers
    ```
 
 4. Optionally create a GitHub release from the tag:
