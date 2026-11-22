@@ -36,6 +36,7 @@ assetutilities/
 |       +-- `common/`
 |       +-- `constants/`
 |       +-- `devtools/`
+|       +-- `line_dynamics_report/`
 |       +-- `modules/`
 |       +-- `units/`
 |       +-- `workflow_api/`
@@ -53,6 +54,7 @@ assetutilities/
 | `common/` | Common file, data, YAML, visualization, web scraping, logging, and validation helpers. | `tests/unit/test_common_*.py`, `tests/modules/` | `docs/modules/` |
 | `constants/` | Casing grades, conversions, materials, and seawater constants. | `tests/unit/test_constants.py`, `tests/test_casing_grades.py` | `docs/README.md` |
 | `devtools/` | Developer tooling for dependency modernization and command propagation. | `tests/unit/` or focused devtool tests when added | `src/assetutilities/devtools/README.md` |
+| `line_dynamics_report/` | Line-dynamics bending report and layback summary calculations reproduced from source workbooks. | `tests/modules/line_dynamics_report/` | `src/assetutilities/line_dynamics_report/README.md` |
 | `modules/` | CSV, data exploration, Excel, PDF, YAML, zip, and test utility modules. | `tests/modules/`, `tests/unit/test_common_yml_utilities.py` | `docs/modules/` |
 | `units/` | Units, quantities, policies, traceability, and domain registries. | `tests/unit/test_quantity.py`, `tests/unit/test_registry.py`, `tests/unit/test_traceability*.py` | `docs/README.md` |
 | `workflow_api/` | Workflow runs, result envelopes, artifact identity, metrics, and publication contracts. | `tests/workflow_api/` | `docs/README.md` |
