@@ -1,24 +1,22 @@
 ﻿%YAML 1.1
 # Type: Model
 # Program: OrcaFlex 11.2d
-# File: 
+# Export metadata omitted for fixture privacy.
 # Created: 9:59 AM on 11/30/2022
-# User: Jun.Cheng
-# Machine: CGNP9Z2
 ---
 BaseFile: %basefile%
 VesselTypes:
     Strt1_FST2type:
         Draughts:
             Full:
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST2F.yml
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST2F.yml
+                includefile: fixtures/reference-97.yml
+                includefile: fixtures/reference-98.yml
     Strt2_FST1type:
         Draughts:
             Full:
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Wind_Ext_FST1F.yml
-                includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Curr_Ext_FST1F.yml
-includefile: P:\analysis03\254445 Woodfibre LNG\Naval\02.Working\03.Orcaflex\00-Common\Mooring_stiffness.yml
+                includefile: fixtures/reference-99.yml
+                includefile: fixtures/reference-100.yml
+includefile: fixtures/reference-101.yml
 General:
   StaticsMinDamping: 200
   StageDuration[1]: 1000

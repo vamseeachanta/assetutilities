@@ -12,7 +12,7 @@ Determinism fields are COMPUTED, never hardcoded:
 
 - ``input_hash`` -- sha256 over the caller cfg with volatile top-level keys pruned.
 - ``result_hash`` -- for ``kind: files`` payloads, a content hash keyed by sorted
-  basename (location-independent AND content-sensitive).
+  result-relative path (temporary-root-independent AND content-sensitive).
 - ``reproducible`` -- ``None`` unless an opt-in double-run verification is requested.
 - ``provenance.code_version`` -- ``{package_version, git_sha}``, parameterized by
   package so each adopting repo stamps its OWN version (workspace-hub#3287).
@@ -108,17 +108,19 @@ def input_hash(cfg: dict) -> str:
 def result_hash(payload: dict) -> str:
     """Hash a standardized result payload.
 
-    For ``kind == "files"`` the canonical form is ``sorted((basename, sha256))``
-    over the per-file content digests already computed by ``extract_result``.
-    This is location-independent (the throwaway tempdir abspath is dropped) AND
-    content-sensitive (a changed output byte flips a per-file ``sha256`` and so
-    the overall hash). For any other ``kind`` the payload itself is hashed.
+    For ``kind == "files"`` the canonical form is
+    ``sorted((relative_path, sha256))`` over the per-file content digests already
+    computed by ``extract_result``. Legacy records without ``relative_path``
+    use ``basename``. The temporary root is excluded, while a directory-only
+    move or a changed output byte changes the hash. For any other ``kind`` the
+    payload itself is hashed.
     """
     if payload.get("kind") == "files":
         canon = {
             "kind": "files",
             "files": sorted(
-                (f["basename"], f["sha256"]) for f in payload.get("outputs", [])
+                (f.get("relative_path", f["basename"]), f["sha256"])
+                for f in payload.get("outputs", [])
             ),
         }
     else:

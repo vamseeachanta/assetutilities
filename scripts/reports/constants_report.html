@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Constants module analysis</title>
+<style>$STYLE</style>
+<style>
+body{margin:0}h2{margin-bottom:16px}h3{margin:24px 0 12px}p{max-width:72ch}
+figure{margin:24px 0}svg{width:100%;height:auto}figcaption,caption{font-size:14px;color:var(--ink-2);text-align:left;padding:10px 0;caption-side:bottom}
+.table-wrap{overflow-x:auto}td,th{text-align:left;white-space:normal;vertical-align:top}pre{overflow-x:auto;padding:16px;background:var(--surface-2)}
+button,input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--hairline);border-radius:5px;padding:8px;max-width:100%}
+button{cursor:pointer}label{display:block;margin-top:12px}textarea{width:100%;min-height:90px}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.chart circle{fill:var(--cfd);stroke:var(--surface);stroke-width:2}.chart .curve{fill:none;stroke:var(--cfd);stroke-width:3}
+.chart text,.schematic text{font:14px var(--sans);fill:var(--ink)}.schematic path,.schematic line{stroke:var(--ink-2);stroke-width:2;fill:none}
+code{overflow-wrap:anywhere}#comments-list li{white-space:pre-wrap;overflow-wrap:anywhere}.digest{font:11px var(--mono)}
+@media print{.masthead,.toc,#comments,.controls{display:none}.shell{display:block}.main{padding:0}.doc{background:white;color:black}h2,h3{break-after:avoid}tr{break-inside:avoid}}
+</style>
+</head>
+<body class="hs-doc doc" id="top">
+<header class="masthead"><div class="wrap"><span class="brand">Engineering constants</span><span class="lg">Draft for maintainer review</span></div></header>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">Module analysis · Revision A · 22 October 2026</p>
+<h1>Constants module analysis</h1>
+<p class="lede">Scalar conversions, engineering property records and the boundary between arithmetic evidence and a design basis.</p>
+</div></div>
+<div class="wrap shell">
+<nav class="toc" aria-label="Report contents"><p class="eyebrow">Contents</p><ol>
+<li><a href="#summary">Executive Summary</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#results">Summary of Results</a></li>
+<li><a href="#basis">Basis and Criteria</a></li>
+<li><a href="#method">Methodology and Interfaces</a></li>
+<li><a href="#example">Worked Example</a></li>
+<li><a href="#validation">Validation Evidence</a></li>
+<li><a href="#limits">Limits and Recommendations</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#appendix">Appendix</a></li>
+</ol><p><a href="#changes">Changes</a> · <a href="#comments">Comments</a></p></nav>
+<main class="main">
+<section id="summary">
+<h2>1 Executive Summary</h2>
+<p>The constants module is a scalar conversion and engineering property library. Analysis is performed to determine how its public conversion functions support explicit unit changes; the key results are summarized below.</p>
+<ul>
+<li>The published length example can be evaluated through the public interface.
+<ul><li>For $LENGTH_FT ft, the calculated value is $LENGTH_M m and the rounded presentation is $ROUNDED_M m. The latter follows the source example; measurement precision is not inferred by the module. The source is identified in <a href="#ref-nist">Reference 1</a>.</li></ul></li>
+<li>The conversion evidence supports an arithmetic check within the stated numerical tolerance.
+<ul><li>A physical acceptance limit is not supplied by unit conversion. Material selection, seawater model accuracy and site design conditions remain outside this conclusion, as described in <a href="#limits">Section 8</a>.</li></ul></li>
+</ul>
+<h3>1.1 Revision history</h3>
+<div class="table-wrap"><table><caption>Revision history, newest first.</caption><thead><tr><th>Revision</th><th>Date</th><th>What changed and why</th></tr></thead>
+<tbody><tr><td>A</td><td>22 October 2026</td><td>The public conversion workflow and its evidence are described to distinguish arithmetic output from engineering acceptance.</td></tr></tbody></table></div>
+</section>
+<section id="introduction">
+<h2>2 Introduction</h2>
+<p>The module scope is described through its public functions, scalar constants and property records. A complete length conversion is followed from the documented input to a target-unit result and an arithmetic return check.</p>
+<p>Pressure, length, force, mass and temperature conversions are supplied as separate scalar functions. Surface seawater density and viscosity functions are supplied alongside steel and casing records. Function docstrings and existing tests establish a public entry point and test coverage; a readiness-only report is therefore not used. The records are listed in <a href="#repository-records">Section 9.2</a>.</p>
+<h3>2.1 Not covered</h3>
+<p>The main conclusion is limited to the length workflow and the supplementary unit-identity checks. Force, mass, offset-temperature and reciprocal pressure-factor accuracy are not newly benchmarked here. Seawater correlations, hydrostatic modelling, scalar material properties, grade-table accuracy and indicative environmental values are not assessed as design methods.</p>
+<p>Their repository tests are included in the existing evidence selection, with the distinction between regression expectations and external validation preserved. No structural model, material allowable or operating envelope is established by this report.</p>
+</section>
+<section id="results">
+<h2>3 Summary of Results</h2>
+<p>The converted length is presented against the source-unit magnitude. Every plotted ordinate is obtained by calling the length conversion function; intermediate inputs are illustrative subdivisions of the published example.</p>
+<p>For $LENGTH_FT ft, the calculated value is $LENGTH_M m and the rounded presentation is $ROUNDED_M m. The latter follows the source example; measurement precision is not inferred by the module. The source is identified in <a href="#ref-nist">Reference 1</a>.</p>
+<figure class="card">
+<svg class="chart" viewBox="0 0 720 350" role="group" aria-label="Converted length against input length; hover over or focus a point">
+<line class="axis" x1="80" y1="280" x2="660" y2="280"/><line class="axis" x1="80" y1="40" x2="80" y2="280"/>
+<text x="80" y="25">Converted length (m)</text><text x="300" y="330">Input length (ft)</text>
+<text x="52" y="285">0</text><polyline class="curve" points="$CURVE"/>
+$POINTS
+</svg>
+<p id="chart-detail" aria-live="polite">Hover over or focus a point for the case, component, input, converted demand, units and limit status.</p>
+<figcaption>Figure 1. Converted length for the published example and illustrative intermediate inputs. The endpoints describe example coverage. No capacity limit applies to this unit identity.</figcaption>
+</figure>
+<p>The legend is defined as follows: an illustration is a selected arithmetic input with no measurement claim; a limit that is not applicable denotes a unit identity with no capacity criterion; NOT_EVALUATED denotes a physical assessment for which the required evidence is absent. No numerical operating-limit line is drawn because none is supplied.</p>
+</section>
+<section id="basis">
+<h2>4 Basis and Criteria</h2>
+<p>The conversion basis is taken from an open metrology guide. Numerical comparison criteria are selected for arithmetic regression and are separated from physical acceptance criteria.</p>
+<h3>4.1 Theory and equations</h3>
+<p>A multiplicative conversion is written as <var>y</var> = <var>c</var><var>x</var>, where <var>x</var> is the magnitude in the source unit, <var>y</var> is the magnitude in the target unit and <var>c</var> is the target-unit magnitude per source unit. This is the factor method in <a href="#ref-nist">Reference 1, Appendix B.3</a>. The equation applies to compatible multiplicative units; offset temperatures require a different relation.</p>
+<div class="formula"><var>l</var><sub>m</sub> = <var>l</var><sub>ft</sub> × $FOOT_FACTOR m/ft.</div>
+<p>The symbols <var>l</var><sub>m</sub> and <var>l</var><sub>ft</sub> denote the same length expressed in metres and international feet. The factor is read from <a href="#ref-nist">Reference 1, Appendix B.8, foot entry</a>. A survey-foot definition is not substituted. The inverse conversion divides by the same factor and provides a consistency check, rather than a separate reference measurement.</p>
+<p>For the supplementary inch and bar checks, the cited definitions are combined with decimal prefixes. Their arithmetic is <var>l</var><sub>mm</sub> = <var>l</var><sub>in</sub> × <var>c</var><sub>m/in</sub> / <var>c</var><sub>m/mm</sub> and <var>p</var><sub>MPa</sub> = <var>p</var><sub>bar</sub> × <var>c</var><sub>Pa/bar</sub> / <var>c</var><sub>Pa/MPa</sub>. Here <var>p</var> denotes pressure and each <var>c</var> carries the units indicated by its subscript. The factors are given in <a href="#ref-nist">Reference 1, Appendix B.8 and Section 4.3, Table 5</a> and reproduced with locators in <a href="#source-register">Table A1</a>.</p>
+<h3>4.2 Comparison criteria</h3>
+<p>The hand-calculated anchors are compared with an absolute tolerance of 10<sup>−12</sup> in their respective output units. Rounded chart payloads are compared with a tolerance of 10<sup>−10</sup> m. These are report-test criteria selected to detect changed arithmetic while allowing binary floating-point rounding; the tests are identified in <a href="#repository-records">Section 9.2</a>.</p>
+<p>The unrounded length is retained in the calculation payload. Its rounded display follows <a href="#ref-nist">Reference 1, Appendix B.7.2</a>. The additional arithmetic digits do not establish measurement precision. Finite numeric input is ASSUMED - to be confirmed at the calling interface, because the conversion functions do not enforce an input-validation policy.</p>
+</section>
+<section id="method">
+<h2>5 Methodology and Interfaces</h2>
+<p>The conversion sequence is performed using the public scalar functions. Input units are selected by the function name and are not attached to the returned number.</p>
+<p>A length magnitude in feet is supplied to <code>ft_to_m</code>, and a magnitude in metres is returned. The result is supplied to <code>m_to_ft</code> for a consistency check. The functions <code>inch_to_mm</code> and <code>bar_to_mpa</code> are called with supplementary unit inputs. No dimensional object or uncertainty record is returned.</p>
+<figure class="card">
+<svg class="schematic" viewBox="0 0 720 220" role="img" aria-label="Length measurement between two datum faces, with the same span expressed in source and target units">
+<path d="M85 60v95m540-95v95M85 80h540M85 75l15-10m-15 10l15 10m525-10l-15-10m15 10l-15 10"/>
+<path d="M85 145h540m-480 0v-15m60 15v-15m60 15v-15m60 15v-15m60 15v-15m60 15v-15m60 15v-15m60 15v-15"/>
+<text x="190" y="48">Same span l in international feet or metres</text>
+<text x="65" y="185">Datum face</text><text x="540" y="185">End face</text>
+<text x="220" y="118">Illustrative scale; no physical size assigned</text>
+</svg>
+<figcaption>Figure 2. A length between datum faces is represented in different units. The schematic defines the measured span, without assigning a structure, load, mesh or boundary condition to an arithmetic conversion.</figcaption>
+</figure>
+<p>The wider interfaces are summarized in <a href="#interface-register">Table A2</a>. Steel lookup returns a frozen record or a missing result; the surrounding registry remains mutable. Casing records store strength in megapascals, whereas steel records store strength in pascals. The physical-property interfaces do not use the unit-conversion workflow to select a design basis.</p>
+</section>
+<section id="example">
+<h2>6 Worked Example</h2>
+<p>The published rounding example is evaluated through the module. Its input and reference presentation are read from the source register, and every result below is inserted from a function call.</p>
+<p>The input is $LENGTH_FT ft. Calling <code>ft_to_m</code> gives $LENGTH_M m. The cited factor is $FOOT_FACTOR m/ft, so multiplication of the displayed input by the displayed factor reproduces the calculated result. The presentation $ROUNDED_M m follows the published example in <a href="#ref-nist">Reference 1, Appendix B.7.2</a>.</p>
+<p>Calling <code>m_to_ft</code> with the calculated metre value returns $RETURNED_FT ft. This is a consistency check through the reciprocal implementation. It is not evidence of a separate physical measurement.</p>
+<p>The supplementary length input $INCH in gives $LENGTH_MM mm through <code>inch_to_mm</code>. The supplementary pressure input $BAR bar gives $PRESSURE_MPA MPa through <code>bar_to_mpa</code>. These are selected unit-identity checks based on <a href="#ref-nist">Reference 1, Appendix B.8 and Section 4.3, Table 5</a>, rather than additional published measurement examples.</p>
+<p>The hand arithmetic for these results is written above the test assertions. Consistency checks compare the reported outputs and chart samples with fresh calls of the public functions. The displayed headline is also recomputed from its displayed input and cited factor, with no extra input precision supplied.</p>
+</section>
+<section id="validation">
+<h2>7 Validation Evidence</h2>
+<p>The existing repository evidence is separated from the new report checks. Test counts describe execution or source inventory only, rather than engineering acceptance.</p>
+<p>The existing constants-related selection contains $TEST_TOTAL test definitions across the files listed in <a href="#repository-records">Section 9.2</a>. The selection was executed with all cases passing; its shared casing file also includes pipe-geometry tests outside this module. The exact inventory is given in <a href="#test-inventory">Table A3</a>.</p>
+<p>The existing tests check stored constants, conversion round trips, reference expectations, ordering and frozen records. The seawater tests include approximate reference comments, qualitative trends, physical-range checks and a kinematic-viscosity identity. These tests provide regression evidence; their comments alone do not establish agreement with a newly opened scientific dataset.</p>
+<p>The new report checks exercise the hand-calculated anchors, fresh-call consistency, displayed precision, offline rebuilding, source links and text encoding. The length example is compared with the opened metrology source. No separately stored field campaign, laboratory benchmark dataset or material certificate is added. A repository-wide test result is not claimed.</p>
+<p>The arithmetic evidence does not reconcile parallel material values. A disagreement between the scalar and registry representations of the higher-strength pipeline grade remains in the source; both existing isolated test expectations reflect their respective representation. The implementation records are identified in <a href="#repository-records">Section 9.2</a>. No licensed standard value is reproduced here.</p>
+</section>
+<section id="limits">
+<h2>8 Limits and Recommendations</h2>
+<p>The limits of use are defined by the arithmetic interface and available source evidence. Recommendations are tied to the documented behaviour and open-source conversion guidance.</p>
+<h3>8.1 Limits of use</h3>
+<p>Unit labels, dimensional compatibility, finite-input checks, measurement uncertainty and physically admissible signs are not enforced by the conversion helpers. Incorrectly labelled inputs therefore remain a caller risk. The pressure reciprocal is stored with finite decimal precision; the scope of the exact-definition example is not extended to every pressure route.</p>
+<p>The seawater functions describe a surface-pressure envelope, while hydrostatic pressure uses a fixed nominal density. Input bounds are documented without runtime guards. Correlation accuracy and numerical validity outside the documented envelope remain NOT_EVALUATED here. Numerical envelope values are not adopted as operating limits because the cited scientific source has not been opened for this report.</p>
+<p>Material records and environmental scalars are not a substitute for a supplied material specification or site basis. Record immutability does not prevent registry mutation. A missing steel key returns no record, so a result check is required before field access. The scientific attribution and grade consistency concerns in the repository pack remain unresolved by this documentation.</p>
+<h3>8.2 Recommendations</h3>
+<p>For immediate conversion use, explicit source and target units are to be recorded at the calling interface and finite inputs are to be checked before arithmetic. Rounding is to be selected for the actual measurement precision and intended use, following <a href="#ref-nist">Reference 1, Sections 7.9 and B.7.2</a>. The unrounded value is to be preserved for subsequent calculations.</p>
+<p>Before either parallel grade representation is used for material selection, the maintainer is to reconcile its basis against the applicable specification and add a cross-representation assertion. Before seawater outputs are used in an engineering assessment, the applicable correlation, pressure convention and source envelope are to be established and checked at the interface. These actions follow the implementation gaps documented in <a href="#repository-records">Section 9.2</a>; design acceptance remains NOT_EVALUATED until that evidence is supplied.</p>
+<p>The next numerical slice is a cited pressure-conversion benchmark followed by a separately sourced seawater-property assessment. The existing functions and tests provide the interface inventory for that work; no conclusion from the length example is transferred to those physical models.</p>
+</section>
+<section id="references">
+<h2>9 References</h2>
+<p>The external conversion basis and repository records are identified here. Each reference is used within its stated scope.</p>
+<h3>9.1 Public conversion source</h3>
+<p id="ref-nist">Reference 1. <a href="$SOURCE_URL">Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition</a>. Appendix B.3 supplies the factor method; Appendix B.7.2, pages 43–44, supplies the length and rounding example; Appendix B.8, pages 45, 49 and 50, supplies bar, foot and inch factors; Section 4.3, Table 5, supplies decimal prefixes. The public document was retrieved on 22 October 2026 with a successful response. The source register records the retrieval time and selected inputs.</p>
+<h3 id="repository-records">9.2 Repository records and rebuild instructions</h3>
+<ul>
+<li>Public conversions and docstrings: <code>src/assetutilities/constants/conversions.py</code>. The length functions are <code>ft_to_m</code>, <code>m_to_ft</code> and <code>inch_to_mm</code>; the supplementary pressure function is <code>bar_to_mpa</code>.</li>
+<li>Scalar properties: <code>src/assetutilities/constants/__init__.py</code>; steel records and missing-key handling: <code>src/assetutilities/constants/materials.py</code>; casing records: <code>src/assetutilities/constants/casing_grades.py</code>; surface properties and documented envelope: <code>src/assetutilities/constants/seawater.py</code>.</li>
+<li>Parallel strength representations: <code>FY_X70</code> in the scalar module and the corresponding <code>get_steel_grade</code> record in the materials module. Their differing expectations are encoded in <code>TestSteelProperties.test_yield_strength_X70_mpa</code> and <code>TestAPI5LGrades.test_x70_smys_pa</code>.</li>
+<li>Existing tests: <code>tests/unit/test_constants.py</code>, <code>tests/unit/test_seawater.py</code>, <code>tests/unit/test_materials.py</code> and <code>tests/test_casing_grades.py</code>. Repository evidence inventory and outstanding source questions: <code>src/assetutilities/constants/docs/agent-pack.md</code>.</li>
+<li>Report tests: <code>tests/reports/test_constants_report.py</code>. Rebuild command from the repository root: <code>python scripts/reports/build_constants_report.py</code>. An alternative destination is accepted with <code>--output-dir</code>.</li>
+<li>Execution record: <code>docs/reports/modules/aconstants/checks.json</code> records the commands, test results and scope exclusions. The recorded tests were executed on the uncommitted tree with the Python UTF-8 environment switch unset for the report tests.</li>
+<li>Public source register: <code>docs/reports/modules/aconstants/source-basis.json</code>. The original stylesheet and layout are reused from the units module report exemplar available in repository history; no external assets are loaded by this page.</li>
+</ul>
+<details><summary>Calculation-source fingerprints</summary><p>Fingerprints cover calculation source files only. They identify the code represented by the embedded results.</p><ul class="digest">$DIGESTS</ul></details>
+</section>
+<section id="appendix">
+<h2>10 Appendix</h2>
+<p>The detailed input register, evidence inventory and review facilities are provided here. The tabulated factors are source definitions rather than newly inferred measurements.</p>
+<h3 id="source-register">10.1 Source and data register</h3>
+<div class="table-wrap"><table><caption>Table A1. Conversion definitions read from Reference 1; names state the target unit per source unit.</caption><thead><tr><th>Definition</th><th>Value</th><th>Source</th></tr></thead><tbody>$SOURCE_REGISTER</tbody></table></div>
+<div class="table-wrap"><table><caption>Data register. No missing physical quantity is assigned a numerical value.</caption><thead><tr><th>Item</th><th>Disposition</th><th>Basis or action</th></tr></thead><tbody>
+<tr><td>Published input and rounded presentation</td><td>$LENGTH_FT ft; $ROUNDED_M m</td><td>Reference 1, Appendix B.7.2. The calculation output is $LENGTH_M m.</td></tr>
+<tr><td>Supplementary unit inputs</td><td>$INCH in; $BAR bar</td><td>Selected unit-identity checks using Reference 1, Appendix B.8.</td></tr>
+<tr><td>Finite input and explicit units</td><td>ASSUMED - to be confirmed</td><td>The calling interface is to establish both before conversion.</td></tr>
+<tr><td>Measurement uncertainty and physical span</td><td>NOT_EVALUATED</td><td>The public example is used as arithmetic; no actual measurement is supplied.</td></tr>
+<tr><td>Capacity and site operating limit</td><td>NOT_EVALUATED</td><td>No material, load, geometry or site criterion is supplied.</td></tr>
+<tr><td>Seawater and material source assessment</td><td>NOT_EVALUATED</td><td>Applicable public scientific evidence or a supplied specification is required.</td></tr>
+</tbody></table></div>
+<h3 id="interface-register">10.2 Interface and evidence inventory</h3>
+<div class="table-wrap"><table><caption>Table A2. Public interfaces, inputs and returned quantities. Source records are identified in Section 9.2.</caption><thead><tr><th>Interface</th><th>Required inputs</th><th>Output and convention</th></tr></thead><tbody>
+<tr><td>Pressure, length, force, mass and temperature conversions</td><td>Scalar in the function's named source unit</td><td>Scalar in the named target unit; no dimensional metadata</td></tr>
+<tr><td>Surface seawater properties</td><td>Temperature in degrees Celsius and salinity in the documented convention</td><td>Density in kg/m³, dynamic viscosity in Pa·s or kinematic viscosity in m²/s</td></tr>
+<tr><td>Depth-to-pressure conversion</td><td>Depth in metres</td><td>Gauge pressure in kPa, using the stored nominal density and gravity</td></tr>
+<tr><td>Steel lookup</td><td>Exact grade-name string</td><td>Frozen record with strength in Pa, or no record for an unknown key</td></tr>
+<tr><td>Casing registry</td><td>Exact grade key</td><td>Frozen record with strength in MPa and a grade group</td></tr>
+<tr><td>Scalar constants</td><td>Explicit import</td><td>Plain values; the caller is responsible for interpreting units and basis</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table id="test-inventory"><caption>Table A3. Existing selection inventory; counts are regenerated from test definitions. Passing execution is recorded separately from source counts.</caption><thead><tr><th>Area</th><th>Test definitions</th><th>Source</th></tr></thead><tbody>$INVENTORY</tbody></table></div>
+<h3>10.3 Quality pre-flight evidence</h3>
+<p>The report checks compare hand-calculated literals with module results, compare fresh module calls with the worked example and chart payload, recompute the displayed headline and rebuild into a separate directory. Numeric payloads are compared with stated tolerances before they are masked for the remaining document comparison. Source changes or stale counts identify the rebuild command in the failure message.</p>
+<p>Text files use explicit UTF-8 decoding and LF writes. The report tests are executed with the Python UTF-8 environment switch unset. Internal links, section count, standalone assets and source-register locators are checked. Interactive browser behaviour and the complete repository suite are not executed as part of this report assessment.</p>
+<h3 id="changes">10.4 Changes since the previous issue</h3>
+<p>The initial issue establishes the arithmetic example and its limits. Later engineering changes are to be listed relative to the reader's previous issue.</p>
+<ul id="changes-list">$CHANGES_LIST</ul>
+<h3 id="comments">10.5 Comments</h3>
+<p>Comments are kept in this page until saved. Choose the directory containing this report to save the comment file beside it. Where directory access is unavailable, download the comment file and place it beside the report. The report itself is not modified.</p>
+<label for="comment-section">Section</label><select id="comment-section">
+<option>1 Executive Summary</option><option>2 Introduction</option><option>3 Summary of Results</option><option>4 Basis and Criteria</option><option>5 Methodology and Interfaces</option><option>6 Worked Example</option><option>7 Validation Evidence</option><option>8 Limits and Recommendations</option><option>9 References</option><option>10 Appendix</option>
+</select>
+<label for="comment-text">Comment</label><textarea id="comment-text"></textarea>
+<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save beside report</button><button id="download-comments" type="button">Download comments</button></div>
+<label for="import-comments">Open a saved comment file</label><input id="import-comments" type="file" accept="application/json,.json">
+<p id="comment-status" role="status">No comments saved.</p><ol id="comments-list"></ol>
+</section>
+</main></div>
+<script id="calculation-data" type="application/json">$DATA</script>
+<script id="changes-data" type="application/json">$CHANGES</script>
+<script>
+'use strict';
+document.querySelectorAll('[data-detail]').forEach(function(point) {
+  function show() { document.getElementById('chart-detail').textContent = point.dataset.detail; }
+  point.addEventListener('mouseenter', show);
+  point.addEventListener('focus', show);
+  point.addEventListener('click', show);
+});
+const changeData = JSON.parse(document.getElementById('changes-data').textContent);
+const changeList = document.getElementById('changes-list');
+changeList.replaceChildren();
+changeData.changes.forEach(function(item) {
+  const li = document.createElement('li');
+  li.textContent = 'Sections ' + item.section + ': ' + item.change + ' ' + item.reason;
+  changeList.appendChild(li);
+});
+let comments = [];
+const status = document.getElementById('comment-status');
+function showComments() {
+  const list = document.getElementById('comments-list');
+  list.replaceChildren();
+  comments.forEach(function(item) {
+    const li = document.createElement('li');
+    li.textContent = item.section + ': ' + item.text;
+    list.appendChild(li);
+  });
+}
+function commentJSON() {
+  return JSON.stringify({document: 'Constants module analysis', revision: 'A', comments: comments}, null, 2) + '\n';
+}
+document.getElementById('add-comment').addEventListener('click', function() {
+  const text = document.getElementById('comment-text');
+  if (!text.value.trim()) { status.textContent = 'Enter a comment before adding it.'; return; }
+  comments.push({section: document.getElementById('comment-section').value, text: text.value.trim()});
+  text.value = '';
+  showComments();
+  status.textContent = 'Comments changed. Save the comment file to keep them.';
+});
+document.getElementById('save-comments').addEventListener('click', async function() {
+  if (!window.showDirectoryPicker) {
+    status.textContent = 'Directory access is unavailable. Download comments and place the file beside the report.';
+    return;
+  }
+  try {
+    const directory = await window.showDirectoryPicker({mode: 'readwrite'});
+    const file = await directory.getFileHandle('constants-comments.json', {create: true});
+    const writable = await file.createWritable();
+    await writable.write(commentJSON());
+    await writable.close();
+    status.textContent = 'Comments saved in the selected directory.';
+  } catch (error) {
+    status.textContent = 'Comments were not saved. Retry or download the comment file.';
+  }
+});
+document.getElementById('download-comments').addEventListener('click', function() {
+  const url = URL.createObjectURL(new Blob([commentJSON()], {type: 'application/json'}));
+  const link = document.createElement('a');
+  link.href = url; link.download = 'constants-comments.json'; link.click();
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  status.textContent = 'Comment download requested. Place the file beside the report.';
+});
+document.getElementById('import-comments').addEventListener('change', async function(event) {
+  const file = event.target.files[0];
+  if (!file) { return; }
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.document !== 'Constants module analysis' || data.revision !== 'A' || !Array.isArray(data.comments) || !data.comments.every(function(item) {
+      return typeof item.section === 'string' && typeof item.text === 'string';
+    })) { throw new Error('Invalid comment file'); }
+    comments = data.comments;
+    showComments();
+    status.textContent = 'Saved comments opened.';
+  } catch (error) { status.textContent = 'The selected file is not a valid comment file for this report.'; }
+});
+</script>
+</body>
+</html>
