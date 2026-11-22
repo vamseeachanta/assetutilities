@@ -1,0 +1,26 @@
+# Native aliases: YAML 1.2.2 (2021), sections 3.2.2.2 and 7.1.
+# Placeholders: Jinja 3.1 template documentation, Variables.
+meta:
+  basename: yaml_utilities
+  library: assetutilities
+
+define: &label sample
+block: &target
+  folder: results
+
+test_variables:
+  flag: true
+  method: placeholder
+
+file_management:
+  flag: false
+
+data:
+  groups:
+    - label: *label
+      target: *target
+
+output: "{{ block.folder }}/{{ define }}.csv"
+placeholder_tests:
+  method: "{{ test_variables.method }}"
+  library: "{{ meta.library }}"

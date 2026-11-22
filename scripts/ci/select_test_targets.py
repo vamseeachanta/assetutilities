@@ -21,7 +21,9 @@ Decision tree (first match wins):
     ``src/modules/<m>/``) — but only keep ones with a real
     ``tests/modules/<m>/`` dir — and route exact contract paths (e.g.
     ``config/repo_structure.yml`` -> ``tests/repo_structure``) ->
-    ``scope=modules``.
+    ``scope=modules``. Test code no rule claims is caught too: a top-level
+    ``tests/test_*.py`` runs itself (``_root`` shard) and a file under another
+    ``tests/<dir>/`` with tests runs that dir.
   * if nothing test-relevant changed (docs / reports / notebooks only)
     -> ``scope=skip`` — still runs the cheap always-on cross-cutting set so the
     required check passes fast, never the full tree.
@@ -49,11 +51,13 @@ from pathlib import Path
 ALWAYS_XDIST = [
     "tests/unit",
     "tests/data_store",
+    "tests/hygiene",
+    "tests/ci",
 ]
 
 # Module domains that are WIP staging areas, not gating suites — never shard
 # them into the CI matrix. `tests_wip` is a holding pen for not-yet-stable tests
-# (e.g. plotly polar viz that errors in the engine). See issue #99.
+# (e.g. plotly polar viz that errors in the engine).
 MATRIX_IGNORE_DOMAINS = {
     "tests_wip",
 }
@@ -88,6 +92,10 @@ CONTRACT_ROUTES = {
     "docs/README.md": "tests/docs",
     "README.md": "tests/docs",
     "AGENTS.md": "tests/docs",
+    "docs/sub_utilities/assets/style.css": "tests/modules/devtools",
+    "scripts/reporting/generate_devtools_report.py": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/index.html": "tests/modules/devtools",
+    "docs/reports/modules/adevtools/changes.json": "tests/modules/devtools",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST
@@ -98,6 +106,12 @@ _MODULE_SRC_RES = (
     re.compile(r"^src/modules/([^/]+)/"),
 )
 _MODULE_TEST_RE = re.compile(r"^tests/modules/([^/]+)/")
+# Catch-alls for test code that no module/contract rule claims, so a change to
+# a test never silently maps to ``skip``:
+#   * a top-level test file (tests/test_*.py) runs itself (``_root`` shard);
+#   * a file under another top-level suite dir (tests/<dir>/...) runs that dir.
+_ROOT_TEST_FILE_RE = re.compile(r"^tests/(test_[^/]+\.py|[^/]+_test\.py)$")
+_TEST_SUITE_DIR_RE = re.compile(r"^tests/([^/]+)/")
 
 
 def _is_core(path: str) -> bool:
@@ -127,6 +141,8 @@ def select(changed: list[str], root: Path) -> dict:
 
     modules: set[str] = set()
     contracts: set[str] = set()
+    root_files: set[str] = set()
+    suites: set[str] = set()
     relevant = False
 
     for p in changed:
@@ -139,6 +155,17 @@ def select(changed: list[str], root: Path) -> dict:
             if mt.group(1) not in MATRIX_IGNORE_DOMAINS:
                 modules.add(mt.group(1))
             relevant = True
+            continue
+        if _ROOT_TEST_FILE_RE.match(p):
+            root_files.add(p)
+            relevant = True
+            continue
+        sd = _TEST_SUITE_DIR_RE.match(p)
+        if sd:
+            suite = root / "tests" / sd.group(1)
+            if sd.group(1) != "__pycache__" and suite.is_dir() and _has_tests(suite):
+                suites.add(f"tests/{sd.group(1)}")
+                relevant = True
             continue
         for rx in _MODULE_SRC_RES:
             ms = rx.match(p)
@@ -154,16 +181,21 @@ def select(changed: list[str], root: Path) -> dict:
     xdist = list(ALWAYS_XDIST)
     for mod in sorted(modules):
         xdist.append(f"tests/modules/{mod}")
-    xdist.extend(sorted(contracts))
+    xdist.extend(sorted(contracts | suites))
+    xdist.extend(sorted(root_files))
 
     xdist = _existing_unique(xdist, root)
     return {"scope": "modules" if relevant else "skip", "xdist": xdist, "seq": []}
 
 
 def _existing_unique(targets: list[str], root: Path) -> list[str]:
+    """Keep targets that exist (suite dirs, or top-level test files), deduped."""
     seen, out = set(), []
     for t in targets:
-        if t not in seen and (root / t).is_dir():
+        path = root / t
+        if t not in seen and (
+            path.is_dir() or (path.is_file() and _ROOT_TEST_FILE_RE.match(t))
+        ):
             seen.add(t)
             out.append(t)
     return out
@@ -251,11 +283,19 @@ def to_matrix(changed: list[str], root: Path) -> dict:
             shards.append(
                 {"name": "_always", "targets": " ".join(always), "mode": "xdist"}
             )
+        root_files = []
         for tgt in result["xdist"]:
             if tgt in ALWAYS_XDIST:
                 continue  # already in the always-on shard
+            if _ROOT_TEST_FILE_RE.match(tgt):
+                root_files.append(tgt)  # grouped into one _root shard below
+                continue
             name = tgt.replace("tests/modules/", "modules-").replace("tests/", "")
             shards.append({"name": name, "targets": tgt, "mode": "xdist"})
+        if root_files:
+            shards.append(
+                {"name": "_root", "targets": " ".join(root_files), "mode": "xdist"}
+            )
 
     return {"scope": scope, "include": shards}
 
