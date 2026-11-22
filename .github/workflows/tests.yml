@@ -119,6 +119,9 @@ jobs:
       - name: Test workflow triggers
         run: uv run python -m pytest tests/workflows/test_ci_triggers.py
 
+      - name: Test release tooling
+        run: uv run python -m pytest tests/release
+
       - name: Test target explanations and selector
         run: >-
           uv run python -m pytest tests/devtools/test_test_target_explain.py

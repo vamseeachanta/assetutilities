@@ -71,6 +71,11 @@ surface and update it if it is stale.
 
 Reference material was moved to the cold-data store on 2026-10-11 per `data-manifest/MANIFEST.tsv`.
 
+## Package releases
+
+The reusable build helper, tag workflow, maintainer setup and worked example
+are documented in [Package releases to PyPI](sub_release/pypi.md).
+
 ## Plugin Trial Evidence
 
 The [Compound Engineering trial assessment](evaluations/compound-engineering-trial.html)
