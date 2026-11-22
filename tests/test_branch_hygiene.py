@@ -229,6 +229,21 @@ def git_repository(tmp_path):
     return repo, run_git
 
 
+def configure_remote(run_git, name, url="."):
+    """Configure a remote the way ``git remote add`` would, via plain config.
+
+    Newer Git (seen on 2.56) refuses ``git remote add`` when the new name's ref
+    namespace nests inside or around an existing remote's, for example
+    ``fatal: remote name 'mirror/team' is a subset of existing remote 'mirror'``.
+    Such overlapping remotes still exist in real repositories (older Git, edited
+    config), and ``git remote`` still lists them, so the namespace tests keep
+    modelling them by writing the same url and default fetch refspec directly.
+    """
+    run_git("config", f"remote.{name}.url", url)
+    run_git("config", "--add", f"remote.{name}.fetch",
+            f"+refs/heads/*:refs/remotes/{name}/*")
+
+
 @pytest.mark.parametrize("base,base_ref", [
     ("integration", "refs/heads/integration"),
     ("heads/integration", "refs/heads/integration"),
@@ -306,7 +321,8 @@ def test_base_protection_across_namespaces(
     repo, run_git = git_repository
     commit = run_git("rev-parse", "HEAD")
     for remote_name in sorted({"origin", "mirror", remote}):
-        run_git("remote", "add", remote_name, ".")
+        configure_remote(run_git, remote_name)
+    assert set(run_git("remote").splitlines()) == {"origin", "mirror", remote}
     protected = [f"refs/heads/{name}", f"refs/remotes/origin/{name}",
                  f"refs/remotes/{remote}/{name}"]
     expected = {"refs/heads/main": "protected"}
@@ -337,8 +353,10 @@ def test_base_protection_across_namespaces(
 @pytest.mark.parametrize("remote", ["mirror/team", "mirror/team/nested"])
 def test_default_names_with_configured_remote_prefix(git_repository, capsys, name, remote):
     repo, run_git = git_repository
-    for remote_name in ("mirror", "mirror/team", "mirror/team/nested"):
-        run_git("remote", "add", remote_name, ".")
+    remote_names = ("mirror", "mirror/team", "mirror/team/nested")
+    for remote_name in remote_names:
+        configure_remote(run_git, remote_name)
+    assert set(run_git("remote").splitlines()) == set(remote_names)
     ref = f"refs/remotes/{remote}/{name}"
     run_git("update-ref", ref, run_git("rev-parse", "HEAD"))
 
