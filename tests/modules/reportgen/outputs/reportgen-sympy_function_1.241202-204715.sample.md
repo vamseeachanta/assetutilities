@@ -3,7 +3,7 @@
 |:--|--:|
 | Project Name | Sympy Function 1 |
 | Project # | B1522 |
-| Engineer | Sivakumar Pabolu |
+| Engineer | Engineer |
 | Checker | Vamsee Achanta |
 | Date | 2024/11/24 |
 

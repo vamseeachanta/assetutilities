@@ -75,6 +75,43 @@ def test_noncode_only_change_skips_full_tree():
         assert r["xdist"] == [t for t in ALWAYS_XDIST if (REPO_ROOT / t).is_dir()]
 
 
+def test_branch_hygiene_change_selects_its_own_tests():
+    """Regression: tests/test_branch_hygiene.py used to map to scope=skip, so a
+    PR touching only it ran none of its cases."""
+    path = "tests/test_branch_hygiene.py"
+    assert (REPO_ROOT / path).is_file()
+    r = select([path], REPO_ROOT)
+    assert r["scope"] == "modules"
+    assert path in r["xdist"]
+    m = to_matrix([path], REPO_ROOT)
+    assert m["scope"] != "skip"
+    assert {"name": "_root", "targets": path, "mode": "xdist"} in m["include"]
+
+
+def _root_test_files() -> list[str]:
+    return sorted(
+        f"tests/{p.name}"
+        for p in (REPO_ROOT / "tests").glob("test_*.py")
+        if p.is_file()
+    )
+
+
+@pytest.mark.parametrize("path", _root_test_files())
+def test_every_root_test_file_is_selected(path):
+    """Drift guard: no top-level tests/test_*.py may silently map to skip."""
+    m = to_matrix([path], REPO_ROOT)
+    assert m["scope"] == "modules"
+    root = [s for s in m["include"] if s["name"] == "_root"]
+    assert root and path in root[0]["targets"].split()
+
+
+def test_unrouted_test_suite_dir_selects_that_dir():
+    """A test under a non-module, non-always suite dir runs that dir."""
+    r = select(["tests/repo_structure/test_anything.py"], REPO_ROOT)
+    assert r["scope"] == "modules"
+    assert "tests/repo_structure" in r["xdist"]
+
+
 def test_config_repo_structure_routes_to_its_contract():
     r = select(["config/repo_structure.yml"], REPO_ROOT)
     assert r["scope"] == "modules"
