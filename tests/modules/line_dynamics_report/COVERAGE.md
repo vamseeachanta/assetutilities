@@ -41,6 +41,14 @@ direct-source comparison. B4 is excluded because its title prefix is identifying
 neutral title assembly has a separate assertion. Formula interpretation does
 not establish agreement with independently calculated Excel values.
 
+Direct assertions with literal expectations, independent of the interpreter,
+cover Excel's strict B9 text coercion: Tp tokens such as `08_5` (which Python
+`float()` reads as 85) raise `ValueError` starting `#VALUE!`, while zero,
+negative, exponent and leading-space periods keep INT's floor. The interpreter's
+INT applies the same strictness. Empty bending input (zero extrema) and
+nonblank layback labels, including `0` for both `0.0` and `-0.0`, are asserted
+directly.
+
 All tests run without source workbooks except the three read-only source
 comparisons (two report checks and one summary check). Only those tests skip
 when their optional source is absent.

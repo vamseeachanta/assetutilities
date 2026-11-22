@@ -24,7 +24,8 @@ range extrema on Sheet1. The source has no polynomial equation or coefficient
 table despite its filename. Inputs are sparse G7:L41 and blank layback cells
 A7/A13/A19/A25/A31/A37. Only I/J/K have numeric values. Blank range entries are
 `None`; extrema ignore blanks and return zero for an entirely blank range.
-Concatenating a blank layback produces empty text. Lengths are m, angles degrees,
+Concatenating a blank layback produces empty text; a zero (including `-0.0`)
+renders as `0`, as Excel does. Lengths are m, angles degrees,
 and tensions retain the source's `Te` notation.
 
 `bending_report.calculate_bending_report` reduces raw rows 2:57, using columns B,
@@ -34,7 +35,16 @@ Lengths are m, time s, angles degrees, speed m/s and loads/tensions kN; the
 current factor is dimensionless. Callers supply inputs in these units.
 
 Tp and Hs are the first four characters after those filename tokens. Tp uses
-INT (floor); Hs stays text. Wave direction is `360 - direction + 90`, relative
+INT (floor); Hs stays text. The Tp text is coerced strictly, as Excel does:
+Python `float()` would accept `08_5` as 85, but Excel INT returns `#VALUE!`, so
+text outside plain decimal/exponent form (underscores, `inf`, `nan`, non-ASCII
+digits, tabs, empty) raises `ValueError` whose message starts with `#VALUE!`.
+Locale-dependent forms (thousands separators, currency, percent, dates) are also
+rejected. Valid zero and negative periods keep the floor (`-1.2` gives -2).
+
+Direction labels C6, D6 and G6 define the conventions: wave (C) and current (G)
+directions are going-to, clockwise from north; relative wave heading (D) is
+counterclockwise from the connection reference. Wave direction is `360 - direction + 90`, relative
 heading is `wave direction - vessel heading`, and current speed is reference
 speed times factor. Positive current uses `90 - direction`, with 360 added once
 if negative; nonpositive current uses direction zero. Connection angle extrema
@@ -112,8 +122,9 @@ See [COVERAGE.md](../../../tests/modules/line_dynamics_report/COVERAGE.md).
   no cited design basis. All four `ReportAllowables` arguments are required
   caller inputs. P3's clearance criterion `>0` also lacks a stated basis.
 - Every report C9:C64/G9:G64 and L9:M64: the angle literals 360, 90 and 180
-  lack a convention reference. Preserve `DirectionConvention` defaults;
-  callers must confirm the intended coordinate convention.
+  lack a cited reference beyond the C6/D6/G6 labels (going-to clockwise from
+  north for wave and current; counterclockwise for relative heading). Preserve
+  `DirectionConvention` defaults; callers must confirm the input convention.
 - Filename field width four and sheet-label width six are source literals,
   named `FILENAME_VALUE_CHARACTERS` and `REPORT_STEP_CHARACTERS`. No alternative
   naming specification is supplied.

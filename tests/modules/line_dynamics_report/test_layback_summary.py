@@ -50,6 +50,19 @@ def test_layback_summary_fixture_caches():
     compare_layback_summary(json.loads(path.read_text()))
 
 
+def test_nonblank_layback_labels_render_like_excel_text():
+    # The source caches only exercise blank distances; Excel shows zero as "0".
+    distances = (0.0, -0.0, 150.0, 12.5, -3.25, None)
+    output = calculate_layback_summary(LaybackSummaryInputs(distances, *((),) * 6))
+    assert output.labels == (
+        "Layback distance of 0 m", "Layback distance of 0 m",
+        "Layback distance of 150 m", "Layback distance of 12.5 m",
+        "Layback distance of -3.25 m", "Layback distance of  m",
+    )
+    assert output.exit_tension_max_te == 0.0
+    assert output.minimum_bend_radius_m == 0.0
+
+
 def test_layback_summary_direct_workbook_caches():
     if not SOURCE.is_file():
         pytest.skip("Optional source workbook is absent")

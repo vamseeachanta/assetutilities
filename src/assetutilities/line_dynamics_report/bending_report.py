@@ -1,6 +1,21 @@
-"""Reduce line-dynamics responses into bending-report rows and extrema."""
+"""Reduce line-dynamics responses into bending-report rows and extrema.
+
+Direction conventions (workbook labels C6, D6 and G6), all in degrees:
+
+* Wave direction (C6) and current direction (G6) are "going-to" directions,
+  measured clockwise from north.
+* Relative wave heading (D6) is measured counterclockwise from the
+  connection (vessel heading) reference.
+
+No angle is normalized beyond what the workbook formulas do; see
+``reduce_dynamics_row``.
+
+Workbook errors are raised as ``ValueError``. Where the workbook would show
+an Excel error value, the message names it (for example ``#VALUE!``).
+"""
 
 import math
+import re
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
 
@@ -8,11 +23,31 @@ from typing import Optional, Tuple, Union
 Scalar = Union[float, str]
 FILENAME_VALUE_CHARACTERS = 4
 REPORT_STEP_CHARACTERS = 6
+EXCEL_VALUE_ERROR = "#VALUE!"
+# Plain decimal text that Excel's implicit text-to-number coercion accepts:
+# optional surrounding spaces and sign, ASCII digits, one decimal point and an
+# optional exponent. Python float() is more lenient (underscores, "inf",
+# "nan", non-ASCII digits, tabs), so it is never applied to unchecked text.
+# Locale-dependent forms (thousands separators, currency, percent, dates and
+# times) are rejected rather than guessed.
+_EXCEL_NUMBER_TEXT = re.compile(r" *[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)? *")
+
+
+def excel_int_of_text(text: str) -> int:
+    """Excel INT applied to text: coerce strictly, then floor toward -inf.
+
+    Raises ValueError naming #VALUE! where Excel would return that error,
+    e.g. for the four-character token ``08_5``.
+    """
+    if not _EXCEL_NUMBER_TEXT.fullmatch(text):
+        raise ValueError(f"{EXCEL_VALUE_ERROR}: INT cannot coerce text {text!r}")
+    return math.floor(float(text))
 
 
 @dataclass(frozen=True)
 class DirectionConvention:
-    """Angle defaults are formula literals; their convention is not cited."""
+    """Angle defaults are formula literals; see the module docstring for the
+    C6/D6/G6 direction conventions. No external standard is cited."""
 
     full_turn_deg: float = 360.0
     north_offset_deg: float = 90.0
@@ -142,6 +177,9 @@ def reduce_dynamics_row(
     sheets. No standard or clause is cited in the workbook. Filename parsing
     reproduces INT(LEFT(TEXTAFTER(...,"Tp"),4)) and LEFT(TEXTAFTER(...,"Hs"),4).
     Wave direction is not normalized; current adds one turn only when negative.
+    The Tp token is coerced strictly (see ``excel_int_of_text``); text Excel
+    INT rejects, such as ``08_5``, raises ValueError naming #VALUE!. Valid
+    zero and negative periods keep INT's floor behavior (``-1.2`` gives -2).
     """
     def token_after(delimiter: str) -> str:
         if delimiter not in raw.case_filename:
@@ -156,7 +194,7 @@ def reduce_dynamics_row(
     else:
         current_direction = 0.0
     return ReportRow(
-        math.floor(float(token_after("Tp"))),
+        excel_int_of_text(token_after("Tp")),
         convention.full_turn_deg - raw.wave_direction_deg + convention.north_offset_deg,
         raw.wave_direction_deg - raw.vessel_heading_deg,
         token_after("Hs"), current_speed, current_direction,

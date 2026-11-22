@@ -47,8 +47,13 @@ def calculate_layback_summary(inputs: LaybackSummaryInputs) -> LaybackSummary:
         numbers = tuple(value for value in values if value is not None)
         return (min(numbers) if minimum else max(numbers)) if numbers else 0.0
 
+    def excel_text(value: float) -> str:
+        # Excel has no negative zero: concatenating -0 renders "0". Adding 0.0
+        # maps -0.0 to 0.0 and leaves every other value unchanged.
+        return format(value + 0.0, ".15g")
+
     labels = tuple(
-        "Layback distance of " + ("" if value is None else format(value, ".15g")) + " m"
+        "Layback distance of " + ("" if value is None else excel_text(value)) + " m"
         for value in inputs.layback_distances_m
     )
     return LaybackSummary(

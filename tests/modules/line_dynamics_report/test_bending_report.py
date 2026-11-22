@@ -191,3 +191,52 @@ def test_current_direction_and_filename_boundary_behavior():
     assert reduce_dynamics_row(replace(raw, wave_direction_deg=0)).wave_direction_clockwise_from_north_deg == 450
     with pytest.raises(ValueError, match="Missing filename token"):
         reduce_dynamics_row(replace(raw, case_filename="no_tokens"))
+
+
+def sample_raw_row():
+    _, rows, _, _ = calculate_fixture(expand_report(COMPACT, REPORTS[0]))
+    return rows[0]
+
+
+@pytest.mark.parametrize("filename", [
+    "Hs1.00-Tp08_5",   # Python float("08_5") == 85.0; Excel INT gives #VALUE!
+    "Hs1.00-Tp1_00",
+    "Hs1.00-Tpinf0",   # LEFT(...,4) == "inf0"
+    "Hs1.00-Tpnan",
+    "Hs1.00-Tp",       # INT("") is #VALUE!
+    "Hs1.00-Tp\t8.5",
+    "Hs1.00-Tp٣.5",  # non-ASCII digit accepted by float()
+    "Hs1.00-Tp1.2.",
+])
+def test_period_text_excel_rejects_is_value_error(filename):
+    # Literal expectation, deliberately not routed through FormulaOracle.
+    with pytest.raises(ValueError, match=r"^#VALUE!"):
+        reduce_dynamics_row(replace(sample_raw_row(), case_filename=filename))
+
+
+@pytest.mark.parametrize("filename, period", [
+    ("Hs1.00-Tp08.5", 8), ("Hs1.00-Tp00.0", 0), ("Hs1.00-Tp-1.2", -2),
+    ("Hs1.00-Tp 8.5", 8), ("Hs1.00-Tp1e1", 10), ("Hs1.00-Tp.5", 0),
+])
+def test_valid_period_text_keeps_int_floor(filename, period):
+    row = reduce_dynamics_row(replace(sample_raw_row(), case_filename=filename))
+    assert row.wave_period_s == period
+    assert type(row.wave_period_s) is int
+
+
+def test_oracle_int_no_longer_accepts_underscore():
+    from formula_oracle import excel_int
+    with pytest.raises(ValueError, match=r"^#VALUE!"):
+        excel_int("08_5")
+    assert excel_int("08.5") == 8
+
+
+def test_empty_bending_input_gives_zero_extrema():
+    metadata = ReportMetadata("RPT_step01", "neutral", TITLE_TEMPLATE)
+    criteria = ReportAllowables(1.0, 2.0, "n/a", 3.0)
+    report = calculate_bending_report((), metadata, criteria)
+    assert report.rows == ()
+    assert report.step_label == "step01"
+    assert report.maxima == (0.0,) * 20
+    assert report.minima == (0.0,) * 20
+    assert report.allowables == ("/",) * 6 + (1.0, 2.0, "n/a", 3.0, "/", "/") + (0.0,) * 8

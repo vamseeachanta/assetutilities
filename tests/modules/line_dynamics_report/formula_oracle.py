@@ -8,9 +8,23 @@ It supplies a formula-consistency check, not an Excel cached-value oracle.
 import ast
 import math
 import operator
+import re
 
 from openpyxl.formula.tokenizer import Tokenizer
 from openpyxl.utils.cell import get_column_letter, range_boundaries
+
+
+# Excel text-to-number coercion is stricter than Python float(): no "_",
+# "inf"/"nan" or non-ASCII digits. Kept separate from the implementation.
+NUMERIC_TEXT = re.compile(r" *[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)? *", re.ASCII)
+
+
+def excel_int(value):
+    if isinstance(value, str):
+        if not NUMERIC_TEXT.fullmatch(value):
+            raise ValueError(f"#VALUE!: INT({value!r})")
+        value = float(value)
+    return math.floor(value)
 
 
 class FormulaOracle:
@@ -82,7 +96,7 @@ class FormulaOracle:
                 assert args == ["filename"]
                 return f"[{self.workbook_name}]" + self.sheet
             functions = {
-                "INT": lambda x: math.floor(float(x)),
+                "INT": excel_int,
                 "LEFT": lambda text, count: text[:count],
                 "RIGHT": lambda text, count: text[-count:] if count else "",
                 "TEXTAFTER": lambda text, delimiter: text.split(delimiter, 1)[1],
