@@ -17,7 +17,7 @@ More information is available at:
 Version:
 --------
 
-- assetutilities v0.0.8
+- assetutilities v0.2.0
 """
 
 # Reader imports
