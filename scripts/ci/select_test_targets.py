@@ -21,9 +21,11 @@ Decision tree (first match wins):
     ``src/modules/<m>/``) — but only keep ones with a real
     ``tests/modules/<m>/`` dir — and route exact contract paths (e.g.
     ``config/repo_structure.yml`` -> ``tests/repo_structure``) ->
-    ``scope=modules``. Test code no rule claims is caught too: a top-level
-    ``tests/test_*.py`` runs itself (``_root`` shard) and a file under another
-    ``tests/<dir>/`` with tests runs that dir.
+    ``scope=modules``. Integration source and test changes also select their
+    non-module integration suite, retaining any existing module targets. Test
+    code no rule claims is caught too: a top-level ``tests/test_*.py`` runs
+    itself (``_root`` shard) and a file under another ``tests/<dir>/`` with
+    tests runs that dir.
   * if nothing test-relevant changed (docs / reports / notebooks only)
     -> ``scope=skip`` — still runs the cheap always-on cross-cutting set so the
     required check passes fast, never the full tree.
@@ -80,7 +82,7 @@ CORE_PREFIXES = (
     "src/assetutilities/common/",
     "src/assetutilities/constants/",
     "src/assetutilities/units/",
-    "scripts/ci/",  # the selector itself / its tests -> fail safe to full
+    "scripts/ci/",  # selector and CI helpers -> fail safe to full
 )
 
 # Exact non-module paths that should run a specific contract suite.
@@ -96,6 +98,12 @@ CONTRACT_ROUTES = {
     "scripts/reporting/generate_devtools_report.py": "tests/modules/devtools",
     "docs/reports/modules/adevtools/index.html": "tests/modules/devtools",
     "docs/reports/modules/adevtools/changes.json": "tests/modules/devtools",
+}
+
+# Additive routes for suites outside tests/modules/<module>.
+CONTRACT_PREFIX_ROUTES = {
+    "src/assetutilities/agent_os/integration/": "tests/agent_os/integration",
+    "tests/agent_os/integration/": "tests/agent_os/integration",
 }
 
 # A module's source can live under any of these prefixes; the canonical TEST
@@ -146,6 +154,10 @@ def select(changed: list[str], root: Path) -> dict:
     relevant = False
 
     for p in changed:
+        for prefix, target in CONTRACT_PREFIX_ROUTES.items():
+            if p.startswith(prefix):
+                contracts.add(target)
+                relevant = True
         if p in CONTRACT_ROUTES:
             contracts.add(CONTRACT_ROUTES[p])
             relevant = True
@@ -291,6 +303,7 @@ def to_matrix(changed: list[str], root: Path) -> dict:
                 root_files.append(tgt)  # grouped into one _root shard below
                 continue
             name = tgt.replace("tests/modules/", "modules-").replace("tests/", "")
+            name = name.replace("/", "-")
             shards.append({"name": name, "targets": tgt, "mode": "xdist"})
         if root_files:
             shards.append(
