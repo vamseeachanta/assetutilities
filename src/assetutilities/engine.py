@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 # Reader imports
 from assetutilities.common.ApplicationManager import ConfigureApplicationInputs
 
@@ -15,7 +17,7 @@ from assetutilities.common.webscraping.web_scraping import WebScraping
 from assetutilities.common.yml_utilities import WorkingWithYAML
 from assetutilities.modules.csv_utilities.csv_utilities_router import CSVUtilitiesRouter
 from assetutilities.modules.data_exploration.data_exploration import DataExploration
-from assetutilities.modules.zip_utilities.zip_utilities import ZipUtilities
+from assetutilities.engine_registry import runner_registry
 
 library_name = "assetutilities"
 
@@ -96,7 +98,15 @@ def engine(
 
     logger.info(f"{basename}, application ... START")
 
-    if basename in ["excel_utilities"]:
+    runner_class = runner_registry.get(basename)
+    if runner_class is not None:
+        cfg_base = runner_class().run(cfg_base)
+        if not isinstance(cfg_base, Mapping):
+            raise TypeError(
+                f"Runner {runner_class.__name__} for basename {basename!r} "
+                f"returned {type(cfg_base).__name__}, not a configuration mapping"
+            )
+    elif basename in ["excel_utilities"]:
         # Reader imports
         from assetutilities.modules.excel_utilities.excel_utilities import (
             ExcelUtilities,
@@ -116,18 +126,6 @@ def engine(
         from assetutilities.modules.git_utilities.git_utilities import GitUtilities
 
         cfg_base = GitUtilities().router(cfg_base)
-    elif basename in ["read_pdf"]:
-        # Reader imports (lazy: pulls optional PDF deps such as tabula/PyPDF2)
-        from assetutilities.modules.pdf_utilities.read_pdf import ReadPDF
-
-        read_pdf = ReadPDF()
-        cfg_base["result"] = read_pdf.read_pdf(cfg_base)
-    elif basename in ["edit_pdf"]:
-        # Reader imports (lazy: pulls optional PDF dep PyPDF2)
-        from assetutilities.modules.pdf_utilities.edit_pdf import EditPDF
-
-        edit_pdf = EditPDF()
-        edit_pdf.edit_pdf(cfg_base)
     elif basename in ["text_analytics"]:
         cfg_base = TextAnalytics().router(cfg_base)
     elif basename in ["word_utilities"]:
@@ -155,10 +153,6 @@ def engine(
 
         # init and run reportgen using config
         reportgen.run(cfg_base)
-    elif basename == "zip_utilities":
-        zu = ZipUtilities()
-        cfg_base = zu.router(cfg_base)
-
     elif basename == "csv_utilities":
         cfg_base = CSVUtilitiesRouter().router(cfg_base)
 

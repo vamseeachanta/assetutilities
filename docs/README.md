@@ -24,6 +24,9 @@ contracts, worked answers, output locations and limitations.
 
 ## Curated Routing Surfaces
 
+The [engine registry guide](modules/engine-registry.html) documents runner
+registration, compatibility, and a runnable custom-workflow example.
+
 For read-only consolidation planning, see the
 [data inventory guide and worked example](modules/data_inventory.html) and
 `src/assetutilities/data_inventory.py`.

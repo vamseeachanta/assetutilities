@@ -8,9 +8,9 @@ Engine-backed tests call the #3297 embed path. They run from the repo root
 
 from __future__ import annotations
 
-import os
+import tempfile
+import types
 from pathlib import Path
-
 
 from assetutilities.workflow_api import (
     ResultEnvelope,
@@ -18,6 +18,7 @@ from assetutilities.workflow_api import (
     build_cfg,
     run_workflow,
 )
+from assetutilities.workflow_api import runner as runner_mod
 from assetutilities.workflow_api.runner import (
     extract_result,
     load_registry,
@@ -35,6 +36,33 @@ def _snapshot(path: Path) -> dict:
             st = p.stat()
             snap[str(p)] = (st.st_size, st.st_mtime_ns)
     return snap
+
+
+def _run_in_own_temp_root(tmp_path: Path, monkeypatch):
+    """Run data_exploration with the stdlib temp dir pointed at a per-test root.
+
+    Returns ``(env, temp_root, created, leftover)``: ``created`` lists the
+    ``auwf_`` roots this call made, ``leftover`` the ``auwf_`` entries still in
+    the per-test root afterwards. Listing the shared system temp dir instead
+    also sees the live roots of concurrent runs (other xdist workers, other
+    jobs on the same host), which made the old check fail at random.
+    """
+    temp_root = tmp_path / "tempdir"
+    temp_root.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(temp_root))
+    created: list[str] = []
+    real_mkdtemp = tempfile.mkdtemp
+
+    def _recording_mkdtemp(*args, **kwargs):
+        path = real_mkdtemp(*args, **kwargs)
+        if Path(path).name.startswith("auwf_"):
+            created.append(path)
+        return path
+
+    monkeypatch.setattr(tempfile, "mkdtemp", _recording_mkdtemp)
+    env = run_workflow("data_exploration")
+    leftover = sorted(p.name for p in temp_root.iterdir() if p.name.startswith("auwf_"))
+    return env, temp_root, created, leftover
 
 
 # --- registry / schema (no engine) -----------------------------------------
@@ -137,19 +165,44 @@ def test_extract_result_globs_injected_root_real_filenames():
     assert not any(n.startswith("input_") for n in names)
 
 
-def test_run_workflow_writes_nothing_outside_tempdir():
+def test_run_workflow_writes_nothing_outside_tempdir(tmp_path, monkeypatch):
     before = _snapshot(EXAMPLE_DIR)
     cwd_logs_before = (REPO_ROOT / "logs").exists()
-    env = run_workflow("data_exploration")
+    env, temp_root, created, leftover = _run_in_own_temp_root(tmp_path, monkeypatch)
     after = _snapshot(EXAMPLE_DIR)
     assert env.status == "ok", env.warnings
     assert before == after, "embed run mutated the repo example dir"
     assert not (EXAMPLE_DIR / "results").exists()
     # No new logs dir under the repo root from this call.
     assert (REPO_ROOT / "logs").exists() == cwd_logs_before
+    # The check observes this call's own temp roots, not an empty directory.
+    assert created, "run_workflow made no auwf_ temp root under the per-test temp dir"
+    assert all(Path(p).parent == temp_root for p in created), created
     # No stray temp roots left behind.
-    leftover = [d for d in os.listdir("/tmp") if d.startswith("auwf_")]
     assert leftover == [], f"tempdirs not cleaned: {leftover}"
+
+
+def test_tempdir_check_ignores_concurrent_runs_roots(tmp_path, monkeypatch):
+    # A concurrent run (another xdist worker or job) holds a live auwf_ root
+    # in the shared system temp dir while this call runs; it is not this
+    # call's leftover and must not fail the check.
+    foreign = Path(tempfile.mkdtemp(prefix="auwf_", dir=tempfile.gettempdir()))
+    try:
+        test_run_workflow_writes_nothing_outside_tempdir(tmp_path, monkeypatch)
+    finally:
+        foreign.rmdir()
+
+
+def test_tempdir_check_detects_own_leftover_root(tmp_path, monkeypatch):
+    # The per-test check still catches a real leak: with the runner's
+    # cleanup disabled, its own root is reported.
+    monkeypatch.setattr(
+        runner_mod, "shutil", types.SimpleNamespace(rmtree=lambda *a, **k: None)
+    )
+    env, _, created, leftover = _run_in_own_temp_root(tmp_path, monkeypatch)
+    assert env.status == "ok", env.warnings
+    assert created
+    assert leftover == sorted(Path(p).name for p in created)
 
 
 def test_reproducible_computed_true_on_double_run():
