@@ -1,0 +1,64 @@
+basename: visualization
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: xy_line
+  mode: scatter
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: False
+  file_name: NULL
+  plt_save_extensions: [".png"]
+  title: Wind Coefficients for FSTs, Cx
+  xlabel: Direction (deg)
+  ylabel: Cx
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  legend:
+    flag: True
+    label: []
+    loc: best
+    prop: { family: Arial, size: 8 }
+  xlim: [-1, 1.0]
+  ylim: [-1, 1.0]
+  xscale:
+    log: False
+
+master_settings:
+  groups:
+    columns: { x: [Heading], y: [Cx] }
+    color: []
+    alpha: []
+    linestyle: []
+    marker:
+      type: "s"
+      size: 5
+      edgecolors: True
+    filter:
+      - column: Heading
+        value: 0 # long-term
+        contains: NULL
+    transform:
+      - { column: Heading, scale: 1, shift: 0 }
+      - { column: Cx, scale: 1, shift: 0 }
+      - { column: Cy, scale: 1, shift: 0 }
+      - { column: no_col, scale: 1, shift: 0 }
+
+data:
+  type: csv
+  groups:
+    - label: FST1
+      file_name: src/assetutilities/tests/test_data/visualization/csv/test_1.csv
+    - label: FST2
+      file_name: src/assetutilities/tests/test_data/visualization/csv/test_2.csv
+
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]

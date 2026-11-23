@@ -1,0 +1,275 @@
+import importlib.util
+import logging
+import os
+from pathlib import Path
+
+from webcolors import rgb_to_hex
+
+from assetutilities.common.data import SaveData
+
+save_data = SaveData()
+
+
+def get_valid_file_name(file_name):
+    pass
+
+
+def get_module_path(module=None):
+    # The deprecated `imp` module was removed in Python 3.12; use importlib
+    # (review 2026-05-23). `imp.find_module` returned the package directory for
+    # packages and the source file for plain modules; reproduce that here.
+    import importlib.util
+
+    if module is None:
+        module_path = __name__
+        module = module_path.split(".")[0]
+    spec = importlib.util.find_spec(module)
+    if spec is None:
+        raise ImportError(f"Module '{module}' not found")
+    if spec.submodule_search_locations:
+        # Package: return its directory (matches imp.find_module behaviour).
+        return list(spec.submodule_search_locations)[0]
+    if spec.origin:
+        # Plain module: return the source file path.
+        return spec.origin
+    raise ImportError(f"Could not resolve path for module '{module}'")
+
+
+# Determine if file is valid
+def is_dir_valid_func(dir, analysis_root_folder=None):
+    dir_is_valid = True
+    
+    # MODIFIED: Always check analysis_root_folder FIRST when provided
+    # This ensures config-relative paths take priority over CWD-relative paths
+    if analysis_root_folder is not None and not os.path.isabs(dir):
+        # For relative paths, try analysis_root_folder first
+        file_name_analysis_root = os.path.join(analysis_root_folder, dir)
+        if os.path.isdir(file_name_analysis_root):
+            dir = file_name_analysis_root
+            return dir_is_valid, dir
+    
+    # Check if directory exists as-is (absolute path or relative to CWD)
+    if os.path.isdir(dir):
+        # Convert to absolute path for consistency
+        dir = os.path.abspath(dir)
+    else:
+        # Directory doesn't exist as-is, try other locations
+        if analysis_root_folder is not None and os.path.isabs(dir):
+            # Absolute path that doesn't exist - no fallback
+            dir_is_valid = False
+            logging.error(f"Directory not found: {dir}")
+        else:
+            # Try CWD for relative paths
+            file_name_cwd = os.path.join(os.getcwd(), dir)
+            if os.path.isdir(file_name_cwd):
+                dir = file_name_cwd
+            else:
+                dir_is_valid = False
+                if analysis_root_folder is not None:
+                    file_name_analysis_root = os.path.join(analysis_root_folder, dir)
+                    logging.error(f"Directory not found: {dir} (checked analysis_root: {file_name_analysis_root} and cwd: {file_name_cwd})")
+                else:
+                    logging.error(f"Directory not found: {dir}")
+
+    return dir_is_valid, dir
+
+
+# Determine if file is valid
+def is_file_valid_func(file_name, analysis_root_folder=None):
+    file_is_valid = True
+    
+    # MODIFIED: Always check analysis_root_folder FIRST when provided
+    # This ensures config-relative paths take priority over CWD-relative paths
+    if analysis_root_folder is not None and not os.path.isabs(file_name):
+        # For relative paths, try analysis_root_folder first
+        file_name_analysis_root = os.path.join(analysis_root_folder, file_name)
+        if os.path.isfile(file_name_analysis_root):
+            file_name = file_name_analysis_root
+            return file_is_valid, file_name
+    
+    # Check if file exists as-is (absolute path or relative to CWD)
+    if os.path.isfile(file_name):
+        # Convert to absolute path for consistency
+        file_name = os.path.abspath(file_name)
+    else:
+        # File doesn't exist as-is, try other locations
+        if analysis_root_folder is not None and os.path.isabs(file_name):
+            # Absolute path that doesn't exist - no fallback
+            file_is_valid = False
+            logging.error(f"File not found: {file_name}")
+        else:
+            # Try CWD for relative paths
+            file_name_cwd = os.path.join(os.getcwd(), file_name)
+            if os.path.isfile(file_name_cwd):
+                file_name = file_name_cwd
+            else:
+                file_is_valid = False
+                if analysis_root_folder is not None:
+                    file_name_analysis_root = os.path.join(analysis_root_folder, file_name)
+                    logging.error(f"File not found: {file_name} (checked analysis_root: {file_name_analysis_root} and cwd: {file_name_cwd})")
+                else:
+                    logging.error(f"File not found: {file_name}")
+
+    return file_is_valid, file_name
+
+
+def get_repository_filename(cfg):
+    file_is_valid = True
+    filename_with_repo_path = cfg["filename"]
+    library_name = cfg["library_name"]
+    repository_path = cfg["repository_path"]
+
+    lib_spec = importlib.util.find_spec(library_name)
+    lib_path = Path(lib_spec.origin).parent
+
+    if repository_path is not None:
+        repo_path = repository_path
+    else:
+        repo_path = os.path.join(lib_path, "..", "..")
+    if not os.path.isdir(repo_path):
+        raise FileNotFoundError("Directory Not Found")
+    filename_with_repo_path = os.path.join(repo_path, cfg["filename"])
+    if not os.path.isfile(filename_with_repo_path):
+        file_is_valid = False
+        raise FileNotFoundError()
+
+    return file_is_valid, filename_with_repo_path
+
+
+def get_repository_filepath(cfg):
+    dir_is_valid = True
+    repo_filepath = cfg["filepath"]
+    library_name = cfg["library_name"]
+    repository_path = cfg["repository_path"]
+
+    lib_spec = importlib.util.find_spec(library_name)
+    lib_path = Path(lib_spec.origin).parent
+
+    if repository_path is not None:
+        repo_full_filepath = repository_path
+    else:
+        repo_full_filepath = os.path.join(lib_path, "..", "..", repo_filepath)
+    if not os.path.isdir(repo_full_filepath):
+        raise FileNotFoundError("Directory Not Found")
+
+    return dir_is_valid, repo_full_filepath
+
+
+def add_cwd_to_filename(file_name, cwd=None):
+    if not file_name.startswith(os.path.sep):
+        file_name = os.path.join(cwd, file_name)
+
+    return file_name
+
+
+def get_common_name_from_2_filenames(filename1, filename2):
+    # get file root directory
+    stem1 = Path(filename1).stem
+    stem2 = Path(filename2).stem
+    commonprefix = os.path.commonprefix([stem1, stem2])
+    uniquebasename = stem1 + "_" + Path(filename2).stem.replace(commonprefix, "")
+
+    return uniquebasename
+
+
+def get_colors(set="single", n=15):
+    """
+    https://help.tableau.com/current/pro/desktop/en-us/formatting_create_custom_colors.htm
+    """
+
+    if set == "single":
+        if n <= 10:
+            colors = [
+                "#17becf",
+                "#bcbd22",
+                "#7f7f7f",
+                "#e377c2",
+                "#8c564b",
+                "#9467bd",
+                "#d62728",
+                "#2ca02c",
+                "#ff7f0e",
+                "#1f77b4",
+            ]
+        else:
+            colors = [
+                (31, 119, 180),
+                (174, 199, 232),
+                (255, 127, 14),
+                (255, 187, 120),
+                (44, 160, 44),
+                (152, 223, 138),
+                (214, 39, 40),
+                (255, 152, 150),
+                (148, 103, 189),
+                (197, 176, 213),
+                (140, 86, 75),
+                (196, 156, 148),
+                (227, 119, 194),
+                (247, 182, 210),
+                (127, 127, 127),
+                (199, 199, 199),
+                (188, 189, 34),
+                (219, 219, 141),
+                (23, 190, 207),
+                (158, 218, 229),
+            ]
+            colors = [rgb_to_hex(color) for color in colors]
+    elif set == "multi":
+        if n <= 8:
+            color_1 = ["#0F6BE9", "#043F8F", "#001E45"]
+            color_2 = ["#D1350A", "#B23000", "#2F1202"]
+            color_3 = ["#A06900", "#5D4101", "#2C1B07"]
+            color_4 = ["#05B25D", "#044B32", "#012B1"]
+            color_5 = ["#A37BFA", "#492D99", "#019OA52"]
+            color_6 = ["#017C9D", "#D1485B", "#062530"]
+            color_7 = ["#D2186D", "#880C3E", "#3A0116"]
+            color_8 = ["#DC1830", "#830A12", "#340301"]
+
+            set1 = [
+                color_1[0],
+                color_2[0],
+                color_3[0],
+                color_4[0],
+                color_5[0],
+                color_6[0],
+                color_7[0],
+                color_8[0],
+            ]
+            set2 = [
+                color_1[1],
+                color_2[1],
+                color_3[1],
+                color_4[1],
+                color_5[1],
+                color_6[1],
+                color_7[1],
+                color_8[1],
+            ]
+            set3 = [
+                color_1[2],
+                color_2[2],
+                color_3[2],
+                color_4[2],
+                color_5[2],
+                color_6[2],
+                color_7[2],
+                color_8[2],
+            ]
+            set1 = [rgb_to_hex(color) for color in set1]
+            set2 = [rgb_to_hex(color) for color in set2]
+            set3 = [rgb_to_hex(color) for color in set3]
+            colors = {"set1": set1, "set2": set2, "set3": set3}
+        else:
+            raise ValueError("Number of colors must be less than 9")
+
+    return colors
+
+
+def save_application_cfg(cfg_base):
+    output_dir = cfg_base.Analysis["result_folder"]
+
+    filename = cfg_base.Analysis["file_name"]
+    filename_path = os.path.join(output_dir, filename)
+
+    save_data.saveDataYaml(cfg_base, filename_path, default_flow_style=False)

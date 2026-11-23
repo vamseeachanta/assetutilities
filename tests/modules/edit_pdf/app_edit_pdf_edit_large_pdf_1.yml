@@ -1,0 +1,42 @@
+&id001 !!python/object/new:assetutilities.common.data.AttributeDict
+dictitems:
+  Analysis:
+    CustomInputFile: .\edit_large_pdf_1.yml
+    DefaultInputFile: null
+    analysis_root_folder: .
+    basename: edit_pdf
+    cfg_array_file_names: null
+    file_name: app_edit_pdf_edit_large_pdf_1
+    file_name_for_overwrite: app_edit_pdf_edit_large_pdf_1
+    log_folder: .\logs\
+    result_folder: .\results\
+    start_time: 2023-11-29 14:33:39.262464
+  basename: edit_pdf
+  default:
+    config:
+      overwrite:
+        output: true
+    log_level: DEBUG
+  files:
+  - io: fixtures/reference-1.pdf
+    pages:
+    - - 1
+      - 100
+    - - 101
+      - 200
+    - - 201
+      - 300
+    - - 301
+      - 452
+  - io: fixtures/reference-2.pdf
+    pages:
+    - - 1
+      - 100
+    - - 101
+      - 200
+    - - 201
+      - 300
+    - - 301
+      - 452
+  library: PyPDF2
+state: *id001

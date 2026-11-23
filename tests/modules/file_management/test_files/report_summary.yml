@@ -1,0 +1,889 @@
+basename: file_management
+
+
+
+    DecoupleLateralAndAxialSeabedFriction: No
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature: ~
+    ContentsPressureRefZ: ~
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Quick
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: None
+  - Name: FST1_Conact_Line_04
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination, ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo:
+      - [FST1, 204.592, 10, 0, 0, 0, -180, ~]
+      - [FST1, 204.592, 21.87, 25, 0, 0, -180, ~]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, ~]
+      - [0, ~]
+    # Feeding
+    ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor, ConnectionApplyRamp, ConnectionUseSmoothGrowth:
+      - [~, 0, 0.001]
+      - [~, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Contact_Line, 25, 100]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature: ~
+    ContentsPressureRefZ: ~
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Quick
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: None
+  - Name: FST2_Conact_Line_05
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination, ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo:
+      - [FST2, 0, -10, 0, 0, 0, 0, ~]
+      - [FST2, 0, 10, 0, 0, 0, 0, ~]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, ~]
+      - [0, ~]
+    # Feeding
+    ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor, ConnectionApplyRamp, ConnectionUseSmoothGrowth:
+      - [~, 0, 0.001]
+      - [~, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Contact_Line, 43.74, 100]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature: ~
+    ContentsPressureRefZ: ~
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Quick
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: None
+  - Name: FST1_Conact_Line_05
+    IncludeTorsion: No
+    TopEnd: End A
+    LengthAndEndOrientations: Explicit
+    Representation: Finite element
+    PyModel: (none)
+    PreBendSpecifiedBy: Bend angle
+    DragFormulation: Standard
+    StaticsVIV: None
+    DynamicsVIV: None
+    WaveCalculationMethod: Specified by environment
+    # End connections
+    Connection, ConnectionX, ConnectionY, ConnectionZ, ConnectionAzimuth, ConnectionDeclination, ConnectionGamma, ConnectionReleaseStage, ConnectionzRelativeTo:
+      - [FST1, 30, -10, 0, 0, 0, -180, ~]
+      - [FST1, 30, 10, 0, 0, 0, -180, ~]
+    # End connection stiffness
+    ConnectionxBendingStiffness, ConnectionyBendingStiffness:
+      - [0, ~]
+      - [0, ~]
+    # Feeding
+    ConnectionInitialArclength, ConnectionPayoutRate, ConnectionShortestViableSegmentFactor, ConnectionApplyRamp, ConnectionUseSmoothGrowth:
+      - [~, 0, 0.001]
+      - [~, 0, 0.001]
+    # Sections
+    LineType, Length, TargetSegmentLength:
+      - [Contact_Line, 43.74, 100]
+    # Seabed
+    DecoupleLateralAndAxialSeabedFriction: No
+    # Contents
+    ContentsMethod: Uniform
+    IncludeAxialContentsInertia: Yes
+    ContentsDensity: 0
+    ContentsTemperature: ~
+    ContentsPressureRefZ: ~
+    ContentsPressure: 0
+    ContentsFlowRate: 0
+    # Statics
+    IncludedInStatics: Yes
+    StaticsStep1: Quick
+    StaticsStep2: Full statics
+    StaticsSeabedFrictionPolicy: None
+MultibodyGroups:
+  - Name: Multibody_FST2F_FST1F
+    Bodies:
+      - Name: Body1
+        VesselType: Strt1_FST2type
+        Draught: Full
+        ReferenceOrigin: [99.2554, 0, 18.93]
+        # Stiffness
+        ReferenceOriginDatumPosition: [6.96, 0, 0]
+        HydrostaticStiffnessMethod: Displacement
+        DisplacedVolume: 95.6826e3
+        CentreOfBuoyancy: [99.2555, 0, 6.213699999999999]
+        HydrostaticStiffnessz, HydrostaticStiffnessRx, HydrostaticStiffnessRy:
+          - [86.383e3, -0.2467, -152.32e3]
+          - [-0.2467, 721.34e3, 2.8282]
+          - [-152.32e3, 2.8282, 270.67e6]
+      - Name: Body2
+        VesselType: Strt2_FST1type
+        Draught: Full
+        ReferenceOrigin: [99.2171, 0, 18.81]
+        # Stiffness
+        ReferenceOriginDatumPosition: [7.08, 0, 0]
+        HydrostaticStiffnessMethod: Displacement
+        DisplacedVolume: 93.623e3
+        CentreOfBuoyancy: [99.2171, 100e-6, 6.089599999999999]
+        HydrostaticStiffnessz, HydrostaticStiffnessRx, HydrostaticStiffnessRy:
+          - [86.273e3, -0.87239, 152.44e3]
+          - [-0.87239, 1.0352e6, 50.129]
+          - [152.44e3, 50.129, 270.05e6]
+    # Added mass and damping
+    AMDTimeStep: ~
+    AMDCutoffTime: ~
+    AMDCutoffTolerance: 2
+    MultibodyAddedMassAndDamping:
+      - AMDPeriodOrFrequency: 35
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [12.319e3, -0.73065, -4929.1, -43.447, 2.3896e6, 127.64]
+              - [-0.73065, 97.102e3, -0.39367, 207.68e3, 366.32, 24.674e3]
+              - [-4929.1, -0.39367, 356.79e3, 29.114, -813.95e3, 373.78]
+              - [-43.447, 207.68e3, 29.114, 7.0575e6, 624.1, -2.3075e6]
+              - [2.3896e6, 366.32, -813.95e3, 624.1, 1.0779e9, 27.81e3]
+              - [127.64, 24.674e3, 373.78, -2.3075e6, 27.81e3, 188.76e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [760.92, -0.061279, -514.21, -4.2621, 213.67e3, 10.372]
+              - [-0.061279, 3691.7, 0.026666, 2845.2, 15.915, 5250.8]
+              - [-514.21, 0.026666, 87.669e3, -1.5706, -263.37e3, 95.883]
+              - [-4.2621, 2845.2, -1.5706, 2311, 14.006, -2318.8]
+              - [213.67e3, 15.915, -263.37e3, 14.006, 60.309e6, 2739.9]
+              - [10.372, 5250.8, 95.883, -2318.8, 2739.9, 829.34e3]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-5810.9, 2.3647, -6080.6, 29.115, -1.3368e6, -145.29]
+              - [0.49731, 1740.5, -0.17166, -3053.8, -38.719, -370.6e3]
+              - [5912.3, 0.30935, -166.01e3, -9.1667, 1.1215e6, -244.62]
+              - [0.49016, -2916, 0.30723, -2127.2, -50.576, -125.33e3]
+              - [-1.309e6, 521.64, -1.1189e6, 7539.8, -359.24e6, -26.7e3]
+              - [33.864, 369.93e3, -14.748, 47.438e3, -1368.8, -18.462e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-327.14, 0.23621, -5679.9, 2.4039, -100.8e3, -20.442]
+              - [0.047562, 1677.6, 0.041738, 546.49, 4.9843, -41.338e3]
+              - [5574.3, -2.3364, 19.285e3, -36.062, 1.6457e6, 132.62]
+              - [0.01188, 964.4, 0.0082763, 218.4, -3.5859, -33.434e3]
+              - [-99.073e3, 64.705, -1.6462e6, 720.12, -30.426e6, -5912.7]
+              - [0.76594, 40.991e3, -0.40434, 22.698e3, 244.98, -109.27e3]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [11.852e3, -3.3266, 4848.2, -51.561, 2.3423e6, 124.15]
+              - [-3.3266, 92.731e3, 0.008231, 181.78e3, 283.79, -25.076e3]
+              - [4848.2, 0.008231, 354.75e3, -34.07, 823.35e3, 534.53]
+              - [-51.561, 181.78e3, -34.07, 6.938e6, 640, 2.2256e6]
+              - [2.3423e6, 283.79, 823.35e3, 640, 1.0717e9, 22.409e3]
+              - [124.15, -25.076e3, 534.53, 2.2256e6, 22.409e3, 181e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [726.79, -0.33474, 506.48, -4.7613, 208.11e3, 8.0301]
+              - [-0.33474, 3453.4, -0.0040761, 1866.1, 12.81, -5098.9]
+              - [506.48, -0.0040761, 87.496e3, -6.2703, 263.88e3, 293.45]
+              - [-4.7613, 1866.1, -6.2703, 1094.1, 18.134, 3185.6]
+              - [208.11e3, 12.81, 263.88e3, 18.134, 59.915e6, 2686.6]
+              - [8.0301, -5098.9, 293.45, 3185.6, 2686.6, 784.89e3]
+      - AMDPeriodOrFrequency: 27.375
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [10.993e3, -0.62044, -3611.2, -36.011, 2.0068e6, 108.59]
+              - [-0.62044, 95.608e3, -0.56384, 214.66e3, 351.65, 4784.3]
+              - [-3611.2, -0.56384, 273.33e3, 24.853, -333.44e3, 295.31]
+              - [-36.011, 214.66e3, 24.853, 7.0876e6, 656.72, -2.43e6]
+              - [2.0068e6, 351.65, -333.44e3, 656.72, 977.96e6, 22.48e3]
+              - [108.59, 4784.3, 295.31, -2.43e6, 22.48e3, 198.27e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1251.7, -0.1379, -676.31, -7.2613, 356.49e3, 17.716]
+              - [-0.1379, 7183.5, 0.027503, 6415.4, 28.173, 5798.5]
+              - [-676.31, 0.027503, 95.619e3, 0.81579, -292.89e3, 112.73]
+              - [-7.2613, 6415.4, 0.81579, 6094, 29.333, -16.471e3]
+              - [356.49e3, 28.173, -292.89e3, 29.333, 102.15e6, 4827.5]
+              - [17.716, 5798.5, 112.73, -16.471e3, 4827.5, 2.6516e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-4594.6, 1.6355, 6455.9, 20.067, -986.47e3, -111.41]
+              - [0.4069, -2750, -0.28325, -5702.1, -55.128, -266.64e3]
+              - [-6411.3, 4.1139, -121.83e3, 74.969, -2.5369e6, -210.87]
+              - [0.41894, -6735.5, -0.41683, -4313.7, -46.442, 9927.2]
+              - [-964.87e3, 324.19, 2.5369e6, 5023.5, -262.33e6, -16.688e3]
+              - [35.306, 267.64e3, -5.2625, -57.793e3, -2242.8, -23.299e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-819.67, 0.44139, -5483.4, 5.8583, -249.16e3, -24.932]
+              - [0.07695, 1663, 0.10311, 125.45, 4.3392, -88.334e3]
+              - [5380.9, -2.0295, 3060, -33.683, 1.6091e6, 101.63]
+              - [0.052327, 522.51, 0.047561, -538.69, -3.6657, -74.68e3]
+              - [-244.86e3, 122.57, -1.6097e6, 1742.6, -74.285e6, -7137.6]
+              - [1.6435, 87.822e3, -0.83122, 51.907e3, 398.63, -1.1601e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [10.591e3, -2.6124, 3561.4, -43.111, 1.9707e6, 110.34]
+              - [-2.6124, 91.449e3, 0.039917, 188.94e3, 281.24, -5961.2]
+              - [3561.4, 0.039917, 271.58e3, -22.289, 344.74e3, 246.54]
+              - [-43.111, 188.94e3, -22.289, 6.9643e6, 622.18, 2.3378e6]
+              - [1.9707e6, 281.24, 344.74e3, 622.18, 972.73e6, 17.905e3]
+              - [110.34, -5961.2, 246.54, 2.3378e6, 17.905e3, 189.98e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1197.3, -0.54866, 665.69, -8.0283, 347.63e3, 12.979]
+              - [-0.54866, 6723.1, -0.0048566, 4463.3, 23.293, -5661.9]
+              - [665.69, -0.0048566, 95.453e3, -8.3436, 293.48e3, 307.49]
+              - [-8.0283, 4463.3, -8.3436, 3249.4, 33.101, 16.421e3]
+              - [347.63e3, 23.293, 293.48e3, 33.101, 101.57e6, 4095]
+              - [12.979, -5661.9, 307.49, 16.421e3, 4095, 2.5015e6]
+      - AMDPeriodOrFrequency: 22.478
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [9599.2, -0.36551, -2989.8, -27.394, 1.5862e6, 87.227]
+              - [-0.36551, 90.609e3, -0.63804, 219.49e3, 335.02, -10.219e3]
+              - [-2989.8, -0.63804, 215.84e3, 19.168, -152.54e3, 206.34]
+              - [-27.394, 219.49e3, 19.168, 7.1238e6, 673.3, -2.5706e6]
+              - [1.5862e6, 335.02, -152.54e3, 673.3, 866.67e6, 16.029e3]
+              - [87.227, -10.219e3, 206.34, -2.5706e6, 16.029e3, 208.52e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1662.8, -0.21155, -875.1, -10.049, 481.51e3, 23.643]
+              - [-0.21155, 11.692e3, 0.02761, 12.25e3, 43.968, 3471]
+              - [-875.1, 0.02761, 99.546e3, 4.2153, -321.84e3, 126.04]
+              - [-10.049, 12.25e3, 4.2153, 13.788e3, 51.335, -52.757e3]
+              - [481.51e3, 43.968, -321.84e3, 51.335, 141.02e6, 6525.1]
+              - [23.643, 3471, 126.04, -52.757e3, 6525.1, 6.6259e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-2739.7, 0.77555, 10.07e3, 5.8278, -415.35e3, -95.868]
+              - [0.29941, -4108.1, -0.68634, -5576, -63.82, -62.618e3]
+              - [-9965.6, 4.6102, -63.575e3, 100.11, -3.8209e6, -127.43]
+              - [0.35152, -6948, -0.8974, -2451.3, -47.343, 294.75e3]
+              - [-403.33e3, 74.454, 3.8221e6, 771.76, -93.228e6, -11.869e3]
+              - [36.506, 65.066e3, 3.5534, -285.5e3, -3347.6, -25.503e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1086.6, 0.52548, -3642.2, 7.7564, -341.94e3, -27.609]
+              - [0.10087, 932.19, 0.066059, -1039.9, -0.30962, -123.01e3]
+              - [3565.8, -1.2737, -5850.4, -19.049, 1.066e6, 86.59]
+              - [0.053419, -861.11, 0.074975, -2381.8, -13.152, -93.944e3]
+              - [-336.2e3, 150, -1.0679e6, 2401.4, -105.75e6, -7810.1]
+              - [3.3063, 122.79e3, 1.487, 63.107e3, 279.81, -4.2426e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [9262.7, -1.8395, 2952.2, -33.593, 1.5621e6, 96.128]
+              - [-1.8395, 86.922e3, 0.14966, 194.98e3, 265.77, 8492.1]
+              - [2952.2, 0.14966, 214.24e3, -15.857, 163.76e3, 74.404]
+              - [-33.593, 194.98e3, -15.857, 6.9977e6, 651.61, 2.469e6]
+              - [1.5621e6, 265.77, 163.76e3, 651.61, 862.44e6, 13.55e3]
+              - [96.128, 8492.1, 74.404, 2.469e6, 13.55e3, 199.68e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1593.5, -0.69653, 864.47, -10.985, 470.26e3, 17.66]
+              - [-0.69653, 10.966e3, 0.010247, 8992.2, 36.936, -3514.3]
+              - [864.47, 0.010247, 99.424e3, -10.658, 323.67e3, 300.67]
+              - [-10.985, 8992.2, -10.658, 8164.6, 61.87, 49.682e3]
+              - [470.26e3, 36.936, 323.67e3, 61.87, 140.39e6, 5481.5]
+              - [17.66, -3514.3, 300.67, 49.682e3, 5481.5, 6.2349e6]
+      - AMDPeriodOrFrequency: 19.068
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [8325.2, -0.074853, -1952.3, -18.054, 1.1682e6, 69.361]
+              - [-0.074853, 82.675e3, -0.67237, 220.75e3, 304.36, -19.394e3]
+              - [-1952.3, -0.67237, 177.44e3, 7.9952, 110.06e3, 140.04]
+              - [-18.054, 220.75e3, 7.9952, 7.1644e6, 616.1, -2.7052e6]
+              - [1.1682e6, 304.36, 110.06e3, 616.1, 752.34e6, 9981.2]
+              - [69.361, -19.394e3, 140.04, -2.7052e6, 9981.2, 216.67e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1983.1, -0.25322, -998.78, -12.542, 587.01e3, 28.623]
+              - [-0.25322, 16.622e3, -0.026704, 20.537e3, 60.181, -2356.9]
+              - [-998.78, -0.026704, 98.31e3, 7.0397, -333.7e3, 129.48]
+              - [-12.542, 20.537e3, 7.0397, 27.653e3, 92.424, -127.37e3]
+              - [587.01e3, 60.181, -333.7e3, 92.424, 178.12e6, 7927.2]
+              - [28.623, -2356.9, 129.48, -127.37e3, 7927.2, 13.984e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1546.6, 0.28094, 7262.4, -4.5088, 23.044e3, -86.254]
+              - [0.20577, -2740.1, -0.78062, -2127.5, -56.073, 118.79e3]
+              - [-7189.6, 3.2425, -24.299e3, 77.522, -3.157e6, -84.162]
+              - [0.23596, -3084, -0.90081, 5920.9, -9.6473, 569.13e3]
+              - [28.92e3, -94.768, 3.1657e6, -2902.9, 59.158e6, -8693.9]
+              - [37.389, -116.79e3, -5.792, -509.9e3, -3700.6, -18.87e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1020.9, 0.46948, -1901.1, 6.9854, -334.04e3, -31.791]
+              - [0.10924, 244.97, -0.042108, -2148.9, -6.4436, -112.38e3]
+              - [1848.2, -0.64822, -5483.7, -3.6102, 456.27e3, 85.69]
+              - [0.055412, -2185.1, -0.10819, -4057.5, -16.266, -23.338e3]
+              - [-328.58e3, 135.81, -458.52e3, 2280.4, -108.8e6, -8998.6]
+              - [5.0983, 112.81e3, 10.007, -2275, -54.908, -9.1387e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [8041.5, -1.2084, 1922, -23.669, 1.1543e6, 81.874]
+              - [-1.2084, 79.631e3, 0.1882, 198.38e3, 241.71, 17.606e3]
+              - [1922, 0.1882, 175.89e3, -4.7329, -103.45e3, -5.3878]
+              - [-23.669, 198.38e3, -4.7329, 7.0371e6, 641.66, 2.5977e6]
+              - [1.1543e6, 241.71, -103.45e3, 641.66, 748.64e6, 8480]
+              - [81.874, 17.606e3, -5.3878, 2.5977e6, 8480, 207.47e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [1904.6, -0.76567, 988.07, -13.55, 574.41e3, 21.018]
+              - [-0.76567, 15.641e3, 0.076082, 15.796e3, 52.966, 1963.5]
+              - [988.07, 0.076082, 98.252e3, -12.442, 336.24e3, 277.01]
+              - [-13.55, 15.796e3, -12.442, 17.915e3, 95.208, 118.2e3]
+              - [574.41e3, 52.966, 336.24e3, 95.208, 177.57e6, 6583.3]
+              - [21.018, 1963.5, 277.01, 118.2e3, 6583.3, 13.142e6]
+      - AMDPeriodOrFrequency: 16.556
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [7306, 0.167, -1446.7, -8.529, 769.72e3, 51.466]
+              - [0.167, 73.102e3, -0.58075, 217.56e3, 272.58, -17.309e3]
+              - [-1446.7, -0.58075, 156.7e3, -1.9356, 197.56e3, 91.946]
+              - [-8.529, 217.56e3, -1.9356, 7.2058e6, 548.41, -2.7812e6]
+              - [769.72e3, 272.58, 197.56e3, 548.41, 631.36e6, 3745.1]
+              - [51.466, -17.309e3, 91.946, -2.7812e6, 3745.1, 218.75e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2140.2, -0.24901, -892.62, -13.948, 644.08e3, 31.58]
+              - [-0.24901, 21.345e3, -0.12607, 31.104e3, 76.686, -11.095e3]
+              - [-892.62, -0.12607, 94.005e3, 7.6225, -280.86e3, 128.3]
+              - [-13.948, 31.104e3, 7.6225, 50.425e3, 132.89, -253.04e3]
+              - [644.08e3, 76.686, -280.86e3, 132.89, 204.68e6, 8617.5]
+              - [31.58, -11.095e3, 128.3, -253.04e3, 8617.5, 25.381e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1313.6, 0.20509, 3436.1, -7.425, 190.04e3, -73.054]
+              - [0.16741, -1109.3, -0.55737, 1813.2, -50.239, 162.09e3]
+              - [-3411.8, 1.7249, -10.218e3, 42.68, -1.8859e6, -67.412]
+              - [0.13037, 1380.1, -0.43405, 16.954e3, 27.319, 549.42e3]
+              - [195.09e3, -149.36, 1.8985e6, -4715.6, 148.05e6, -3389.3]
+              - [36.341, -161.85e3, -35.619, -480.15e3, -3154.9, -2.7987e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-829.39, 0.36695, -1321.4, 4.6723, -262.39e3, -35.419]
+              - [0.10161, 127.61, -0.15399, -2178.5, -12.725, -66.961e3]
+              - [1277.7, -0.42097, -1493.2, 3.3709, 145.11e3, 83.808]
+              - [0.014549, -2273.4, -0.48029, -2729.9, -18.949, 149.36e3]
+              - [-257.78e3, 97.873, -144.63e3, 1440.8, -84.443e6, -10.283e3]
+              - [8.7975, 67.718e3, 13.761, -159.13e3, -325.63, -12.453e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [7058.3, -0.78205, 1421.3, -13.87, 764.1e3, 71.504]
+              - [-0.78205, 70.741e3, 0.17155, 198e3, 214.51, 16.055e3]
+              - [1421.3, 0.17155, 155.15e3, 3.2385, -193.25e3, -13.567]
+              - [-13.87, 198e3, 3.2385, 7.0798e6, 539.45, 2.6757e6]
+              - [764.1e3, 214.51, -193.25e3, 539.45, 627.91e6, 3613.2]
+              - [71.504, 16.055e3, -13.567, 2.6757e6, 3613.2, 209.65e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2058.9, -0.74843, 882.87, -14.938, 631.23e3, 22.45]
+              - [-0.74843, 20.166e3, 0.066875, 24.893e3, 67.509, 10.3e3]
+              - [882.87, 0.066875, 94.038e3, -12.117, 282.71e3, 250.1]
+              - [-14.938, 24.893e3, -12.117, 35.243e3, 140.63, 234.55e3]
+              - [631.23e3, 67.509, 282.71e3, 140.63, 204.19e6, 7065.6]
+              - [22.45, 10.3e3, 250.1, 234.55e3, 7065.6, 23.848e6]
+      - AMDPeriodOrFrequency: 14.628
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6797.9, 0.3299, -1415.1, -0.81884, 479.55e3, 40.402]
+              - [0.3299, 63.263e3, -0.46907, 209.84e3, 243.67, -7596.4]
+              - [-1415.1, -0.46907, 146.68e3, -8.065, 144.73e3, 55.78]
+              - [-0.81884, 209.84e3, -8.065, 7.2437e6, 519.79, -2.7601e6]
+              - [479.55e3, 243.67, 144.73e3, 519.79, 533.14e6, -697.47]
+              - [40.402, -7596.4, 55.78, -2.7601e6, -697.47, 211.57e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2177.6, -0.20681, -815.58, -14.082, 647.58e3, 31.944]
+              - [-0.20681, 25.392e3, -0.11517, 43.343e3, 87.529, -19.828e3]
+              - [-815.58, -0.11517, 88.5e3, 7.6207, -261.08e3, 120.14]
+              - [-14.082, 43.343e3, 7.6207, 84.802e3, 163.79, -427.23e3]
+              - [647.58e3, 87.529, -261.08e3, 163.79, 216.13e6, 8099.9]
+              - [31.944, -19.828e3, 120.14, -427.23e3, 8099.9, 40.292e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1570.2, 0.33726, 1409.4, -5.125, 146.17e3, -64.76]
+              - [0.18997, -551.94, -0.27483, 3119.8, -32.909, 98.208e3]
+              - [-1416.4, 0.85078, -7791.1, 21.551, -1.0352e6, -49.999]
+              - [0.12802, 2922.4, 0.65815, 20.894e3, 31.536, 142.47e3]
+              - [152.95e3, -118.26, 1.0431e6, -4322.9, 157.26e6, 2393.7]
+              - [31.726, -99.253e3, -60.299, -96.533e3, -2604.5, 11.763e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-738.96, 0.30997, -1526.8, 2.8505, -199.21e3, -35.962]
+              - [0.095773, 316.42, -0.16936, -1311.7, -18.611, -37.226e3]
+              - [1481.5, -0.46542, 1046, 2.5592, 146.36e3, 82.638]
+              - [-0.077029, -1363.2, -0.62446, 3156.6, -16.484, 301.25e3]
+              - [-194.4e3, 61.361, -142.74e3, 285.09, -45.17e6, -10.136e3]
+              - [12.578, 37.738e3, 4.7703, -298.57e3, -371.1, -10.326e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6563.7, -0.5972, 1390.6, -6.313, 479.77e3, 68.268]
+              - [-0.5972, 61.511e3, 0.1154, 193.35e3, 184.2, 7166.8]
+              - [1390.6, 0.1154, 145.02e3, 6.9308, -139.92e3, 5.9559]
+              - [-6.313, 193.35e3, 6.9308, 7.1216e6, 477.82, 2.6659e6]
+              - [479.77e3, 184.2, -139.92e3, 477.82, 530.06e6, 483.98]
+              - [68.268, 7166.8, 5.9559, 2.6659e6, 483.98, 203.26e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2097.2, -0.6868, 807.73, -15.003, 635.74e3, 22.511]
+              - [-0.6868, 24.091e3, 0.14657, 35.846e3, 80.509, 18.714e3]
+              - [807.73, 0.14657, 88.629e3, -11.712, 262.4e3, 231.59]
+              - [-15.003, 35.846e3, -11.712, 63.102e3, 178.51, 397.88e3]
+              - [635.74e3, 80.509, 262.4e3, 178.51, 215.75e6, 6591.1]
+              - [22.511, 18.714e3, 231.59, 397.88e3, 6591.1, 37.908e6]
+      - AMDPeriodOrFrequency: 13.103
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6744.1, 0.41341, -1507.7, 5.0985, 300.45e3, 35.354]
+              - [0.41341, 54.25e3, -0.34835, 198.32e3, 218.74, 5844.1]
+              - [-1507.7, -0.34835, 143.16e3, -12.993, 128.08e3, 36.656]
+              - [5.0985, 198.32e3, -12.993, 7.2726e6, 384.26, -2.6152e6]
+              - [300.45e3, 218.74, 128.08e3, 384.26, 457.48e6, -2499.3]
+              - [35.354, 5844.1, 36.656, -2.6152e6, -2499.3, 193.98e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2226.5, -0.13074, -789.33, -13.031, 618.01e3, 31.823]
+              - [-0.13074, 28.593e3, -0.12144, 56.398e3, 100.51, -27.921e3]
+              - [-789.33, -0.12144, 82.765e3, 6.5079, -268.6e3, 106.22]
+              - [-13.031, 56.398e3, 6.5079, 133.24e3, 203.03, -634.45e3]
+              - [618.01e3, 100.51, -268.6e3, 203.03, 218.88e6, 6916.6]
+              - [31.823, -27.921e3, 106.22, -634.45e3, 6916.6, 56.449e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1835.9, 0.46154, 646.76, -2.9287, 72.678e3, -65.809]
+              - [0.22193, -531.7, -0.1824, 2225, -12.03, 54.056e3]
+              - [-671.94, 0.48787, -6914.7, 15.84, -768.42e3, -41.418]
+              - [0.24246, 2074.2, 1.7249, 10.509e3, 60.482, -334.36e3]
+              - [79.194e3, -60.127, 769.53e3, -2436.3, 108.31e6, 5084]
+              - [25.247, -55.276e3, -51.342, 357.18e3, -2788.6, 13.449e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-773.25, 0.31634, -1820.2, 2.5696, -191.49e3, -37.005]
+              - [0.10916, 406.5, -0.12999, -890.76, -18.114, -42.559e3]
+              - [1769.5, -0.5619, 2114.1, 1.0008, 217.54e3, 84.956]
+              - [-0.20595, -910.36, -0.30265, 10.271e3, -7.6979, 272.31e3]
+              - [-185.12e3, 46.7, -213.16e3, -493.33, -15.501e6, -8599.3]
+              - [15.481, 42.573e3, -9.7716, -267.94e3, -422.48, -4.8223e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6503.9, -0.58249, 1479.3, -0.9659, 303.25e3, 70.336]
+              - [-0.58249, 52.974e3, -0.0021743, 184.8e3, 163.99, -5389.9]
+              - [1479.3, -0.0021743, 141.37e3, 9.9461, -122.79e3, 22.919]
+              - [-0.9659, 184.8e3, 9.9461, 7.1572e6, 389.88, 2.5399e6]
+              - [303.25e3, 163.99, -122.79e3, 389.88, 454.61e6, -926.04]
+              - [70.336, -5389.9, 22.919, 2.5399e6, -926.04, 187.09e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2144.5, -0.6264, 783.03, -13.985, 608.22e3, 23.657]
+              - [-0.6264, 27.239e3, 0.13497, 47.906e3, 87.944, 26.642e3]
+              - [783.03, 0.13497, 82.972e3, -10.959, 269.81e3, 222.45]
+              - [-13.985, 47.906e3, -10.959, 104.41e3, 217.95, 595.18e3]
+              - [608.22e3, 87.944, 269.81e3, 217.95, 218.76e6, 5727.8]
+              - [23.657, 26.642e3, 222.45, 595.18e3, 5727.8, 53.263e6]
+      - AMDPeriodOrFrequency: 11.866
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6950.1, 0.41348, -1670.2, 8.6044, 221.48e3, 34.431]
+              - [0.41348, 46.582e3, -0.22811, 184.37e3, 200.04, 21.149e3]
+              - [-1670.2, -0.22811, 142.79e3, -15.696, 137.63e3, 30.367]
+              - [8.6044, 184.37e3, -15.696, 7.2859e6, 290.27, -2.3579e6]
+              - [221.48e3, 200.04, 137.63e3, 290.27, 400.14e6, -2256]
+              - [34.431, 21.149e3, 30.367, -2.3579e6, -2256, 169.3e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2427.6, -0.032956, -859.43, -10.678, 572.75e3, 32.9]
+              - [-0.032956, 31.069e3, -0.16882, 69.346e3, 110.45, -34.352e3]
+              - [-859.43, -0.16882, 77.447e3, 4.1687, -278.1e3, 90.343]
+              - [-10.678, 69.346e3, 4.1687, 196.66e3, 219.21, -835.03e3]
+              - [572.75e3, 110.45, -278.1e3, 219.21, 210.8e6, 5854.3]
+              - [32.9, -34.352e3, 90.343, -835.03e3, 5854.3, 70.554e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-2127.6, 0.53864, 284.97, -3.3567, 75.842e3, -67.668]
+              - [0.24329, -476.28, -0.18854, 2407.6, -5.0808, 63.545e3]
+              - [-319.81, 0.31755, -6700, 12.455, -676.81e3, -39.918]
+              - [0.58387, 2281.6, 1.8559, -8095.7, 83.746, -464.86e3]
+              - [79.086e3, -26.467, 673.65e3, -707.19, 57.729e6, 4489.3]
+              - [20.25, -64.121e3, -26.598, 479.87e3, -2599.7, 6.706e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-894.58, 0.34874, -2216.3, 2.1931, -200.98e3, -41.645]
+              - [0.13413, 472.11, -0.12951, -1322.8, -10.034, -46.173e3]
+              - [2153.5, -0.64982, 2874.9, 2.6109, 206.32e3, 86.319]
+              - [-0.33913, -1325.1, 0.40219, 11.159e3, 14.748, 96.92e3]
+              - [-193.55e3, 50.615, -203.16e3, -501.68, -9.1683e6, -7005.4]
+              - [16.874, 45.818e3, -14.321, -94.506e3, -764.77, -2.1544e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6697.2, -0.65595, 1635.9, 1.8186, 223.58e3, 73.78]
+              - [-0.65595, 45.642e3, -0.14437, 173.45e3, 144.38, -19.973e3]
+              - [1635.9, -0.14437, 140.89e3, 11.794, -132.16e3, 25.263]
+              - [1.8186, 173.45e3, 11.794, 7.1793e6, 321.56, 2.3046e6]
+              - [223.58e3, 144.38, -132.16e3, 321.56, 397.27e6, -714.08]
+              - [73.78, -19.973e3, 25.263, 2.3046e6, -714.08, 164.11e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2334.2, -0.60558, 852.01, -11.934, 565.12e3, 27.107]
+              - [-0.60558, 29.707e3, 0.21961, 60.174e3, 101.91, 33.065e3]
+              - [852.01, 0.21961, 77.716e3, -9.3872, 279.3e3, 215.74]
+              - [-11.934, 60.174e3, -9.3872, 160.76e3, 251.65, 789.61e3]
+              - [565.12e3, 101.91, 279.3e3, 251.65, 210.98e6, 4978.9]
+              - [27.107, 33.065e3, 215.74, 789.61e3, 4978.9, 66.835e6]
+      - AMDPeriodOrFrequency: 10.842
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [7049.6, 0.31656, -1654.5, 8.7013, 214.23e3, 33.425]
+              - [0.31656, 40.189e3, -0.15386, 169.83e3, 178.05, 36.358e3]
+              - [-1654.5, -0.15386, 143.39e3, -14.231, 146.37e3, 33.286]
+              - [8.7013, 169.83e3, -14.231, 7.2791e6, 209.04, -2.0486e6]
+              - [214.23e3, 178.05, 146.37e3, 209.04, 366.9e6, -1464.5]
+              - [33.425, 36.358e3, 33.286, -2.0486e6, -1464.5, 143.22e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2873.6, 0.063228, -1048.6, -7.4696, 537.79e3, 36.009]
+              - [0.063228, 33.092e3, -0.059869, 81.616e3, 120.82, -38.488e3]
+              - [-1048.6, -0.059869, 72.424e3, 1.1532, -284.19e3, 73.491]
+              - [-7.4696, 81.616e3, 1.1532, 273.1e3, 227.11, -992.19e3]
+              - [537.79e3, 120.82, -284.19e3, 227.11, 195.52e6, 5242.6]
+              - [36.009, -38.488e3, 73.491, -992.19e3, 5242.6, 80.297e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-2272.3, 0.59277, 764.3, -2.2831, 80.04e3, -65.782]
+              - [0.26518, -687.9, -0.10995, 4177.5, -14.233, 58.134e3]
+              - [-785.52, 0.28581, -7533.1, 3.9959, -534.95e3, -39.15]
+              - [1.0767, 4018.3, 0.9837, -16.79e3, 72.791, -299.6e3]
+              - [80.875e3, -17.308, 530.99e3, -92.376, 35.701e6, 2693.9]
+              - [17.87, -57.947e3, -15.497, 310.59e3, -1895.9, 3.0518e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1235.2, 0.41265, -2698.5, 0.41714, -191.47e3, -47.562]
+              - [0.17388, 558.24, -0.14335, -1000.3, -6.0223, -35.078e3]
+              - [2621.1, -0.74515, 2861.7, 3.9222, 180.05e3, 86.384]
+              - [-0.32624, -986.66, 0.98435, 3665, 46.662, -4472.4]
+              - [-184.6e3, 56.852, -179.13e3, -174.71, -13.803e6, -6367.9]
+              - [17.428, 34.763e3, -10.49, 6633.4, -898.89, -3.0075e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6798.4, -0.71027, 1620.3, 1.5123, 214.04e3, 74.395]
+              - [-0.71027, 39.481e3, -0.28972, 161.02e3, 123.26, -34.664e3]
+              - [1620.3, -0.28972, 141.4e3, 11.425, -140.63e3, 22.391]
+              - [1.5123, 161.02e3, 11.425, 7.1824e6, 224.39, 2.0145e6]
+              - [214.04e3, 123.26, -140.63e3, 224.39, 363.85e6, 278.84]
+              - [74.395, -34.664e3, 22.391, 2.0145e6, 278.84, 139.55e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [2757.3, -0.63733, 1036.5, -9.4147, 531.28e3, 33.384]
+              - [-0.63733, 31.737e3, 0.15588, 72.015e3, 112.97, 37.319e3]
+              - [1036.5, 0.15588, 72.748e3, -7.4209, 285.31e3, 206.66]
+              - [-9.4147, 72.015e3, -7.4209, 230.84e3, 271.5, 945.51e3]
+              - [531.28e3, 112.97, 285.31e3, 271.5, 196.06e6, 4620.4]
+              - [33.384, 37.319e3, 206.66, 945.51e3, 4620.4, 76.411e6]
+      - AMDPeriodOrFrequency: 9.981
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6799.8, 0.18245, -1470, 5.9835, 226.31e3, 29.188]
+              - [0.18245, 34.602e3, -0.15054, 156.12e3, 153.02, 49.332e3]
+              - [-1470, -0.15054, 144.44e3, -12.051, 159.51e3, 45.305]
+              - [5.9835, 156.12e3, -12.051, 7.2524e6, 111.13, -1.7636e6]
+              - [226.31e3, 153.02, 159.51e3, 111.13, 351.89e6, -1038]
+              - [29.188, 49.332e3, 45.305, -1.7636e6, -1038, 121.09e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [3413.6, 0.1139, -1208.4, -4.9824, 533.43e3, 40.465]
+              - [0.1139, 34.85e3, 0.002987, 93.426e3, 133.57, -40.146e3]
+              - [-1208.4, 0.002987, 67.37e3, -0.6836, -296.74e3, 56.007]
+              - [-4.9824, 93.426e3, -0.6836, 358.07e3, 218.8, -1.0855e6]
+              - [533.43e3, 133.57, -296.74e3, 218.8, 178.77e6, 5250.2]
+              - [40.465, -40.146e3, 56.007, -1.0855e6, 5250.2, 85.46e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1914.7, 0.58051, 1655.2, 1.66, 66.892e3, -64.101]
+              - [0.2482, -914.61, -0.043815, 4152.9, -17.24, 43.129e3]
+              - [-1655.2, 0.35151, -7251.2, -2.8782, -448.9e3, -38.913]
+              - [1.3632, 3957.5, 0.017191, -10.571e3, 32.93, -223.05e3]
+              - [67.724e3, -14.351, 447.29e3, 34.79, 28.821e6, 1448.9]
+              - [20.3, -42.746e3, -13.502, 232.19e3, -1640.5, 2.7773e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1564.9, 0.49362, -2608, -0.19856, -196.78e3, -53.699]
+              - [0.24524, 362.42, -0.08235, 421.92, -9.1471, -38.38e3]
+              - [2528.4, -0.7886, 1680.1, 0.95432, 189.58e3, 87.488]
+              - [-0.1258, 383.84, 1.0763, -2717.9, 74.833, 11.435e3]
+              - [-190.66e3, 61.453, -190.4e3, -5.1078, -17.378e6, -6697.2]
+              - [18.904, 38.432e3, -7.3982, -11.578e3, -608.78, -3.6347e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6571.8, -0.69993, 1442.3, -0.95199, 224.77e3, 72.231]
+              - [-0.69993, 34.075e3, -0.37089, 148.98e3, 97.567, -47.373e3]
+              - [1442.3, -0.37089, 142.38e3, 9.6247, -153.37e3, 19.168]
+              - [-0.95199, 148.98e3, 9.6247, 7.1656e6, 105.15, 1.7412e6]
+              - [224.77e3, 97.567, -153.37e3, 105.15, 348.45e6, 1123.8]
+              - [72.231, -47.373e3, 19.168, 1.7412e6, 1123.8, 118.46e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [3275.4, -0.68444, 1194.8, -7.7238, 526.82e3, 39.729]
+              - [-0.68444, 33.506e3, 0.091593, 83.531e3, 123.13, 39.184e3]
+              - [1194.8, 0.091593, 67.753e3, -6.0941, 298.04e3, 191.3]
+              - [-7.7238, 83.531e3, -6.0941, 310.56e3, 278.84, 1.0413e6]
+              - [526.82e3, 123.13, 298.04e3, 278.84, 179.64e6, 4955.3]
+              - [39.729, 39.184e3, 191.3, 1.0413e6, 4955.3, 81.692e6]
+      - AMDPeriodOrFrequency: 9.246
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6384.7, 0.081889, -1238.8, 2.7861, 207.77e3, 22.082]
+              - [0.081889, 29.412e3, -0.17517, 143.17e3, 125.12, 59.14e3]
+              - [-1238.8, -0.17517, 145.67e3, -8.7702, 186.54e3, 60.202]
+              - [2.7861, 143.17e3, -8.7702, 7.2121e6, 12.58, -1.5714e6]
+              - [207.77e3, 125.12, 186.54e3, 12.58, 346.86e6, -1331.7]
+              - [22.082, 59.14e3, 60.202, -1.5714e6, -1331.7, 105.15e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [3882.2, 0.12443, -1305.3, -3.8475, 551.39e3, 43.866]
+              - [0.12443, 36.279e3, 0.013449, 105.58e3, 137.02, -40.519e3]
+              - [-1305.3, 0.013449, 61.959e3, -1.3714, -305.75e3, 43.313]
+              - [-3.8475, 105.58e3, -1.3714, 447.43e3, 204.01, -1.1358e6]
+              - [551.39e3, 137.02, -305.75e3, 204.01, 164.11e6, 5452.1]
+              - [43.866, -40.519e3, 43.313, -1.1358e6, 5452.1, 88.14e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1644.3, 0.55623, 1622.8, 3.9679, 86.333e3, -61.009]
+              - [0.17413, -600.75, -0.098814, 2634.9, -13.731, 55.163e3]
+              - [-1618, 0.37686, -5129.5, -2.6323, -421.85e3, -43.705]
+              - [1.3998, 2546.9, -0.3824, -4696.9, -13.242, -242.73e3]
+              - [88.089e3, -14.588, 423.59e3, 181.09, 29.097e6, 1557.1]
+              - [22.973, -55.281e3, -12.538, 257.32e3, -1934.5, 2.7952e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1608.6, 0.55972, -2143.9, 1.1755, -206.62e3, -61.647]
+              - [0.30423, 156.64, -0.022847, 969.35, -8.3568, -38.307e3]
+              - [2068.9, -0.78186, 916.05, -2.8855, 165.64e3, 86.984]
+              - [0.063105, 876.65, 0.88206, -3078.8, 85.557, -3609.3]
+              - [-200.58e3, 67.45, -166.33e3, 141.47, -19.744e6, -7620]
+              - [25.266, 38.614e3, -3.8318, 4921, -591.02, -4.5017e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6180.7, -0.69112, 1212.3, -3.6392, 206.59e3, 69.837]
+              - [-0.69112, 29.048e3, -0.36594, 137.44e3, 68.231, -57.127e3]
+              - [1212.3, -0.36594, 143.54e3, 8.2401, -180.55e3, 25.164]
+              - [-3.6392, 137.44e3, 8.2401, 7.1339e6, 40.315, 1.5529e6]
+              - [206.59e3, 68.231, -180.55e3, 40.315, 342.99e6, 922.6]
+              - [69.837, -57.127e3, 25.164, 1.5529e6, 922.6, 103.06e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [3731.8, -0.71503, 1292.9, -7.2156, 544.45e3, 46.055]
+              - [-0.71503, 34.956e3, 0.056341, 95.441e3, 131, 39.732e3]
+              - [1292.9, 0.056341, 62.405e3, -5.3183, 307.32e3, 172.78]
+              - [-7.2156, 95.441e3, -5.3183, 395.46e3, 280.68, 1.0941e6]
+              - [544.45e3, 131, 307.32e3, 280.68, 165.21e6, 5743]
+              - [46.055, 39.732e3, 172.78, 1.0941e6, 5743, 84.565e6]
+      - AMDPeriodOrFrequency: 8.613
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6101.7, 0.029466, -1141.4, 0.60846, 155.58e3, 15.46]
+              - [0.029466, 24.576e3, -0.22653, 129.58e3, 100.72, 67.802e3]
+              - [-1141.4, -0.22653, 147.58e3, -7.5475, 207.93e3, 72.512]
+              - [0.60846, 129.58e3, -7.5475, 7.1652e6, -61.652, -1.4632e6]
+              - [155.58e3, 100.72, 207.93e3, -61.652, 344.95e6, -1831.3]
+              - [15.46, 67.802e3, 72.512, -1.4632e6, -1831.3, 93.307e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [4262.7, 0.11793, -1361.2, -3.911, 562.83e3, 44.529]
+              - [0.11793, 37.152e3, 0.14499, 118.6e3, 132.07, -40.609e3]
+              - [-1361.2, 0.14499, 55.974e3, -1.1887, -307.25e3, 35.083]
+              - [-3.911, 118.6e3, -1.1887, 541.18e3, 187.03, -1.2087e6]
+              - [562.83e3, 132.07, -307.25e3, 187.03, 151.36e6, 5071]
+              - [44.529, -40.609e3, 35.083, -1.2087e6, 5071, 90.857e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1793.2, 0.56176, 1136, 4.1812, 100.22e3, -58.413]
+              - [0.13136, -377.22, -0.15293, 2047.8, -16.63, 46.596e3]
+              - [-1138, 0.35052, -3669.6, -0.56154, -350.63e3, -41.949]
+              - [1.5076, 2041.9, -0.35774, -3829.7, -39.117, -250.41e3]
+              - [103.07e3, -22.786, 353.24e3, 134.38, 33.744e6, 3154.6]
+              - [17.724, -47.2e3, -16.041, 259.63e3, -1974.5, 5.3838e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-1693.7, 0.63647, -2111.1, 2.5061, -201.44e3, -68.951]
+              - [0.33553, 254.38, 0.004957, 906.44, -4.6849, -26.796e3]
+              - [2034.8, -0.79143, 1219, -4.1918, 129.83e3, 83.202]
+              - [0.13837, 857.92, 0.80204, -2599.6, 87.262, -25.487e3]
+              - [-194.33e3, 75.048, -128.16e3, 355.64, -15.872e6, -8032.4]
+              - [35.63, 26.825e3, 0.42087, 34.075e3, -598.65, -4.5528e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [5908.5, -0.73708, 1114, -5.6087, 155.84e3, 68.678]
+              - [-0.73708, 24.354e3, -0.32475, 125.18e3, 40.348, -65.709e3]
+              - [1114, -0.32475, 145.36e3, 6.9866, -201.97e3, 39.874]
+              - [-5.6087, 125.18e3, 6.9866, 7.0948e6, -49.786, 1.4464e6]
+              - [155.84e3, 40.348, -201.97e3, -49.786, 340.74e6, -256.43]
+              - [68.678, -65.709e3, 39.874, 1.4464e6, -256.43, 91.518e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [4103.1, -0.75914, 1348.3, -7.7281, 556.3e3, 53.332]
+              - [-0.75914, 35.878e3, -0.050294, 108.29e3, 128.15, 39.942e3]
+              - [1348.3, -0.050294, 56.495e3, -5.3552, 308.87e3, 157.7]
+              - [-7.7281, 108.29e3, -5.3552, 484.83e3, 288.74, 1.1658e6]
+              - [556.3e3, 128.15, 308.87e3, 288.74, 152.59e6, 6274.6]
+              - [53.332, 39.942e3, 157.7, 1.1658e6, 6274.6, 87.379e6]
+      - AMDPeriodOrFrequency: 8.06
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [6021.2, 0.0057597, -1072.2, -0.054996, 98.491e3, 11.948]
+              - [0.0057597, 20.369e3, -0.33422, 113.75e3, 86.34, 76.805e3]
+              - [-1072.2, -0.33422, 150.4e3, -7.473, 232.07e3, 81.002]
+              - [-0.054996, 113.75e3, -7.473, 7.1126e6, -168.78, -1.3329e6]
+              - [98.491e3, 86.34, 232.07e3, -168.78, 343.82e6, -1951]
+              - [11.948, 76.805e3, 81.002, -1.3329e6, -1951, 82.104e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [4817.6, 0.10093, -1553.9, -4.2647, 552.8e3, 44.368]
+              - [0.10093, 37.354e3, 0.32537, 131.78e3, 119.92, -39.232e3]
+              - [-1553.9, 0.32537, 49.588e3, -1.2634, -310.55e3, 27.782]
+              - [-4.2647, 131.78e3, -1.2634, 644.55e3, 152.41, -1.3408e6]
+              - [552.8e3, 119.92, -310.55e3, 152.41, 139.38e6, 4546.8]
+              - [44.368, -39.232e3, 27.782, -1.3408e6, 4546.8, 93.819e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-2023.8, 0.58196, 1026.5, 4.248, 112.66e3, -58.353]
+              - [0.11367, -377.45, -0.22358, 1966.6, -22.333, 41.292e3]
+              - [-1033.2, 0.37197, -3332.7, 0.39712, -305.94e3, -39.705]
+              - [1.9357, 1943.2, -0.28181, -6472.8, -57.907, -279.99e3]
+              - [114.48e3, -41.012, 305.43e3, -79.683, 28.143e6, 4211.8]
+              - [6.0668, -41.582e3, -23.401, 278.43e3, -2210.2, 5.2804e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-2070.4, 0.78039, -2426.2, 3.6054, -206.53e3, -80.984]
+              - [0.42157, 319.28, 0.037636, 780.16, -4.0068, -32.324e3]
+              - [2338.9, -0.87118, 1541.7, -4.8254, 119.05e3, 87.473]
+              - [0.28967, 756.93, 0.9534, -4616.4, 96.029, -107.24e3]
+              - [-197.16e3, 75.735, -116.07e3, 418.49, -7.4034e6, -7380.4]
+              - [42.733, 31.923e3, 2.9959, 113.17e3, -503.56, -2.2069e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [5831.2, -0.79299, 1043.8, -6.5619, 99.533e3, 70.472]
+              - [-0.79299, 20.246e3, -0.32602, 110.65e3, 16.585, -74.601e3]
+              - [1043.8, -0.32602, 148.08e3, 6.8155, -226.1e3, 52.825]
+              - [-6.5619, 110.65e3, 6.8155, 7.0502e6, -193.37, 1.3229e6]
+              - [99.533e3, 16.585, -226.1e3, -193.37, 339.35e6, -1416.9]
+              - [70.472, -74.601e3, 52.825, 1.3229e6, -1416.9, 80.647e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [4637.7, -0.90354, 1537.7, -8.9078, 547.97e3, 64.649]
+              - [-0.90354, 36.16e3, -0.064395, 121.48e3, 116.67, 38.752e3]
+              - [1537.7, -0.064395, 50.183e3, -5.813, 312.35e3, 151.53]
+              - [-8.9078, 121.48e3, -5.813, 583.5e3, 300.72, 1.2947e6]
+              - [547.97e3, 116.67, 312.35e3, 300.72, 140.71e6, 6108.7]
+              - [64.649, 38.752e3, 151.53, 1.2947e6, 6108.7, 90.374e6]
+      - AMDPeriodOrFrequency: 7.574
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [5750, 0.026976, -752.94, -0.049002, 62.571e3, 9.5878]
+              - [0.026976, 16.974e3, -0.51622, 95.802e3, 84.323, 84.707e3]
+              - [-752.94, -0.51622, 154.11e3, -6.4494, 261.09e3, 87.021]
+              - [-0.049002, 95.802e3, -6.4494, 7.0434e6, -367.86, -1.0968e6]
+              - [62.571e3, 84.323, 261.09e3, -367.86, 343.17e6, -1757.8]
+              - [9.5878, 84.707e3, 87.021, -1.0968e6, -1757.8, 70.796e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [5696.6, 0.093725, -1840.4, -3.9294, 529.35e3, 45.796]
+              - [0.093725, 37.047e3, 0.32731, 143.19e3, 97.562, -34.91e3]
+              - [-1840.4, 0.32731, 43.108e3, -1.4581, -306.46e3, 19.282]
+              - [-3.9294, 143.19e3, -1.4581, 761.35e3, 70.931, -1.4657e6]
+              - [529.35e3, 97.562, -306.46e3, 70.931, 126.26e6, 3998.2]
+              - [45.796, -34.91e3, 19.282, -1.4657e6, 3998.2, 95.279e6]
+          - Row: 1
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [-1977.5, 0.46427, 1515.9, 3.8988, 130.88e3, -54.036]
+              - [-0.0079935, -498.23, -0.35569, 2737, -29.21, 44.655e3]
+              - [-1517.7, 0.58412, -3638.4, 1.567, -270.93e3, -50.377]
+              - [2.5194, 2709.3, -0.42631, -698.18, -85.036, -161.45e3]
+              - [130.17e3, -48.589, 268.36e3, -128.21, 19.674e6, 4302.5]
+              - [-3.724, -44.394e3, -32.361, 160.87e3, -2583.7, 3.3929e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [-2740.7, 0.99772, -2735.2, 4.8214, -202.48e3, -99.244]
+              - [0.56277, 387.06, 0.05001, 1551.3, -4.6306, -26.419e3]
+              - [2627.6, -0.91256, 1319.2, -4.9767, 86.46e3, 94.088]
+              - [1.0048, 1532.7, 1.4475, -13.801e3, 109.38, -180.66e3]
+              - [-192.45e3, 65.599, -85.614e3, 378.7, -6.3879e6, -6980.7]
+              - [48.324, 26.166e3, 2.4148, 181.2e3, -493.15, -2.1949e6]
+          - Row: 2
+            Column: 2
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [5580.2, -0.68809, 730.84, -6.4282, 62.737e3, 67.615]
+              - [-0.68809, 16.899e3, -0.38171, 93.824e3, 2.454, -82.482e3]
+              - [730.84, -0.38171, 151.67e3, 7.0044, -255.04e3, 47.889]
+              - [-6.4282, 93.824e3, 7.0044, 6.9906e6, -388.53, 1.0977e6]
+              - [62.737e3, 2.454, -255.04e3, -388.53, 338.55e6, -1757.7]
+              - [67.615, -82.482e3, 47.889, 1.0977e6, -1757.7, 69.72e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [5485.5, -1.1252, 1819.9, -10.241, 526.17e3, 83.266]
+              - [-1.1252, 35.944e3, -0.16969, 133.2e3, 92.451, 34.709e3]
+              - [1819.9, -0.16969, 43.752e3, -6.2158, 308.54e3, 149.57]
+              - [-10.241, 133.2e3, -6.2158, 696.23e3, 294.58, 1.4207e6]
+              - [526.17e3, 92.451, 308.54e3, 294.58, 127.73e6, 5796.5]
+              - [83.266, 34.709e3, 149.57, 1.4207e6, 5796.5, 91.958e6]
+      - AMDPeriodOrFrequency: 7.144
+        Matrices:
+          - Row: 1
+            Column: 1
+            AddedMassX, AddedMassY, AddedMassZ, AddedMassRx, AddedMassRy, AddedMassRz:
+              - [5168.4, 0.065243, -210.83, -0.88278, 24.907e3, 5.5982]
+              - [0.065243, 14.242e3, -0.67584, 77.821e3, 94.391, 88.988e3]
+              - [-210.83, -0.67584, 158.42e3, -5.7091, 295.74e3, 91.737]
+              - [-0.88278, 77.821e3, -5.7091, 6.9447e6, -538.66, -835.28e3]
+              - [24.907e3, 94.391, 295.74e3, -538.66, 343.99e6, -1556.4]
+              - [5.5982, 88.988e3, 91.737, -835.28e3, -1556.4, 61.309e6]
+            DampingX, DampingY, DampingZ, DampingRx, DampingRy, DampingRz:
+              - [6736.6, 0.13146, -1981.8, -3.2119, 520.24e3, 47.478]
+              - [0.13146, 36.426e3, 0.40217, 151.43e3, 68.56, -27.813e3]

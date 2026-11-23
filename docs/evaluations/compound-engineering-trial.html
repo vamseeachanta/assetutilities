@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Compound Engineering trial assessment</title>
+<main>
+<h1>Compound Engineering trial assessment</h1>
+<h2>Summary</h2>
+<p>Adoption is deferred. No live plugin skills have been exercised, so plugin
+effectiveness, installation cleanliness, and knowledge reuse are not established.
+The evidence validator and worked example support a later trial; their test
+results do not satisfy the plugin acceptance criteria in
+<a href="https://github.com/vamseeachanta/assetutilities/issues/81">the epic</a>.</p>
+<h2>Revision history</h2>
+<table>
+<thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead>
+<tbody><tr><td>Initial</td><td>2026-10-20</td><td>Evidence format, worked example,
+and deferred assessment added to prevent unobserved behavior from supporting adoption.</td></tr></tbody>
+</table>
+<p>Table 1. Issued assessment revisions.</p>
+<h2>Implemented scope</h2>
+<ol>
+<li><strong>Evidence recording:</strong> a command-line validator checks the
+complete epic checklist and preserves pending observations separately from failures.</li>
+<li><strong>Evidence integrity:</strong> observed results require readable local
+artifacts with matching SHA-256 digests. Passing results require a pinned plugin
+revision. The local configuration ignore rule is tested without installation.</li>
+<li><strong>Trial preparation:</strong> this assessment, the worked example,
+<a href="../plans/compound-engineering-trial.html">implementation plan</a>, and
+<a href="../solutions/compound-engineering-evidence.html">reusable solution note</a>
+define how a later permitted trial will collect and assess evidence.</li>
+</ol>
+<p>These are preparation slices. They do not represent completion of the live
+installation, advisory evaluation, compounding loop, or adoption decision.</p>
+<h2>Observed basis</h2>
+<p>At inspection, the isolated feature worktree was clean and its starting commit
+matched the available main reference at
+<code>3626a05b71442557df44168bf2ac962dd88205c7</code>.
+No installation or assistant invocation was performed. Existing repository
+configuration and the primary checkout were read without alteration.</p>
+<p>The epic requests plugin version <code>v1.0.2</code>. A request for
+<a href="https://api.github.com/repos/EveryInc/compound-engineering-plugin/git/ref/tags/v1.0.2">that exact upstream Git tag</a>
+returned HTTP 404 on 2026-10-20. This establishes only that the
+tag reference did not resolve at the time of inspection; it does not establish
+whether a matching plugin manifest version exists in history. Plugin source and
+revision resolution remain <code>NOT_EVALUATED</code>. The later trial shall
+resolve the intended version to a source revision before recording passing results.</p>
+<h2>Acceptance evidence</h2>
+<table>
+<thead><tr><th>Criterion</th><th>Status</th><th>Required observation and source</th></tr></thead>
+<tbody>
+<tr><td><code>install_clean</code></td><td>NOT_EVALUATED</td><td>User-scoped install,
+setup health, required dependency versions, installation location, and before/after
+repository state; <a href="https://github.com/vamseeachanta/assetutilities/issues/82">setup issue</a>.</td></tr>
+<tr><td><code>advisory_value</code></td><td>NOT_EVALUATED</td><td>Review, debug,
+simplification, and documentation skill outputs with findings, noise, elapsed time,
+and keep/drop/conditional judgments;
+<a href="https://github.com/vamseeachanta/assetutilities/issues/84">advisory issue</a>.</td></tr>
+<tr><td><code>plan_work</code></td><td>NOT_EVALUATED</td><td>A real task, generated
+plan, implementation, tests, review, and protected-main behavior;
+<a href="https://github.com/vamseeachanta/assetutilities/issues/85">pipeline issue</a>.</td></tr>
+<tr><td><code>compound_capture</code></td><td>NOT_EVALUATED</td><td>Plugin-produced
+solution and glossary entries, followed by a reuse assessment on a subsequent
+occurrence; the pipeline issue and epic.</td></tr>
+<tr><td><code>rollout_recommendation</code></td><td>NOT_EVALUATED</td><td>An
+evidence-backed adopt/adopt-partial/drop judgment, skill keep-list, and approved
+scope; <a href="https://github.com/vamseeachanta/assetutilities/issues/86">decision issue</a>.</td></tr>
+</tbody>
+</table>
+<p>Table 2. The epic criteria are pending; validator tests are not substituted for trial evidence.</p>
+<h2>Worked example: inputs, method, answer</h2>
+<p>The input is
+<a href="../../examples/compound-engineering/deferred-trial.json">deferred-trial.json</a>.
+It has an unresolved plugin revision and no observed criteria. From the repository root:</p>
+<pre><code>uv run --no-project python scripts/evaluation/compound_trial.py \
+  examples/compound-engineering/deferred-trial.json --root .</code></pre>
+<p>The method validates the record structure, classifies each named criterion,
+and checks any referenced evidence bytes. Hand enumeration of the input gives
+zero passing criteria, zero failed criteria, and five pending criteria. The
+following fields are extracted from the full JSON output:</p>
+<pre><code>{
+  "counts": {"PASS": 0, "FAIL": 0, "NOT_EVALUATED": 5},
+  "disposition": "defer",
+  "ready_for_maintainer_review": false
+}</code></pre>
+<p>The exit status is <code>1</code>, the documented result for a valid record
+that does not establish readiness. Status <code>0</code> means all criteria pass
+and the evidence is ready for maintainer review; status <code>2</code> means an
+invalid record or unavailable evidence. No status authorizes adoption.</p>
+<h2>Record contract</h2>
+<p>The top-level keys are exactly <code>schema_version</code> (local format
+version <code>1</code>), <code>plugin</code>, and <code>criteria</code>.
+The plugin object contains nonempty <code>version</code> text and
+<code>revision</code>, either null or a full lowercase Git commit ID.
+Each criterion contains exactly <code>status</code>, nonempty
+<code>reason</code>, and an <code>evidence</code> array. Status is one of
+<code>PASS</code>, <code>FAIL</code>, or <code>NOT_EVALUATED</code>.</p>
+<p>Each evidence item contains exactly <code>path</code> and
+<code>sha256</code>. Paths use repository-relative forward slashes, remain within
+the selected root after symlink resolution, and identify regular files. Digests
+use lowercase hexadecimal. Repeated paths within a criterion, duplicate JSON
+keys, unsupported formats, missing criteria, and unknown fields are rejected.
+An observation with PASS or FAIL requires evidence; PASS also requires a pinned
+plugin revision. Any FAIL governs the disposition; otherwise any pending criterion
+defers readiness. The validator only reads the selected record and local artifacts.</p>
+<h2>Procedure for the live trial</h2>
+<ol>
+<li>Resolve and record the intended plugin revision and manifest version.
+Verify user-scoped installation authority separately from repository write authority.</li>
+<li>Install and run setup in an isolated feature worktree. Record dependency
+health and before/after repository state. Confirm local configuration is ignored.
+Follow the <a href="https://github.com/vamseeachanta/assetutilities/issues/83">worktree issue</a>;
+never copy credentials into evidence.</li>
+<li>Run the advisory skills in report-only mode against a named revision.
+Classify useful findings and noise individually. Record elapsed time and judgment
+without inventing a numerical acceptance threshold.</li>
+<li>Run the complete plan/work/review/compound sequence on a bounded real task.
+Record protected-main checks and the resulting reusable knowledge. Evaluate the
+knowledge on the next occurrence before claiming a measured time saving.</li>
+<li>Retain public-ready observations and their digests, update the trial record,
+run the validator, and obtain independent review. Resolve the adoption decision
+in the decision issue; a complete record alone is not authorization.</li>
+</ol>
+<h2>Proposed rollout boundaries</h2>
+<table>
+<thead><tr><th>Repository</th><th>Proposed use after an adoption decision</th><th>Artifact policy and guardrails</th></tr></thead>
+<tbody>
+<tr><td>assetutilities</td><td>Isolated trial first</td><td>Reviewed public plans
+and solutions may be committed; local configuration remains ignored.</td></tr>
+<tr><td>digitalmodel and worldenergydata</td><td>Bounded full workflow</td><td>Each
+repository uses its own feature branch and pull request; public artifacts require
+disclosure review before publication.</td></tr>
+<tr><td>Private repository</td><td>Bounded full workflow</td><td>Private plans and
+solutions remain private and follow that repository's data contract.</td></tr>
+<tr><td>workspace-hub</td><td>Advisory and planning only</td><td>Commit, push, and
+pull-request skills remain excluded; artifact retention follows its own policy.</td></tr>
+</tbody>
+</table>
+<p>Table 3. Proposed boundaries from the decision issue; no rollout is authorized by this document.</p>
+<p>The current keep-list is empty pending evidence. All advisory and pipeline
+skills remain conditional candidates. The named artifact roots in the epic are
+<code>docs/plans/</code>, <code>docs/brainstorms/</code>,
+<code>docs/solutions/</code>, <code>CONCEPTS.md</code>, and
+<code>STRATEGY.md</code>. Their behavior has not been verified against an installed
+version. This preparation adds no root glossary or strategy file.</p>
+<h2>Limitations and next checkpoint</h2>
+<p>Hashes establish agreement with recorded bytes, not the truth, completeness,
+authorship, or quality of an observation. The script does not query installation
+state, execute assistants, inspect remote checks, verify a plugin revision against
+upstream, or enforce repository policy. The sample record is a pending record,
+and the tests' passing records are synthetic. No engineering input data or
+licensed-source values are introduced. The next checkpoint is a permitted
+version-pinned installation and live trial, followed by independent review.</p>
+</main>
+</html>

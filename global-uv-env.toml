@@ -1,0 +1,82 @@
+# Global UV Environment Configuration for AssetUtilities
+# This file enables sharing the AssetUtilities environment across multiple repositories
+# Usage: Copy this file to other repos and run: uv sync --config-file global-uv-env.toml
+
+[project]
+name = "assetutilities-global"
+version = "0.0.8"
+description = "Global AssetUtilities environment for cross-repository usage"
+requires-python = ">=3.9"
+
+# Complete dependency set from AssetUtilities for global use
+dependencies = [
+    "pyyaml",
+    "numpy",
+    "pandas",
+    "plotly",
+    "matplotlib",
+    "chardet",
+    "python-certifi-win32",
+    "webcolors",
+    "xlsxwriter",
+    "plantuml",
+    "deepdiff",
+    "pandoc",
+    "wkhtmltopdf",
+    "python-docx",
+    "scrapy==2.12",
+    "bs4",
+    "gitpython==3.1.31",
+    "excel2img; sys_platform == 'win32'",
+    "PyPDF2",
+    "tabula",
+    "sympy>=1.13.3",
+    "utm",
+    "ruamel.yaml",
+    "jinja2",
+    "openpyxl",
+    "crochet",
+    "loguru",
+    "playwright",
+    "selenium",
+    "fake_headers",
+    "undetected-chromedriver",
+    "parsel",
+    # Development tools for cross-repo development
+    "build",
+    "twine",
+    "bumpver",
+    "pytest",
+    "ruff",
+    # Additional utilities commonly needed across repos
+    "requests",
+    "click",
+    "rich",
+    "typer",
+]
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

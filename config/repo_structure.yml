@@ -1,0 +1,83 @@
+allowed_root_files:
+  - AGENTS.md
+  - CHANGELOG.md
+  - CLAUDE.md
+  - LICENSE
+  - MANIFEST.in
+  - MODULE_STRUCTURE.md
+  - Makefile
+  - README.md
+  - REQUIREMENTS_MIGRATION.md
+  - TEST_PATH_RESOLUTION_FIX.md
+  - create-module-agent.py
+  - global-uv-env.toml
+  - hub-config.yaml
+  - mkdocs.yml
+  - poetry.lock
+  - pyproject.toml
+  - pytest.ini
+  - requirements.txt
+  - uv.lock
+  - vulture_whitelist.py
+  - .command-registry.json
+  - .gitignore
+  - .gitleaks.toml
+  - .pre-commit-config.yaml
+  - .radon.cfg
+  - .uvrc
+allowed_root_dirs:
+  - data-manifest
+  - config
+  - docs
+  - examples
+  - modules
+  - results
+  - scripts
+  - slash_commands
+  - src
+  - tests
+  - .agent-os
+  - .claude
+  - .codex
+  - .gemini
+  - .git-commands
+  - .github
+  - .planning
+  - .vscode
+generated_roots:
+  - results
+generated_exceptions:
+  - path: results
+    category: durable-evidence
+    owner: assetutilities-maintainers
+    review_date: "2026-06-30"
+    follow_up_url: https://github.com/vamseeachanta/assetutilities/issues/78
+    reason: Legacy tracked analysis evidence retained until a dedicated generated-evidence classification/migration issue is approved.
+    allowed_paths:
+      - results/data_exploration.yml
+      - results/data_exploration_column.csv
+      - results/data_exploration_column_T.csv
+      - results/data_exploration_data_type.csv
+      - results/data_exploration_data_type_T.csv
+      - results/data_exploration_end_value.csv
+      - results/data_exploration_end_value_T.csv
+      - results/data_exploration_max.csv
+      - results/data_exploration_max_T.csv
+      - results/data_exploration_mean.csv
+      - results/data_exploration_mean_T.csv
+      - results/data_exploration_min.csv
+      - results/data_exploration_min_T.csv
+      - results/data_exploration_no_of_unique_values.csv
+      - results/data_exploration_no_of_unique_values_T.csv
+      - results/data_exploration_row_count.csv
+      - results/data_exploration_row_count_T.csv
+      - results/data_exploration_row_count_per_unique_values.csv
+      - results/data_exploration_row_count_per_unique_values_T.csv
+      - results/data_exploration_start_value.csv
+      - results/data_exploration_start_value_T.csv
+      - results/data_exploration_stdev.csv
+      - results/data_exploration_stdev_T.csv
+      - results/data_exploration_unique_values.csv
+      - results/data_exploration_unique_values_T.csv
+      - results/file_edit.yml
+      - results/file_management.yml

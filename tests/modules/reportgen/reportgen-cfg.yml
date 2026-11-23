@@ -1,0 +1,55 @@
+basename: reportgen
+
+# folders to source/place data , assets and output data
+# all fields are mandatory and will be used by report gen to source and place data if the template does not have content
+important_paths: 
+  project_root: "fixtures/reference-91/"
+  inputs_path: "tests/modules/reportgen/inputs"
+  assets_path: "tests/modules/reportgen/assets"
+  outputs_path: "tests/modules/reportgen/outputs"
+
+# declare report details
+# most things from here directly go into the report
+# all fields mandatory 
+report_details:
+  name: "Pandula pai pakshapatam - tests _ config"
+  client_logo: "client-logo.png"
+  project_name: "Pemex Zama FEED"
+  project_num: "61850"
+  engineer: "Vamsee Achanta"
+  reviewer: "TBD"
+  date: "2021/10/22"
+  # If report_writer_class is not specified, DefaultMDWriter will be used
+  target_file_stub: "pandulu-kukkalu"
+  target_report_type : "docx"
+
+# - [ ] #todo have to really switch this to a md format.  
+# optional sections configuration
+sections_L1:
+  - name: "Pandula pempakam"
+    paragraphs:
+      - ["Kakinadalo nedu pandulano neti garela to pushtiga balango penchutunnaru."]
+      - ["Neti garelu tinna pandulu pushti ga balanga tayarayyayi."]
+  
+  - name: "Kukkala pempakam"
+    paragraphs:
+      - ["Kukkalanu maatram chaala heenanga , deenanga penchutunnaru"]
+      - ["Kukkalaku garelu kaadu sari kada, korikesina chicken mukka kooda dakkatam ledu"]
+
+  - name: "Vinnapam"
+    paragraphs:
+      - ["Needey babugari prabhutvam ee taara tamyanni parishkarinchaali"]
+ 
+  - name: "Appendix"
+    sections_L2:
+      - name: "subsection 1"
+        paragraphs:
+          - ["Table1a - 2024 census of street dogs in kakinada"]
+          - [{"type": "markdown_table", 
+              "content": "| Dog Breed | count |\n|---|---|\n| black | 10 |\n| spotted | 5 |\n| brown | 40 |"}]
+      
+      - name: "subsection 2"
+        paragraphs:
+          - ["Table1b - 2024 census of pigs dogs in kakinada"]
+          - [{"type": "markdown_table", 
+              "content": "| pig breed | count |\n|---|---|\n| wild | 40 |\n| tea cup | 300 |"}]

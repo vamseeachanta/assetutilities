@@ -1,0 +1,17 @@
+basename: word_utilities
+
+# Convert a CSV table into a Word (.docx) document with a rendered table.
+# The CSV path is resolved relative to the repo root (the working directory
+# you run `uv run python -m assetutilities ...` from).
+# Output: examples/workflows/word_utilities/data/sample_table.docx
+
+task: csv_to_docx
+
+files:
+  file_name: examples/workflows/word_utilities/data/sample_table.csv
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True

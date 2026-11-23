@@ -1,0 +1,29 @@
+basename: excel_utilities
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+task: custom_calculation
+
+custom_calculation:
+  output:
+    -
+      io: tests\data\custom_calculation_polynomial.xlsx
+      sheet_name: Sheet1
+      index_col: 0
+      skiprows: 71
+      skipfooter: 34
+
+
+
+files:
+  -
+    io: tests\data\custom_calculation_polynomial.xlsx
+    sheet_name: Sheet1
+    index_col: 0
+    skiprows: 71
+    skipfooter: 34
+

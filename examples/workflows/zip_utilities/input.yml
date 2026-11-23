@@ -1,0 +1,46 @@
+meta:
+  library: assetutilities
+  basename: zip_utilities
+
+# Group files by stem and produce one zip archive per stem.
+# Stems are derived from the marker files in yml/; the matching CSV files
+# in csv/ are bundled into <stem>.zip under the output_directory (zip/).
+# Paths are resolved relative to this file's directory.
+# Output: zip/caseA.zip, zip/caseB.zip
+
+basename: zip_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+parallel_processing:
+  enabled: true
+  max_workers: 4
+
+analysis_settings:
+  flag: True
+  type: zip_by_stem
+  by: stem
+
+analysis:
+  flag: True
+  type: zip_by_stem
+  by: stem
+  input_directory: csv
+  filename:
+    extension: [csv]
+
+file_management:
+  flag: True
+  input_directory: yml
+  output_directory: zip
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

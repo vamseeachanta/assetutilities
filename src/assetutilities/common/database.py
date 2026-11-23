@@ -1,0 +1,1286 @@
+import logging
+import os
+import re
+
+
+def get_db_connection(db_properties):
+    dbe = Database(db_properties)
+    try:
+        dbe.enable_connection_and_cursor()
+        connection_status = True
+        return dbe, connection_status
+    except Exception as e:
+        connection_status = False
+        print(f"Error as {e}")
+        print(
+            "No connection for environment: {}".format(
+                db_properties.get("server", None)
+            )
+        )
+        return dbe, connection_status
+
+
+def get_db_properties_for_service(service):
+    import yaml
+
+    working_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    filename = os.path.join(working_directory, "data", "database.yml")
+
+    with open(filename) as ymlfile:
+        database_dict = yaml.safe_load(ymlfile)
+    db_properties = database_dict[service].copy()
+    current_env = os.environ.get("environment", "stage")
+    db_properties.update(database_dict["common"][current_env])
+    return db_properties
+
+
+def test_saving_service_data_to_db():
+    pass
+
+
+class Database:
+    def __init__(self, db_properties):
+        from assetutilities.common.data import AttributeDict
+
+        self.init_assign_db_properties(db_properties)
+        self.analysis = AttributeDict()
+
+    def init_assign_db_properties(self, db_properties):
+        self.highAvailability = True
+        self.server_type = db_properties.get("server_type", None)
+        self.server = db_properties.get("server", None)
+        self.database = db_properties.get("database", None)
+        self.schema = db_properties.get("schema", None)
+        self.user = db_properties.get("user", None)
+        self.password = db_properties.get("password", None)
+        self.port = db_properties.get("port", None)
+        self.connection_string = db_properties.get("connection_string", None)
+        self.parse_dates = db_properties.get("pd_parse_dates_columns", True)
+        self.cursor = None
+        self.conn = None
+
+    # Maximum number of attempts for the retry decorator. Bounds what was
+    # previously unbounded recursion (issue #80), preventing a RecursionError /
+    # stack overflow when an operation fails persistently.
+    DB_RETRY_MAX_ATTEMPTS = 5
+
+    def db_retry_decorator(f):
+        import logging
+        from functools import wraps
+
+        @wraps(f)
+        def wrapper(self, *args, **kwargs):
+            max_attempts = getattr(self, "DB_RETRY_MAX_ATTEMPTS", 5)
+            last_exc = None
+            for _ in range(max_attempts):
+                try:
+                    return f(self, *args, **kwargs)
+                except Exception as e:
+                    last_exc = e
+                    logging.info(str(e))
+            # Exhausted all attempts; re-raise the last error instead of
+            # recursing forever.
+            if last_exc is not None:
+                raise last_exc
+
+        return wrapper
+
+    def get_input_data(self, cfg_input):
+        try:
+            self.enable_connection_and_cursor()
+        except Exception as e:
+            print(f"No connection to input db, error {e}")
+        try:
+            if cfg_input["source"] == "db":
+                self.get_input_data_from_db(cfg_input)
+            else:
+                print("No input data source defined")
+        except Exception as e:
+            print(f"Error getting input data in error {e}")
+
+    def _redact(self, message):
+        """Strip this connection's password out of arbitrary text.
+
+        Driver errors routinely embed the whole DSN, password included, so the
+        exception text is as much of a leak as printing the properties dict.
+        """
+        text = str(message)
+        if self.password:
+            text = text.replace(str(self.password), "***")
+        return text
+
+    def describe_connection(self):
+        """Non-secret identification of the configured connection.
+
+        Never includes password or connection_string (issue #80).
+        """
+        return (
+            f"server={self.server}, database={self.database}, user={self.user} "
+            "(credentials redacted)"
+        )
+
+    def set_up_db_connection(self, db_properties):
+        try:
+            self.enable_connection_and_cursor()
+            return True
+        except Exception as e:
+            # The previous implementation printed the whole db_properties dict,
+            # which carries `password` and `connection_string` (issue #80).
+            print(f"Error as {self._redact(e)}")
+            print(f"No connection for environment: {self.describe_connection()}")
+            return False
+
+    def enable_connection_and_cursor(self):
+        from urllib.parse import quote_plus
+
+        from sqlalchemy import create_engine  # type: ignore
+
+        if self.server_type == "mssql":
+            import logging
+
+            logging.info("  ******DATABASE******")
+            logging.info(
+                f"Attempt to connect to Server: {self.server}, user: {self.user}, password:not displayed, database: {self.database}"
+            )
+            try:
+                if self.user is not None:
+                    connection_string_driver_specific = (
+                        "Driver={ODBC Driver 13 for SQL Server};Server="
+                        + self.server
+                        + ";Database="
+                        + self.database
+                        + ";Uid="
+                        + self.user
+                        + ";Pwd="
+                        + self.password
+                        + ";"
+                    )
+                    connection_string_generic = (
+                        "Driver=SQL+Server;Server="
+                        + self.server
+                        + ";Database="
+                        + self.database
+                        + ";Uid="
+                        + self.user
+                        + ";Pwd="
+                        + self.password
+                        + ";"
+                    )
+                    if self.highAvailability:
+                        connection_string_driver_specific = (
+                            connection_string_driver_specific
+                            + "MultiSubnetFailover=Yes;"
+                        )
+                        connection_string_generic = (
+                            connection_string_generic + "MultiSubnetFailover=Yes;"
+                        )
+                    connection_string_generic = (
+                        "mssql+pyodbc:///?odbc_connect="
+                        + quote_plus(connection_string_generic)
+                    )
+                    connection_string_driver_specific = (
+                        "mssql+pyodbc:///?odbc_connect="
+                        + quote_plus(connection_string_driver_specific)
+                    )
+                    try:
+                        self.engine = create_engine(
+                            connection_string_generic, echo=False
+                        )
+                    except Exception:
+                        print("Generic driver did not work. Utilizing specific driver")
+                        self.engine = create_engine(
+                            connection_string_driver_specific,
+                            echo=False,
+                        )
+                else:
+                    import pyodbc  # type: ignore
+
+                    server_database_string = f"Server={self.server};Database={self.database};Trusted_Connection=yes;"
+                    sql_alchemy_connection_string_generic = (
+                        "mssql+pyodbc:///?odbc_connect="
+                        + quote_plus("Driver={SQL Server};" + server_database_string)
+                    )
+                    self.engine = create_engine(
+                        sql_alchemy_connection_string_generic,
+                        echo=False,
+                    )
+
+                    # pyodbc_connection_string_generic = "Driver={SQL Server};" + server_database_string
+                    # self.conn = pyodbc.connect(pyodbc_connection_string_generic)
+                    # self.get_db_version()
+
+                self.conn = self.engine.connect()
+                print(
+                    f"Connection to Server: {self.server} Successful by user {self.user} to database {self.database}!"
+                )
+
+            except Exception as e:
+                # Log the cause; it was discarded before (issue #80).
+                logging.info(f"MSSQL connection failed: {e}")
+                print("MSSQL connection failed")
+
+        if self.server_type == "postgresql":
+            import logging
+
+            import psycopg2  # type: ignore
+
+            logging.info("  ******DATABASE******")
+            logging.info(
+                f"Attempt to connect to Server: {self.server}, user: {self.user}, password:not displayed, database: {self.database}"
+            )
+            try:
+                if self.connection_string is not None:
+                    self.engine = create_engine(self.connection_string)
+                    self.conn = self.engine.connect()
+                    print(
+                        f"Connection to Server: {self.server} Successful by user {self.user} to database {self.database}!"
+                    )
+                else:
+                    connection_string = f"postgresql+psycopg2://{self.user}:{self.password}@{self.server}:{self.port}/{self.database}"
+                    self.engine = create_engine(connection_string)
+                    self.conn = self.engine.connect()
+                    print(
+                        f"Connection to Server: {self.server} Successful by user {self.user} to database {self.database}!"
+                    )
+            except (Exception, psycopg2.Error) as error:
+                print("Error while connecting to PostgreSQL", error)
+                logging.info(f"Error while connecting to PostgreSQL {error}")
+
+        if self.server_type == "mongodb":
+            from pprint import pprint
+
+            from pymongo import MongoClient  # type: ignore
+
+            logging.info("  ******DATABASE******")
+            logging.info(
+                f"Attempt to connect to Server: {self.server}, user: {self.user}, password:not displayed, database: {self.database}"
+            )
+            try:
+                client = MongoClient()
+                db = client.admin
+                # Issue the serverStatus command and print the results
+                serverStatusResult = db.command("serverStatus")
+                pprint(serverStatusResult)
+
+                # MongoDB is a non-SQL store; building a postgresql+psycopg2
+                # engine here was a copy/paste error that silently connected to
+                # Postgres instead of Mongo (review 2026-05-23). Surface the
+                # missing wiring instead of misconnecting.
+                raise NotImplementedError(
+                    "MongoDB SQLAlchemy engine wiring is not implemented; "
+                    "use the MongoClient `client` directly."
+                )
+            except (Exception, psycopg2.Error) as error:
+                print("Error while connecting to PostgreSQL", error)
+                logging.info(f"Error while connecting to PostgreSQL {error}")
+
+        if self.server_type in ["accdb", "mdb"]:
+            import logging
+
+            logging.info("  ******DATABASE******")
+            logging.info(
+                f"Attempt to connect to Server: {None}, user: {None}, password:not displayed, database: {self.database}"
+            )
+            try:
+                # Could not get this working
+                from pathlib import PureWindowsPath
+
+                import pyodbc  # type: ignore
+
+                # Build the DBQ from the configured database path. A previous
+                # hardcoded developer path (C:\Users\achantv\...) that overrode
+                # this value was removed (review 2026-05-23) so the connection
+                # is no longer bound to one machine.
+                dbq = rf"DBQ={PureWindowsPath(self.database)}"
+                connection_string_generic = (
+                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
+                )
+                self.conn = pyodbc.connect(connection_string_generic)
+
+                import pypyodbc  # type: ignore
+
+                pypyodbc.lowercase = False
+                from pathlib import PureWindowsPath
+
+                # Same as above: derive DBQ from the configured database path
+                # rather than a hardcoded developer path (review 2026-05-23).
+                dbq = rf"DBQ={PureWindowsPath(self.database)}"
+                connection_string_generic = (
+                    r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};" + dbq + ";"
+                )
+                self.conn = pypyodbc.connect(connection_string_generic)
+
+            except Exception as e:
+                # Raise instead of exiting so callers can report the failure
+                # (issue #80). The print that used to sit after sys.exit() was
+                # unreachable dead code and has been removed.
+                logging.info(f"Access file connection failed: {e}")
+                raise ConnectionError(f"Access file connection failed: {e}") from e
+
+    def perform_analysis(self, cfg_analysis):
+        db_analysis_result = {}
+        if cfg_analysis["simple"]:
+            print("Performing db data analysis")
+            db_analysis_result = self.get_db_basic_analysis_outputs()
+        if cfg_analysis["table_statistics"]["flag"]:
+            print("Performing db table statistics")
+            statistics_df_columns = cfg_analysis["table_statistics"][
+                "statistics_df_columns"
+            ]
+            self.get_table_basic_statistics(statistics_df_columns)
+        if cfg_analysis["timeline_statistics"]["flag"]:
+            timeline_statistics_cfg = cfg_analysis["timeline_statistics"].copy()
+            statistics_df_columns = cfg_analysis["table_statistics"][
+                "statistics_df_columns"
+            ]
+            self.get_timeline_statistics(timeline_statistics_cfg, statistics_df_columns)
+        if (
+            cfg_analysis.__contains__("extreme_events")
+            and cfg_analysis["extreme_events"]["flag"]
+        ):
+            print("Performing event identification analysis")
+            cfg_extreme_events = cfg_analysis["extreme_events"]
+            extreme_events_df_array = self.perform_extreme_event_analysis(
+                cfg_extreme_events
+            )
+            db_analysis_result.update(
+                {
+                    "cfg_extreme_events": cfg_extreme_events,
+                    "extreme_events_df_array": extreme_events_df_array,
+                }
+            )
+        return db_analysis_result
+
+    def get_db_basic_analysis_outputs(self):
+        db_version_df = self.get_db_version()
+        db_table_df = self.get_db_tables()
+        db_function_df = self.get_db_functions()
+        table_column_df_array, column_df_array_tables = (
+            self.get_columns_for_all_db_tables(db_table_df)
+        )
+
+        db_analysis_result = {
+            "db_version_df": db_version_df,
+            "db_table_df": db_table_df,
+            "db_function_df": db_function_df,
+            "table_column_df_array": table_column_df_array,
+            "column_df_array_tables": column_df_array_tables,
+        }
+        return db_analysis_result
+
+    def get_df_from_stored_procedure(self, sp, args):
+        import logging
+
+        import pandas as pd
+
+        if len(args) == 1:
+            if type(args[0]) is str:
+                query = f"exec dbo.{sp} '{args[0]}'"
+            else:
+                query = f"exec dbo.{sp} {args[0]}"
+
+        logging.debug(query)
+        df = pd.read_sql_query(query, self.conn)
+        return df
+
+    def get_df_from_query(self, query):
+        import logging
+
+        import pandas as pd
+
+        logging.debug(query)
+        df = pd.read_sql_query(query, self.conn)
+        return df
+
+    def get_db_table_analysis_outputs(self):
+        self.get_table_statistics()
+
+    def get_db_version(self):
+        import os
+
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "sql_version.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename)
+            self.analysis.update({"version": df})
+            return df
+        else:
+            print("Not a valid filename")
+
+    def get_db_tables(self):
+        import os
+
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "tables_in_database.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename)
+            self.analysis.update({"tables": df})
+            return df
+        else:
+            print("Not a valid filename")
+
+    def get_db_functions(self):
+        import os
+
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "functions_in_database.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename)
+            self.analysis.update({"store_procedures": df})
+            return df
+        else:
+            print("Not a valid filename")
+
+    def get_columns_for_all_db_tables(self, db_table_df):
+        import pandas as pd
+
+        column_df_array = []
+        column_df_array_tables = []
+        for row_index in range(0, len(db_table_df)):
+            table_name = db_table_df.iloc[row_index].TABLE_NAME
+            self.schema = db_table_df.iloc[row_index].TABLE_SCHEMA
+            try:
+                column_df = self.get_table_columns(table_name)
+            except Exception:
+                column_df = pd.DataFrame()
+                print(
+                    f"          ..... FAILURE DB table columns for table {row_index} of {len(self.analysis.tables)}: {table_name}"
+                )
+            column_df_array.append(column_df)
+            column_df_array_tables.append(table_name)
+
+        return column_df_array, column_df_array_tables
+
+    def get_table_basic_statistics(self, statistics_df_columns):
+        import pandas as pd
+
+        self.StatisticsClass_df = None
+        for table_index in range(0, len(self.analysis.tables)):
+            # for table_index in range(0, 1):
+            self.table_statistics = pd.DataFrame(columns=statistics_df_columns)
+            self.schema = self.analysis.tables.iloc[table_index].TABLE_SCHEMA
+            self.StatisticsClass_df = self.get_schema_statistics_class()
+            table_name = self.analysis.tables.iloc[table_index].TABLE_NAME
+            print(
+                f"          ..... DB table statistics for table {table_index} of {len(self.analysis.tables)}: {table_name}"
+            )
+            try:
+                self.get_table_statistics(table_name)
+                if len(self.table_statistics) > 0:
+                    self.save_to_db(self.table_statistics, "TableStatistics")
+            except Exception:
+                print(
+                    f"          ..... FAILURE DB table statistics for table {table_index} of {len(self.analysis.tables)}: {table_name}"
+                )
+
+    def get_schema_statistics_class(self):
+        import os
+
+        schema_table = self.schema + "." + "StatisticsClass"
+        query_argument_array = [schema_table]
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "get_all_records_from_table.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename, query_argument_array)
+            return df
+        else:
+            print("Not a valid filename")
+
+    def get_table_statistics(self, table_name, chosen_columns=None):
+        column_df = self.get_table_columns(table_name)
+        for df_row in range(0, len(column_df)):
+            # for df_row in range(0, 1):
+            column_name = column_df.iloc[df_row]["Column Name"]
+            process_column_flag = False
+            if chosen_columns is None:
+                process_column_flag = True
+            elif column_name in chosen_columns:
+                process_column_flag = True
+            if process_column_flag:
+                column_data_type = column_df.iloc[df_row]["Data type"]
+                StatisticsClassType = "Time Range"
+                StatisticsClassId = self.StatisticsClass_df[
+                    self.StatisticsClass_df.StatisticsClassType == StatisticsClassType
+                ].StatisticsClassId.iloc[0]
+
+                table_column_statistics_df = self.get_table_column_statistics(
+                    table_name, column_name, column_data_type
+                )
+                start_time = None
+                end_time = None
+                table_rows = table_column_statistics_df.table_rows.iloc[0]
+                minimum = table_column_statistics_df.minimum.iloc[0]
+                maximum = table_column_statistics_df.maximum.iloc[0]
+                average = None
+                RMS = None
+                StandardDeviation = None
+                column_statistics_array = [
+                    1,
+                    self.schema,
+                    table_name,
+                    column_name,
+                    column_data_type,
+                    StatisticsClassId,
+                    start_time,
+                    end_time,
+                    table_rows,
+                    minimum,
+                    maximum,
+                    average,
+                    RMS,
+                    StandardDeviation,
+                ]
+                if table_rows > 0:
+                    self.table_statistics.loc[len(self.table_statistics)] = (
+                        column_statistics_array
+                    )
+
+    def get_table_timetrace_statistics(
+        self, table_name, start_time, end_time, time_column, chosen_columns=None
+    ):
+        column_df = self.get_table_columns(table_name)
+        for df_row in range(0, len(column_df)):
+            # for df_row in range(0, 1):
+            column_name = column_df.iloc[df_row]["Column Name"]
+            process_column_flag = False
+            if chosen_columns is None:
+                process_column_flag = True
+            elif column_name in chosen_columns:
+                process_column_flag = True
+            if process_column_flag:
+                column_data_type = column_df.iloc[df_row]["Data type"]
+                StatisticsClassType = "Time Range"
+                StatisticsClassId = self.StatisticsClass_df[
+                    self.StatisticsClass_df.StatisticsClassType == StatisticsClassType
+                ].StatisticsClassId.iloc[0]
+                table_column_timetraces_df = self.get_table_column_time_traces(
+                    table_name,
+                    column_name,
+                    column_data_type,
+                    start_time,
+                    end_time,
+                    time_column,
+                )
+                table_rows = len(table_column_timetraces_df)
+                minimum = table_column_timetraces_df[column_name].min()
+                maximum = table_column_timetraces_df[column_name].max()
+                average = table_column_timetraces_df[column_name].mean()
+                RMS = None
+                StandardDeviation = table_column_timetraces_df[column_name].std()
+                column_statistics_array = [
+                    1,
+                    self.schema,
+                    table_name,
+                    column_name,
+                    column_data_type,
+                    StatisticsClassId,
+                    start_time,
+                    end_time,
+                    table_rows,
+                    minimum,
+                    maximum,
+                    average,
+                    RMS,
+                    StandardDeviation,
+                ]
+                if table_rows > 0:
+                    self.table_statistics.loc[len(self.table_statistics)] = (
+                        column_statistics_array
+                    )
+
+    def get_timeline_statistics(self, cfg, statistics_df_columns):
+        import datetime
+
+        import pandas as pd
+        from dateutil import parser
+
+        self.StatisticsClass_df = None
+        for table_index in range(0, len(cfg["sets"])):
+            # for table_index in range(0, 1):
+            self.table_statistics = pd.DataFrame(columns=statistics_df_columns)
+            self.schema = cfg["schema"]
+            self.StatisticsClass_df = self.get_schema_statistics_class()
+            table_name = cfg["sets"][table_index]["table"]
+            print(
+                "          ..... DB table statistics for table {} of {}: {}".format(
+                    table_index, len(cfg["sets"]), table_name
+                )
+            )
+            try:
+                entire_table_statistics_df = self.get_table_statistics_from_db(
+                    table_name
+                )
+                if len(entire_table_statistics_df) > 0:
+                    table_column_arrays = cfg["sets"][table_index]["columns"]
+                    time_column = cfg["sets"][table_index]["time"]
+                    min_time = entire_table_statistics_df[
+                        entire_table_statistics_df.ColumnName == time_column
+                    ].Minimum[0]
+                    max_time = entire_table_statistics_df[
+                        entire_table_statistics_df.ColumnName == time_column
+                    ].Maximum[0]
+                    min_time = parser.parse(min_time).replace(
+                        microsecond=0, second=0, minute=0
+                    )
+                    time_interval = datetime.timedelta(
+                        hours=cfg["time_interval_in_hours"]
+                    )
+                    max_time = (
+                        parser.parse(max_time).replace(
+                            microsecond=0, second=0, minute=0
+                        )
+                        + time_interval
+                    )
+                    number_of_time_intervals = int(
+                        (max_time - min_time) / time_interval
+                    )
+                    # DEBUG
+                    # number_of_time_intervals = 2
+                    for time_interval_index in range(0, number_of_time_intervals):
+                        # DEBUG
+                        # for time_interval_index in range(0, 2):
+                        start_time = min_time + time_interval_index * time_interval
+                        end_time = start_time + time_interval
+                        self.get_table_timetrace_statistics(
+                            table_name,
+                            start_time,
+                            end_time,
+                            time_column,
+                            table_column_arrays,
+                        )
+                    if len(self.table_statistics) > 0:
+                        self.save_to_db(self.table_statistics, "TableStatistics")
+                    else:
+                        print(
+                            "          ..... No table statistics for table {} of {}: {}".format(
+                                table_index, len(cfg["sets"]), table_name
+                            )
+                        )
+                else:
+                    print(
+                        "          ..... FAILURE DB table timeline statistics for table {} of {}: {}".format(
+                            table_index, len(cfg["sets"]), table_name
+                        )
+                    )
+            except Exception as e:
+                print(f"Error is: {e}")
+                print(
+                    "          ..... FAILURE DB table timeline statistics for table {} of {}: {}".format(
+                        table_index, len(cfg["sets"]), table_name
+                    )
+                )
+
+    def get_table_statistics_from_db(self, table_name):
+        import os
+
+        schema_table = self.schema + "." + "TableStatistics"
+        query_argument_array = [schema_table, table_name]
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "get_table_statistics_by_table_name.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename, query_argument_array)
+            return df
+        else:
+            print("Not a valid filename")
+
+    def save_application_data(self, app_object):
+        import pandas as pd
+
+        save_sets = app_object.cfg.save_data["sets"]
+        for set_index in range(0, len(save_sets)):
+            cfg_set = save_sets[set_index]
+            df = getattr(app_object, cfg_set["attribute"], pd.DataFrame())
+            if df is not None:
+                self.save_to_db(df, cfg=cfg_set)
+
+    def save_to_db(self, df, table_name=None, if_exists="append", index=False, cfg=None):
+        if cfg is None:
+            cfg = {}
+        schema = getattr(self, "schema", None)
+        schema = cfg.get("schema", schema)
+        table_name = cfg.get("table_name", table_name)
+        if_exists = cfg.get("if_exists", if_exists)
+        index = cfg.get("index", False)
+        index_label = cfg.get("index_label", None)
+
+        if self.engine.has_table(table_name):
+            if cfg.__contains__("pre_conditions") and cfg["pre_conditions"]["flag"]:
+                for set_index in range(0, len(cfg["pre_conditions"]["sets"])):
+                    set_info = cfg["pre_conditions"]["sets"][set_index]
+                    query = set_info["sql"]
+                    arg_array = set_info["arg_array"]
+                    self.executeQueryWithParameters(query=query, arg_array=arg_array)
+
+        chunk = 1000000
+        if len(df.columns) > 0 and len(df) > 0 and len(df) < chunk:
+            df.to_sql(
+                name=table_name,
+                con=self.engine,
+                schema=schema,
+                if_exists=if_exists,
+                index=index,
+                index_label=index_label,
+            )
+        else:
+            import math
+
+            number_of_chunks = math.ceil(len(df) / chunk)
+            for chuck_index in range(0, number_of_chunks):
+                start_index = chuck_index * chunk
+                end_index = (chuck_index + 1) * chunk
+                df_temp = df.iloc[start_index:end_index].copy()
+                if chuck_index == 1:
+                    df_temp.to_sql(
+                        name=table_name,
+                        con=self.engine,
+                        schema=schema,
+                        if_exists=if_exists,
+                        index=index,
+                        index_label=index_label,
+                    )
+                else:
+                    df_temp.to_sql(
+                        name=table_name,
+                        con=self.engine,
+                        schema=schema,
+                        if_exists="append",
+                        index=index,
+                        index_label=index_label,
+                    )
+
+    # A SQL identifier: a leading letter/underscore then letters, digits or
+    # underscores, optionally schema-qualified with a single dot. Deliberately
+    # strict -- identifiers cannot be passed as bound parameters, so the only
+    # safe handling is to reject anything that is not plainly an identifier.
+    SQL_IDENTIFIER_PATTERN = re.compile(
+        r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$"
+    )
+
+    @classmethod
+    def _validate_sql_identifier(cls, identifier, role):
+        if not isinstance(identifier, str) or not cls.SQL_IDENTIFIER_PATTERN.match(
+            identifier
+        ):
+            raise ValueError(
+                f"Invalid SQL identifier for {role}: {identifier!r}. "
+                "Identifiers cannot be parameterised, so only plain "
+                "(optionally schema-qualified) names are accepted."
+            )
+        return identifier
+
+    def build_upsert_statement(self, df, cfg):
+        """Build a parameterised single-row upsert.
+
+        Returns ``(statement_text, parameters)``. Values are always bound, never
+        interpolated, which closes the injection vector that the previous
+        ``sqlFileQuery.format(custom_dict=cfg)`` implementation carried (issue
+        #80). That implementation quoted values by string concatenation, so any
+        value containing an apostrophe broke or subverted the statement, and any
+        non-string value raised TypeError.
+
+        Identifiers (table, columns, primary key) cannot be bound, so they are
+        validated instead. Schema-qualified table names such as
+        ``stocks.analysis`` are accepted because that is the documented usage
+        shape; rejecting the dot would break it.
+
+        The statement is constructed here rather than read from
+        ``data/<server_type>/sql/common.upsert_single_record.sql``: that template
+        does not ship with this package, so the previous code path depended on a
+        file that had to exist in the caller's working directory.
+        """
+        if len(df) == 0:
+            raise ValueError("Cannot build an upsert statement from an empty dataframe")
+
+        table_name = self._validate_sql_identifier(
+            cfg.get("table_name", None), "table_name"
+        )
+        primary_key = self._validate_sql_identifier(
+            cfg.get("primary_key", None), "primary_key"
+        )
+
+        df_columns = [
+            self._validate_sql_identifier(column, "column") for column in df.columns
+        ]
+        if primary_key not in df_columns:
+            raise ValueError(
+                f"Primary key {primary_key!r} is not a column of the dataframe "
+                f"(columns: {df_columns})"
+            )
+
+        row = df.iloc[0].to_list()
+        placeholders = [f":v_{index}" for index in range(len(df_columns))]
+        parameters = {
+            f"v_{index}": self._as_bindable(value) for index, value in enumerate(row)
+        }
+
+        update_columns = [column for column in df_columns if column != primary_key]
+        if update_columns:
+            set_code_block = ", ".join(
+                f"{column} = excluded.{column}" for column in update_columns
+            )
+            conflict_action = f"DO UPDATE SET {set_code_block}"
+        else:
+            # Nothing to update: the primary key is the only column. An empty
+            # SET list is a syntax error, so the correct action is DO NOTHING.
+            conflict_action = "DO NOTHING"
+
+        statement = (
+            f"INSERT INTO {table_name} ({', '.join(df_columns)}) "
+            f"VALUES ({', '.join(placeholders)}) "
+            f"ON CONFLICT ({primary_key}) {conflict_action}"
+        )
+        return statement, parameters
+
+    @staticmethod
+    def _as_bindable(value):
+        """Convert a pandas scalar to something the DBAPI can bind.
+
+        numpy scalars are not accepted by every driver; ``item()`` unwraps them
+        to the equivalent Python builtin. NaN/NaT become None so they bind as
+        SQL NULL rather than the string 'nan'.
+        """
+        import pandas as pd
+
+        if value is None:
+            return None
+        if hasattr(value, "item") and getattr(value, "shape", None) == ():
+            value = value.item()
+        try:
+            if pd.isna(value):
+                return None
+        except (TypeError, ValueError):
+            pass
+        return value
+
+    def save_1_row_df_to_postgresql_db_using_primary_key(self, df, cfg=None):
+        if cfg is None:
+            cfg = {"table_name": None, "primary_key": None}
+        if len(df) == 0:
+            # Nothing to write. The previous implementation fell through to a
+            # reference to `filename`, which was only assigned inside the
+            # non-empty branch, raising UnboundLocalError (issue #80).
+            logging.info("No row to upsert; dataframe is empty")
+            return
+
+        statement, parameters = self.build_upsert_statement(df, cfg)
+        self.executeNoDataQuery(statement, params=parameters)
+
+    def get_table_column_statistics(self, table_name, column_name, column_data_type):
+        import os
+
+        schema_table = self.schema + "." + table_name
+        query_argument_array = [column_name, schema_table]
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "table_statistics.sql",
+        )
+        if os.path.isfile(filename):
+            print(f"          ............................ Column : {column_name}")
+            df_statistics = self.executeScriptsFromFile(filename, query_argument_array)
+            return df_statistics
+        else:
+            print("Not a valid filename")
+
+    def get_table_column_time_traces(
+        self,
+        table_name,
+        column_name,
+        column_data_type,
+        start_time,
+        end_time,
+        time_column,
+    ):
+        import os
+
+        schema_table = self.schema + "." + table_name
+        query_argument_array = [
+            time_column,
+            column_name,
+            schema_table,
+            start_time,
+            end_time,
+        ]
+        if start_time is not None and end_time is not None:
+            print(
+                f"          .....getting timetrace for Column : {column_name} from {start_time} to {end_time}"
+            )
+            filename = os.path.join(
+                r"data_manager\data",
+                self.server_type,
+                "definitions\\functions",
+                "get_column_timetraces.sql",
+            )
+            if os.path.isfile(filename):
+                print(f"          ............................ Column : {column_name}")
+                df_timetraces = self.executeScriptsFromFile(
+                    filename, query_argument_array
+                )
+                return df_timetraces
+            else:
+                print("Not a valid filename")
+
+    def executeScriptsFromFile(self, filename, arg_array=None):
+        """Execute a SQL script file, substituting positional ``arg_array`` values.
+
+        .. warning::
+            SQL-INJECTION RISK (issue #80, partially mitigated). This method
+            interpolates ``arg_array`` into the SQL text via ``str.format`` rather
+            than passing them as bound parameters. Full remediation requires
+            migrating the external ``.sql`` template files (which live outside
+            this repo, under ``data_manager/data/.../functions``) from ``{}``
+            placeholders to DBAPI parameter markers and passing
+            ``params=arg_array`` to ``pd.read_sql_query``. Until those templates
+            are migrated, callers MUST only pass trusted, validated values in
+            ``arg_array`` (never raw user input). Tracked for human follow-up.
+        """
+        import pandas as pd
+
+        if arg_array is None:
+            arg_array = []
+        sqlFile = self.read_from_file(filename)
+        if len(arg_array) == 1:
+            sqlFile = sqlFile.format(arg_array[0])
+        elif len(arg_array) == 2:
+            sqlFile = sqlFile.format(arg_array[0], arg_array[1])
+        elif len(arg_array) == 3:
+            sqlFile = sqlFile.format(arg_array[0], arg_array[1], arg_array[2])
+        elif len(arg_array) == 4:
+            sqlFile = sqlFile.format(
+                arg_array[0], arg_array[1], arg_array[2], arg_array[3]
+            )
+        elif len(arg_array) == 5:
+            sqlFile = sqlFile.format(
+                arg_array[0], arg_array[1], arg_array[2], arg_array[3], arg_array[4]
+            )
+        elif len(arg_array) == 6:
+            sqlFile = sqlFile.format(
+                arg_array[0],
+                arg_array[1],
+                arg_array[2],
+                arg_array[3],
+                arg_array[4],
+                arg_array[5],
+            )
+        elif len(arg_array) == 7:
+            sqlFile = sqlFile.format(
+                arg_array[0],
+                arg_array[1],
+                arg_array[2],
+                arg_array[3],
+                arg_array[4],
+                arg_array[5],
+                arg_array[6],
+            )
+
+        try:
+            logging.debug(f"     .....Executing query: {sqlFile}")
+            df = pd.read_sql_query(sqlFile, self.conn, parse_dates=self.parse_dates)
+            return df
+        except Exception as e:
+            logging.error(f"Command skipped: {e}")
+
+    def read_from_file(self, filename):
+        fd = open(filename)
+        sqlFileQuery = fd.read()
+        fd.close()
+        return sqlFileQuery
+
+    def executeQueryWithParameters(self, query, arg_array=None):
+        import pandas as pd
+
+        if arg_array is None:
+            arg_array = []
+        sql = query
+        if len(arg_array) == 1:
+            sql = sql.format(arg_array[0])
+        elif len(arg_array) == 2:
+            sql = sql.format(arg_array[0], arg_array[1])
+        elif len(arg_array) == 3:
+            sql = sql.format(arg_array[0], arg_array[1], arg_array[2])
+        elif len(arg_array) == 4:
+            sql = sql.format(arg_array[0], arg_array[1], arg_array[2], arg_array[3])
+        elif len(arg_array) == 5:
+            sql = sql.format(
+                arg_array[0], arg_array[1], arg_array[2], arg_array[3], arg_array[4]
+            )
+
+        try:
+            logging.debug(f"     .....Executing query: {sql}")
+            df = pd.read_sql_query(sql, self.conn, parse_dates=self.parse_dates)
+            return df
+        except Exception as e:
+            # self.conn.execute(query)
+            print("Command skipped: ", e)
+
+    def executeNoDataQuery_using_dict(self, query, dict):
+        pass
+
+    def executeNoDataQuery(self, query, arg_array=None, params=None):
+        """Execute a statement that returns no rows.
+
+        ``params`` carries bound parameters, which is how callers should pass
+        data values. ``arg_array`` is the legacy positional-format path, kept
+        for backward compatibility; it interpolates into the statement text and
+        so must only ever receive trusted identifiers, never user data.
+        """
+        if arg_array is None:
+            arg_array = []
+        sql = query
+        if len(arg_array) == 1:
+            sql = sql.format(arg_array[0])
+        elif len(arg_array) == 2:
+            sql = sql.format(arg_array[0], arg_array[1])
+        elif len(arg_array) == 3:
+            sql = sql.format(arg_array[0], arg_array[1], arg_array[2])
+        elif len(arg_array) == 4:
+            sql = sql.format(arg_array[0], arg_array[1], arg_array[2], arg_array[3])
+        elif len(arg_array) == 5:
+            sql = sql.format(
+                arg_array[0], arg_array[1], arg_array[2], arg_array[3], arg_array[4]
+            )
+        try:
+            # Log only the leading verb, never the statement body: the previous
+            # print echoed every interpolated data value into stdout/logs
+            # (issue #80).
+            logging.debug(
+                f"     .....Executing no-data query: {sql.strip().split(None, 1)[0]}"
+            )
+            from sqlalchemy import text  # type: ignore
+            from sqlalchemy.orm import scoped_session, sessionmaker  # type: ignore
+
+            Session = scoped_session(sessionmaker(bind=self.engine))
+            s = Session()
+            s.execute(text(sql), params or {})
+            s.commit()
+        except Exception as e:
+            print("Command skipped: ", e)
+
+    def get_input_data_from_db(self, cfg_input):
+        import logging
+
+        for set_index in range(0, len(cfg_input["sets"])):
+            set_info = cfg_input["sets"][set_index]
+            logging.info("Preparing input data for: '{}'".format(set_info["label"]))
+            self.schema = set_info.get("schema")
+            if not set_info.__contains__("query"):
+                table_name = set_info["table_name"]
+                df = self.get_input_data_set(table_name)
+                if set_info["column_name"] is None:
+                    df = df
+            else:
+                import os
+
+                if set_info["query"].__contains__("filename"):
+                    filename = os.path.join(
+                        r"data_manager\data",
+                        self.server_type,
+                        "definitions\\functions",
+                        set_info["query"]["filename"],
+                    )
+                    query_argument_array = set_info["query"]["arguments"]
+                    df = self.executeScriptsFromFile(filename, query_argument_array)
+                elif set_info["query"].__contains__("sql"):
+                    query = set_info["query"]["sql"]
+                    if set_info["query"].__contains__("arg_array"):
+                        args_array = set_info["query"]["arg_array"]
+                        df = self.executeQueryWithParameters(query, args_array)
+                    else:
+                        df = self.get_df_from_query(query)
+                else:
+                    import pandas as pd
+
+                    df = pd.DataFrame()
+            setattr(self, "input_data_" + set_info["label"], df)
+            logging.info(
+                "Preparing input data for: '{}'  ... COMPLETE".format(set_info["label"])
+            )
+
+    def get_input_data_set(self, table_name):
+        import os
+
+        schema_table = self.schema + "." + table_name
+        query_argument_array = [schema_table]
+        filename = os.path.join(
+            r"data_manager\data",
+            self.server_type,
+            "definitions\\functions",
+            "get_all_records_from_table.sql",
+        )
+        if os.path.isfile(filename):
+            df = self.executeScriptsFromFile(filename, query_argument_array)
+            return df
+        else:
+            print("Not a valid filename")
+
+    def perform_extreme_event_analysis(self, cfg_extreme_events):
+        result_df_array = []
+        for set_index in range(0, len(cfg_extreme_events["sets"])):
+            cfg_setting = cfg_extreme_events["sets"][set_index]
+            df = getattr(self, cfg_setting["df"])
+            table_name = cfg_setting["table_name"]
+            temp_df = df[
+                (df.TableName == table_name) & (df.StatisticsClassId == 2)
+            ].copy()
+            statistics_df = self.format_table_statistics_df_for_extreme_events(
+                cfg_setting, temp_df
+            )
+            result_df = (
+                statistics_df.sort_values(
+                    by=cfg_setting["column_name"] + "_" + cfg_setting["statistic"],
+                    ascending=False,
+                )
+                .head(cfg_setting["number_of_events"])
+                .copy()
+            )
+            for quantity_index in range(0, len(cfg_setting["related_quantities"])):
+                cfg_related_quantity = cfg_setting["related_quantities"][quantity_index]
+                table_name = cfg_related_quantity["table_name"]
+                temp_df = df[
+                    (df.TableName == table_name) & (df.StatisticsClassId == 2)
+                ].copy()
+                temp_array = []
+                quantity_column_name = (
+                    cfg_related_quantity["column_name"]
+                    + "_"
+                    + cfg_related_quantity["statistic"]
+                )
+                if len(temp_df) > 0:
+                    statistics_df = self.format_table_statistics_df_for_extreme_events(
+                        cfg_related_quantity, temp_df
+                    )
+                    for row_index in range(0, len(result_df)):
+                        try:
+                            related_quantity = statistics_df[
+                                statistics_df.StartTime
+                                == result_df.StartTime.iloc[row_index]
+                            ][quantity_column_name].iloc[0]
+                        except Exception as e:
+                            logging.debug(
+                                f"Related quantity unavailable for row "
+                                f"{row_index}: {e}"
+                            )
+                            related_quantity = None
+                        temp_array.append(related_quantity)
+                else:
+                    temp_array = [None] * len(result_df)
+                result_df[quantity_column_name] = temp_array
+            result_df_array.append(result_df)
+
+        return result_df_array
+
+    def prepare_input_statistics(self, data_set_cfg):
+        df = getattr(self, data_set_cfg["df"])
+        table_name = data_set_cfg["table_name"]
+        temp_df = df[(df.TableName == table_name) & (df.StatisticsClassId == 2)].copy()
+        statistics_df = self.format_table_statistics_df(temp_df, data_set_cfg)
+        return statistics_df
+
+    def format_table_statistics_df(self, temp_df, data_set_cfg):
+        import pandas as pd
+
+        if data_set_cfg.__contains__("x") and data_set_cfg.__contains__("y"):
+            statistics_df_column_array = data_set_cfg["x"] + data_set_cfg["y"]
+        else:
+            # Raise instead of exiting so the caller can report a misconfigured
+            # data set rather than losing the whole run (issue #80).
+            raise ValueError(
+                "Data not defined for formatting table statistics: "
+                "data_set_cfg must contain both 'x' and 'y'"
+            )
+        statistics_df = pd.DataFrame()
+        for column_index in range(0, len(statistics_df_column_array)):
+            column_name = statistics_df_column_array[column_index]
+            if column_name == "StartTime":
+                import dateutil
+
+                column_df = temp_df[
+                    temp_df.ColumnName == statistics_df_column_array[1]
+                ].sort_values(by=["StartTime"])
+                StartTime_array = column_df.StartTime.to_list()
+                StartTime_array = [
+                    dateutil.parser.parse(item) for item in StartTime_array
+                ]
+                statistics_df[column_name] = StartTime_array
+            else:
+                column_df = temp_df[
+                    temp_df.ColumnName == statistics_df_column_array[column_index]
+                ].sort_values(by=["StartTime"])
+                column_df.fillna(0, inplace=True)
+                column_array = column_df[data_set_cfg["statistic"]].to_list()
+                if (len(column_df) > 0) and (
+                    column_df.ColumnDataType.iloc[0] == "float"
+                ):
+                    column_array = [float(item) for item in column_array]
+                statistics_df[column_name] = column_array
+
+        return statistics_df
+
+    def format_table_statistics_df_for_extreme_events(self, cfg_setting, temp_df):
+        import pandas as pd
+
+        statistics_df_column_array = [
+            "StartTime",
+            "EndTime",
+            cfg_setting["column_name"],
+        ]
+        statistics_df = pd.DataFrame()
+        for column_index in range(0, len(statistics_df_column_array)):
+            column_name = statistics_df_column_array[column_index]
+            if column_name in ["StartTime", "EndTime"]:
+                import dateutil
+
+                column_df = temp_df[
+                    temp_df.ColumnName == statistics_df_column_array[2]
+                ].sort_values(by=["StartTime"])
+                time_array = column_df[column_name].tolist()
+                time_array = [dateutil.parser.parse(item) for item in time_array]
+                statistics_df[column_name] = time_array
+            else:
+                column_df = temp_df[
+                    temp_df.ColumnName == statistics_df_column_array[column_index]
+                ].sort_values(by=["StartTime"])
+                column_df.fillna(0, inplace=True)
+                column_array = column_df[cfg_setting["statistic"]].tolist()
+                if column_df.ColumnDataType.iloc[0] == "float":
+                    column_array = [float(item) for item in column_array]
+                statistics_df[column_name + "_" + cfg_setting["statistic"]] = (
+                    column_array
+                )
+
+        return statistics_df
+
+    def get_create_table_sql_code_from_df(
+        self, df, table_name="table_name", file_name="results/filename.txt"
+    ):
+        from assetutilities.common.data import SaveData
+
+        save_data = SaveData()
+        import pandas as pd
+
+        sql_table_code = pd.io.sql.get_schema(
+            df.reset_index(), table_name, con=self.conn
+        )
+        save_data.write_ascii_file_from_text(sql_table_code, file_name)
+        return sql_table_code

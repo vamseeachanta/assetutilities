@@ -1,0 +1,19 @@
+@startuml
+
+title Message/Job Queue + Workers State Chart
+
+state "Idle Queue" as Idle
+[*] -> Idle
+Idle -> Queue : Task Arrives
+Queue : Task placed in queue.
+Queue -> Worker : Worker collects Task
+Worker -> ProcessingTask
+
+state ProcessingTask {
+  [*] --> long1
+  long1 --> ProcessData : Enough Data
+}
+
+ProcessingTask -> [*]
+
+@enduml

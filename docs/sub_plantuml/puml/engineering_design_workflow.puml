@@ -1,0 +1,71 @@
+@startuml engineering_design_workflow
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title Engineering Design \n Typical Workflow 
+
+start
+
+    partition "3D Modelling" {
+
+        note right
+            Software: AutoDesk?
+            Storage: Vault?
+        end note
+
+        :Define key Design Parameters;
+        :Build the 3D models;
+        :Save required formats 
+        (script/automate upon save);
+    }
+
+    :Communicate Status to Client;
+        note right
+            PDF: 3D viewable format 
+        end note
+
+    partition "3D to 2D Drawing" {
+
+        note right
+            Software: AutoCAD?
+            Storage: Vault?
+            Automation: what extent?
+        end note
+
+        :Define key Design Parameters;
+        note right
+            Borders
+            Size
+            Title blocks
+            BOM table
+            Notes table
+        end note
+        :Convert 2D to 3D using script;
+        :Basic Performance Tests
+            Latency etc.;
+
+        :Detailed Checking;
+        note right
+            Use 3 color option in PDF 
+            save them in repo
+            2-3 drawing sync will decrease comments
+        end note
+    }
+
+    partition "Client Delivery" {
+    : Send Draft for Client comments;
+    : Incorporate Client comments;
+    : Check  Client comments;
+    : Issue to client;
+    }
+
+stop
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml

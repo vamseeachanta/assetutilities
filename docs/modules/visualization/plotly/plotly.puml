@@ -1,0 +1,37 @@
+@startwbs plotly
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title plotly
+
+* plotly
+
+** xy :
+
+*** line
+**** df
+***** template_xy_line_df.yml
+
+**** csv (#TODO)
+***** pass
+***** pass
+
+*** scatter (#TODO)
+**** pass
+
+** polar (#TODO ):
+
+*** polar
+**** Line
+**** Scatter
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs

@@ -1,0 +1,78 @@
+basename: visualization
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+    
+settings:
+  type: polar_scatter
+  plt_engine: matplotlib
+  rect: NULL
+  facecolor: NULL
+  label: Allowable Wave Height
+  multiple: False
+  file_name: polar_matplotlib_add_axes
+  plt_save_extensions: ['.png']
+  title: Allowable Significant Wave Height (Hs)
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_theta_zero_location: NULL
+  set_rlabel_position: -22.5
+  grid: True
+  legend: 
+    flag: True
+    label: [vessel inline with product route, vessel rotation wrt. product route]
+    loc: best
+    prop: {family: Arial, size: 8}
+
+data:
+  type: input
+  r : 
+    - [0.5,1,2,2.5,3,4]
+    - [0.5,1,2,2.5,3,4]
+  theta : 
+    - [35,70,120,155,205,240]
+  color: [blue, green]
+  linestyle: ["-.", "--","-", ":"]
+  groups:
+    - name: group1
+      r: [0.5, 1, 2, 2.5, 3, 4]
+      theta: [35, 70, 120, 155, 205, 240]
+      color: blue
+    - name: group2
+      r: [0.5, 1, 2, 2.5, 3, 4]
+      theta: [35, 70, 120, 155, 205, 240]
+      color: green
+  alpha: [0.5, 1]
+
+add_axes:
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.25, 0.5, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid_1: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,30]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["-.", "--","-", ":"]
+      alpha: [0.5, 1]

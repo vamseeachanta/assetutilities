@@ -1,0 +1,49 @@
+@startwbs _public_library
+
+scale 2
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title Public Library \n librarytemplate
+
+* Public Library (Main)
+
+** Branch1: read_yml_file 
+*** Read .YML File
+*** Show example of data is displayed
+*** Write Test to confirm example data
+*** Merge to master
+
+** Branch2: sample_calculation
+*** Do a sample calculation
+*** Show the result
+*** Merge to master
+
+** Branch3: write_test
+*** Write test for calculation
+*** Add code to run on local computer
+*** Add code to run on github using github actions
+*** Merge to master
+
+** Branch4: convert_to_public_library
+*** Add necessary files to convert to public library
+*** Test public library locally and on server
+*** Merge to master
+
+
+** Branch5: deploy_public_library
+*** Ask a friend to download and test the public library
+*** Merge to master
+
+** Branch6: develop_public_library
+*** Add instructions to develop an exsiting python public library
+*** Merge to master
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@endwbs

@@ -1,0 +1,62 @@
+basename: reportgen
+
+# folders to source/place data , assets and output data
+# all fields mandatory
+important_paths: 
+  project_root: "fixtures/reference-92/"
+  inputs_path: "test/modules/reportgen/inputs"
+  assets_path: "test/modules/reportgen/assets"
+  outputs_path: "test/modules/reportgen/outputs"
+
+# declare report details 
+# all fields mandatory 
+report_details:
+  name: "Pipeline Lateral Buckling Evaluation"
+  client_logo: "client-logo.png"
+  project_name: "Pemex Zama FEED"
+  project_num: "61850"
+  engineer: "Vamsee Achanta"
+  reviewer: "TBD"
+  date: "2021/10/22"
+  # If report_writer_class is not specified, DefaultMDWriter will be used
+  target_file_stub: "20inch_gas"
+  target_report_type: "md"
+
+  # optional fields
+  # target report type - md or docx
+  target_report_type : "md"
+
+# optional sections configuration
+sections_L1:
+  - name: "Overview"
+    paragraphs:
+      - ["This is a text element", 
+         {"type": "image", "path": "overview-diagram.png", "caption": "System Overview"},
+         {"type": "table", "data": "table1.csv", "caption": "Summary Table"}]
+      - ["Next paragraph with math: ", 
+         {"type": "sympy", "expression": "x^2 + y^2 = z^2"},
+         {"type": "latex", "expression": "sum_{i=1}^n x_i"}]
+  
+  - name: "Analysis"
+    paragraphs:
+      - ["Analysis details go here"]
+      - ["More analysis content"]
+  
+  - name: "Appendix"
+    sections_L2:
+      - name: "subsection 1"
+        paragraphs:
+          - ["Table1a - 2024 census of street dogs in kakinada"]
+          - [{"type": "markdown_table", 
+              "content": "| Dog Breed | count |\n|---|---|\n| black | 10 |\n| spotted | 5 |\n| brown | 40 |"}]
+      
+      - name: "subsection 2"
+        paragraphs:
+          - ["Table1b - 2024 census of pigs dogs in kakinada"]
+          - [{"type": "markdown_table", 
+              "content": "| pig breed | count |\n|---|---|\n| wild | 40 |\n| tea cup | 300 |"}]
+      
+      - name: "subsection 3"
+        paragraphs:
+          - ["Following is a color coded map of kakinada where pigs and dogs have territories. Note: pig territories in red, dog territories in blue"]
+          - [{"type": "image", "path": "2024-census/territories-map.png", "caption": "Territory Map - Dogs vs Pigs"}]

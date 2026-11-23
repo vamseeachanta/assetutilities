@@ -1,0 +1,29 @@
+def decoratorWithArgumentExample(func=None, *, kw1=None):
+  '''Decorator with keyword argument Boiler Plate Example'''
+  import functools
+
+  @functools.wraps(func)
+  def wrapper_decoratorWithArgumentExample(*args, **kwargs):
+    function_value = func(*args, **kwargs)
+    return function_value
+
+  return wrapper_decoratorWithArgumentExample
+
+
+def applicationTimer(func):
+  import functools
+
+  @functools.wraps(func)
+  def wrapper_applicationTimer(*args, **kwargs):
+    import time
+    start_time = time.perf_counter()
+
+    function_value = func(*args, **kwargs)
+
+    end_time = time.perf_counter()
+    run_time = end_time - start_time
+    print(f"Finished {func.__name__!r} in {run_time:.2f} secs")
+
+    return function_value
+
+  return wrapper_applicationTimer

@@ -1,0 +1,369 @@
+basename: visualization
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+    
+settings:
+  type: polar
+  plt_engine: matplotlib
+  rect: NULL
+  facecolor: NULL
+  label: Allowable Wave Height
+  multiple: False
+  file_name: ms_laydown_allowable_wave_height_vessel
+  plt_save_extensions: ['.png']
+  title: Allowable Significant Wave Height (Hs); Midline Splice, LayDown
+  set_rmax: 5
+  set_rticks: [1, 1.5, 2, 2.5]
+  set_thetagrids: [15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345]
+  set_theta_zero_location: W
+  set_rlabel_position: -22.5
+  grid: True
+  legend: 
+    flag: True
+    label: [vessel inline with product route, vessel rotation wrt. product route]
+    loc: best
+    prop: {family: Arial, size: 5}
+
+data:
+  type: input
+  r : 
+    - [2.5, 1.5, 1.5, 1.5, 1, 1.5, 2.5, 1.5, 1, 1.5, 1.5, 1.5, 2.5]
+    - [2.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5]
+
+  theta : 
+    - [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]
+  color: [blue, green]
+  linestyle: ["--", "-","-", ":"]
+  alpha: [0.5, 0.75]
+
+add_axes:
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.12, 0.35, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.15, 0.22, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.23, 0.1, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.34, 0.05, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.45, 0.12, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,-30]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.53, 0.22, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.55, 0.35, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.53, 0.48, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.45, 0.58, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,30]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.34, 0.67, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.23, 0.60, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+
+  - 
+    settings:
+      plt_kind: polar
+      plt_engine: matplotlib
+      rect: [0.14, 0.50, 0.25, 0.25]
+      axis: 'off' # [0, 70, 0, 1] 
+      facecolor: white
+      alpha: 1
+      set_theta_zero_location: NULL
+      grid: True
+      legend: 
+        flag: False
+        label: [label1, label2]
+        loc: best
+      grid: False
+
+    data:
+      r : 
+        - [0,0.5]
+        - [0,0.5]
+      theta : 
+        - [0,0]
+        - [0,0]
+      color: [blue, green]
+      linestyle: ["--", "-"]
+      alpha: [0.5, 0.75]
+

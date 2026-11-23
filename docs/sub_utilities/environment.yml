@@ -1,0 +1,29 @@
+name: utilities
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python
+  - Flask
+  - flask-restplus
+  - psutil
+  - pandas
+  - numpy
+  - numpy-base
+  - sqlmodel
+  - xmltodict
+  - bs4
+  - pip
+  - pip:
+    - ta==0.10.1
+    - plotly-express==0.4.1
+    - pyyaml
+    - numpy_financial==1.0.0
+    - kaleido
+    - yfinance==0.1.72
+    - finvizfinance==0.14.3
+    - yahoo-fin==0.8.9.1
+    - sec-edgar-downloader
+    - xlwings
+    - pandoc
+    - wkhtmltopdf

@@ -1,0 +1,11 @@
+# Synthetic four-page fixture; page numbers follow issue #91's input contract.
+basename: read_pdf
+library: PyPDF2
+files:
+  from_pdf:
+    - io: examples/workflows/read_pdf/data/sample.pdf
+      page: 1
+      label: first
+    - io: examples/workflows/read_pdf/data/sample.pdf
+      page: 4
+      label: last

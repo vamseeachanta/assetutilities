@@ -1,0 +1,30 @@
+@startuml plate-buckling
+skinparam titleBorderRoundCorner 14
+skinparam titleBorderThickness 1
+skinparam titleBorderColor black
+skinparam titleBackgroundColor lightblue
+
+title Process Of Tracking Polar tests
+
+start
+
+:Polar Test Starts;
+:engine (basename);
+:visualization_components.py (polar router);
+:visualization_polar.py;
+:visualization_common.py;
+
+
+stop
+
+
+footer
+
+
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml
+
+

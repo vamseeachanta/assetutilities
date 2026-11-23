@@ -1,0 +1,30 @@
+meta:
+  basename: excel_utilities
+  library: assetutilities
+
+basename: excel_utilities
+
+task: csv_copy_to_excel
+
+data:
+    input_format: csv
+    groups:
+      -
+        target:
+          template: input_data/target1.xlsx
+          filename: input_data/target_output.xlsx
+        csvs:
+          - input:
+              filename: input_data/inputs.csv
+            target:
+              sheet_name: inputs
+          - input:
+              filename: input_data/results.csv
+            target:
+              sheet_name: results
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True

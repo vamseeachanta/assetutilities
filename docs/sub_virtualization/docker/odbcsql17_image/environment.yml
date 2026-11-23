@@ -1,0 +1,14 @@
+name: my_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python
+  - Flask
+  - flask-restplus
+  - psutil
+  - cryptography
+  - pandas
+  - pip
+  - pip:
+    - wfastcgi

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Get all the local branches
+local_branches() {
+  git for-each-ref --format="%(refname:short)" refs/heads
+}
+
+# Get the current checked out branch
+current_branch() {
+  git symbolic-ref --short HEAD
+}
+
+# save the current checked out branch
+saved_branch=$(current_branch)
+
+# If the current checked out branch is not master, check out master
+[[ "${saved_branch}" != "master" ]] && git checkout "master"
+
+# Pull the latest changes for master
+git pull
+
+# For each feature branch, check out the branch and merge master into the branch
+for branch in $(local_branches); do
+  if [[ "${branch}" != "master" ]]; then
+    echo
+    git checkout "${branch}"
+    git merge "master"
+  fi
+done
+
+# Finally, if the current branch is not the saved branch, check out the saved branch (in case if we've checked out master earlier)
+echo
+[[ "${saved_branch}" != "$(current_branch)" ]] && git checkout "${saved_branch}"

@@ -1,0 +1,9 @@
+# Offline regression-workflow prompt; expected output is in agents-index.md.
+agent: python_programmer
+template: |
+  Task: $task
+  Evidence: $evidence
+  First write a failing regression test, then propose the smallest fix.
+inputs:
+  task: Reject an empty configuration.
+  evidence: An empty mapping currently reaches the parser.
