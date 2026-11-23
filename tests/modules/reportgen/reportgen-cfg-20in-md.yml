@@ -1,0 +1,63 @@
+basename: reportgen
+
+# folders to source/place data , assets and output data
+# all fields are mandatory and will be used by report gen to source and place data if the template does not have content
+important_paths: 
+  project_root: "fixtures/reference-91/"
+  inputs_path: "tests/modules/reportgen/inputs"
+  assets_path: "tests/modules/reportgen/assets"
+  outputs_path: "tests/modules/reportgen/outputs"
+
+# declare report details
+# most things from here directly go into the report
+# all fields mandatory 
+report_details:
+  name: "Pipeline Lateral Buckling Evaluation"
+  client_logo: "client-logo.png"
+  project_name: "Pemex Zama FEED"
+  project_num: "61850"
+  engineer: "VA"
+  reviewer: "TBD"
+  date: "2021/10/22"
+  addnl_note: "20 inch Gas Flowline Lateral Buckling (Design Condition-Corroded)"
+  # expect document to be written as target_file_start + "."+ timestamp + ".out" + target_report_type
+  target_file_stub: "20inch_gas"
+  # - [ ] #todo have to deprecate this. switch to use target file name. suffix rest of the stuff 
+  target_md_file: "20inch_gas.out.md"
+  target_word_file: "pandulu-kukkalu.out.docx"
+  # If report_writer_class is not specified, DefaultMDWriter will be used
+  report_writer_class: "DorisMarkdownWriter"
+  # report_writer_class: "DorisWordWriter"
+
+  # optional fields
+  target_report_type : "md"
+
+# - [ ] #todo have to really switch this to a md format.  
+# optional sections configuration
+sections_L1:
+  - name: "Notes"
+    paragraphs:
+      - ["This tool can be used to estimate the approximate thermal movement/reaction forces for signal pipe or PIP."]
+      - ["Assumptions"]
+      - ["- If solution not converging, adjusting assumed initial values"]
+      - ["- The flowline is treated as straight line in the expansion calculation. Lateral motion is ignored"]
+
+  - name: "Input Data"
+    paragraphs:
+      - ["1. **Critical Parameters** "]
+      - ["2. **Flowline pipe design data**"]
+
+  - name: "Pipe Property"
+    paragraphs:
+      - ["1. **Critical Parameters** "]
+      - ["2. **Flowline pipe design data**"]
+
+  - name: "Expansion Calculation"
+    paragraphs:
+      - ["TBD"]
+      - ["TBD"]
+
+  - name: "Buckle Susceptibility Check"
+    paragraphs:
+      - ["TBD"]
+      - ["TBD"]

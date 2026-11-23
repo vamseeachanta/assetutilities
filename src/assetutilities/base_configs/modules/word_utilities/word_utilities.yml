@@ -1,0 +1,12 @@
+basename: word_utilities
+
+task: search_strings
+
+files:
+  file_name: src/assetutilities/tests/test_data/search_LNGC.docx
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True

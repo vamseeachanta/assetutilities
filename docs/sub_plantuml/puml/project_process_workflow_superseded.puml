@@ -1,0 +1,26 @@
+@startuml
+
+title Typical Project Workflow Process
+
+state "Work Lead" as WorkLead
+[*] -> WorkLead
+WorkLead : high-level requirements 
+
+note bottom
+Requirement Template: 
+- work scope 
+- timeline
+- area 
+- technologies
+end note
+
+WorkLead -> DiRev
+state "Di Review (1 Week)" as DiRev {
+  [*] --> long1
+  long1 --> ProcessData : Enough Data
+}
+
+
+DiDev -> [*]
+
+@enduml

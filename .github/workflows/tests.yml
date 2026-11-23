@@ -1,0 +1,161 @@
+name: Tests
+
+# PR_GATE_RUNNER configures Gates only; the reusable domain jobs are unchanged.
+# It accepts self-hosted-arm64 (Actions compares without case).
+# Same-repository pull_request, push and workflow_dispatch events may use
+# [self-hosted, Linux, ARM64]. Unset, empty or other values, forks and other
+# events use ubuntu-latest. Draft and edited pull requests retain every gate.
+# This repository is not ARM64-eligible until native installation and Gates
+# completion are demonstrated. Locked black/debugpy have no Linux aarch64-specific
+# wheels; universal wheels and source distributions exist. No install failure
+# has been demonstrated. Keep PR_GATE_RUNNER unset until qualification and
+# credential-free ephemeral runner isolation without privileged access are proven;
+# contents: read is not runner isolation. Unset it again to roll back routing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    # All edits rerun gates: conditional skips could mask an earlier failure.
+    # Retargeting needs a fresh merge against the new base, not an old run retry.
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ----------------------------------------------------- non-test gates ------
+  # Source hygiene, repo-structure contract, and the wheel-package-data guard
+  # (assetutilities#88). These ran as steps inside the old monolithic "Run
+  # Tests" job; they are now their own job and feed the aggregate gate below so
+  # they keep gating without coupling to the per-domain test fan-out.
+  gates:
+    name: Gates
+    runs-on: >-
+      ${{ vars.PR_GATE_RUNNER == 'self-hosted-arm64'
+          && ((github.event_name == 'pull_request'
+               && github.event.pull_request.head.repo.full_name
+               && github.event.pull_request.head.repo.full_name == github.repository)
+              || github.event_name == 'push'
+              || github.event_name == 'workflow_dispatch')
+          && fromJSON('["self-hosted", "Linux", "ARM64"]') || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          fetch-depth: 50
+          persist-credentials: false
+
+      - name: Build and guard local merge
+        id: local_merge
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_ref="refs/remotes/base/$BASE_REF"
+          git fetch --no-tags "$BASE_URL" "+refs/heads/$BASE_REF:$base_ref"
+          tip=$(git rev-parse "$base_ref")
+          for deepen in 50 200 1000; do
+            if git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+              break
+            fi
+            if [[ $(git rev-parse --is-shallow-repository) != true ]]; then
+              break
+            fi
+            git fetch --no-tags --deepen="$deepen" origin "$PR_HEAD_SHA"
+          done
+          if ! git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+            if [[ $(git rev-parse --is-shallow-repository) == true ]]; then
+              git fetch --no-tags --unshallow origin "$PR_HEAD_SHA"
+            fi
+          fi
+          if ! git merge-base "$tip" "$PR_HEAD_SHA" >/dev/null; then
+            echo "::error::No merge base found for current base tip and PR head"
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout --detach "$tip"
+          if ! git merge --no-ff --no-edit "$PR_HEAD_SHA"; then
+            echo "::error::Cannot merge PR head into current base tip; resolve conflicts"
+            git merge --abort
+            exit 1
+          fi
+          mapfile -t parents < <(git cat-file -p HEAD | sed -n 's/^parent //p')
+          if [[ ${#parents[@]} != 2 || ${parents[0]} != "$tip" || ${parents[1]} != "$PR_HEAD_SHA" ]]; then
+            echo "::error::Local merge must have exactly the current tip and PR head as parents"
+            exit 1
+          fi
+          tested=$(git rev-parse HEAD)
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tip=$tip" >> "$GITHUB_OUTPUT"
+          echo "tested=$tested first_parent=${parents[0]} second_parent=${parents[1]} tip=$tip event_base=$EVENT_BASE_SHA tree=$tree"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --group test
+
+      - name: Test workflow triggers
+        run: uv run python -m pytest tests/workflows/test_ci_triggers.py
+
+      - name: Test target explanations and selector
+        run: >-
+          uv run python -m pytest tests/devtools/test_test_target_explain.py
+          tests/ci/test_select_test_targets.py
+
+      - name: Run source hygiene gate
+        run: bash scripts/hygiene/check-source-hygiene.sh
+
+      - name: Test tracked-text hygiene
+        run: uv run python -m pytest tests/hygiene
+
+      - name: Run repo-structure contract gate
+        run: uv run python scripts/maintenance/verify_repo_structure.py
+
+      - name: Verify base_configs ship in the wheel (assetutilities#88 guard)
+        run: |
+          uv build --wheel --out-dir dist_check
+          uv run python scripts/maintenance/check_wheel_package_data.py dist_check
+
+  # --------------------------------------------------- domain test matrix ----
+  # Modular per-domain test gate. The discover -> test-domain (matrix) ->
+  # aggregate scaffolding now lives ONCE in workspace-hub's reusable
+  # domain-matrix.yml (worldenergydata#526 / #530, P4); this caller just wires
+  # it up. assetutilities keeps its OWN repo-specific selector
+  # (scripts/ci/select_test_targets.py) + quarantine list
+  # (scripts/ci/quarantine.txt) — the reusable workflow runs them. A change
+  # fans out into one CI job per touched domain (+ the always-on cross-cutting
+  # core), so a red domain no longer blocks green siblings and they run in
+  # parallel. Both default paths (selector + quarantine-file) already match
+  # this repo, so only install-cmd needs an override (--group test, not
+  # --all-extras).
+  #
+  # NOTE: status-check names become "<caller-job>/<reusable-job>", e.g.
+  # "domain-tests / Aggregate domain results" — the required check to wire if
+  # branch protection is ever enabled (currently unprotected, so the rename is
+  # harmless).
+  domain-tests:
+    uses: vamseeachanta/workspace-hub/.github/workflows/domain-matrix.yml@main
+    with:
+      install-cmd: "uv sync --group test"

@@ -1,0 +1,12 @@
+basename: word_utilities
+
+task: csv_to_docx
+
+files:
+  file_name: src\assetutilities\tests\test_data\word_utilities\data\viv_analysis_safety_factors.csv
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True

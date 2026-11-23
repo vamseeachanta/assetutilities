@@ -1,0 +1,48 @@
+# Pre-commit configuration for assetutilities
+# Install: uv run pre-commit install
+# Run manually: uv run pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # bandit security scan on staged Python files (WRK-1081)
+  - repo: local
+    hooks:
+      - id: bandit-staged
+        name: bandit security scan (staged Python files)
+        language: system
+        entry: uvx bandit[toml]==1.9.4
+        args: [-ll, -c, pyproject.toml, -b, config/quality/bandit-baseline-assetutilities.json]
+        types: [python]
+        exclude: ^tests/
+
+  # Repository structure gate (issue #78): prevent new root/generated drift
+  - repo: local
+    hooks:
+      - id: verify-repo-structure
+        name: Verify repository structure contract
+        language: system
+        entry: uv run python scripts/maintenance/verify_repo_structure.py
+        pass_filenames: false
+        always_run: true
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+        # Repository-local configuration supports standalone clones and worktrees.
+        args: [--config, .gitleaks.toml]
+
+  # No retained tracked file exceeds this threshold; no exclusions are needed.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']

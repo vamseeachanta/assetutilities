@@ -1,0 +1,31 @@
+basename: file_edit
+edit_type: concatenate
+concatenate_type: 2d_array # 2d_array
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+input:
+  - output_filename: NULL
+    output_basename: D
+    output_dir: concatenate/dats
+    file_extension: dat
+    filename:
+    input_files:
+      [
+        [concatenate/_0to9_static.deck],
+        [concatenate/_10_no_tug.deck],
+        [concatenate/_11_12.deck],
+        [concatenate/_13_000MPH000WD.deck, concatenate/_13_100MPH000WD.deck],
+        [concatenate/_14_10moors.deck],
+        [concatenate/_15_.deck],
+      ]
+    input_file_labels:
+      [[""], [no_tug], [""], [000MPH000WD, 100MPH000WD], [10moors], [""]]
+    batch:
+      flag: True
+      extension: no
+      content: fixture-command fixtures/reference-82.dat

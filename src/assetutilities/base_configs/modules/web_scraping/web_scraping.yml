@@ -1,0 +1,29 @@
+basename: web_scraping
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+web_scrape_engine: scrapy
+
+settings_master:
+  save_csv: True
+  url: https://www.data.bsee.gov/Well/APD/Default.aspx
+
+input:
+  - label: well_data_1
+    input_box:
+      label: ASPxFormLayout1$ASPxTextBoxAPI
+      value: 608164024500
+
+form_data:
+  first_request:
+    ASPxFormLayout1$ASPxTextBoxAPI: "608164024500"
+    ASPxFormLayout1$ASPxButtonSubmitQ: "Submit Query"
+
+  second_request:
+    ASPxFormLayout1$ASPxTextBoxAPI: "608164024500"
+    __EVENTTARGET: "ASPxFormLayout2$btnCsvExport"
+    __EVENTARGUMENT: "Click"

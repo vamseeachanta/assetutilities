@@ -1,0 +1,30 @@
+@startuml plate-buckling
+skinparam titleBorderRoundCorner 14
+skinparam titleBorderThickness 1
+skinparam titleBorderColor black
+skinparam titleBackgroundColor lightblue
+
+title Process Of Tracking XY Tests
+
+start
+
+:XY Test Starts;
+:engine (basename);
+:visualization_components.py (XY router);
+:visualization_common.py;
+:visualization_xy.py;
+
+
+stop
+
+
+footer
+
+
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml
+
+

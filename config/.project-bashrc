@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# AssetUtilities Project-Specific Bash Configuration
+# This file is automatically loaded when working in the AssetUtilities project
+# DO NOT source this file directly - it's loaded by the setup script
+
+# Ensure we're in the right project
+if [[ -z "$ASSETUTILITIES_ROOT" ]]; then
+    return 1
+fi
+
+# Color codes for enhanced terminal output
+export AU_COLOR_RED='\033[0;31m'
+export AU_COLOR_GREEN='\033[0;32m'
+export AU_COLOR_YELLOW='\033[1;33m'
+export AU_COLOR_BLUE='\033[0;34m'
+export AU_COLOR_PURPLE='\033[0;35m'
+export AU_COLOR_CYAN='\033[0;36m'
+export AU_COLOR_NC='\033[0m' # No Color
+
+# Project-specific environment variables
+export ASSETUTILITIES_PROJECT="AssetUtilities"
+export PYTHONPATH="$ASSETUTILITIES_ROOT/src:$PYTHONPATH"
+
+# Python virtual environment auto-activation
+if [[ -f "$ASSETUTILITIES_ROOT/venv/Scripts/activate" ]]; then
+    # Windows Git Bash path
+    source "$ASSETUTILITIES_ROOT/venv/Scripts/activate"
+elif [[ -f "$ASSETUTILITIES_ROOT/venv/bin/activate" ]]; then
+    # Unix-style path (in case of WSL or cross-platform usage)
+    source "$ASSETUTILITIES_ROOT/venv/bin/activate"
+fi
+
+# Load project-specific aliases
+if [[ -f "$ASSETUTILITIES_ROOT/scripts/aliases.sh" ]]; then
+    source "$ASSETUTILITIES_ROOT/scripts/aliases.sh"
+fi
+
+# Load environment variables
+if [[ -f "$ASSETUTILITIES_ROOT/config/env-vars.sh" ]]; then
+    source "$ASSETUTILITIES_ROOT/config/env-vars.sh"
+fi
+
+# Custom prompt to show we're in AssetUtilities project
+if [[ -n "$ASSETUTILITIES_ROOT" ]]; then
+    # Add project indicator to prompt
+    export PS1="(AU) $PS1"
+fi
+
+# Project-specific functions
+
+# Quick navigation to important directories
+au_root() {
+    cd "$ASSETUTILITIES_ROOT"
+}
+
+au_src() {
+    cd "$ASSETUTILITIES_ROOT/src"
+}
+
+au_tests() {
+    cd "$ASSETUTILITIES_ROOT/tests"
+}
+
+au_docs() {
+    cd "$ASSETUTILITIES_ROOT/docs"
+}
+
+au_scripts() {
+    cd "$ASSETUTILITIES_ROOT/scripts"
+}
+
+# Development utility functions
+au_status() {
+    echo -e "${AU_COLOR_BLUE}AssetUtilities Development Environment${AU_COLOR_NC}"
+    echo "Project Root: $ASSETUTILITIES_ROOT"
+    echo "Python Path: $PYTHONPATH"
+    
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        echo -e "Virtual Env: ${AU_COLOR_GREEN}$VIRTUAL_ENV${AU_COLOR_NC}"
+    else
+        echo -e "Virtual Env: ${AU_COLOR_YELLOW}Not activated${AU_COLOR_NC}"
+    fi
+    
+    if command -v python &> /dev/null; then
+        local python_version
+        python_version=$(python --version 2>&1)
+        echo "Python Version: $python_version"
+    fi
+    
+    if git rev-parse --is-inside-work-tree &> /dev/null; then
+        local branch
+        branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        echo "Git Branch: $branch"
+    fi
+}
+
+# Clean up function (called when leaving project)
+au_cleanup() {
+    # Deactivate virtual environment if it was activated by us
+    if [[ -n "$VIRTUAL_ENV" ]] && [[ "$VIRTUAL_ENV" == "$ASSETUTILITIES_ROOT/venv" ]]; then
+        deactivate 2>/dev/null || true
+    fi
+    
+    # Remove project indicator from prompt
+    export PS1="${PS1#(AU) }"
+    
+    # Clean up environment variables
+    unset ASSETUTILITIES_PROJECT
+    unset ASSETUTILITIES_ROOT
+    
+    # Remove color exports (optional, they're harmless)
+    unset AU_COLOR_RED AU_COLOR_GREEN AU_COLOR_YELLOW
+    unset AU_COLOR_BLUE AU_COLOR_PURPLE AU_COLOR_CYAN AU_COLOR_NC
+}
+
+# Welcome message
+echo -e "${AU_COLOR_GREEN}AssetUtilities development environment loaded${AU_COLOR_NC}"
+echo "Type 'au_status' for environment info, 'au_root' to go to project root"

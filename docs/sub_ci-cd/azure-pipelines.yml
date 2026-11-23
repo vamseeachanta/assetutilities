@@ -1,0 +1,98 @@
+pool:
+  name: ONPREM PYTHON
+  demands:
+  - conda
+  - Cmd
+
+variables:
+  AppName: 'myshed'
+  GIT_REDIRECT_STDERR: 2>&1
+
+steps:
+
+- checkout: self
+  persistCredentials: true
+
+- script: |
+   %conda% activate
+   %conda% env update -f environment.yml
+  displayName: 'Update conda env'
+
+- script: |
+   echo Skipping version validation check..
+   python setup.py check_version 2>&1
+  failOnStderr: false
+  displayName: 'Check Build Number'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+- script: |
+   python setup.py check_version
+  failOnStderr: true
+  displayName: 'Check Build Number'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+
+- powershell: |
+   try {
+       $configFile = (Join-Path "$(System.DefaultWorkingDirectory)" "app.config")
+       $configFileMap = new-object System.Configuration.ExeConfigurationFileMap
+       $configFileMap.ExeConfigFilename = $configFile
+       $config = [System.Configuration.ConfigurationManager]::OpenMappedExeConfiguration($configFileMap, [System.Configuration.ConfigurationUserLevel]::None, $true)
+   }
+   catch [System.Management.Automation.MethodInvocationException] {
+       $ex = $_.Exception
+       if ($ex.InnerException.GetType() -eq [System.Configuration.ConfigurationErrorsException]) {
+           throw $ex.InnerException
+       }
+       throw $_
+   }
+  displayName: 'Validate app.config'
+
+- task: BatchScript@1
+  displayName: 'Run script run_build.bat'
+  inputs:
+    filename: 'run_build.bat'
+    modifyEnvironment: true
+
+- task: qetza.xdttransform.xdttransform-task.xdttransform@3
+  displayName: 'Apply transforms app.release.config => app.config'
+  inputs:
+    transforms: 'app.release.config => app.config'
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    Contents: |
+     **/*.py
+     **/*.sql
+     templates/**/*
+     *.py
+     *.bat
+     *.yml
+     *.yaml
+     *.md
+     app.config
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    CleanTargetFolder: true
+
+- task: BatchScript@1
+  displayName: 'Run script run_tests.bat'
+  inputs:
+    filename: 'run_tests.bat'
+    modifyEnvironment: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: $(AppName)'
+  inputs:
+    ArtifactName: '$(AppName)'
+
+- powershell: |
+    Write-Host "Tagging Build: $env:BuildNumber"
+    git config --global user.name "My Shed Build"
+    git config --global user.email "email@aceengineer.com"
+    git tag $env:NEWBUILDNUMBER
+    git push origin $env:NEWBUILDNUMBER
+  env:
+    BuildNumber: $(Build.BuildNumber)
+  failOnStderr: true
+  displayName: 'Tag Sources on Success'
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))

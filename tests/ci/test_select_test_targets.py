@@ -1,0 +1,299 @@
+# ABOUTME: Drift guard for the PR-gate test selector.
+# ABOUTME: Fails if any tests/modules/<module> stops being selected, or routing regresses.
+
+"""Tests for scripts/ci/select_test_targets.py."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "ci"))
+
+from select_test_targets import (  # noqa: E402
+    ALWAYS_XDIST,
+    MATRIX_IGNORE_DOMAINS,
+    _has_tests,
+    select,
+    to_matrix,
+)
+
+
+def _modules() -> list[str]:
+    base = REPO_ROOT / "tests" / "modules"
+    return sorted(
+        d.name for d in base.iterdir() if d.is_dir() and d.name != "__pycache__"
+    )
+
+
+def _modules_with_tests() -> list[str]:
+    base = REPO_ROOT / "tests" / "modules"
+    return sorted(
+        d.name
+        for d in base.iterdir()
+        if d.is_dir() and d.name != "__pycache__" and _has_tests(d)
+    )
+
+
+def test_core_change_runs_full_tree():
+    r = select(["pyproject.toml"], REPO_ROOT)
+    assert r["scope"] == "full"
+
+
+def test_uvlock_change_is_core():
+    assert select(["uv.lock"], REPO_ROOT)["scope"] == "full"
+
+
+def test_selector_self_change_is_core():
+    assert select(["scripts/ci/select_test_targets.py"], REPO_ROOT)["scope"] == "full"
+
+
+def test_module_change_is_module_scoped_not_full():
+    r = select(["tests/modules/calculations/test_x.py"], REPO_ROOT)
+    assert r["scope"] == "modules"
+    assert "tests/modules/calculations" in r["xdist"]
+    # the always-on cross-cutting set is always present
+    assert all(t in r["xdist"] for t in ALWAYS_XDIST if (REPO_ROOT / t).is_dir())
+
+
+def test_src_module_change_maps_to_test_home():
+    """A change under a src module that has a tests/modules home is scoped."""
+    if (REPO_ROOT / "tests/modules/csv_utilities").is_dir():
+        r = select(["src/assetutilities/modules/csv_utilities/foo.py"], REPO_ROOT)
+        assert r["scope"] == "modules"
+        assert "tests/modules/csv_utilities" in r["xdist"]
+
+
+def test_noncode_only_change_skips_full_tree():
+    for path in ("reports/x.html", "notebooks/demo.ipynb", "docs/x.md"):
+        r = select([path], REPO_ROOT)
+        assert r["scope"] == "skip", path
+        # skip still runs the cheap always-on set, never module/full dirs
+        assert r["xdist"] == [t for t in ALWAYS_XDIST if (REPO_ROOT / t).is_dir()]
+
+
+def test_branch_hygiene_change_selects_its_own_tests():
+    """Regression: tests/test_branch_hygiene.py used to map to scope=skip, so a
+    PR touching only it ran none of its cases."""
+    path = "tests/test_branch_hygiene.py"
+    assert (REPO_ROOT / path).is_file()
+    r = select([path], REPO_ROOT)
+    assert r["scope"] == "modules"
+    assert path in r["xdist"]
+    m = to_matrix([path], REPO_ROOT)
+    assert m["scope"] != "skip"
+    assert {"name": "_root", "targets": path, "mode": "xdist"} in m["include"]
+
+
+def _root_test_files() -> list[str]:
+    return sorted(
+        f"tests/{p.name}"
+        for p in (REPO_ROOT / "tests").glob("test_*.py")
+        if p.is_file()
+    )
+
+
+@pytest.mark.parametrize("path", _root_test_files())
+def test_every_root_test_file_is_selected(path):
+    """Drift guard: no top-level tests/test_*.py may silently map to skip."""
+    m = to_matrix([path], REPO_ROOT)
+    assert m["scope"] == "modules"
+    root = [s for s in m["include"] if s["name"] == "_root"]
+    assert root and path in root[0]["targets"].split()
+
+
+def test_unrouted_test_suite_dir_selects_that_dir():
+    """A test under a non-module, non-always suite dir runs that dir."""
+    r = select(["tests/repo_structure/test_anything.py"], REPO_ROOT)
+    assert r["scope"] == "modules"
+    assert "tests/repo_structure" in r["xdist"]
+
+
+def test_config_repo_structure_routes_to_its_contract():
+    r = select(["config/repo_structure.yml"], REPO_ROOT)
+    assert r["scope"] == "modules"
+    if (REPO_ROOT / "tests/repo_structure").is_dir():
+        assert "tests/repo_structure" in r["xdist"]
+
+
+@pytest.mark.parametrize("module", _modules())
+def test_every_module_is_selected(module):
+    """Drift guard: a change under any tests/modules/<module> must be
+    module-scoped and pull in that module's dir (no module silently regresses
+    to full/skip)."""
+    r = select([f"tests/modules/{module}/test_smoke.py"], REPO_ROOT)
+    assert r["scope"] == "modules"
+    if module in MATRIX_IGNORE_DOMAINS:
+        # WIP staging domains are intentionally excluded: the change
+        # is still "relevant" (scope=modules, runs the always-on set) but the
+        # WIP domain itself is never sharded.
+        assert f"tests/modules/{module}" not in r["xdist"]
+    else:
+        assert f"tests/modules/{module}" in r["xdist"]
+
+
+# --- Matrix-emitter (domain fan-out) tests ---
+
+
+def _names(m: dict) -> set[str]:
+    return {s["name"] for s in m["include"]}
+
+
+def test_matrix_is_never_empty_on_skip():
+    """Docs-only change still yields the always-on shard (matrix never empty)."""
+    m = to_matrix(["docs/x.md"], REPO_ROOT)
+    assert m["scope"] == "skip"
+    assert m["include"], "matrix must never be empty (CI matrix would error)"
+    assert _names(m) == {"_always"}
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        ["MODULE_STRUCTURE.md"],
+        ["docs/maps/assetutilities-operator-map.md"],
+        ["docs/registry/module-routing.yaml"],
+        ["docs/README.md"],
+        ["README.md"],
+        ["AGENTS.md"],
+        [
+            "MODULE_STRUCTURE.md",
+            "docs/maps/assetutilities-operator-map.md",
+            "docs/registry/module-routing.yaml",
+        ],
+    ],
+)
+def test_routing_documents_select_docs_domain(changed: list[str]) -> None:
+    """Each routing contract input selects exactly one docs shard."""
+    matrix = to_matrix(changed, REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "docs"}
+    assert [shard for shard in matrix["include"] if shard["name"] == "docs"] == [
+        {"name": "docs", "targets": "tests/docs", "mode": "xdist"}
+    ]
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "src/assetutilities/devtools/modernize_deps.py",
+        "tests/modules/devtools/test_devtools_coverage.py",
+        "tests/modules/devtools/test_devtools_report.py",
+        "docs/sub_utilities/assets/style.css",
+        "scripts/reporting/generate_devtools_report.py",
+        "docs/reports/modules/adevtools/index.html",
+        "docs/reports/modules/adevtools/changes.json",
+    ],
+)
+def test_report_inputs_select_devtools_freshness_check(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    assert matrix["scope"] == "modules"
+    assert _names(matrix) == {"_always", "modules-devtools"}
+    assert [
+        shard for shard in matrix["include"] if shard["name"] == "modules-devtools"
+    ] == [
+        {
+            "name": "modules-devtools",
+            "targets": "tests/modules/devtools",
+            "mode": "xdist",
+        }
+    ]
+    assert (REPO_ROOT / "tests/modules/devtools/test_devtools_report.py").is_file()
+
+
+def test_matrix_module_scope_one_shard_per_domain():
+    m = to_matrix(
+        [
+            "tests/modules/calculations/test_a.py",
+            "tests/modules/excel_utilities/test_b.py",
+        ],
+        REPO_ROOT,
+    )
+    assert m["scope"] == "modules"
+    names = _names(m)
+    assert "_always" in names
+    assert "modules-calculations" in names and "modules-excel_utilities" in names
+
+
+def test_matrix_full_scope_fans_out_every_module_with_tests():
+    """A core change fans out to one shard per tests/modules/<domain> that has
+    tests; pure support / empty stub dirs are excluded to avoid empty shards."""
+    m = to_matrix(["uv.lock"], REPO_ROOT)
+    assert m["scope"] == "full"
+    names = _names(m)
+    base = REPO_ROOT / "tests" / "modules"
+    for module in _modules():
+        if module in MATRIX_IGNORE_DOMAINS:
+            # WIP staging domains are intentionally never sharded.
+            assert f"modules-{module}" not in names, f"{module} should be ignored"
+        elif _has_tests(base / module):
+            assert f"modules-{module}" in names, f"{module} missing from full matrix"
+        else:
+            assert f"modules-{module}" not in names, f"{module} is an empty shard"
+
+
+def test_wip_domain_excluded_from_matrix():
+    """tests_wip is a WIP staging area — never a CI shard, in any scope."""
+    assert "tests_wip" in MATRIX_IGNORE_DOMAINS
+    full = to_matrix(["uv.lock"], REPO_ROOT)
+    assert "modules-tests_wip" not in _names(full)
+    scoped = to_matrix(["tests/modules/tests_wip/test_x.py"], REPO_ROOT)
+    assert "modules-tests_wip" not in _names(scoped)
+
+
+def test_matrix_shards_have_required_fields():
+    m = to_matrix(["uv.lock"], REPO_ROOT)
+    for shard in m["include"]:
+        assert set(shard) >= {"name", "targets", "mode"}
+        assert shard["mode"] in {"xdist", "seq"}
+        assert shard["targets"].strip()
+
+
+def test_matrix_targets_only_existing_dirs_in_module_scope():
+    m = to_matrix(["tests/modules/visualization/test_x.py"], REPO_ROOT)
+    for shard in m["include"]:
+        for tgt in shard["targets"].split():
+            assert (REPO_ROOT / tgt).exists(), f"{tgt} does not exist"
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "scripts/fetch_data.py",
+        "data-manifest/MANIFEST.tsv",
+        "tests/data_store/test_fetch_data.py",
+        "uv.lock",
+    ],
+)
+def test_data_store_is_collected_for_contract_and_full_changes(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = {
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    }
+    assert "tests/data_store" in targets
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "tests/modules/yml_utilities/yml/test_data/Template_example.yml",
+        "examples/workflows/excel_utilities/input_data/inputs.csv",
+        "tests/hygiene/test_yaml_fixture_header_privacy.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_array.py",
+        "tests/modules/file_edit/test_file_edit_concatenate_2d_array.py",
+        "tests/modules/file_management/test_file_management_file_size.py",
+        "tests/modules/file_management/test_file_management_regex.py",
+        "docs/example.md",
+        "pyproject.toml",
+    ],
+)
+def test_privacy_guard_is_always_selected(changed):
+    matrix = to_matrix([changed], REPO_ROOT)
+    targets = [
+        target for shard in matrix["include"] for target in shard["targets"].split()
+    ]
+    assert targets.count("tests/hygiene") == 1
+    assert targets.count("tests/ci") == 1

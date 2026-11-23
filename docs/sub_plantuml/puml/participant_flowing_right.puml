@@ -1,0 +1,36 @@
+@startuml
+
+autonumber
+
+actor User
+participant Server
+
+box "Filter Chain"
+    participant "Delegating Filter Proxy" as F1
+    participant "Filter 1" as F2
+    participant "Filter ..." as F3
+    participant "Filter n" as F4
+end box
+
+participant DispatcherServlet as DS
+participant Controller
+
+User -> Server : request
+Server -> F1 : request
+F1 -> F2
+F2 -> F3
+F3 -> F4
+F4 -> DS
+DS -> Controller
+
+autonumber stop
+
+Controller -->> DS
+DS -->> F4
+F4 -->> F3
+F3 -->> F2
+F2 -->> F1
+F1 -->> Server
+Server -->> User
+
+@enduml

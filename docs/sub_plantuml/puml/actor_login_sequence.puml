@@ -1,0 +1,27 @@
+@startuml
+
+actor User
+User -> "Restricted Page": Try to open
+
+alt authenticated user
+
+	"Restricted Page" -> "Restricted Page": Open page
+	
+else unauthenticated user
+
+	"Restricted Page" -> "Login Page": Redirect
+	"Login Page" -> DB: Check auth details
+	DB -> "Login Page": Auth response
+	
+	alt unsuccessful authentication
+	
+		"Login Page" -> "Login Page": Show error \nmessage
+	
+	else successful authentication
+	
+		"Login Page" -> "Restricted Page": Redirect to the \nrestricted page
+		
+	end	
+end
+
+@enduml

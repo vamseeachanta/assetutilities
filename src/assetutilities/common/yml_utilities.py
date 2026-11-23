@@ -1,0 +1,487 @@
+from __future__ import annotations
+
+# Standard library imports
+import importlib.util
+
+# import logging
+import os
+import pkgutil
+import types
+from collections.abc import Mapping, MutableMapping
+from pathlib import Path
+from typing import Any, Optional, Union
+
+# Third party imports
+import yaml  # type: ignore[import-untyped]
+import yaml.composer  # type: ignore[import-untyped]
+from deepdiff import DeepDiff
+from jinja2 import StrictUndefined
+from jinja2.exceptions import TemplateError, UndefinedError
+from jinja2.sandbox import ImmutableSandboxedEnvironment
+from loguru import logger
+
+# Reader imports
+from assetutilities.common.data import ReadData
+from assetutilities.common.saveData import saveDataYaml
+from assetutilities.common.utilities import (
+    get_common_name_from_2_filenames,
+    is_file_valid_func,
+)
+from assetutilities.common.visualization.visualization_templates_matplotlib import (
+    VisualizationTemplates,
+)
+from assetutilities.modules.yml_utilities.ruamel_yaml import RuamelYAML
+
+# from assetutilities.engine import engine as aus_engine
+
+viz_templates = VisualizationTemplates()
+
+read_data = ReadData()
+ruamel_yaml_utilities = RuamelYAML()
+
+
+def represent_none(self: Any, _: Any) -> Any:
+    return self.represent_scalar("tag:yaml.org,2002:null", "~")
+
+
+yaml.add_representer(type(None), represent_none)
+
+
+def ymlInput(
+    defaultYml: str,
+    updateYml: Optional[str] = None,
+    *,
+    resolve_placeholders: bool = True,
+) -> dict[str, Any]:
+    return WorkingWithYAML().ymlInput(
+        defaultYml, updateYml, resolve_placeholders=resolve_placeholders
+    )
+
+
+def update_deep(d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+    return WorkingWithYAML().update_deep(d, u)
+
+
+def resolve_placeholders(data: Any, context: Optional[Mapping[str, Any]] = None) -> Any:
+    """Recursively substitute ``{{ key }}`` placeholders in a YAML-derived tree.
+
+    This implements the "YAML placeholders" scenario of issue #59. Unlike native
+    YAML anchors/aliases (``&name`` / ``*name``), which the loader resolves and
+    which only reference a single previously-defined node, placeholders are plain
+    quoted strings such as ``"{{ meta.library }}"`` that are resolved *after*
+    parsing. They can therefore reference any key in the document (including
+    nested keys via dotted access) and be embedded inside larger strings.
+
+    Substitution is performed once with sandboxed Jinja2. Mapping keys and
+    native scalar types are preserved; template results remain strings.
+    Chained expansion is not performed. Dotted placeholders like
+    ``{{ meta.library }}`` resolve against the nested mapping ``context["meta"]``.
+
+    Args:
+        data: The value or tree to resolve. Typically the parsed config ``dict``.
+        context: Mapping that placeholder names are rendered against. When
+            ``None`` and ``data`` is a mapping, ``data`` is used as its own
+            context, supporting self-referential documents (the common case).
+
+    Returns:
+        A new structure mirroring ``data`` with every resolvable placeholder
+        replaced by its string value. Placeholders that reference an undefined
+        key are left untouched so unrelated braces are never destroyed.
+
+    Notes:
+        Note that a bare, unquoted ``{{ key }}`` in YAML is *not* a string but a
+        nested mapping (``{{'key': None}: None}``) and so cannot be resolved here;
+        placeholders must be quoted to round-trip through the YAML parser.
+    """
+    if context is None:
+        context = data if isinstance(data, Mapping) else {}
+    render_context = {
+        key: value for key, value in context.items() if isinstance(key, str)
+    }
+
+    # Jinja 3.1 API: sandboxed rendering and keep_trailing_newline preserve
+    # config text without exposing Python internals through template attributes.
+    env = ImmutableSandboxedEnvironment(
+        undefined=StrictUndefined, autoescape=False, keep_trailing_newline=True
+    )
+    memo: dict[int, Any] = {}
+
+    def visit(value: Any) -> Any:
+        if isinstance(value, str):
+            if not any(marker in value for marker in ("{{", "{%", "{#")):
+                return value
+            try:
+                return env.from_string(value).render(render_context)
+            except UndefinedError:
+                return value
+            except (TemplateError, TypeError):
+                # Do not log config values: they can contain private data.
+                logger.warning("Placeholder template could not be rendered")
+                return value
+        if isinstance(value, (Mapping, list)):
+            # YAML aliases can share nodes, including recursive nodes (YAML
+            # 1.2.2, 2021, sections 3.2.2.2 and 7.1). Preserve that graph in the copy.
+            identity = id(value)
+            if identity in memo:
+                return memo[identity]
+            if isinstance(value, Mapping):
+                result: dict[Any, Any] = {}
+                memo[identity] = result
+                result.update((key, visit(item)) for key, item in value.items())
+                return result
+            items: list[Any] = []
+            memo[identity] = items
+            items.extend(visit(item) for item in value)
+            return items
+        return value
+
+    return visit(data)
+
+
+class WorkingWithYAML:
+    """
+    yaml utilities module for handling YAML files.
+
+    """
+
+    def __init__(self) -> None:
+        pass
+
+    def router(self, cfg: dict[str, Any]) -> dict[str, Any]:
+        if (
+            "yml_analysis" in cfg
+            and cfg["yml_analysis"]["divide"]["technique"] == "ruamel_yml"
+        ):
+            ruamel_yaml_utilities.router(cfg)
+        elif "plot_yml_data" in cfg and cfg["plot_yml_data"]["flag"]:
+            cfg = self.get_plotting_data(cfg)
+            cfg = self.plot_yml_data(cfg)
+        elif "test_variables" in cfg and cfg["test_variables"]["flag"]:
+            self.test_variables(cfg)
+
+        return cfg
+
+    def get_plotting_data(self, cfg: dict[str, Any]) -> dict[str, Any]:
+        groups_key_chain = cfg["data"]["groups_key_chain"]
+        groups = groups_key_chain.copy()
+        for group_idx, group in enumerate(groups_key_chain):
+            for x_list_idx, x_list in enumerate(group["x"]):
+                x_list_values = self.get_data_from_file_keychain(cfg, x_list)
+                groups[group_idx]["x"][x_list_idx] = x_list_values
+            for y_list_idx, y_list in enumerate(group["y"]):
+                y_list_values = self.get_data_from_file_keychain(cfg, y_list)
+                groups[group_idx]["y"][y_list_idx] = y_list_values
+
+        cfg["data"]["groups"] = groups.copy()
+
+        return cfg
+
+    def get_data_from_file_keychain(self, cfg: dict[str, Any], file_keychain: dict[str, Any]) -> Any:
+        file_name = file_keychain["file_name"]
+        key_chain = file_keychain["key_chain"]
+
+        if not os.path.isfile(file_name):
+            file_name = os.path.join(cfg["Analysis"]["analysis_root_folder"], file_name)
+            if not os.path.isfile(file_name):
+                raise FileNotFoundError(f"File {file_name} does not exist.")
+
+        # file_name_dict = self.ymlInput(file_name)
+        # cleaned_yaml, ruamel_data_dict = ruamel_yaml_utilities.load_clean_yaml_file(file_name)
+        # safe_yaml = YAML(typ='safe')
+        # ruamel_data_dict = safe_yaml.load(cleaned_yaml)
+
+        data = self.load_yml_with_utf_8_sig(file_name)
+
+        for key in key_chain:
+            data = data[key].copy() if isinstance(data, dict) else data[int(key)]
+
+        return data
+
+    def plot_yml_data(self, cfg: dict[str, Any]) -> dict[str, Any]:
+        from assetutilities.engine import engine as au_engine
+
+        plot_yml = viz_templates.get_xy_line_input(cfg["Analysis"].copy())
+        plot_yml["settings"].update(cfg["settings"].copy())
+
+        file_name = os.path.join(
+            cfg["Analysis"]["result_plot_folder"], cfg["Analysis"]["file_name"]
+        )
+        plot_yml["settings"]["file_name"] = file_name
+
+        plot_yml["data"] = cfg["data"].copy()
+
+        au_engine(inputfile=None, cfg=plot_yml, config_flag=False)  # type: ignore[arg-type]
+        return cfg
+
+    def ymlInput(
+        self,
+        defaultYml: str,
+        updateYml: Optional[str] = None,
+        *,
+        resolve_placeholders: bool = True,
+    ) -> dict[str, Any]:
+        """Load and merge YAML; disable placeholder resolution for literal data."""
+        if not is_file_valid_func(defaultYml):
+            raise Exception("Not valid file. Please check the file path.")
+
+        cfg: dict[str, Any]
+        with open(defaultYml, encoding="utf-8") as ymlfile:
+            try:
+                cfg = yaml.safe_load(ymlfile)  # type: ignore[assignment]
+            except yaml.composer.ComposerError as e:
+                logger.error(f"YAML parsing error: {e}")
+                cfg = self.yml_read_stream(defaultYml)
+
+        if updateYml is not None:
+            #  Update values file
+            try:
+                with open(updateYml, encoding="utf-8") as ymlfile:
+                    cfgUpdateValues = yaml.safe_load(ymlfile)
+                #  Convert to logs
+                # logger.info(cfgUpdateValues)
+                cfg = update_deep(cfg, cfgUpdateValues)  # type: ignore[assignment]
+            except Exception as e:
+                # Surface the cause; this handler previously discarded it
+                # entirely (issue #80). Fallback behaviour is unchanged.
+                logger.info(
+                    "Update Input file could not be loaded successfully. Running program default values"
+                )
+                logger.info(f"Error is : {e}")
+
+        # Resolve against the final merged document, never an intermediate one.
+        return self.process_placeholders(cfg) if resolve_placeholders else cfg
+
+    def yml_read_stream(self, yaml_file_name: str) -> dict[str, Any]:
+        stream_dict: dict[str, Any] = {}
+        try:
+            with open(yaml_file_name, encoding="utf-8") as ymlfile:
+                yaml_content = ymlfile.read()
+
+                # Clean the YAML content
+                # cleaned_yaml = self.clean_yaml_file(yaml_content)
+                docs = yaml.safe_load_all(yaml_content)
+                if type(docs) is types.GeneratorType:
+                    for doc in docs:
+                        if type(doc) is dict:
+                            stream_dict = update_deep(stream_dict, doc)  # type: ignore[assignment]
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error: {e}")
+        except Exception:
+            raise Exception(
+                "Stopping Program due to some inefficient data in the YAML file"
+            )
+
+        return stream_dict
+
+    def update_deep(self, d: MutableMapping[str, Any], u: Mapping[str, Any]) -> MutableMapping[str, Any]:
+        for k, v in u.items():
+            # this condition handles the problem
+            if not isinstance(d, Mapping):
+                d = u
+            elif isinstance(v, Mapping):
+                r = update_deep(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+
+        return d
+
+    def load_yml_with_utf_8_sig(self, file_name: str) -> Any:
+        with open(file_name, encoding="utf-8") as ymlfile:
+            doc = yaml.safe_load(ymlfile)
+
+        return doc
+
+    def analyze_yaml_keys(self, file_name: str) -> None:
+        """
+        Analyze Yaml file
+        """
+        file_name_content = ymlInput(file_name, resolve_placeholders=False)
+        logger.info(file_name_content.keys())
+
+    def compare_yaml_root_keys(self, file_name1: str, file_name2: str) -> None:
+        """
+        Compare 2 yaml files
+        """
+
+        file_name1_content = ymlInput(file_name1, resolve_placeholders=False)
+        file_name2_content = ymlInput(file_name2, resolve_placeholders=False)
+        file_name1_keys = file_name1_content.keys()
+        file_name2_keys = file_name2_content.keys()
+        if file_name1_keys == file_name2_keys:
+            logger.info("Yaml files have the same root keys")
+        else:
+            logger.info(
+                f"The root keys for {Path(file_name1).as_posix()}: {file_name1_keys}"
+            )
+            logger.info(
+                f"The root keys for {Path(file_name2).as_posix()}: {file_name2_keys}"
+            )
+
+    def compare_yaml_files_deepdiff(self, cfg: dict[str, Any]) -> None:
+        """
+        Compare 2 yaml files using DeepDiff
+        """
+        file_name1 = cfg["file_name1"]
+        file_name2 = cfg["file_name2"]
+        file_name1_content = ymlInput(file_name1, resolve_placeholders=False)
+        file_name2_content = ymlInput(file_name2, resolve_placeholders=False)
+        file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
+        if file_diff == {}:  # if there is no difference
+            logger.info("Yaml files are the same")
+        else:
+            self.save_diff_files(file_diff, cfg)
+
+    def compare_yaml_file_contents_deepdiff(self, cfg: dict[str, Any]) -> None:
+        file_name1 = cfg["file_name1"]
+        file_name2 = cfg["file_name2"]
+
+        file_name1_content = read_data.key_chain(
+            ymlInput(file_name1, resolve_placeholders=False),
+            *cfg["map_list"]["file_name1"],
+        )
+        file_name2_content = read_data.key_chain(
+            ymlInput(file_name2, resolve_placeholders=False),
+            *cfg["map_list"]["file_name2"],
+        )
+
+        file_diff = DeepDiff(file_name1_content, file_name2_content, ignore_order=True)
+
+        self.save_diff_files(file_diff, cfg)
+
+    def save_diff_files(
+        self, file_diff: dict[str, Any], cfg: dict[str, Any], deepdiff_save: bool = False
+    ) -> None:
+        file_name1 = cfg["file_name1"]
+        file_name2 = cfg["file_name2"]
+        if file_diff == {}:  # if there is no difference
+            logger.info("Yaml files are the same")
+        else:
+            # get file root directory
+            file_directory = os.path.dirname(file_name1)
+            uniquebasename = get_common_name_from_2_filenames(file_name1, file_name2)
+
+            # save the entire diff file. A very messy and overwhelming file
+            if deepdiff_save:
+                saveDataYaml(
+                    file_diff, f"{file_directory}/wwyaml_{uniquebasename}_deepdiff"
+                )
+
+            file_name = f"{file_directory}/wwyaml_{uniquebasename}_updated_values.yml"
+            with open(file_name, "w", encoding="utf-8", newline="\n") as f:
+                for key, value in file_diff.items():
+                    if key == "values_changed":
+                        for k, v in value.items():
+                            f.write(f"{k}: {v['new_value']}\n")
+
+            saveDataYaml(
+                dict(file_diff), f"{file_directory}/wwyaml_{uniquebasename}_items"
+            )
+
+            saveDataYaml(
+                dict(file_diff)["values_changed"],
+                f"{file_directory}/wwyaml_{uniquebasename}_values_changed",
+            )
+
+            logger.info(
+                "Yaml files are different. See wwyaml files saved in the current file directory"
+            )
+
+    def get_library_yaml_file(self, cfg: dict[str, Any]) -> Any:
+        library_yaml_filename = cfg["filename"]
+        library_name = cfg["library_name"]
+        if os.path.isfile(library_yaml_filename):
+            with open(library_yaml_filename, encoding="utf-8") as ymlfile:
+                library_yaml = yaml.safe_load(ymlfile)
+        else:
+            data = pkgutil.get_data(library_name, cfg["filename"])
+            library_yaml = yaml.safe_load(data)
+
+        return library_yaml
+
+    def get_library_filename(self, cfg: dict[str, Any]) -> str:
+        filename_with_lib_path: Any = cfg["filename"]
+        library_name = cfg["library_name"]
+        if not os.path.isfile(cfg["filename"]):
+            lib_spec = importlib.util.find_spec(library_name)
+            if lib_spec is None or lib_spec.origin is None:
+                raise ImportError(f"Library '{library_name}' not found")
+            lib_path = Path(lib_spec.origin).parent
+            filename_with_lib_path = os.path.join(lib_path, cfg["filename"])
+            if not os.path.isfile(filename_with_lib_path):
+                raise FileNotFoundError()
+
+        return str(filename_with_lib_path)
+
+    def get_library_filepath(self, cfg: dict[str, Any], src_relative_location_flag: bool = False) -> str:
+        filepath_with_lib_path: Any = cfg["filepath"]
+        library_name = cfg["library_name"]
+        if not os.path.isabs(filepath_with_lib_path) or not os.path.isdir(
+            filepath_with_lib_path
+        ):
+            lib_spec = importlib.util.find_spec(library_name)
+            if lib_spec is None or lib_spec.origin is None:
+                raise ImportError(f"Library '{library_name}' not found")
+            lib_path = Path(lib_spec.origin).parent
+            if not src_relative_location_flag:
+                lib_path = lib_path.parents[1]
+            filepath_with_lib_path = os.path.join(lib_path, cfg["filepath"])
+            if not os.path.isdir(filepath_with_lib_path):
+                raise FileNotFoundError()
+
+        return str(filepath_with_lib_path)
+
+    def test_variables(self, cfg: dict[str, Any]) -> dict[str, Any]:
+        if cfg["test_variables"]["method"] == "single":
+            flag, label = self.test_single_variable(cfg)
+        elif cfg["test_variables"]["method"] == "directive_block":
+            flag, label = self.test_directive_block(cfg)
+        elif cfg["test_variables"]["method"] == "placeholder":
+            flag, label = self.test_variable_placeholder(cfg)
+
+        return cfg
+
+    def test_single_variable(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
+        try:
+            label = cfg["data"]["groups"][0]["label"]
+            logger.info("Label is reusable: {}", label)
+            return True, label
+        except KeyError as e:
+            logger.error("Label cannot be accesible:", e)
+            return False, None
+
+    def test_directive_block(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
+        try:
+            target_block = cfg["data"]["groups"][0]["target"]
+            target_block["template"]
+            logger.debug("block and it's nested value reusable:")
+            return True, target_block
+        except KeyError as e:
+            logger.error("Directive block not accessible:", e)
+            return False, None
+
+    def test_variable_placeholder(self, cfg: dict[str, Any]) -> tuple[bool, Any]:
+        try:
+            method = cfg["placeholder_tests"]["method"]
+            logger.info("yml key placeholder is reusable: {}", method)
+            return True, method
+        except KeyError as e:
+            logger.error("yml key cannot be accesible:", e)
+            return False, None
+
+    def process_placeholders(self, data: Any, context: Optional[dict[str, Any]] = None) -> Any:
+        """Resolve ``{{ key }}`` placeholders in a config tree (backwards-compatible alias).
+
+        Thin wrapper around :func:`resolve_placeholders` for downstream callers.
+        Diagnostic helpers report values already resolved during configuration.
+
+        Args:
+            data: The value/tree to resolve. Usually the full ``cfg`` dict.
+            context: Mapping that placeholders are rendered against. When
+                ``None`` and ``data`` is a mapping, ``data`` itself is used as
+                the context (the common "self-referential" YAML case).
+
+        Returns:
+            A new structure with every resolvable placeholder substituted.
+        """
+        return resolve_placeholders(data, context)

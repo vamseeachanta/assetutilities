@@ -1,0 +1,9 @@
+name: assetutilities
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python >=3.7
+  - pip
+  - pip:
+      - -r requirements.txt  # source pip specific requirements 

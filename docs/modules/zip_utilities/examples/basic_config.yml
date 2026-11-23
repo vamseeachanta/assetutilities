@@ -1,0 +1,47 @@
+meta:
+  library: assetutlities
+  basename: zip_utilities
+  label: example_scenario
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+# Parallel processing configuration
+parallel_processing:
+  enabled: true
+  max_workers: 30
+  timeout_per_file: 3600
+  save_error_reports: false
+  progress_reporting: true
+
+# Files to be zipped (CSV files)
+analysis:
+  flag: True
+  type: zip_by_stem
+  by: stem
+  input_directory: ../output/csv/example_scenario
+  
+  filename:
+    extension: [csv]
+
+# Required for routing to zip utilities
+analysis_settings:
+  flag: True
+  type: zip_by_stem
+  by: stem
+
+# Stem source and output configuration
+file_management:
+  flag: True
+  input_directory: ../example_scenario        # YML files for stem extraction
+  output_directory: ../output/zip/example_scenario  # ZIP output directory
+  
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      contains: []
+      not_contains: []

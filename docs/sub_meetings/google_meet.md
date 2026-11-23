@@ -1,0 +1,6 @@
+- https://meet.google.com/
+- Schedule a meeting
+  - Click on the "New meeting" button
+  - Schedule in Google Calendar 
+  - Google Calendar will open
+  - 

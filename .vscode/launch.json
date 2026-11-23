@@ -1,0 +1,140 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "timeout": 30
+        },
+        {
+            "name": "assetUtilities - file_edit_split",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/file_edit/file_edit_split.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-cfg.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen-md",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-cfg-md.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen-docx",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-cfg-docx.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen-20in-md",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-cfg-20in-md.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen-20in-docx",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-cfg-20in-docx.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "reportgen-sympy_function_1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/modules/reportgen/test-clients/sympy_function_1.py",
+            "args": [
+                "${workspaceFolder}/tests/modules/reportgen/reportgen-sympy_function_1_cfg.yml"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash simple",
+            "cwd": "${workspaceFolder}",
+            // "cwd": "k:/github/assetutilities",
+            "program": "${file}",
+            "terminalKind": "integrated"   <---- This attaches the integrated terminal.
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (type in script name)",
+            "cwd": "${workspaceFolder}",
+            "program": "${command:AskForScriptName}",
+            "args": []
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (select script from list of sh files)",
+            "cwd": "${workspaceFolder}",
+            "program": "${command:SelectScriptName}",
+            "args": []
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (hardcoded script name)",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/path/to/script.sh",
+            "args": []
+        },
+        {
+            "name": "au_test_zip_by_stem_argparse_dict",
+            "type": "python",
+            "request": "launch",
+            "module": "assetutilities",
+            "args": [
+                "${workspaceFolder}/tests/modules/zip_utilities/test_zip_by_stem.yml",
+                "{'meta': {'arg_parse_dict': True, 'label': 'argprase_dict'}}"
+
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+    ]
+}

@@ -1,0 +1,33 @@
+basename: file_management
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+file_management:
+  flag: true
+  input_directory: ~
+  output_directory: ~
+  filename:
+    extension: []
+    pattern: ~
+    filters:
+      contains: []
+      not_contains: []
+  input_files: {}
+Analysis:
+  basename: file_management
+  analysis_root_folder: D:\workspace-hub\assetutilities
+  file_name: file_management
+  file_name_for_overwrite: file_management
+  log_folder: D:\workspace-hub\assetutilities\logs
+  start_time: 2025-10-15 14:14:35.786736
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: ~
+  result_folder: D:\workspace-hub\assetutilities\results
+  result_data_folder: D:\workspace-hub\assetutilities\results\Data
+  result_plot_folder: D:\workspace-hub\assetutilities\results\Plot
+  fe_folder: D:\workspace-hub\assetutilities\results
+  file_management_input_directory: D:\workspace-hub\assetutilities
+  file_management_output_directory: D:\workspace-hub\assetutilities\results

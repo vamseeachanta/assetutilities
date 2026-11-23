@@ -1,0 +1,36 @@
+basename: visualization
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+    
+settings:
+  type: polar
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  multiple: False
+  file_name: normal_lay_allowable_wave_height
+  plt_save_extensions: ['.png']
+  title: Allowable Significant Wave Height (Hs); Normal Lay
+  set_rmax: 3
+  set_rticks: [1, 1.5, 2, 2.5]
+  set_thetagrids: [15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345]
+  # set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: NULL
+  theta_data: degrees # Code assumes degrees
+  set_theta_zero_location: W
+  
+data:
+  type: input
+  r : 
+    - [2.5, 2.5, 2.5, 2.5, 1.5, 2.5, 2.5, 2.5, 1.5, 2.5, 2.5, 2.5, 2.5]
+    - [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5]
+  theta : 
+    - [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]
+  legend: [vessel inline with product route, vessel rotation wrt. product route]
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-","-", ":"]

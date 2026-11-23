@@ -1,0 +1,44 @@
+basename: visualization
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: xy
+  mode: line
+  pairs: False
+  multiple: False
+  plt_engine: matplotlib
+  label: Allowable Wave Height
+  file_name: x_y_line
+  plt_save_extensions: [".png"]
+  title: Allowable Significant Wave Height (Hs)
+  xlabel: Direction (deg)
+  ylabel: Allowable Wave Height (m)
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  legend:
+    flag: True
+    label: []
+    loc: best
+    prop: { family: Arial, size: 5 }
+
+master_settings:
+  groups: {}
+
+data:
+  type: input
+  groups:
+    - x:
+        - [35, 70, 120, 155, 205, 240]
+      y:
+        - [0.5, 1, 2, 2.5, 3, 4]
+        - [1, 2, 2.5, 2.5, 3, 5]
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]

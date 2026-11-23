@@ -1,0 +1,19 @@
+basename: yaml_utilities
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: False
+
+test_variables:
+  flag: True
+  method: single
+
+data:
+  type: input
+  groups:
+    - label: test_label

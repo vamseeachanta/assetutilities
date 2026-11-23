@@ -1,0 +1,58 @@
+meta:
+  basename: excel_utilities
+  library: assetutilities
+
+basename: excel_utilities
+
+task: csv_copy_to_excel
+
+# Parallel processing configuration
+parallel_processing:
+  enabled: true  # Enable parallel processing for groups
+  max_workers: auto  # Auto-detect optimal workers (default: 8 for I/O-bound)
+  task_type: io_bound  # Excel operations are typically I/O-bound
+
+data:
+    input_format: csv  # clear_existing_data in a sheet
+    groups:
+      # Group 1: Process inputs.csv to target.xlsx
+      - 
+        input: 
+          filename: tests/modules/excel_utilities/input_data/inputs.csv
+        target: 
+          filename: tests/modules/excel_utilities/input_data/target.xlsx
+          sheet_name: inputs
+      
+      # Group 2: Process results.csv to target.xlsx
+      -
+        input: 
+          filename: tests/modules/excel_utilities/input_data/results.csv
+        target: 
+          filename: tests/modules/excel_utilities/input_data/target.xlsx
+          sheet_name: results
+      
+      # Additional example groups for demonstration
+      # Uncomment to test with more groups for better parallelization
+      # -
+      #   input: 
+      #     filename: tests/modules/excel_utilities/input_data/summary.csv
+      #   target: 
+      #     filename: tests/modules/excel_utilities/input_data/target.xlsx
+      #     sheet_name: summary
+      # -
+      #   input: 
+      #     filename: tests/modules/excel_utilities/input_data/details.csv
+      #   target: 
+      #     filename: tests/modules/excel_utilities/input_data/output.xlsx
+      #     sheet_name: details
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True
+
+# Performance monitoring (optional)
+monitoring:
+  track_time: true  # Track execution time for each group
+  log_performance: true  # Log performance metrics

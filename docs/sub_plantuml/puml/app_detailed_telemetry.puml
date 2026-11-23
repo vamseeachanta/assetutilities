@@ -1,0 +1,64 @@
+@startuml Application Detailed Telemetry
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title Application Monitoring \nDetailed Telemetry
+
+    participant "application" as app
+    participant "logic/analysis" as logic
+    participant "App Logs" as logs
+    
+    activate app
+    activate logs
+
+   
+    note over app: Periodic heart beat
+        app-> logs: start_up/period check-in
+ 
+    note over app: User actions (if applicable)
+        app-> logs: user data/actions
+
+
+    alt logic/analysis for each asset
+        logic-> logs: start-up and analysis .. START
+        activate logic
+
+        note over logic: Module 1
+        logic-> logs: logic logs
+        note over logic: Module 2
+        logic-> logs: logic logs
+        note over logic: Module 3
+        logic-> logs: logic logs
+
+        logic-> logs: start-up and analysis .. END
+        deactivate logic
+    end group
+    
+    app-> logs: pre-exit actions
+    app-> logs: exit
+    note over app: Exit
+
+note over logs
+    <b>Logs</b> can be saved in:
+        - ascii files to same server/cloud
+        - cloud apps (eg. appinsights)
+        - others?
+end note
+
+note over logic
+    <b>Resource status</b> can be by: 
+    - app (multithreading needed)
+    - seperate service (another program)
+    - dediated server/service 
+        (eg: SolarWinds, appdynamics, datadog etc.)
+end note
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml

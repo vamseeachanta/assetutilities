@@ -1,0 +1,90 @@
+@startuml engineering_analysis_workflow
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title Engineering Analysis \n Typical Workflow 
+
+        note right
+            TODO:
+             Need 2 track workflow 
+             Add timelines
+        end note
+
+start
+
+    partition "Design Data and Methodology Preperation" {
+
+        note right
+            Markdown for:
+             Maintenance 
+             Portability
+             Add flowcharts in puml
+        end note
+
+        :Standard design data template;
+        :data known
+          Document;
+        :data unknown
+            Fill in Generic assumptions
+            Fill other assumptions 
+            Leave Blanks
+            Use color codes;
+    }
+
+    :Communicate Status to Client;
+        note right
+            md: 
+                Send as attachment? or 
+                repo link 
+        end note
+    partition "Design Data and Methodology Approval" {
+
+        note right
+            Can be cyclic (2-3 iterations)
+            Prepare to run draft analysis
+            Assume analysis is always re-analysis
+            Provide timeline to client
+        end note
+
+        :Client Reviews;
+        :Get client confirmation;
+
+    }
+
+
+    partition "Analysis" {
+    : Setoff 2 Analysis Matrix;
+
+        note right
+            Each matrix set:
+             should give operating envelopes
+             high level answers
+            Guide with next steps
+            Helps define re-analysis and postprocess requirements
+        end note
+
+    : PostProcess results;
+    : Spot check animations;
+    : Review results;
+    : Client communication;
+    }
+
+    partition "Full Analysis, Postprocess and Results" {
+    : Set up full analysis;
+    : Postpcoess;
+    : Prepare results and charts;
+    : Document conclusions;
+    }
+
+: Full Report;
+
+stop
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml

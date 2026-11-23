@@ -1,0 +1,33 @@
+basename: file_edit
+edit_type: concatenate
+concatenate_type: array
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: true
+input:
+- output_filename: 06a_501_section2_def
+  output_dir: ~
+  filename: ~
+  add_blank_file_in_between: false
+  input_files: []
+Analysis:
+  basename: file_edit
+  analysis_root_folder: D:\workspace-hub\assetutilities
+  file_name: file_edit
+  file_name_for_overwrite: file_edit
+  log_folder: D:\workspace-hub\assetutilities\logs
+  start_time: 2025-10-15 14:14:35.696444
+  cfg_array_file_names: ~
+  DefaultInputFile: ~
+  CustomInputFile: ~
+  result_folder: D:\workspace-hub\assetutilities\results
+  result_data_folder: D:\workspace-hub\assetutilities\results\Data
+  result_plot_folder: D:\workspace-hub\assetutilities\results\Plot
+  fe_folder: D:\workspace-hub\assetutilities\results
+file_edit:
+  output_filename:
+  - []
+  batch_filename:
+  - D:\workspace-hub\assetutilities\file_edit_0.bat

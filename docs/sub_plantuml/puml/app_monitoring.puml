@@ -1,0 +1,57 @@
+@startuml Application High-Level Telemetry
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Tomato
+
+title Application Monitoring \nHigh-level Telemetry
+
+    participant "application" as app
+    participant "logic / analysis" as logic
+    participant "App Logs" as log
+    participant "Database" as db
+    
+    activate app
+    activate log
+    activate db
+
+   
+    note over app: Start-up
+        app-> log: start_up/period check-in
+        app--> db: start_up/period check-in
+ 
+    note over app: User actions (if applicable)
+        app-> log: user data/actions
+        app--> db: user data/actions
+
+    alt logic/analysis for each asset
+        logic-> log: start-up and analysis .. START
+        activate logic
+
+        logic-> log: start-up and analysis .. END
+        deactivate logic
+    end group
+    
+    app--> db: detailed results
+    app--> db: pre-exit actions
+    app-> log: pre-exit actions
+    app-> log: exit
+    note over app: Exit
+
+note over db
+    <b>Daily Monitoring</b> metrics: 
+    - no. of. users
+    - result (expected vs. actual)
+    - result (current vs. historical)
+    - asset success & failures (expected vs. actual)
+    - asset success & failures (current vs. historical)
+    - others
+end note
+
+
+footer
+%date("yyyy.MM.dd' at 'HH:mm")
+%filename()
+end footer
+
+@enduml

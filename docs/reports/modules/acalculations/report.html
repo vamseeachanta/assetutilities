@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculations module analysis</title>
+<style>
+  /* ============================ TOKENS ============================ */
+  :root{
+    --paper:#f5f7f7; --surface:#ffffff; --surface-2:#eef2f2;
+    --ink:#0d2230; --ink-2:#3f5563; --ink-muted:#6b8291; --hairline:#d8e0e2;
+    --sea:#0d2a36; --sea-ink:#eaf2f2;
+    --cfd:#009B84; --ro:#2563C9; --proj:#D9820A;
+    --cfd-soft:rgba(0,155,132,.12); --ro-soft:rgba(37,99,201,.12); --proj-soft:rgba(217,130,10,.14);
+    --good:#0f9d6b; --pend:#D9820A;
+    --shadow:0 1px 2px rgba(13,34,48,.05), 0 8px 28px -12px rgba(13,34,48,.18);
+    --maxw:1080px;
+    --mono:ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0a1a22; --surface:#0f2530; --surface-2:#132e3a;
+      --ink:#e8f0f0; --ink-2:#a9c0c8; --ink-muted:#7593a0; --hairline:#1e3a45;
+      --sea:#081419; --sea-ink:#eaf2f2;
+      --cfd:#12A38C; --ro:#5B8DEF; --proj:#BC8024;
+      --cfd-soft:rgba(18,163,140,.16); --ro-soft:rgba(91,141,239,.16); --proj-soft:rgba(188,128,36,.18);
+      --good:#37c08a; --pend:#e0a13a;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#f5f7f7; --surface:#ffffff; --surface-2:#eef2f2;
+    --ink:#0d2230; --ink-2:#3f5563; --ink-muted:#6b8291; --hairline:#d8e0e2;
+    --sea:#0d2a36; --sea-ink:#eaf2f2;
+    --cfd:#009B84; --ro:#2563C9; --proj:#D9820A;
+    --cfd-soft:rgba(0,155,132,.12); --ro-soft:rgba(37,99,201,.12); --proj-soft:rgba(217,130,10,.14);
+    --good:#0f9d6b; --pend:#D9820A;
+    --shadow:0 1px 2px rgba(13,34,48,.05), 0 8px 28px -12px rgba(13,34,48,.18);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0a1a22; --surface:#0f2530; --surface-2:#132e3a;
+    --ink:#e8f0f0; --ink-2:#a9c0c8; --ink-muted:#7593a0; --hairline:#1e3a45;
+    --sea:#081419; --sea-ink:#eaf2f2;
+    --cfd:#12A38C; --ro:#5B8DEF; --proj:#BC8024;
+    --cfd-soft:rgba(18,163,140,.16); --ro-soft:rgba(91,141,239,.16); --proj-soft:rgba(188,128,36,.18);
+    --good:#37c08a; --pend:#e0a13a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+  }
+
+  /* ============================ BASE ============================ */
+  *{box-sizing:border-box}
+  .doc{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    line-height:1.62;font-size:17px;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"kern" 1;overflow-x:hidden}
+  .doc :where(p,li){color:var(--ink-2)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(18px,5vw,40px)}
+  h1,h2,h3{color:var(--ink);text-wrap:balance;line-height:1.15;letter-spacing:-.02em;margin:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-muted);font-weight:600}
+  .num{font-variant-numeric:tabular-nums}
+  var{font-style:italic;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+  a{color:var(--cfd);text-underline-offset:2px}
+
+  /* ============================ MASTHEAD ============================ */
+  .masthead{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 86%,transparent);
+    backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--hairline)}
+  .masthead .wrap{display:flex;align-items:center;gap:16px;height:56px}
+  .brand{font-family:var(--mono);font-weight:700;letter-spacing:-.01em;font-size:14px;color:var(--ink);white-space:nowrap}
+  .brand b{color:var(--cfd)}
+  .mh-legend{margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .lg{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;color:var(--ink-muted);letter-spacing:.02em}
+  .lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+
+  /* ============================ HERO ============================ */
+  .hero{position:relative;background:
+      radial-gradient(120% 80% at 82% -10%, var(--cfd-soft), transparent 60%),
+      radial-gradient(90% 70% at 10% 0%, var(--ro-soft), transparent 55%);
+    border-bottom:1px solid var(--hairline)}
+  .hero .wrap{padding-top:clamp(40px,7vw,76px);padding-bottom:clamp(30px,5vw,48px)}
+  .kicker{display:inline-flex;gap:9px;align-items:center;padding:5px 12px;border:1px solid var(--hairline);
+    border-radius:999px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:22px}
+  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--cfd);box-shadow:0 0 0 4px var(--cfd-soft)}
+  .kicker span{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2)}
+  h1{font-size:clamp(30px,5.4vw,52px);font-weight:800}
+  .lede{font-size:clamp(17px,2.2vw,21px);max-width:60ch;margin-top:18px;color:var(--ink-2)}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:38px;
+    background:var(--hairline);border:1px solid var(--hairline);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .kpi{background:var(--surface);padding:18px 20px}
+  .kpi .v{font-family:var(--mono);font-size:clamp(22px,3vw,30px);font-weight:700;color:var(--ink);letter-spacing:-.02em;line-height:1.05}
+  .kpi .v .u{font-size:.5em;color:var(--ink-muted);font-weight:500;margin-left:2px}
+  .kpi .k{font-size:12.5px;color:var(--ink-muted);margin-top:8px;line-height:1.35}
+  .kpi.teal .v{color:var(--cfd)} .kpi.amber .v{color:var(--proj)}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+
+  /* ============================ SECTIONS ============================ */
+  section{padding:clamp(40px,6vw,68px) 0;border-bottom:1px solid var(--hairline)}
+  .sec-head{display:flex;gap:16px;align-items:baseline;margin-bottom:26px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--cfd);font-weight:700;letter-spacing:.05em;flex:none}
+  h2{font-size:clamp(22px,3.4vw,32px);font-weight:750}
+  .sec-head p{margin:8px 0 0;max-width:64ch}
+  .prose{max-width:68ch}
+  .prose p{margin:0 0 16px}
+  .prose p:last-child{margin-bottom:0}
+
+  /* device layout */
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,48px);align-items:center}
+  @media(max-width:820px){.split{grid-template-columns:1fr}}
+  .steps{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:14px}
+  .steps li{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .steps .n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cfd);background:var(--cfd-soft);
+    width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex:none}
+  .steps b{color:var(--ink)}
+
+  /* formula */
+  .formula{font-family:var(--mono);background:var(--surface-2);border:1px solid var(--hairline);border-radius:10px;
+    padding:14px 16px;font-size:15px;color:var(--ink);overflow-x:auto;letter-spacing:.01em}
+  .formula .lbl{color:var(--ink-muted);font-size:12px}
+  .def{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-family:var(--mono);font-size:12.5px;color:var(--ink-muted)}
+  .def b{color:var(--ink-2);font-weight:600}
+
+  /* figure / card */
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow);
+    padding:clamp(16px,2.4vw,26px)}
+  .fig-cap{font-size:13.5px;color:var(--ink-muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);
+    display:flex;gap:10px}
+  .fig-cap .tag{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 8px;border-radius:6px;flex:none;height:fit-content}
+  .tag.cfd{background:var(--cfd-soft);color:var(--cfd)} .tag.proj{background:var(--proj-soft);color:var(--proj)}
+  .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px;justify-content:flex-end}
+  .chart-legend .lg{font-size:12px;color:var(--ink-2)}
+  .chart-title{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px}
+  svg .grid{stroke:var(--hairline);stroke-width:1}
+  svg .axis{stroke:var(--ink-muted);stroke-width:1}
+  svg text{fill:var(--ink-muted);font-family:var(--mono);font-size:11px}
+  svg .axtitle{fill:var(--ink-2);font-size:12.5px;font-weight:600}
+
+  /* stat callouts row */
+  .callrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+  @media(max-width:760px){.callrow{grid-template-columns:1fr}}
+  .call{background:var(--surface);border:1px solid var(--hairline);border-radius:13px;padding:18px 18px;box-shadow:var(--shadow)}
+  .call .v{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--cfd);letter-spacing:-.02em}
+  .call .k{font-size:13px;color:var(--ink-2);margin-top:6px} .call .s{font-size:12px;color:var(--ink-muted);margin-top:4px}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;margin-top:20px;border:1px solid var(--hairline);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+  th,td{padding:11px 15px;text-align:right;border-bottom:1px solid var(--hairline);font-variant-numeric:tabular-nums;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-muted);font-weight:600;background:var(--surface-2)}
+  tbody tr:last-child td{border-bottom:none}
+  td.hl{color:var(--ink);font-weight:600}
+  tbody tr:hover{background:var(--surface-2)}
+
+  /* status list */
+  .status{display:grid;gap:12px;margin-top:8px}
+  .st{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;background:var(--surface);
+    border:1px solid var(--hairline);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow)}
+  .st .icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none;font-family:var(--mono);font-weight:700;font-size:15px}
+  .st.ok .icon{background:var(--cfd-soft);color:var(--cfd)}
+  .st.proj .icon{background:var(--proj-soft);color:var(--proj)}
+  .st.pend .icon{background:var(--surface-2);color:var(--ink-muted);border:1px dashed var(--hairline)}
+  .st .lab{color:var(--ink);font-weight:600;font-size:15px}
+  .st .sub{color:var(--ink-muted);font-size:13px;margin-top:2px}
+  .st .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:5px 11px;border-radius:999px;flex:none}
+  .st.ok .pill{background:var(--cfd-soft);color:var(--cfd)}
+  .st.proj .pill{background:var(--proj-soft);color:var(--proj)}
+  .st.pend .pill{background:var(--surface-2);color:var(--ink-muted)}
+
+  .note{background:var(--proj-soft);border:1px solid color-mix(in srgb,var(--proj) 35%,transparent);border-radius:12px;
+    padding:16px 18px;margin-top:22px;font-size:14.5px;color:var(--ink-2);display:flex;gap:12px}
+  .note .b{font-family:var(--mono);color:var(--proj);font-weight:700;font-size:12px;letter-spacing:.05em;flex:none;padding-top:1px}
+
+  /* footer */
+  footer{background:var(--sea);color:var(--sea-ink);border-bottom:none}
+  footer .wrap{padding:44px clamp(18px,5vw,40px)}
+  footer h3{color:var(--sea-ink);font-size:16px;margin-bottom:14px;font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
+  .foot-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:32px}
+  @media(max-width:760px){.foot-grid{grid-template-columns:1fr;gap:24px}}
+  footer p,footer li{color:color-mix(in srgb,var(--sea-ink) 72%,transparent);font-size:13.5px;line-height:1.6}
+  footer ul{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+  footer .k{font-family:var(--mono);color:color-mix(in srgb,var(--sea-ink) 55%,transparent);font-size:11px}
+  .foot-bar{border-top:1px solid rgba(255,255,255,.1);margin-top:30px;padding-top:18px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:11.5px;color:color-mix(in srgb,var(--sea-ink) 55%,transparent)}
+
+  /* tooltip */
+  #tip{position:fixed;pointer-events:none;z-index:60;background:var(--ink);color:var(--paper);font-family:var(--mono);
+    font-size:12px;padding:8px 11px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(4px);
+    transition:opacity .1s;max-width:240px;line-height:1.5}
+  #tip.on{opacity:1;transform:none}
+  #tip .t{color:#fff;font-weight:700}
+  .hit{cursor:crosshair}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  :focus-visible{outline:2px solid var(--cfd);outline-offset:2px;border-radius:4px}
+
+  /* ============================ STANDARD-REPORT SHELL ============================ */
+  html{scroll-behavior:smooth}
+  .shell{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:250px minmax(0,1fr);gap:0;align-items:start}
+  .toc{position:sticky;top:56px;align-self:start;max-height:calc(100vh - 56px);overflow-y:auto;
+    padding:26px 20px 40px 0;border-right:1px solid var(--hairline)}
+  .toc .tt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 12px 4px}
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:l1}
+  .toc>ol>li{counter-increment:l1;margin:2px 0}
+  .toc a{display:block;text-decoration:none;color:var(--ink-2);font-size:13.5px;padding:5px 10px;border-radius:7px;border-left:2px solid transparent;line-height:1.3}
+  .toc>ol>li>a::before{content:counter(l1) ".  ";color:var(--ink-muted);font-family:var(--mono);font-size:12px}
+  .toc a:hover{background:var(--surface-2);color:var(--ink)}
+  .toc a.active{color:var(--cfd);border-left-color:var(--cfd);background:var(--cfd-soft);font-weight:600}
+  .toc .sub{list-style:none;margin:0 0 6px;padding:0;counter-reset:l2}
+  .toc .sub li{counter-increment:l2}
+  .toc .sub a{font-size:12.5px;color:var(--ink-muted);padding:3px 10px 3px 22px}
+  .toc .sub a::before{content:counter(l1) "." counter(l2) "  ";font-family:var(--mono);font-size:11px;opacity:.8}
+  .main{min-width:0;padding:8px 0 0 clamp(20px,3vw,44px)}
+  @media(max-width:900px){
+    .shell{grid-template-columns:1fr}
+    .toc{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--hairline);padding:18px 0 22px}
+    .toc ol{columns:2;column-gap:20px} .toc .sub{columns:1}
+    .main{padding-left:0}
+  }
+
+  /* numbered L1 / L2 sections */
+  .main>section{counter-increment:sec;border-bottom:1px solid var(--hairline);padding:38px 0 40px;scroll-margin-top:72px}
+  .main{counter-reset:sec}
+  .main>section:last-child{border-bottom:none}
+  .l1head{display:flex;gap:14px;align-items:baseline;margin-bottom:6px}
+  .l1head .secnum{font-family:var(--mono);font-weight:700;color:var(--cfd);font-size:15px;flex:none}
+  .l1head .secnum::after{content:counter(sec)}
+  .main>section>h2{font-size:clamp(21px,3vw,30px);font-weight:750}
+  .l1sub{color:var(--ink-muted);font-size:15px;max-width:66ch;margin:2px 0 0}
+  .l2{counter-increment:sub;padding-top:26px;scroll-margin-top:72px}
+  section{counter-reset:sub}
+  .l2head{display:flex;gap:11px;align-items:baseline;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed var(--hairline)}
+  .l2head .n{font-family:var(--mono);font-size:12.5px;color:var(--cfd);font-weight:700;flex:none}
+  .l2head .n::after{content:counter(sec) "." counter(sub)}
+  .l2head h3{font-size:clamp(16px,2vw,20px);font-weight:700}
+
+  /* objective callout */
+  .objective{background:var(--cfd-soft);border:1px solid color-mix(in srgb,var(--cfd) 30%,transparent);border-radius:14px;padding:20px 22px;display:grid;gap:10px}
+  .objective .oh{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cfd);font-weight:700}
+  .objective p{color:var(--ink);margin:0;font-size:16px}
+  .objective .scope{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{font-family:var(--mono);font-size:11.5px;background:var(--surface);border:1px solid var(--hairline);border-radius:999px;padding:5px 11px;color:var(--ink-2)}
+
+  /* data / definition tables */
+  .datagrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:4px}
+  .kv{border:1px solid var(--hairline);border-radius:12px;overflow-x:auto;background:var(--surface);box-shadow:var(--shadow)}
+  .kv .cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);
+    padding:11px 15px;background:var(--surface-2);border-bottom:1px solid var(--hairline);font-weight:600}
+  .kv td{border-bottom:1px solid var(--hairline)}
+  .kv tr:last-child td{border-bottom:none}
+  /* Label sized to its own content, value takes the remaining measure, so a
+     row reads as one line across the page instead of a stub with dead space
+     beside it -- and a long value wraps rather than being clipped. */
+  .kv td:first-child{color:var(--ink-2);width:1%;white-space:nowrap;padding-right:30px}
+  .kv td:last-child{width:99%;white-space:normal;overflow-wrap:break-word}
+  .kv td:last-child{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:13px}
+  .kv td .un{color:var(--ink-muted);font-weight:400;font-size:11px}
+
+  /* equation cards */
+  .eq{display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;background:var(--surface);
+    border:1px solid var(--hairline);border-left:3px solid var(--cfd);border-radius:11px;padding:16px 20px;margin:14px 0;box-shadow:var(--shadow)}
+  .eq .m{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:20px;color:var(--ink);
+    overflow-x:auto;line-height:2;letter-spacing:.01em}
+  .eq .m var{font-size:1em}
+  .eq .eno{font-family:var(--mono);font-size:13px;color:var(--ink-muted);flex:none}
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .18em;font-size:.86em}
+  .frac>.n{border-bottom:1.6px solid currentColor;padding:0 .4em 1px}
+  .frac>.d{padding:1px .4em 0}
+  .rad{white-space:nowrap}
+  .rad>.rc{border-top:1.6px solid currentColor;padding:0 .18em;margin-left:-.08em}
+  .op{color:var(--ink-muted);margin:0 .12em}
+  .defs{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 22px}
+  .defs .d{display:flex;gap:9px;font-size:13.5px;color:var(--ink-2);align-items:baseline}
+  .defs .d var{color:var(--ink);font-weight:600;min-width:2.4em;font-family:"Iowan Old Style",Palatino,Georgia,serif}
+  .defs .d .u{color:var(--ink-muted);font-family:var(--mono);font-size:11px;margin-left:auto;white-space:nowrap}
+
+  /* flowchart */
+  .flow{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:20px;box-shadow:var(--shadow);overflow-x:auto}
+  .flow svg{display:block;min-width:560px;margin:0 auto}
+  .flow .fb{fill:var(--surface-2);stroke:var(--ink-muted);stroke-width:1.5}
+  .flow .fb.cfd{fill:var(--cfd-soft);stroke:var(--cfd)}
+  .flow .fb.ro{fill:var(--ro-soft);stroke:var(--ro)}
+  .flow .fb.proj{fill:var(--proj-soft);stroke:var(--proj);stroke-dasharray:5 3}
+  .flow .fl{fill:var(--ink);font-family:var(--sans);font-size:12.5px;font-weight:600}
+  .flow .fs{fill:var(--ink-muted);font-family:var(--mono);font-size:10.5px}
+  .flow .fa{stroke:var(--ink-muted);stroke-width:1.6;fill:none}
+  .flow .fd{fill:var(--ink-muted)}
+
+  .refs{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:10px}
+  .refs li{display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:14px;color:var(--ink-2);align-items:baseline}
+  .refs .rn{font-family:var(--mono);font-size:12px;color:var(--cfd);font-weight:700}
+  .backtop{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--ink-muted);text-decoration:none}
+  .backtop:hover{color:var(--cfd)}
+</style>
+<style>
+/* Report controls inherit the shared calculation-report palette and typography. */
+body{margin:0} .shell{padding:0 24px} .main{padding-bottom:40px}
+code{overflow-wrap:anywhere} pre.formula{white-space:pre-wrap}
+h2{margin-bottom:14px} h3{margin:24px 0 10px} caption{caption-side:bottom;text-align:left;padding:10px;color:var(--ink-2)}
+figure{margin:20px 0} figcaption{font-size:14px;color:var(--ink-2)}
+svg{width:100%;height:auto} .chart text,.timeline text{font:14px var(--sans);fill:var(--ink)}
+.chart .grid{stroke:var(--hairline)} .chart .curve{fill:none;stroke:var(--cfd);stroke-width:3}
+.chart circle{fill:var(--cfd);stroke:var(--surface);stroke-width:2;cursor:pointer}
+.chart circle:focus{outline:3px solid var(--ro)} .timeline line,.timeline path{stroke:var(--ink-muted);stroke-width:2;fill:none}
+.timeline rect{fill:var(--surface-2);stroke:var(--hairline)}
+button,input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--hairline);border-radius:5px;padding:6px;max-width:100%}
+button{cursor:pointer} textarea{display:block;width:100%;min-height:80px} label{display:block;margin-top:12px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0} .table-wrap{overflow-x:auto}
+td,th{padding:10px;text-align:left;border-bottom:1px solid var(--hairline)}
+.note{border-left:3px solid var(--proj);padding:12px;background:var(--proj-soft)}
+#chart-detail{min-height:85px} #comment-list li{overflow-wrap:anywhere} .digest{overflow-wrap:anywhere;font:11px var(--mono)}
+@media print{.masthead,.toc,.controls,#comments{display:none}.shell{display:block;padding:0}.main{padding:0}body.doc{background:white;color:black}.main>section{break-inside:auto}h2,h3,figcaption{break-after:avoid}tr{break-inside:avoid}}
+</style>
+</head>
+<body class="hs-doc doc" id="top">
+<header class="masthead"><div class="wrap"><span class="brand">Engineering calculations</span><span class="lg">Draft for maintainer review</span></div></header>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">Module analysis · Revision A · 22 October 2026</p>
+<h1>Calculations module analysis</h1>
+<p class="lede">Public-example discounting, calculation interfaces and evidence required before engineering use.</p>
+<p>Prepared: documentation basis. Checked: pending. Approved: pending. Project reference: not applicable to this public module description.</p>
+</div></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents"><p class="tt">Contents</p><ol>
+
+<li><a href="#s1">Executive Summary</a></li>
+<li><a href="#s2">Introduction</a></li>
+<li><a href="#s3">Summary of Results</a></li>
+<li><a href="#s4">Basis and Criteria</a></li>
+<li><a href="#s5">Methodology</a></li>
+<li><a href="#s6">Worked Example</a></li>
+<li><a href="#s7">Validation Evidence</a></li>
+<li><a href="#s8">Limits and Recommendations</a></li>
+<li><a href="#s9">References</a></li>
+<li><a href="#s10">Appendices</a></li>
+</ol><p><a href="#comments">Comments</a> · <a href="#changes">Changes</a></p></nav>
+<main class="main">
+
+<section id="s1">
+<h2>1 Executive Summary</h2>
+<p>The calculations module is a collection of engineering and lifecycle-cost functions. Analysis is performed to determine how its documented interfaces support a public cost-discounting example, and the key results are summarized below.</p>
+<ul>
+<li>The public replacement and maintenance examples are calculated separately and combined as an illustration.
+<ul><li>The combined present cost is <span data-number="combined_pv">1,320.58</span> USD at the source example rate of <span data-number="rate_percent">3.0</span> % over <span data-number="years">5</span> years. Its equivalent annual cost is <span data-number="annual_cost">288.35</span> USD/year. The calculation basis is given in <a href="#s4">Section 4</a>.</li></ul></li>
+<li>Cost timing can be checked using the reported inputs and the cumulative-cost chart.
+<ul><li>Budget acceptance is not evaluated because no budget or competing design is specified. Structural qualification is not established by this example; the additional evidence is identified in <a href="#s8">Section 8</a>.</li></ul></li>
+</ul>
+<h3>Revision history</h3>
+<p>The revision record is presented below.</p>
+<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Date</th><th>Change and reason</th></tr></thead><tbody><tr><td>A</td><td>22 October 2026</td><td>First module description with public cost examples, explicit timing and bounded validation evidence.</td></tr></tbody><caption>Revision history. The initial issue establishes the calculation basis.</caption></table></div>
+</section>
+<section id="s2">
+<h2>2 Introduction</h2>
+<p>The implemented calculation areas and the selected workflow are described in this section. Direct function calls are provided for scalar and list calculations; a complete design model is not assembled by the module.</p>
+<p>The lifecycle-cost workflow is covered in full from timed cash inputs through present cost to annual equivalent cost. It is selected because its documented interfaces, numerical tests and public reference examples permit a readable arithmetic check without material coefficients or licensed design tables.</p>
+<h3>2.1 Not covered</h3>
+<p>The remaining areas are identified without extending the worked-example conclusion to their results.</p>
+<p>Riser vibration, array interference, riser dynamics, drilling-riser tension and integrity, wellhead fatigue, steel catenary riser fatigue, tension-leg platform geometry, pipeline resistance and casing ratings are not evaluated here. The polynomial evaluator is a placeholder that returns no numerical value. The source and test inventory is provided in <a href="#s9-2">Section 9.2</a>.</p>
+<p>Within lifecycle costing, levelized output cost, event-based maintenance, transport, downtime and installed-cost summation are additional callable utilities. Their input contracts are listed in <a href="#s10-contract">Appendix 10.2</a>; their use in an asset forecast is outside the selected discounting example.</p>
+</section>
+<section id="s3">
+<h2>3 Summary of Results</h2>
+<p>The time-dependent present cost of the combined illustration is presented below. Each point is calculated from the costs incurred up to that year, discounted to the same base date.</p>
+<p>The combined present cost is <span data-number="combined_pv">1,320.58</span> USD at the source example rate of <span data-number="rate_percent">3.0</span> % over <span data-number="years">5</span> years. Its equivalent annual cost is <span data-number="annual_cost">288.35</span> USD/year. The replacement payment occurs at the final year end; maintenance occurs at each year end.</p>
+<figure>
+<svg class="chart" viewBox="0 0 720 360" role="group" aria-label="Cumulative present cost against year; focus a point for values">
+<line class="grid" x1="90" y1="280" x2="660" y2="280"/><line class="grid" x1="90" y1="45" x2="90" y2="280"/>
+<text x="90" y="25">Cumulative present cost (USD)</text><text x="325" y="345">Year from base date</text>
+<text x="28" y="285">0</text><text x="6" y="50">1,320.58</text>
+
+
+
+<circle cx="90" cy="280.00" r="7" tabindex="0" data-point="0" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 0; cumulative present cost 0.00 USD; limit not specified.</title></circle>
+<text x="86" y="305">0</text>
+
+
+<path class="curve" d="M 90 280.00 H 204 V 262.72"/>
+<circle cx="204" cy="262.72" r="7" tabindex="0" data-point="1" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 1; cumulative present cost 97.09 USD; limit not specified.</title></circle>
+<text x="200" y="305">1</text>
+
+
+<path class="curve" d="M 204 262.72 H 318 V 245.95"/>
+<circle cx="318" cy="245.95" r="7" tabindex="0" data-point="2" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 2; cumulative present cost 191.35 USD; limit not specified.</title></circle>
+<text x="314" y="305">2</text>
+
+
+<path class="curve" d="M 318 245.95 H 432 V 229.66"/>
+<circle cx="432" cy="229.66" r="7" tabindex="0" data-point="3" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 3; cumulative present cost 282.86 USD; limit not specified.</title></circle>
+<text x="428" y="305">3</text>
+
+
+<path class="curve" d="M 432 229.66 H 546 V 213.85"/>
+<circle cx="546" cy="213.85" r="7" tabindex="0" data-point="4" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 4; cumulative present cost 371.71 USD; limit not specified.</title></circle>
+<text x="542" y="305">4</text>
+
+
+<path class="curve" d="M 546 213.85 H 660 V 45.00"/>
+<circle cx="660" cy="45.00" r="7" tabindex="0" data-point="5" aria-describedby="chart-detail"><title>Combined illustration; cost stream; year 5; cumulative present cost 1320.58 USD; limit not specified.</title></circle>
+<text x="656" y="305">5</text>
+
+</svg>
+<p id="chart-detail" aria-live="polite">Hover over or focus a point to inspect the case, component, present cost and units. No acceptance limit is specified.</p>
+<figcaption>Figure 1. Cumulative present cost increases as maintenance and the final replacement payment are included. Horizontal steps denote discrete payments, without a continuous expenditure model.</figcaption>
+</figure>
+<p>Budget acceptance is not evaluated because no budget or competing design is specified. The source examples demonstrate discounting; the combined illustration is not a published asset benchmark.</p>
+</section>
+<section id="s4">
+<h2>4 Basis and Criteria</h2>
+<p>The public source examples and numerical comparison criteria are defined here. NIST Handbook 135, August 2025 edition, is used for discounting theory and example inputs, as identified in <a href="#ref-nist">Reference 1</a>.</p>
+<p>The replacement example uses <span data-number="replacement">1,000.00</span> USD at the end of year <span data-number="years">5</span>. The maintenance example uses <span data-number="maintenance">100.00</span> USD at each year end over the same period. Both use an annual discount rate of <span data-number="rate_percent">3.0</span> %. This rate is an example input, not a statement of the current rate required for an investment decision.</p>
+<p>Each published example is compared with the module result to the displayed cent. The report tests additionally use a tighter arithmetic tolerance for the hand-worked anchors. This is a reporting-accuracy criterion, without a structural resistance criterion or an investment-acceptance threshold.</p>
+<p>No material strength, load factor, design fatigue factor or environmental limit is selected. These quantities remain required inputs for a future structural assessment. No numerical design requirement is taken from a licensed publication.</p>
+</section>
+<section id="s5">
+<h2>5 Methodology</h2>
+<p>The present cost is calculated by discounting each dated payment and summing the resulting base-date values. The equivalent annual cost is calculated from that present cost using the same annual rate and study period.</p>
+<h3>5.1 Governing equations</h3>
+<p>The single-payment relation in <a href="#ref-nist">Reference 1</a>, section 3.2.1, equation (3−6), is applied to each payment.</p>
+<p class="formula">P = Σ C<sub>t</sub> / (1 + r)<sup>t</sup></p>
+<p>For equal end-of-year maintenance payments, the finite geometric sum is the uniform-present-value relation in section 3.2.2.1, equation (3−7).</p>
+<p class="formula">P<sub>maintenance</sub> = M [(1 + r)<sup>n</sup> − 1] / [r (1 + r)<sup>n</sup>]</p>
+<p>The annual-value relation in section 17.4, equation (12−17), is applied to the combined present cost.</p>
+<p class="formula">A = P r / [1 − (1 + r)<sup>−n</sup>]</p>
+<p>The symbols are defined in <a href="#s10-symbols">Appendix 10.1</a>. The unit terms in the equations follow the cited mathematical definitions; no empirical coefficient is introduced.</p>
+<h3>5.2 Timing boundary</h3>
+<p>The example cash flow is represented on an annual timeline. This is an economic model, so no structural geometry, support conditions or mesh is implied.</p>
+<figure>
+<svg class="timeline" viewBox="0 0 720 195" role="img" aria-label="Cash-flow boundary: annual maintenance at year ends and replacement at the final year end">
+<rect x="8" y="8" width="704" height="175" rx="10"/>
+<text x="28" y="36">Base date → end-of-year payments → present cost</text>
+<line x1="65" y1="92" x2="665" y2="92"/>
+<line x1="65" y1="85" x2="65" y2="100"/>
+<text x="61" y="120">0</text>
+<line x1="181" y1="85" x2="181" y2="100"/>
+<text x="177" y="120">1</text>
+<path d="M 181 48 V 79 l -5 -6 m 5 6 l 5 -6"/><line x1="297" y1="85" x2="297" y2="100"/>
+<text x="293" y="120">2</text>
+<path d="M 297 48 V 79 l -5 -6 m 5 6 l 5 -6"/><line x1="413" y1="85" x2="413" y2="100"/>
+<text x="409" y="120">3</text>
+<path d="M 413 48 V 79 l -5 -6 m 5 6 l 5 -6"/><line x1="529" y1="85" x2="529" y2="100"/>
+<text x="525" y="120">4</text>
+<path d="M 529 48 V 79 l -5 -6 m 5 6 l 5 -6"/><line x1="645" y1="85" x2="645" y2="100"/>
+<text x="641" y="120">5</text>
+<path d="M 645 48 V 79 l -5 -6 m 5 6 l 5 -6"/>
+<text x="28" y="153">Maintenance: 100.00 USD/year; replacement: 1,000.00 USD at final year end</text>
+</svg>
+<figcaption>Figure 2. Payment timing is mapped to the array index used by the cost-discounting function. The first array element represents the base date.</figcaption>
+</figure>
+</section>
+<section id="s6">
+<h2>6 Worked Example</h2>
+<p>The published replacement and maintenance cases are calculated separately before their cash flows are combined. The combined case is an illustration constructed from those two examples; it is not presented as a third published benchmark.</p>
+<p>The input replacement is <span data-number="replacement">1,000.00</span> USD at the end of year <span data-number="years">5</span>. The input maintenance is <span data-number="maintenance">100.00</span> USD at each year end. The annual discount rate is <span data-number="rate_percent">3.0</span> %, and the duration is <span data-number="years">5</span> years. The source is <a href="#ref-nist">the NIST handbook reference</a>.</p>
+<p>The replacement present cost returned by the module is <span data-number="replacement_pv">862.61</span> USD. The maintenance present cost returned by the module is <span data-number="maintenance_pv">457.97</span> USD. Each agrees with its published example to the displayed cent.</p>
+<p>The combined present cost returned by the module is <span data-number="combined_pv">1,320.58</span> USD. The equivalent annual cost returned by the module is <span data-number="annual_cost">288.35</span> USD/year. The replacement contributes <span data-number="replacement_annual">188.35</span> USD/year and maintenance contributes <span data-number="maintenance_annual">100.00</span> USD/year to that annual equivalent.</p>
+<p>No initial purchase, revenue, tax, escalation or residual value is included. An asset-level economic decision is not established by this limited cash-flow illustration.</p>
+</section>
+<section id="s7">
+<h2>7 Validation Evidence</h2>
+<p>The existing repository tests and the additional report checks are distinguished here. The inspected calculation test files contain 150 test functions; this inventory describes the evidence available, without converting the count into a physical-validation claim.</p>
+<p>The existing cost tests exercise a timed cost stream, levelized output cost, equivalent annual cost, maintenance cost, transport cost, downtime adjustment and installed-cost addition. Empty cash streams and selected invalid denominators are also covered. The cost-test assertions and the source inventory are located in <a href="#s9-2">Section 9.2</a>.</p>
+<p>The report tests add hand-worked anchors for replacement present cost, maintenance present cost and combined annual cost. Consistency checks compare the displayed values and chart data with fresh module calls. A rebuild comparison checks the committed document, its change panel and calculation-source digests.</p>
+<p>The public NIST examples establish arithmetic agreement for the stated timing and inputs. Field validation, a complete asset cost estimate and qualification of the structural routines are not established by those checks. The inspected cost tests contain illustrative values rather than a measured cost dataset or a whole-asset published benchmark.</p>
+</section>
+<section id="s8">
+<h2>8 Limits and Recommendations</h2>
+<p>The limits affecting interpretation and the required next evidence are stated below. Budget acceptance is not evaluated, and structural qualification is not established by the selected cost example.</p>
+<ul>
+<li>Restrict this example to deterministic, annually dated cost arithmetic.
+<ul><li>Supply a complete cost register, a stated currency and price date, consistent escalation and discounting, and comparable service before selecting an asset alternative. This follows the study-basis and discounting treatment in <a href="#ref-nist">Reference 1</a>, chapters 2 and 3.</li></ul></li>
+<li>Check input domains before using the cost utilities.
+<ul><li>The annual-cost function divides by zero for a zero discount rate or zero duration. Levelized cost divides by zero for zero discounted output and does not reject unequal stream lengths. Event-based maintenance divides by the supplied mean time between failures. Add explicit domain handling and tests before exposing these inputs to an unattended decision tool.</li></ul></li>
+<li>Resolve the structural calculation basis before design use.
+<ul><li>The natural-frequency, cross-flow response and buckle-arrest expressions contain dimensional inconsistencies with their stated output units. Casing collapse includes approximate regime selection. These routines require dimensional correction, edition-specific source checking and reference cases before their outputs are used as design evidence. Source locations are given in <a href="#s9-2">Section 9.2</a>.</li></ul></li>
+<li>Complete the public interface where numerical behavior is absent.
+<ul><li>The polynomial evaluator requires a defined coefficient order, units, input domain and value assertions before a polynomial result is reported.</li></ul></li>
+</ul>
+</section>
+<section id="s9">
+<h2>9 References</h2>
+<p>The public theory source and the inspected repository evidence are identified here. Numerical design provisions from unread or licensed publications are not reproduced.</p>
+<h3>9.1 Public source</h3>
+<p id="ref-nist">Reference 1. <a href="https://nvlpubs.nist.gov/nistpubs/hb/2025/NIST.HB.135e2025.pdf">NIST HB 135e2025, Life Cycle Costing Manual for the Federal Energy Management Program</a>, August 2025 edition. Sections 3.2.1 and 3.2.2.1 provide the replacement and maintenance examples; section 17.4 provides annual value. Chapters 2 and 3 define the study basis and discounting assumptions. The public publication was accessed on 22 October 2026.</p>
+<h3 id="s9-2">9.2 Repository evidence</h3>
+<p>The calculation sources and existing test inventory are listed below. The cost entry points are <code>net_present_value(costs, discount_rate)</code> and <code>annual_equivalent_cost(npv, discount_rate, life_years)</code>, both documented in the cost source.</p>
+<p>The existing cost evidence is <code>tests/modules/calculations/test_lifecycle_cost.py</code>. The report checks are <code>tests/modules/calculations/test_module_report.py</code>. The module overview is <code>src/assetutilities/calculations/docs/agent-pack.md</code>. Its documented dimensional concerns are checked against the inspected function bodies rather than used as numerical input.</p>
+<div class="table-wrap"><table><thead><tr><th>Calculation source</th><th>Existing test functions</th></tr></thead><tbody>
+<tr><td><code>src/assetutilities/calculations/casing_pipe.py</code></td><td>10</td></tr><tr><td><code>src/assetutilities/calculations/drilling_riser.py</code></td><td>14</td></tr><tr><td><code>src/assetutilities/calculations/drilling_riser_integrity.py</code></td><td>11</td></tr><tr><td><code>src/assetutilities/calculations/lifecycle_cost.py</code></td><td>11</td></tr><tr><td><code>src/assetutilities/calculations/pipeline_dnv.py</code></td><td>8</td></tr><tr><td><code>src/assetutilities/calculations/polynomial.py</code></td><td>3</td></tr><tr><td><code>src/assetutilities/calculations/riser_array.py</code></td><td>11</td></tr><tr><td><code>src/assetutilities/calculations/riser_dynamics.py</code></td><td>15</td></tr><tr><td><code>src/assetutilities/calculations/riser_viv.py</code></td><td>19</td></tr><tr><td><code>src/assetutilities/calculations/scr_fatigue.py</code></td><td>23</td></tr><tr><td><code>src/assetutilities/calculations/tlp_well_system.py</code></td><td>12</td></tr><tr><td><code>src/assetutilities/calculations/wellhead_fatigue.py</code></td><td>13</td></tr>
+</tbody><caption>Table 1. Existing test-function inventory by calculation source. Corresponding test files use the same module name with a test prefix.</caption></table></div>
+<p>The dimensional limitations concern <code>riser_natural_frequency</code> in <code>riser_viv.py</code>, <code>crossflow_psd_amplitude</code> in <code>riser_dynamics.py</code>, and <code>buckle_arrest_capacity</code> in <code>pipeline_dnv.py</code>. With the documented inputs, their expressions have dimensions of length per time, length per time and force, respectively, rather than the stated frequency, displacement and pressure.</p>
+<p>The calculation is repeated using the documented public entry points as follows. Cost lists begin at the base date; the first nonzero payment is therefore preceded by a zero.</p>
+<pre class="formula"><code>from assetutilities.calculations.lifecycle_cost import (
+    net_present_value, annual_equivalent_cost,
+)
+replacement = [0] * 5 + [1000.00]
+maintenance = [0] + [100.00] * 5
+costs = [a + b for a, b in zip(replacement, maintenance)]
+rate = 0.03
+present_cost = net_present_value(costs, rate)
+annual_cost = annual_equivalent_cost(present_cost, rate, 5)</code></pre>
+<p>The exact rebuild command is <code>PYTHONPATH=src python scripts/reports/build_calculations_report.py</code>.</p>
+<p>The inlined shared presentation source is <code>digitalmodel:src/digitalmodel/reporting/assets/calc_report_format.html</code>; its stylesheet is preserved without changes. No report using the requested body class existed in this repository at the inspected base.</p>
+</section>
+<section id="s10">
+<h2>10 Appendices</h2>
+<p>The symbols, input contracts, cash-flow details and missing-data register are provided for calculation checking. The quality checks are stated with their evidence and limits.</p>
+<h3 id="s10-symbols">10.1 Acronyms and symbols</h3>
+<p>The notation used in the equations is defined here.</p>
+<div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Definition</th><th>Unit</th></tr></thead><tbody>
+<tr><td>P</td><td>Present cost at the base date</td><td>USD</td></tr><tr><td>C<sub>t</sub></td><td>Payment at time t</td><td>USD</td></tr><tr><td>M</td><td>Equal annual maintenance payment</td><td>USD/year</td></tr><tr><td>A</td><td>Equivalent annual cost</td><td>USD/year</td></tr><tr><td>r</td><td>Annual discount rate as a decimal</td><td>Dimensionless</td></tr><tr><td>t, n</td><td>Elapsed years and total study period</td><td>year</td></tr><tr><td>USD</td><td>United States dollar, as used in the federal handbook example</td><td>Currency</td></tr><tr><td>NIST</td><td>National Institute of Standards and Technology</td><td>Not applicable</td></tr></tbody><caption>Table 2. Symbols and abbreviations used in this report.</caption></table></div>
+<h3 id="s10-contract">10.2 Input and output contracts</h3>
+<p>The selected functions consume caller-defined cash streams and return scalar values. No unit conversion, price-date reconciliation or source lookup is performed by those functions.</p>
+<div class="table-wrap"><table><thead><tr><th>Function</th><th>Inputs</th><th>Output and domain concern</th></tr></thead><tbody>
+<tr><td>Present cost</td><td>Annual cost list, base-date element first; decimal annual rate</td><td>Caller currency. An empty list returns zero; the caller establishes valid finite rates and costs.</td></tr>
+<tr><td>Annual equivalent cost</td><td>Present cost, decimal annual rate, integer duration in years</td><td>Currency/year. Zero rate and zero duration are not handled.</td></tr>
+<tr><td>Levelized output cost</td><td>Costs, outputs and annual rate</td><td>Currency/output unit. Equal timing and nonzero discounted output are caller obligations.</td></tr>
+<tr><td>Event-based maintenance</td><td>Cost per event, mean time between failures in years, elapsed years</td><td>Currency. Positive mean time between failures and an appropriate event-rate model are required.</td></tr>
+<tr><td>Transport and installed cost</td><td>Cost components, day rate and days where applicable</td><td>Currency. Matching currency and price date are required.</td></tr>
+<tr><td>Effective transit duration</td><td>Nominal days and downtime fraction</td><td>Days. A fraction below zero or at least unity is rejected; a negative nominal duration is not rejected.</td></tr>
+</tbody><caption>Table 3. Lifecycle-cost input contracts and enforced or caller-supplied restrictions.</caption></table></div>
+<h3>10.3 Cash-flow detail and data register</h3>
+<p>The dated payments and their present values are presented below. True zero entries represent the absence of a payment in this illustration, without describing omitted asset costs.</p>
+<div class="table-wrap"><table><thead><tr><th>Year</th><th>Payment (USD)</th><th>Present value (USD)</th><th>Cumulative present value (USD)</th><th>Source</th></tr></thead><tbody>
+<tr><td><span data-number="year_0">0</span></td><td><span data-number="payment_0">0.00</span></td><td><span data-number="present_0">0.00</span></td><td><span data-number="cumulative_0">0.00</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr><tr><td><span data-number="year_1">1</span></td><td><span data-number="payment_1">100.00</span></td><td><span data-number="present_1">97.09</span></td><td><span data-number="cumulative_1">97.09</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr><tr><td><span data-number="year_2">2</span></td><td><span data-number="payment_2">100.00</span></td><td><span data-number="present_2">94.26</span></td><td><span data-number="cumulative_2">191.35</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr><tr><td><span data-number="year_3">3</span></td><td><span data-number="payment_3">100.00</span></td><td><span data-number="present_3">91.51</span></td><td><span data-number="cumulative_3">282.86</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr><tr><td><span data-number="year_4">4</span></td><td><span data-number="payment_4">100.00</span></td><td><span data-number="present_4">88.85</span></td><td><span data-number="cumulative_4">371.71</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr><tr><td><span data-number="year_5">5</span></td><td><span data-number="payment_5">1,100.00</span></td><td><span data-number="present_5">948.87</span></td><td><span data-number="cumulative_5">1,320.58</span></td><td><a href="#ref-nist">Reference 1</a>, replacement and maintenance examples combined</td></tr>
+</tbody><caption>Table 4. Module-calculated cash-flow detail for Figure 1.</caption></table></div>
+<div class="table-wrap"><table><thead><tr><th>Data item</th><th>Readiness</th><th>Basis or action</th></tr></thead><tbody>
+<tr><td>Replacement, maintenance, rate and duration</td><td>Public example inputs</td><td>Reference 1, sections 3.2.1 and 3.2.2.1; illustration use only.</td></tr>
+<tr><td>Combined timing</td><td>Illustration constructed here</td><td>Both source examples use the same rate and duration; no currency conversion is applied.</td></tr>
+<tr><td>Current project rate, price date and complete cost forecast</td><td>NOT_EVALUATED</td><td>Required before an asset decision; the teaching rate is not substituted.</td></tr>
+<tr><td>Budget, alternatives and investment criterion</td><td>NOT_EVALUATED</td><td>Required before an economic acceptance conclusion.</td></tr>
+<tr><td>Structural coefficients and qualification evidence</td><td>NOT_EVALUATED</td><td>Not selected or inferred for this cost example.</td></tr>
+</tbody><caption>Table 5. Data readiness and evidence required for broader use. No assumed engineering input is introduced.</caption></table></div>
+<h3>10.4 Quality pre-flight evidence</h3>
+<p>The delivered report is checked by the companion report tests. Their scope is numerical consistency, literal hand anchors, calculation-source freshness, output encoding, local references and report structure; those checks do not establish engineering acceptance.</p>
+<p>Replacement and maintenance are checked separately against the public examples. Displayed headline values are recalculated from the displayed inputs. The chart values are calculated by the module, without a browser-side cost formula. Source digests cover the calculation files only and are embedded in the document data.</p>
+<p>Test results and checks attempted for the delivered revision are stated with the accompanying change description. The rebuild command is provided in <a href="#s9-2">Section 9.2</a>.</p>
+</section>
+<aside id="changes"><h3>Changes since the previous issue</h3><p>This is the first issue. The engineering additions are listed below.</p><ul><li><a href="#s3">Present replacement and maintenance costs are combined to show the amount required at the base date.</a> Cost timing is made explicit before annual costs are compared.</li><li><a href="#s6">Published replacement and maintenance examples are calculated separately and then combined as an illustration.</a> Published reference cases remain distinguishable from their combined illustration.</li><li><a href="#s8">Use limits and additional evidence required for structural calculations are stated.</a> Arithmetic checks do not establish structural qualification.</li></ul></aside>
+<aside id="comments"><h3>Comments</h3><p>Choose a section, select text if needed, then add a comment. Save the comment file beside this HTML document. Save As is used where available; otherwise the browser downloads the file to Downloads. Load restores a previously saved comment file.</p>
+<label for="comment-section">Section</label><select id="comment-section"><option value="s1">Section 1</option><option value="s2">Section 2</option><option value="s3">Section 3</option><option value="s4">Section 4</option><option value="s5">Section 5</option><option value="s6">Section 6</option><option value="s7">Section 7</option><option value="s8">Section 8</option><option value="s9">Section 9</option><option value="s10">Section 10</option></select>
+<label for="comment-text">Comment</label><textarea id="comment-text"></textarea>
+<div class="controls"><button id="add-comment" type="button">Add comment</button><button id="save-comments" type="button">Save comments</button><label>Load comments <input id="load-comments" type="file" accept=".json,application/json"></label></div>
+<p id="comment-status" role="status">Comments remain in this page until saved.</p><ol id="comment-list"></ol>
+</aside>
+</main></div>
+<script id="report-data" type="application/json">{"basis": {"clauses": ["3.2.1", "3.2.2.1", "17.4"], "document": "NIST HB 135e2025", "edition": "August 2025", "intended_use": "Published-example arithmetic; no project qualification", "source_observed": "2026-10-22", "units": {"money": "USD", "rate": "annual decimal", "time": "year"}, "url": "https://nvlpubs.nist.gov/nistpubs/hb/2025/NIST.HB.135e2025.pdf"}, "revision": "A", "rows": [{"cumulative_pv": 0.0, "payment": 0, "present_value": 0.0, "year": 0}, {"cumulative_pv": 97.08737864, "payment": 100, "present_value": 97.08737864, "year": 1}, {"cumulative_pv": 191.34696955, "payment": 100, "present_value": 94.25959091, "year": 2}, {"cumulative_pv": 282.86113549, "payment": 100, "present_value": 91.51416594, "year": 3}, {"cumulative_pv": 371.70984028, "payment": 100, "present_value": 88.84870479, "year": 4}, {"cumulative_pv": 1320.5795031, "payment": 1100, "present_value": 948.86966282, "year": 5}], "sources": [{"name": "casing_pipe", "path": "src/assetutilities/calculations/casing_pipe.py", "sha256": "8a3b138512c22d01c45f8f11fabba1e1463bb82e0990ccdc2335e43205568824", "tests": 10}, {"name": "drilling_riser", "path": "src/assetutilities/calculations/drilling_riser.py", "sha256": "d5647edcb763c605830f780dba015ac2a535ebf45a50b23b717e66fbc88b1bc5", "tests": 14}, {"name": "drilling_riser_integrity", "path": "src/assetutilities/calculations/drilling_riser_integrity.py", "sha256": "a2abc14bbc08a8a0ae03e6370c8d1630bc5ee290bf5e35cf00a940a03893c3d2", "tests": 11}, {"name": "lifecycle_cost", "path": "src/assetutilities/calculations/lifecycle_cost.py", "sha256": "084eac90b9e57349ed06fca989bc2ecda82df8abbcfb7d9d09ef77c29b862d83", "tests": 11}, {"name": "pipeline_dnv", "path": "src/assetutilities/calculations/pipeline_dnv.py", "sha256": "a1d140b3858e11ed86d0abe648ea50c30fd54ced30ccf4f1bb82bbe665fd0e75", "tests": 8}, {"name": "polynomial", "path": "src/assetutilities/calculations/polynomial.py", "sha256": "e68c8808476feb948a4fd9e3d5fd248c17e586ea52123f0059a303e5b886c361", "tests": 3}, {"name": "riser_array", "path": "src/assetutilities/calculations/riser_array.py", "sha256": "ffa5938e62bd7a96dc959a930a699b9fbf6939dc1c20a368316b91b145ee8250", "tests": 11}, {"name": "riser_dynamics", "path": "src/assetutilities/calculations/riser_dynamics.py", "sha256": "bf8692e7f79cba7be34275e3746a9c20ad8f524378e4ce17376a2ffc9d2f5229", "tests": 15}, {"name": "riser_viv", "path": "src/assetutilities/calculations/riser_viv.py", "sha256": "b01db27d68d24721d3f3520048bf6ac6ffe1096c81982cf8284c4d08110baa9a", "tests": 19}, {"name": "scr_fatigue", "path": "src/assetutilities/calculations/scr_fatigue.py", "sha256": "4860f7623c02b596893192202dcfe1053dba7e540c68316971072eb7294e04a9", "tests": 23}, {"name": "tlp_well_system", "path": "src/assetutilities/calculations/tlp_well_system.py", "sha256": "d1468f95daa9c6b2a2762fb37b3c2315b0fcd4f75cf6aebeb6ac91c35a156c48", "tests": 12}, {"name": "wellhead_fatigue", "path": "src/assetutilities/calculations/wellhead_fatigue.py", "sha256": "e407da65a755b2081376fdd1900341a290864710ca79e6319c354fbae4d41cb0", "tests": 13}], "values": {"annual_cost": 288.3545714, "combined_pv": 1320.5795031, "cumulative_0": 0.0, "cumulative_1": 97.08737864, "cumulative_2": 191.34696955, "cumulative_3": 282.86113549, "cumulative_4": 371.70984028, "cumulative_5": 1320.5795031, "maintenance": 100, "maintenance_annual": 100.0, "maintenance_pv": 457.97071872, "payment_0": 0, "payment_1": 100, "payment_2": 100, "payment_3": 100, "payment_4": 100, "payment_5": 1100, "present_0": 0.0, "present_1": 97.08737864, "present_2": 94.25959091, "present_3": 91.51416594, "present_4": 88.84870479, "present_5": 948.86966282, "rate_percent": 3.0, "replacement": 1000, "replacement_annual": 188.3545714, "replacement_pv": 862.60878438, "year_0": 0, "year_1": 1, "year_2": 2, "year_3": 3, "year_4": 4, "year_5": 5, "years": 5}}</script>
+<script id="changes-data" type="application/json">{"changes": [{"description": "Present replacement and maintenance costs are combined to show the amount required at the base date.", "reason": "Cost timing is made explicit before annual costs are compared.", "section": "s3"}, {"description": "Published replacement and maintenance examples are calculated separately and then combined as an illustration.", "reason": "Published reference cases remain distinguishable from their combined illustration.", "section": "s6"}, {"description": "Use limits and additional evidence required for structural calculations are stated.", "reason": "Arithmetic checks do not establish structural qualification.", "section": "s8"}], "date": "2026-10-22", "document": "Calculations module analysis", "revision": "A", "status": "Draft for maintainer review"}</script>
+<script>
+'use strict';
+const reportData = JSON.parse(document.getElementById('report-data').textContent);
+const reportDigest = 'b942debb11d1e4c39178e2a20b77d8d91c011dca99d87a0550dc358f502b2333';
+const comments = [];
+function describePoint(index) {
+  const row = reportData.rows[index];
+  document.getElementById('chart-detail').textContent =
+    `Case: combined illustration. Component: cost stream. Year: ${row.year}. Demand: ${row.cumulative_pv.toFixed(2)} USD present cost. Limit: not specified. No acceptance limit is specified.`;
+}
+document.querySelectorAll('[data-point]').forEach(point => {
+  ['pointerenter', 'focus', 'click'].forEach(event => point.addEventListener(event, () => describePoint(Number(point.dataset.point))));
+});
+function renderComments() {
+  const list = document.getElementById('comment-list');
+  list.replaceChildren();
+  comments.forEach(comment => {
+    const item = document.createElement('li');
+    item.textContent = `${comment.section}: ${comment.quote ? '“' + comment.quote + '” — ' : ''}${comment.text}`;
+    list.appendChild(item);
+  });
+}
+let selectedQuote = '';
+document.querySelector('main').addEventListener('mouseup', () => { selectedQuote = window.getSelection().toString().trim(); });
+document.getElementById('add-comment').addEventListener('click', () => {
+  const text = document.getElementById('comment-text').value.trim();
+  if (!text) { document.getElementById('comment-status').textContent = 'Enter a comment before adding it.'; return; }
+  comments.push({section: document.getElementById('comment-section').value, quote: selectedQuote, text});
+  document.getElementById('comment-text').value = '';
+  selectedQuote = '';
+  renderComments();
+  document.getElementById('comment-status').textContent = 'Comment added. Save the comment file to keep it.';
+});
+function commentDocument() { return {revision: reportData.revision, report_digest: reportDigest, comments}; }
+document.getElementById('save-comments').addEventListener('click', async () => {
+  const text = JSON.stringify(commentDocument(), null, 2) + '\n';
+  const status = document.getElementById('comment-status');
+  try {
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({suggestedName: 'report.comments.json', types: [{description: 'Comment file', accept: {'application/json': ['.json']}}]});
+      const writable = await handle.createWritable();
+      await writable.write(text); await writable.close();
+      status.textContent = 'Comment file saved to the selected location.';
+    } else {
+      const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+      const link = document.createElement('a'); link.href = url; link.download = 'report.comments.json'; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      status.textContent = 'Comment file downloaded. Move it from Downloads beside this HTML document.';
+    }
+  } catch (error) { status.textContent = error.name === 'AbortError' ? 'Save cancelled; comments remain in this page.' : 'The file was not saved. ' + error.message; }
+});
+document.getElementById('load-comments').addEventListener('change', async event => {
+  const status = document.getElementById('comment-status');
+  try {
+    const file = event.target.files[0]; if (!file) return;
+    const saved = JSON.parse(await file.text());
+    if (saved.report_digest !== reportDigest || saved.revision !== reportData.revision) throw new Error('The comment file belongs to another report revision.');
+    if (!Array.isArray(saved.comments) || !saved.comments.every(item => /^s(?:[1-9]|10)$/.test(item.section) && typeof item.text === 'string' && typeof item.quote === 'string')) throw new Error('The comment file format is invalid.');
+    comments.splice(0, comments.length, ...saved.comments); renderComments();
+    status.textContent = 'Comments loaded for this report revision.';
+  } catch (error) { status.textContent = 'Comments were not loaded. ' + error.message; }
+});
+</script>
+</body>
+</html>

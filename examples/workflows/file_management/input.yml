@@ -1,0 +1,23 @@
+basename: file_management
+
+# Scan a directory and select files whose names match a regex.
+# The regex below keeps files named like "xx_NNNN_..." (2 letters + _ + 4 digits + _).
+# Input directory (sample_files) is resolved relative to this file's directory.
+# Matches: us_2023_sales.yml, ca_2024_report.yml  (summary.yml / app_logs.yml are filtered out)
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+file_management:
+  flag: True
+  input_directory: sample_files
+  output_directory: NULL
+
+  filename:
+    extension: [yml]
+    pattern: NULL
+    filters:
+      regex: '^[a-z]{2}_[0-9]{4}_.*$'

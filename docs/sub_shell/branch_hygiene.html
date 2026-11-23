@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Read-only branch hygiene report</title>
+<style>
+body {max-width: 58rem; margin: 3rem auto; padding: 0 1rem; font: 1rem/1.6 sans-serif; color: #202b38}
+pre {padding: 1rem; background: #f1f4f8; overflow: auto}
+table {border-collapse: collapse; width: 100%} th,td {border: 1px solid #bac5d0; padding: .5rem; text-align: left}
+caption {caption-side: bottom; text-align: left; padding: .5rem 0}
+</style>
+<h1>Read-only branch hygiene report</h1>
+<p>This command inventories branches for maintainer review without changing Git
+state or contacting a remote. It supports the reporting portion of
+<a href="https://github.com/vamseeachanta/assetutilities/issues/19">issue 19</a>.
+The issue's supersession assessment favors PR-based integration. Consequently,
+monthly naming is optional and no branch is deleted, created or merged.</p>
+<h2>Run</h2>
+<p>From the repository root, with Python 3.9 or later and Git on PATH:</p>
+<pre>python scripts/git/branch_hygiene.py --base origin/main
+bash scripts/branch-hygiene.sh --base origin/main
+python scripts/git/branch_hygiene.py --base main --month 202601 --fail-on-findings</pre>
+<p><code>--repo</code> selects a repository; the default is the current directory.
+The Git Bash wrapper accepts the same arguments and uses <code>PYTHON</code> to
+select an interpreter when supplied. Output is JSON on stdout. Errors are generic
+on stderr to avoid exposing Git diagnostics or environment details.</p>
+<table><tr><th>Exit</th><th>Meaning</th></tr>
+<tr><td>0</td><td>Report generated; default even when review candidates exist.</td></tr>
+<tr><td>1</td><td>With --fail-on-findings, at least one merged_review branch exists.</td></tr>
+<tr><td>2</td><td>Invalid arguments or inspection failure; no usable report.</td></tr>
+<caption>Command exit contract. Monthly annotations do not change exit status.</caption></table>
+<h2>Method and worked example</h2>
+<p>Inputs: an integration branch <code>main</code> with commit chain A → B,
+<code>topic/done</code> pointing at A, and current branch <code>topic/open</code>
+pointing at C, where C descends from B. The integration base is B. Reachability
+from B contains A and B, but not C. Thus the independently calculated merged
+set is {main, topic/done}. Protection and current-branch rules are applied next.</p>
+<table><tr><th>Input ref</th><th>Answer</th><th>Reason</th></tr>
+<tr><td>refs/heads/main</td><td>protected</td><td>Integration base and conventional main branch.</td></tr>
+<tr><td>refs/heads/topic/done</td><td>merged_review</td><td>A is reachable from B; candidate for human review only.</td></tr>
+<tr><td>refs/heads/topic/open</td><td>current</td><td>Current branch is preserved irrespective of reachability.</td></tr>
+<caption>Hand-derived worked example, also encoded in the regression tests.</caption></table>
+<p>Other unreachable branches report <code>unmerged</code>. Both main and master
+are protected, as is an explicitly named base ref. Symbolic remote HEAD refs are
+omitted. Detached HEAD is reported as JSON null. The base commit is resolved once
+and included in the report.</p>
+<p>Optional monthly example: for input <code>202601</code>, the retained names are
+<code>202601</code> and <code>202512</code>. Calendar subtraction gives December
+of the preceding year. A branch named <code>202401</code> is annotated
+<code>outside_window</code>; <code>topic/open</code> is <code>not_monthly</code>.
+An unmerged branch remains unmerged even outside the monthly window. Dates and
+branch names in this example are illustrative inputs, not engineering constants.</p>
+<h2>Daily use and limitations</h2>
+<p>A maintainer may invoke the report from an existing authorized daily job and
+retain stdout according to repository policy. This change installs no schedule
+and sends no notifications. Reports contain branch names and commit identifiers;
+review them before sharing.</p>
+<p>Remote refs are locally cached observations, explicitly marked
+<code>local_cache_only</code>. Fresh remote state is not established by this
+command. It does not fetch. Ref enumeration is not an atomic snapshot: concurrent
+changes can invalidate classifications. It does not enumerate other worktrees,
+PR state or branch protection. No output authorizes deletion. Revalidate current
+state and obtain applicable approval before any Git mutation.</p>
+<p>Git child processes discard inherited GIT_* overrides, preserve normal Git
+configuration, capture output and suppress extra Windows console windows.
+The command is a reporting utility, not a sandbox for an untrusted Git installation.</p>
+<h2>Sources and remaining scope</h2>
+<ul>
+<li><a href="../plans/2026-05-05-issue-19-monthly-branch-and-multiuser-merge.md">Repository issue plan (2026)</a>:
+branch reporting and optional current/previous-month convention. The historical
+automatic-action proposals are not enabled.</li>
+<li><a href="../../scripts/au_git_sync/au_git_clean_stale_local_branches.sh">Existing branch maintenance script</a>:
+local/remote branch context and main/master handling. The new command does not invoke it.</li>
+<li><a href="../../.github/workflows/tests.yml">PR test workflow</a>:
+existing merge construction, gates and domain tests. Required-check enforcement
+in repository settings has not been verified.</li>
+</ul>
+<p>The three delivered slices are classification, read-only Git inspection and
+CLI/runbook integration. Automatic monthly creation, merging, stale-branch
+deletion, notifications, scheduler installation and adoption in other repositories
+remain separate policy and implementation work. Linked agent-development work
+was not inspected under the restriction to this issue's GitHub surface.
+No engineering equations, coefficients or standards acceptance limits apply.</p>
+</html>

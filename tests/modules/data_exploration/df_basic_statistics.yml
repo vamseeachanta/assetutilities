@@ -1,0 +1,27 @@
+basename: data_exploration
+type:
+  df_statistics:
+    flag: False
+    df_array: True
+    df: True
+  df_basic_statistics: 
+    flag: True
+    add_to_df: False
+
+data:
+  type: csv
+  groups:
+    - label: FST1
+      file_name: tests/modules/data_exploration/csv/test_1.csv
+    - label: FST2
+      file_name: tests/modules/data_exploration/csv/test_2.csv
+
+master_settings:
+  groups:
+    columns: { x: [Heading], y: [Cx] }
+
+default:
+  log_level: DEBUG
+  config:
+    overwrite:
+      output: True

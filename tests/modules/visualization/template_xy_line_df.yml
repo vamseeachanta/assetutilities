@@ -1,0 +1,65 @@
+basename: visualization
+
+default:
+  log_level: INFO
+  config:
+    overwrite:
+      output: True
+
+settings:
+  type: xy
+  mode: line
+  plt_engine: plotly
+  label: Allowable Wave Height
+  multiple: False
+  file_name: NULL
+  plt_save_extensions: [".html"]
+  title: Wind Coefficients for FSTs, Cx
+  xlabel: Heading # for testing
+  ylabel: data  # for testing
+  columns_var_name: NULL
+  customize_xdate_ticks:
+     flag: False
+     start_time: NULL
+     end_time: NULL
+  customize_y_ticks:
+     flag: False
+     max_value: NULL
+     least_value: NULL
+  set_rmax: 10
+  set_rticks: [1, 2, 3]
+  set_thetagrids: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+  set_rlabel_position: -22.5
+  legend:
+    flag: True
+    loc: best
+    prop: { family: Arial, size: 8 }
+  xlim: NULL
+  ylim: NULL
+  xscale:
+    log: False
+
+master_settings:
+  groups:
+    columns: { x: [Heading], y: [Cx] }
+    color: []
+    alpha: []
+    linestyle: []
+    marker:
+      symbol: "square" 
+      size: 5  
+      line:
+        width: 1  
+        color: "black" 
+    filter: []
+    transform: []
+
+data:
+  type: df
+  groups:
+    - label: FST1
+      file_name: tests/modules/data_exploration/csv/test_1.csv
+
+  color: [blue, green]
+  alpha: [1, 0.75]
+  linestyle: ["--", "-", "-", ":"]

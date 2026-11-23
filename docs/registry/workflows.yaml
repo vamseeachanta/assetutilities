@@ -1,0 +1,150 @@
+# AssetUtilities workflow registry
+#
+# Discoverable UV workflows exposed via the standard contract:
+#   uv run python -m assetutilities examples/workflows/<slug>/input.yml
+# run from the repo root. __main__.py -> engine(inputfile) reads the YAML,
+# dispatches on cfg["basename"], and writes results next to the input.
+#
+# SCHEMA: schema_version 2 is the documented ADDITIVE SUPERSET defined by
+# workspace-hub#3295 (canonical schema-of-record:
+# workspace-hub/docs/standards/WORKFLOW_REGISTRY_SCHEMA.md; assetutilities
+# companion: docs/registry/SCHEMA.md). It carries the base field set + the
+# REQUIRED top-level `invocation:` key + the optional workflow versioning triple
+# (version/status/latest) + the RESERVED structured slots
+# request_schema/response_schema/result. `invocation` MUST embed the literal
+# package name and uses {input}-ONLY substitution (resolvers never
+# substitute {pkg}). The per-row `result:`
+# descriptor (kind: files|in_memory) is owned by workspace-hub#3282;
+# request_schema/response_schema are RESERVED (untyped) by #3295.
+#
+# Invariant: each row below has a working example that runs GREEN and
+# produces the listed outputs. Routed basenames that cannot run green
+# offline are intentionally omitted (see PR body / issue for the deferred
+# list and reasons). web_scraping and download_data still require live network.
+schema_version: 2
+invocation: "uv run python -m assetutilities {input}"
+repo: assetutilities
+issue: 3063
+workflows:
+  - id: visualization
+    basename: visualization
+    input: examples/workflows/visualization/input.yml
+    outputs:
+      - examples/workflows/visualization/results/Plot/x_y_line.png
+    test: uv run python -m assetutilities examples/workflows/visualization/input.yml
+    runtime: fast
+
+  - id: data_exploration
+    basename: data_exploration
+    input: examples/workflows/data_exploration/input.yml
+    outputs:
+      - examples/workflows/data_exploration/results/input_FST1.csv
+      - examples/workflows/data_exploration/results/input_FST2.csv
+    result:
+      # #3282-owned descriptor. kind: files => run_workflow discovers the
+      # ACTUALLY emitted files by globbing the injected embed root; the embed
+      # file_name is cfg-derived (data_exploration_FST*.csv), so `outputs:`
+      # above is DOCUMENTARY (CLI-path names), not a runtime filename oracle.
+      kind: files
+    test: uv run python -m assetutilities examples/workflows/data_exploration/input.yml
+    runtime: fast
+
+  - id: excel_utilities
+    basename: excel_utilities
+    input: examples/workflows/excel_utilities/input.yml
+    outputs:
+      - examples/workflows/excel_utilities/input_data/output.xlsx
+    test: uv run python -m assetutilities examples/workflows/excel_utilities/input.yml
+    runtime: fast
+
+  - id: zip_utilities
+    basename: zip_utilities
+    input: examples/workflows/zip_utilities/input.yml
+    outputs:
+      - examples/workflows/zip_utilities/zip/caseA.zip
+      - examples/workflows/zip_utilities/zip/caseB.zip
+    test: uv run python -m assetutilities examples/workflows/zip_utilities/input.yml
+    runtime: fast
+
+  - id: yaml_utilities
+    basename: yaml_utilities
+    input: examples/workflows/yaml_utilities/input.yml
+    outputs:
+      - examples/workflows/yaml_utilities/results/input.yml
+    test: uv run python -m assetutilities examples/workflows/yaml_utilities/input.yml
+    runtime: fast
+
+  - id: file_management
+    basename: file_management
+    input: examples/workflows/file_management/input.yml
+    outputs:
+      - examples/workflows/file_management/results/input.yml
+    test: uv run python -m assetutilities examples/workflows/file_management/input.yml
+    runtime: fast
+
+  - id: file_edit
+    basename: file_edit
+    input: examples/workflows/file_edit/input.yml
+    outputs:
+      - examples/workflows/file_edit/combined_doc.dat
+    test: uv run python -m assetutilities examples/workflows/file_edit/input.yml
+    runtime: fast
+
+  - id: word_utilities
+    basename: word_utilities
+    input: examples/workflows/word_utilities/input.yml
+    outputs:
+      - examples/workflows/word_utilities/data/sample_table.docx
+    test: uv run python -m assetutilities examples/workflows/word_utilities/input.yml
+    runtime: fast
+
+  - id: reportgen
+    basename: reportgen
+    input: examples/workflows/reportgen/input.yml
+    outputs:
+      - examples/workflows/reportgen/outputs/sample-report.out.md
+    test: uv run python -m assetutilities examples/workflows/reportgen/input.yml
+    runtime: fast
+
+  - id: read_pdf
+    basename: read_pdf
+    input: examples/workflows/read_pdf/input.yml
+    outputs:
+      - examples/workflows/read_pdf/results/read_pdf_first.txt
+      - examples/workflows/read_pdf/results/read_pdf_last.txt
+    test: uv run python -m assetutilities examples/workflows/read_pdf/input.yml
+    runtime: fast
+
+  - id: edit_pdf
+    basename: edit_pdf
+    input: examples/workflows/edit_pdf/input.yml
+    outputs:
+      - examples/workflows/read_pdf/data/sample.pdf_page_1-2.pdf
+      - examples/workflows/read_pdf/data/sample.pdf_page_3-4.pdf
+    test: uv run python -m assetutilities examples/workflows/edit_pdf/input.yml
+    runtime: fast
+
+  - id: csv_utilities
+    basename: csv_utilities
+    input: examples/workflows/csv_utilities/input.yml
+    outputs:
+      - examples/workflows/csv_utilities/results/sample_latin1_normalized.csv
+      - examples/workflows/csv_utilities/results/sample_latin1_summary.yml
+    test: uv run python -m assetutilities examples/workflows/csv_utilities/input.yml
+    runtime: fast
+
+  - id: text_analytics
+    basename: text_analytics
+    input: examples/workflows/text_analytics/input.yml
+    outputs:
+      - examples/workflows/text_analytics/results/text_analytics_comparison.yml
+    test: uv run python -m assetutilities examples/workflows/text_analytics/input.yml
+    runtime: fast
+
+  - id: gitpython
+    basename: gitpython
+    input: examples/workflows/gitpython/input.yml
+    outputs:
+      - examples/workflows/gitpython/results/gitpython_report.yml
+    test: uv run python -m assetutilities examples/workflows/gitpython/input.yml
+    runtime: fast
