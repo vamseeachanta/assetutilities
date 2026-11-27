@@ -1,0 +1,497 @@
+version: 1
+depth: 3
+entries:
+  - path: .agent-os/
+    purpose: "Defines Agent OS commands, project context and instructions for planning and executing repository work."
+  - path: .agent-os/agent_learning/
+    purpose: "Sets thresholds for recognizing task patterns and supplies the agent learning report template."
+  - path: .agent-os/agent_os/
+    purpose: "Contains Python commands for managing and creating module agents."
+  - path: .agent-os/agent_os/commands/
+    purpose: "Implements agent management and module-agent creation commands and retains a dated copy of the creation command."
+  - path: .agent-os/cli/
+    purpose: "Provides the Agent OS command-line entry point, interactive prompts and progress display."
+  - path: .agent-os/commands/
+    purpose: "Implements commands for specification writing, task execution, Git operations, test automation and environment setup."
+  - path: .agent-os/context/
+    purpose: "Records domain knowledge, project patterns and team conventions in YAML for agent context."
+  - path: .agent-os/docs/
+    purpose: "Indexes Agent OS slash commands and their subcommands in a reference table."
+  - path: .agent-os/instructions/
+    purpose: "Gives step-by-step procedures for product planning, specification writing and task execution."
+  - path: .agent-os/integration/
+    purpose: "Connects specification generation with context optimization, prompt revision and workflow updates."
+  - path: .agent-os/modules/
+    purpose: "Implements agent assignment, learning, task progress tracking and prompt refinement."
+  - path: .agent-os/product/
+    purpose: "Records the product mission, roadmap, technology stack and design decisions."
+  - path: .agent-os/progress/
+    purpose: "Provides a template for reporting session status, task counts and execution metrics."
+  - path: .agent-os/resources/
+    purpose: "Catalogs agent definitions and external templates for AI-assisted development."
+  - path: .agent-os/standards/
+    purpose: "Sets out coding conventions, development practices and technology choices for Agent OS work."
+  - path: .agent-os/sub-agents/
+    purpose: "Defines the responsibilities of deployment, development and testing agents."
+  - path: .agent-os/templates/
+    purpose: "Provides templates for repository agent instructions and trunk-based Git configuration."
+  - path: .claude/
+    purpose: "Holds repository instructions, settings, hooks and skill guides for Claude."
+  - path: .claude/helpers/
+    purpose: "Provides setup and checkpoint scripts for Claude, GitHub and MCP integration."
+  - path: .claude/hooks/
+    purpose: "Contains scripts for pre-task readiness checks and recording corrections."
+  - path: .claude/memory/
+    purpose: "Records session context specific to the assetutilities repository."
+  - path: .claude/skills/
+    purpose: "Indexes skill guides for tabular data, PDF processing and visualization."
+  - path: .claude/skills/data-management/
+    purpose: "Explains how to load, filter and transform tabular data using YAML configuration."
+  - path: .claude/skills/pdf-utilities/
+    purpose: "Explains how to extract tables, edit pages and work with forms and comments in PDFs."
+  - path: .claude/skills/plotly-visualization/
+    purpose: "Explains how to chart data frames with Plotly and Matplotlib and export the results."
+  - path: .codex/
+    purpose: "Points Codex to the shared workspace skill collection."
+  - path: .gemini/
+    purpose: "Points Gemini to the shared workspace skill collection."
+  - path: .git-commands/
+    purpose: "Implements Git repository management commands and their slash-command interface."
+  - path: .github/
+    purpose: "Configures dependency updates and repository automation on GitHub."
+  - path: .github/workflows/
+    purpose: "Defines GitHub Actions jobs for tests, source hygiene, documentation, PDF integration and releases."
+  - path: .planning/
+    purpose: "Stores planning approval records indexed by issue number."
+  - path: .planning/plan-approved/
+    purpose: "Records plan approval timestamps for individual issues."
+  - path: .vscode/
+    purpose: "Configures editor settings, debugging and suggested extensions for Visual Studio Code."
+  - path: config/
+    purpose: "Holds shell environment settings, repository layout rules, quality baselines and a data validation template."
+  - path: config/quality/
+    purpose: "Records the Bandit security scan and Python source hygiene baselines."
+  - path: config/validation/
+    purpose: "Supplies a data validation template with field requirements, quality thresholds and reporting options."
+  - path: data-manifest/
+    purpose: "Lists the sizes, checksums and storage dispositions of files moved out of the repository or marked for retrieval."
+  - path: docs/
+    purpose: "Routes readers to the source, tests and documentation for repository issues and collects developer guides."
+  - path: docs/api/
+    purpose: "Provides the package API reference and instructions for building the demonstration gallery."
+  - path: docs/commands/
+    purpose: "Documents agent commands, command synchronization and Git trunk workflows."
+  - path: docs/decisions/
+    purpose: "Records how to synchronize project source files and specify folder-level Git exclusions."
+  - path: docs/design/
+    purpose: "Describes the proposed registry for dispatching engine requests to module handlers."
+  - path: docs/evaluations/
+    purpose: "Records the evidence and adoption assessment for the compound engineering plugin trial."
+  - path: docs/examples/
+    purpose: "Walks through a source hygiene check with a worked example."
+  - path: docs/maps/
+    purpose: "Maps modules to the source, tests and documentation needed for common issues."
+  - path: docs/modules/
+    purpose: "Organizes usage guides, diagrams and examples by module or workflow."
+  - path: docs/modules/agent-os/
+    purpose: "Explains how to set up, use and troubleshoot the Agent OS specification workflow."
+  - path: docs/modules/ai/
+    purpose: "Collects agent configurations, prompt templates and examples of AI workflows."
+  - path: docs/modules/ascii_workflows/
+    purpose: "Diagrams how text-based tools support development, documentation and collaboration."
+  - path: docs/modules/datetime/
+    purpose: "Documents date parsing errors encountered when appending dates to spreadsheets."
+  - path: docs/modules/documentation/
+    purpose: "Describes report generation, report structure and citation conventions."
+  - path: docs/modules/excel_utilities/
+    purpose: "Shows how to configure a CSV import into a named Excel worksheet."
+  - path: docs/modules/file_management/
+    purpose: "Illustrates the file management workflow and documents its input file filters."
+  - path: docs/modules/gis/
+    purpose: "Introduces geographic data tools and outlines how to create a map from spatial data."
+  - path: docs/modules/git_utilities/
+    purpose: "Collects Git configuration notes, command examples and troubleshooting cases."
+  - path: docs/modules/multiprocessing/
+    purpose: "Compares parallel processing on one computer with distributed and cloud computing options."
+  - path: docs/modules/pandas/
+    purpose: "Collects tips for working with pandas data frames."
+  - path: docs/modules/repo_management/
+    purpose: "Records the status of Agent OS integration across repositories."
+  - path: docs/modules/repositories/
+    purpose: "Maps primary and secondary maintenance responsibilities across public repositories."
+  - path: docs/modules/visualization/
+    purpose: "Diagrams the visualization workflow and illustrates plotting with Plotly."
+  - path: docs/modules/web_scraping/
+    purpose: "Documents how to troubleshoot a Scrapy reactor compatibility error."
+  - path: docs/modules/yml_utilities/
+    purpose: "Explains YAML parsing, variable substitution and splitting files for plotting."
+  - path: docs/modules/zip_utilities/
+    purpose: "Shows how to configure and batch ZIP creation for files with common name prefixes."
+  - path: docs/pkg_npp/
+    purpose: "Links to a tutorial on finding and replacing text with regular expressions in Notepad++."
+  - path: docs/plans/
+    purpose: "Collects issue implementation plans and the plan for the compound engineering trial."
+  - path: docs/registry/
+    purpose: "Defines the module routing and workflow registries and documents their schema."
+  - path: docs/reports/
+    purpose: "Collects generated module analysis reports and their supporting records."
+  - path: docs/reports/modules/
+    purpose: "Groups reports on calculations, constants and developer tools with their change records."
+  - path: docs/solutions/
+    purpose: "Explains how to record unevaluated criteria when a plugin trial lacks observations."
+  - path: docs/standards/
+    purpose: "Defines the repository layout and the intended locations for project files."
+  - path: docs/sub_automation/
+    purpose: "Contains an illustration of the returns from automation."
+  - path: docs/sub_calculation_library_template/
+    purpose: "Diagrams the steps for developing, testing and publishing a calculation library."
+  - path: docs/sub_ci-cd/
+    purpose: "Collects pipeline and scheduled-task examples with guidance on network tests and Windows scheduling."
+  - path: docs/sub_data/
+    purpose: "Collects notes on data formats, file formats and nested dictionaries."
+  - path: docs/sub_data_science/
+    purpose: "Describes and diagrams a proposed architecture for data science libraries."
+  - path: docs/sub_databases/
+    purpose: "Collects database setup notes, MySQL examples and presentations."
+  - path: docs/sub_databases/COD/
+    purpose: "Provides SQL table definitions, Python database access examples and environment setup scripts."
+  - path: docs/sub_databases/PRE/
+    purpose: "Holds slide decks on MySQL setup, connection testing and data flow."
+  - path: docs/sub_env_files/
+    purpose: "Defines a Conda environment for the Databricks command-line client."
+  - path: docs/sub_file_edit/
+    purpose: "Explains how file order and newlines affect text file concatenation."
+  - path: docs/sub_git/
+    purpose: "Collects examples for inspecting Git history, aborting merges and rebasing commits."
+  - path: docs/sub_gmail/
+    purpose: "Explains how to use Gmail filters to retain and organize messages."
+  - path: docs/sub_hardware/
+    purpose: "Collects hardware specifications and notes on compute capacity and remote desktop access."
+  - path: docs/sub_hardware/_ss/
+    purpose: "Holds the source and rendered diagrams of shared server resources during remote desktop use."
+  - path: docs/sub_hardware/aceengineer/
+    purpose: "Documents workstation resources and Windows hardware compatibility checks."
+  - path: docs/sub_hardware/compute_server/
+    purpose: "Collects server specifications and a Marp presentation with its analysis inputs and plots."
+  - path: docs/sub_ide/
+    purpose: "Collects Visual Studio Code shortcuts, debugging tips and troubleshooting notes."
+  - path: docs/sub_k8_starter/
+    purpose: "Demonstrates how to package and deploy a small Flask application on Kubernetes."
+  - path: docs/sub_k8_starter/app/
+    purpose: "Contains the Flask example and the files that define its runtime environment."
+  - path: docs/sub_k8_starter/docker/
+    purpose: "Defines a Docker image that installs Flask and starts the example application."
+  - path: docs/sub_k8_starter/kubernetes/
+    purpose: "Defines the Kubernetes deployment and service for the Flask example."
+  - path: docs/sub_latex/
+    purpose: "Compares ways to typeset calculations and equations with Python and LaTeX."
+  - path: docs/sub_latex/leg/
+    purpose: "Preserves earlier Python and TeX examples for generating equation documents and PDFs."
+  - path: docs/sub_latex/markdown/
+    purpose: "Shows how to write symbolic equations to Markdown using Python."
+  - path: docs/sub_latex/matplotlib/
+    purpose: "Demonstrates rendering a LaTeX equation as a Matplotlib figure."
+  - path: docs/sub_latex/notebook/
+    purpose: "Demonstrates custom SymPy equation printing in a Jupyter notebook."
+  - path: docs/sub_latex/pdflatex/
+    purpose: "Contains a minimal TeX document that loads the PythonTeX package."
+  - path: docs/sub_latex/simpy/
+    purpose: "Shows how to print SymPy expressions and render them with Matplotlib."
+  - path: docs/sub_logging/
+    purpose: "Collects Python logging references and troubleshooting notes for missing log files."
+  - path: docs/sub_math/
+    purpose: "Demonstrates differentiation, integration and equation solving in Python."
+  - path: docs/sub_math/latex/
+    purpose: "Collects examples for typesetting symbolic mathematics with Python, LaTeX and Matplotlib."
+  - path: docs/sub_mathcad/
+    purpose: "Records the problem of extracting reviewable inputs and calculations from proprietary Mathcad files."
+  - path: docs/sub_meetings/
+    purpose: "Explains how to schedule a Google Meet meeting through Google Calendar."
+  - path: docs/sub_ms_office/
+    purpose: "Collects Excel and Word workflow notes and an example for generating a photo grid."
+  - path: docs/sub_plantuml/
+    purpose: "Collects PlantUML guidance and examples for drawing technical diagrams."
+  - path: docs/sub_plantuml/puml/
+    purpose: "Pairs PlantUML source files with example diagrams for workflows, schedules and system interactions."
+  - path: docs/sub_presentation/
+    purpose: "Defines file exclusions for third-party presentation PDFs held in a private archive."
+  - path: docs/sub_programming/
+    purpose: "Collects historical presentations on programming workflows and data architecture."
+  - path: docs/sub_programming/legacy/
+    purpose: "Preserves draft slides on YAML workflows, data layout, Python interfaces and backups."
+  - path: docs/sub_project_management/
+    purpose: "Collects guidance on agile work, communication, meetings and software team metrics."
+  - path: docs/sub_python/
+    purpose: "Collects Python programming notes and examples covering language features, development tools and data handling."
+  - path: docs/sub_python/Jupyter notebook/
+    purpose: "Contains a sample Jupyter notebook that introduces basic Python operations."
+  - path: docs/sub_python/cprofile/
+    purpose: "Demonstrates Python performance profiling with cProfile and sample output."
+  - path: docs/sub_python/error_handling/
+    purpose: "Provides Python exception handling examples for spreadsheets and text files."
+  - path: docs/sub_python/leg_pycodes/
+    purpose: "Preserves earlier Python examples for databases, file handling and plotting."
+  - path: docs/sub_python/logging/
+    purpose: "Introduces the Loguru library for Python logging."
+  - path: docs/sub_release/
+    purpose: "Documents the build, validation and publication steps for PyPI releases."
+  - path: docs/sub_scripting/
+    purpose: "Shows how to change a PowerShell window title."
+  - path: docs/sub_shell/
+    purpose: "Collects Git Bash and PowerShell notes and a guide to Git branch maintenance."
+  - path: docs/sub_utilities/
+    purpose: "Collects standalone utility examples for data analysis, visualization, spreadsheets and reports."
+  - path: docs/sub_utilities/app_insights/
+    purpose: "UNKNOWN - The only tracked script contains a TODO and defines no behavior."
+  - path: docs/sub_utilities/assets/
+    purpose: "Contains stylesheets for web interfaces alongside the utility examples."
+  - path: docs/sub_virtualization/
+    purpose: "Collects environment management guidance and container examples."
+  - path: docs/sub_virtualization/conda/
+    purpose: "Documents virtual environment management with Conda."
+  - path: docs/sub_virtualization/docker/
+    purpose: "Provides Docker notes and container examples for two SQL Server ODBC driver versions."
+  - path: docs/sub_virtualization/poetry/
+    purpose: "Documents Poetry installation, environment creation and command-line use."
+  - path: docs/sub_virtualization/uv/
+    purpose: "Points readers to the official uv documentation."
+  - path: docs/sub_visualization/
+    purpose: "Collects plotting examples, visualization architecture diagrams and notes on digitizing scanned plots."
+  - path: docs/sub_visualization/plotly/
+    purpose: "Collects references for Plotly charts and Dash applications."
+  - path: docs/sub_web_scraping/
+    purpose: "Compares web scraping tools and includes a CSV example of listing data."
+  - path: docs/sub_web_scraping/data/
+    purpose: "Stores a CSV of real estate listings alongside the scraping notes."
+  - path: docs/sub_website_hosting/
+    purpose: "Collects notes and slides on website hosting, GitHub Pages and Python web services."
+  - path: examples/
+    purpose: "Shows how to configure and run workflows, use the engine registry and check validation rules."
+  - path: examples/compound-engineering/
+    purpose: "Records the criteria and reasons for deferring the compound engineering plugin trial."
+  - path: examples/hygiene/
+    purpose: "Compares Python style checker results with hand counts before and after a sample code change."
+  - path: examples/workflows/
+    purpose: "Supplies example YAML inputs and fixtures for workflows run through the engine."
+  - path: examples/workflows/csv_utilities/
+    purpose: "Pairs a Latin-1 CSV fixture with a configuration that exercises automatic encoding selection."
+  - path: examples/workflows/data_exploration/
+    purpose: "Shows how to calculate descriptive statistics for two CSV data sets."
+  - path: examples/workflows/edit_pdf/
+    purpose: "Specifies the page ranges for splitting the sample PDF supplied by the PDF reading example."
+  - path: examples/workflows/excel_utilities/
+    purpose: "Demonstrates copying two CSV files into separate sheets of an Excel workbook template."
+  - path: examples/workflows/file_edit/
+    purpose: "Supplies four input fragments and the configuration for concatenating them in order."
+  - path: examples/workflows/file_management/
+    purpose: "Demonstrates filtering sample YAML filenames with a regular expression."
+  - path: examples/workflows/gitpython/
+    purpose: "Configures a read-only search for the Git repository containing the input directory."
+  - path: examples/workflows/read_pdf/
+    purpose: "Pairs a four-page synthetic PDF with a configuration for reading its first and last pages."
+  - path: examples/workflows/reportgen/
+    purpose: "Shows how to generate a report from configured sections and document-specific citations."
+  - path: examples/workflows/text_analytics/
+    purpose: "Provides two lists of words for the text matching and subset operations."
+  - path: examples/workflows/visualization/
+    purpose: "Defines the data, axes and styles for an XY line chart."
+  - path: examples/workflows/word_utilities/
+    purpose: "Shows how to convert a sample CSV table into a Word document."
+  - path: examples/workflows/yaml_utilities/
+    purpose: "Shows how to reuse YAML values through variable placeholders."
+  - path: examples/workflows/zip_utilities/
+    purpose: "Demonstrates grouping CSV files into ZIP archives by matching filename stems."
+  - path: examples/yaml_split_plot/
+    purpose: "Demonstrates splitting YAML by top-level key and plotting a synthetic curve from its coordinate arrays."
+  - path: modules/
+    purpose: "Contains reporting code for building HTML charts and locating their data."
+  - path: modules/reporting/
+    purpose: "Pairs a Plotly report generator with helpers for finding input data and output files."
+  - path: modules/reporting/templates/
+    purpose: "Provides a Python template for building interactive HTML reports from CSV data with Plotly."
+  - path: modules/reporting/utils/
+    purpose: "Resolves project-relative paths for data files and reports."
+  - path: results/
+    purpose: "Retains workflow outputs including descriptive statistics, transposed CSV tables and YAML results."
+  - path: scripts/
+    purpose: "Provides repository commands for environment setup, Git operations, testing, reporting and releases."
+  - path: scripts/au_git_sync/
+    purpose: "Automates recurring Git operations across repositories, including branch selection, conflict resolution and stale-branch cleanup."
+  - path: scripts/bash/
+    purpose: "Groups Bash helpers for Git operations and Conda or Poetry environments."
+  - path: scripts/bash/conda/
+    purpose: "Provides shell commands for managing Conda environments, installing the package locally and running tests."
+  - path: scripts/bash/git/
+    purpose: "Provides Bash commands for scheduled commits, monthly branch selection and stale-branch cleanup."
+  - path: scripts/bash/poetry/
+    purpose: "Creates standard and developer environments with Poetry."
+  - path: scripts/bat/
+    purpose: "Provides Windows batch files for daily Git updates, commits and pushes."
+  - path: scripts/ci/
+    purpose: "Maps changed paths to pytest targets for continuous integration and records quarantined tests."
+  - path: scripts/cli/
+    purpose: "Contains Agent OS and slash-command launchers and Bash completion definitions."
+  - path: scripts/context/
+    purpose: "Checks agent context files, analyzes usage patterns and schedules routine context checks."
+  - path: scripts/dev/
+    purpose: "Provides developer commands for setting up a uv environment and executing planned tasks."
+  - path: scripts/diagnostics/
+    purpose: "Explains which pytest targets continuous integration selects for a given set of changed paths."
+  - path: scripts/enforcement/
+    purpose: "Checks staged files for unresolved Git conflict markers."
+  - path: scripts/evaluation/
+    purpose: "Summarizes the evaluation record for the compound engineering plugin trial."
+  - path: scripts/git/
+    purpose: "Provides Git utilities for branch maintenance and daily repository operations."
+  - path: scripts/hygiene/
+    purpose: "Checks the source tree for layout and Python style violations."
+  - path: scripts/maintenance/
+    purpose: "Verifies the repository structure and checks package data in built wheels."
+  - path: scripts/monitoring/
+    purpose: "Provides scripts for checking Claude usage and suggesting a model."
+  - path: scripts/powershell/
+    purpose: "Contains a PowerShell script that checks multiple Git repositories for changes."
+  - path: scripts/release/
+    purpose: "Builds Python distributions and validates release artifacts."
+  - path: scripts/reporting/
+    purpose: "Builds the developer tools HTML report and its change data from public API calls."
+  - path: scripts/reports/
+    purpose: "Builds calculation and constants reference reports using HTML templates and stylesheets."
+  - path: scripts/review/
+    purpose: "Holds review findings for repository changes."
+  - path: scripts/review/results/
+    purpose: "Preserves the combined review findings for the repository structure plan."
+  - path: scripts/tools/
+    purpose: "Provides a command-line tool for managing the web resources used by module agents."
+  - path: slash_commands/
+    purpose: "Implements a slash command for trunk-based Git development and branch cleanup."
+  - path: src/
+    purpose: "Contains the assetutilities Python package and separate Agent OS workflow modules."
+  - path: src/assetutilities/
+    purpose: "Provides the engine that runs configured workflows, engineering calculations and shared utility APIs."
+  - path: src/assetutilities/agent_os/
+    purpose: "Implements Agent OS commands for creating module agents, managing specifications and distributing commands across repositories."
+  - path: src/assetutilities/base_configs/
+    purpose: "Supplies default YAML configurations for workflows such as spreadsheet processing, plotting and PDF extraction."
+  - path: src/assetutilities/calculations/
+    purpose: "Implements engineering calculations for offshore risers, pipelines, wells and lifecycle costs."
+  - path: src/assetutilities/cli/
+    purpose: "Provides command-line scripts for creating agents and specifications and distributing slash commands."
+  - path: src/assetutilities/common/
+    purpose: "Provides shared routines for file handling, data processing, configuration, logging and visualization."
+  - path: src/assetutilities/constants/
+    purpose: "Defines unit conversions and reference values for casing grades, materials and seawater."
+  - path: src/assetutilities/devtools/
+    purpose: "Provides repository maintenance commands for modernizing dependencies, organizing directories and distributing commands."
+  - path: src/assetutilities/line_dynamics_report/
+    purpose: "Reproduces workbook formulas for line bending reports and layback summaries in Python."
+  - path: src/assetutilities/modules/
+    purpose: "Groups workflow implementations for tabular data, spreadsheets, PDF documents, YAML, Git and ZIP archives."
+  - path: src/assetutilities/tests/
+    purpose: "Contains package-side tests for engineering calculations such as pipeline, riser and wellhead fatigue analyses."
+  - path: src/assetutilities/units/
+    purpose: "Parses engineering quantities, applies unit policies and formats calculated values for output."
+  - path: src/assetutilities/workflow_api/
+    purpose: "Defines how workflows accept inputs, run, record results and publish artifacts."
+  - path: src/modules/
+    purpose: "Holds Agent OS extensions for specification creation, cross-repository integration and web resource processing."
+  - path: src/modules/agent-os/
+    purpose: "Provides configuration, templates and workflow components for creating enhanced specifications across repositories."
+  - path: src/modules/agent_os/
+    purpose: "Implements and demonstrates saving specifications and using them across repositories."
+  - path: src/modules/web-contextualization/
+    purpose: "Fetches and caches web resources, extracts PDF content and indexes it for search."
+  - path: tests/
+    purpose: "Contains automated checks and fixtures for package behavior, engineering calculations and repository workflows."
+  - path: tests/agent_os/
+    purpose: "Tests Agent OS configuration, commands and interactions between workflow components."
+  - path: tests/agent_os/cli/
+    purpose: "Tests interactive command-line sessions, progress indicators and error handling."
+  - path: tests/agent_os/commands/
+    purpose: "Tests module-agent creation and command handling for context, documentation, specifications and templates."
+  - path: tests/agent_os/integration/
+    purpose: "Tests enhanced specification workflows and the retention of engineering values in learning records."
+  - path: tests/bash-setup/
+    purpose: "Tests project detection and how the Git Bash setup script configures a shell."
+  - path: tests/bash-setup/bash-tests/
+    purpose: "Runs shell tests for backing up and modifying Bash startup files."
+  - path: tests/benchmarks/
+    purpose: "Measures execution time for two functions used in steel catenary riser fatigue calculations."
+  - path: tests/ci/
+    purpose: "Tests changed-file test selection and the policy governing tests that require network access."
+  - path: tests/common/
+    purpose: "Checks configuration, logging and output paths when the engine runs inside another application."
+  - path: tests/data_store/
+    purpose: "Tests manifest-based file restoration and checks that compact archive fixtures preserve table rows."
+  - path: tests/devtools/
+    purpose: "Tests how the diagnostic command explains test selection for changed paths."
+  - path: tests/docs/
+    purpose: "Checks that the documentation index, operator map and module registry direct readers to existing code."
+  - path: tests/evaluation/
+    purpose: "Tests how the compound trial evaluator validates evidence and determines readiness for review."
+  - path: tests/governance/
+    purpose: "Checks that repository hooks are self-contained and retired identifier checks stay disabled."
+  - path: tests/hygiene/
+    purpose: "Checks repository hygiene rules for backup artifacts, personal references and YAML fixture headers."
+  - path: tests/modules/
+    purpose: "Groups workflow and calculation tests with their module-specific configurations, inputs and expected results."
+  - path: tests/modules/agent-os/
+    purpose: "Tests enhanced specification workflows, documentation templates and integration with the Agent OS framework."
+  - path: tests/modules/agent_os/
+    purpose: "Tests persistence and cross-repository integration in the Python specification workflow."
+  - path: tests/modules/all_yml_tests/
+    purpose: "Runs YAML configurations found in the test tree and records the outcomes in a CSV file and a text summary."
+  - path: tests/modules/calculations/
+    purpose: "Checks engineering calculations and their reports, including riser fatigue, pipeline design and lifecycle cost."
+  - path: tests/modules/csv_utilities/
+    purpose: "Tests CSV input routing, encoding selection, delimiters and row limits."
+  - path: tests/modules/data_exploration/
+    purpose: "Uses tabular fixtures to test descriptive statistics and their addition to data frames."
+  - path: tests/modules/devtools/
+    purpose: "Tests dependency modernization, repository discovery and regeneration of the developer tools report."
+  - path: tests/modules/download_data/
+    purpose: "Tests ZIP downloads and offline handling with a configured archive input."
+  - path: tests/modules/edit_pdf/
+    purpose: "Tests splitting PDFs into files for specified inclusive page ranges."
+  - path: tests/modules/excel_utilities/
+    purpose: "Tests CSV imports, custom calculations and image export with spreadsheet fixtures."
+  - path: tests/modules/file_edit/
+    purpose: "Provides input decks, configurations and tests for splitting and concatenating files."
+  - path: tests/modules/file_management/
+    purpose: "Tests file selection by name, size and regular expression against fixture files."
+  - path: tests/modules/gallery/
+    purpose: "Verifies example calculations, artifact discovery and generation of the self-contained HTML gallery."
+  - path: tests/modules/git_utilities/
+    purpose: "Checks that Git utilities inspect repository states without changing files or the Git index."
+  - path: tests/modules/line_dynamics_report/
+    purpose: "Checks bending reports and layback summaries against formula results and workbook-derived fixtures."
+  - path: tests/modules/pipeline_ci_cd/
+    purpose: "Compares the successful YAML run count in the status CSV with the count in the text summary."
+  - path: tests/modules/read_pdf/
+    purpose: "Tests extraction of PDF page text, handling of page selections and routing to optional table readers."
+  - path: tests/modules/reportgen/
+    purpose: "Provides report configurations and sample Word and Markdown output for report generation tests."
+  - path: tests/modules/tests_wip/
+    purpose: "Collects work-in-progress cases for PDF reading and polar plots."
+  - path: tests/modules/visualization/
+    purpose: "Tests plot generation with CSV data and YAML configurations for polar, time-series and XY plots."
+  - path: tests/modules/web_scraping/
+    purpose: "Tests scraper selection and workflows that use Beautiful Soup and Scrapy."
+  - path: tests/modules/word_utilities/
+    purpose: "Tests searching Word documents and converting tabular data to Word tables."
+  - path: tests/modules/yml_utilities/
+    purpose: "Tests splitting, reshaping and reassembling YAML data and plotting values from YAML files."
+  - path: tests/modules/zip_utilities/
+    purpose: "Tests grouping files into archives by stem and reading archived tabular data into data frames."
+  - path: tests/release/
+    purpose: "Tests release tag validation, distribution builds and publishing workflow permissions."
+  - path: tests/repo_structure/
+    purpose: "Tests the repository structure checker against root directory rules and tracked artifact exceptions."
+  - path: tests/reports/
+    purpose: "Checks the arithmetic, cited sources and offline regeneration of the engineering constants report."
+  - path: tests/unit/
+    purpose: "Contains focused tests for shared data utilities, command-line parsing, units and other package behavior."
+  - path: tests/workflow_api/
+    purpose: "Tests workflow inputs, execution records, metrics, artifacts and publication behavior."
+  - path: tests/workflows/
+    purpose: "Checks workflow registry entries, command-line examples and continuous integration triggers."
